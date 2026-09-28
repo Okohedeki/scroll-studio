@@ -1,0 +1,187 @@
+{
+  "id": "orbital_launch",
+  "duration": 18,
+  "fps": 24,
+  "preview_res": [
+    1280,
+    720
+  ],
+  "blockout_script": "blender/orbital_launch.py",
+  "keyframes": {
+    "model": "z_image_turbo_bf16.safetensors",
+    "text_encoder": "qwen_3_4b_fp8_mixed.safetensors",
+    "vae": "ae.safetensors",
+    "controlnet": "Z-Image-Turbo-Fun-Controlnet-Union-2.1-2602-8steps.safetensors",
+    "control_strength": 0.75,
+    "steps": 8,
+    "res": [
+      1536,
+      864
+    ],
+    "seed": 11,
+    "frames": [
+      {
+        "name": "pad",
+        "t": 0,
+        "strength": 1.0,
+        "prompt": "Wide photograph of a rocket on a coastal launch pad at dawn. A tall slender white two-stage rocket with thin black bands stands beside a red steel lattice service tower, surrounded by four tall thin lightning masts. Wisps of white vapour vent from the rocket in the cool blue morning light, the first warm glow of sunrise on the horizon, flat marshland and low hangars around the pad, the ocean in the distance. Photoreal, documentary photography, crisp detail, natural colour, shot on a full-frame camera with a 30mm lens."
+      },
+      {
+        "name": "rise",
+        "t": 4.67,
+        "strength": 0.8,
+        "control_strength": 0.85,
+        "depth_blur": 0,
+        "prompt": "Photograph looking up at a slender white two-stage rocket with a plain smooth white cylindrical body, two thin black bands, a clean plain white pointed nose cone with no windows, no dots and no markings, and four small dark trapezoid fins at the base, no wings, no delta fins, climbing on a brilliant pillar of orange and white flame in bright early-morning light. Clear deep blue sky above, a warm golden glow low on the horizon, the low sun lighting the white rocket body from the side, a long bright exhaust plume trailing down toward a billowing white smoke cloud far below. Daylight, not dusk, not night. Photoreal, IMAX documentary look, crisp clean detail."
+      },
+      {
+        "name": "clouds",
+        "t": 8.0,
+        "strength": 0.8,
+        "control_strength": 0.85,
+        "prompt": "Photograph of a slender white two-stage rocket with a plain smooth white cylindrical body, two thin black bands, a clean plain white pointed nose cone with no windows, no dots and no markings, and four small dark trapezoid fins at the base, no wings, no delta fins, rising straight up out of the top of a thick cumulus cloud deck on a single clean bright orange exhaust flame directly beneath its engines, the clouds parted smoothly around the flame, brilliant low sunlight above a sea of soft white clouds, the sky darkening to deep blue overhead. Nothing else in the sky, no debris. Photoreal, IMAX documentary look, crisp clean detail.",
+        "depth_blur": 0
+      },
+      {
+        "name": "stagesep",
+        "t": 12.33,
+        "strength": 0.8,
+        "control_strength": 0.85,
+        "prompt": "Photograph high above Earth: the upper part of a slender white two-stage rocket with a plain smooth white cylindrical body, two thin black bands, a clean plain white pointed nose cone with no windows, no dots and no markings, and four small dark trapezoid fins at the base, no wings, no delta fins, brightly sunlit, climbing against the black of space, and just below it the spent white first stage with its four small dark fins separating cleanly and falling away. Far below, the curved blue limb of Earth with swirling white clouds and a thin glowing blue atmosphere line. Harsh direct sunlight, deep black space, no stars, photoreal, NASA footage look, crisp clean detail.",
+        "depth_blur": 0
+      },
+      {
+        "name": "fairing",
+        "t": 14.33,
+        "strength": 0.8,
+        "control_strength": 0.85,
+        "prompt": "Photograph in low Earth orbit: the white upper stage of a slender white rocket with thin black bands, against the black of space. Its plain white pointed nose fairing has split into two smooth white halves hinging open and drifting apart, revealing a satellite wrapped in gold foil inside. Far below, the curved blue limb of Earth with swirling white clouds and a thin glowing atmosphere line. Harsh direct sunlight, deep black space, no stars, photoreal, NASA footage look, crisp detail."
+      },
+      {
+        "name": "satellite",
+        "t": "end",
+        "strength": 0.9,
+        "prompt": "Photograph of a single communications satellite in orbit above Earth. A compact box-shaped body wrapped in crinkled gold foil with a small white antenna dish on top, and exactly two long rectangular dark-blue solar panel wings extending straight out to the left and to the right in one line, like a horizontal bar through the body, glinting in the sunlight. Below it the spent white cylindrical rocket upper stage, and one curved white fairing half drifting away on the right. Behind, the curved blue Earth with swirling white clouds and a thin glowing atmosphere line. Deep black space, no stars, harsh sunlight, photoreal, NASA footage look, crisp detail.",
+        "control_strength": 0.9
+      }
+    ]
+  },
+  "ltx": {
+    "checkpoint": "ltx-2.3-22b-distilled-fp8.safetensors",
+    "text_encoder": "gemma_3_12B_it_fp8_scaled.safetensors",
+    "control_lora": "ltx-2.3-22b-ic-lora-union-control-ref0.5.safetensors",
+    "upscaler": "ltx-2.3-spatial-upscaler-x2-1.1.safetensors",
+    "res": [
+      1920,
+      1088
+    ],
+    "upscale": false,
+    "seed": 42,
+    "control_strength": 1.0,
+    "guide_strength": 0.6,
+    "guide_blur": 4,
+    "negative_prompt": "low poly, untextured grey shapes, flat shading, blurry, smeared detail, cartoon, CGI, video game, text, logos, watermark, people, cuts, flicker, warped rocket, bent rocket, duplicate rockets",
+    "segments": [
+      {
+        "id": "pad",
+        "range": [
+          0,
+          3
+        ],
+        "guide_strength": 0.75,
+        "guide_blur": 2,
+        "prompt": "The rocket is a slender white two-stage rocket with a plain smooth white cylindrical body, two thin black bands, a clean plain white pointed nose cone with no windows, no dots and no markings, and four small dark trapezoid fins at the base, no wings, no delta fins. A continuous cinematic shot of a rocket launch at dawn on a coastal launch pad beside a red steel service tower and thin lightning masts, vapour venting in the cool blue light. The engines ignite in a blinding flash, a massive billowing cloud of white exhaust smoke erupts across the pad, and the rocket begins to lift off on a brilliant pillar of orange flame. Consistent warm dawn light throughout: low golden sun, the sky glowing orange near the horizon and clear deep blue above, never dark or night-time. Photoreal, IMAX documentary look, natural colour, clean crisp image, smooth tracking camera.",
+        "seed": 7
+      },
+      {
+        "id": "rise",
+        "range": [
+          3,
+          6
+        ],
+        "guide_strength": 0.75,
+        "guide_blur": 2,
+        "prompt": "The rocket is a slender white two-stage rocket with a plain smooth white cylindrical body, two thin black bands, a clean plain white pointed nose cone with no windows, no dots and no markings, and four small dark trapezoid fins at the base, no wings, no delta fins. A continuous cinematic shot, still in bright dawn light, as the camera tilts up and follows the brightly sunlit white rocket accelerating away from the launch pad on a long bright orange flame, the smoke cloud spreading below and the ground and coastline falling away. Consistent warm dawn light throughout: low golden sun, the sky glowing orange near the horizon and clear deep blue above, never dark or night-time. Photoreal, IMAX documentary look, natural colour, clean crisp image, smooth tracking camera."
+      },
+      {
+        "id": "clouds",
+        "range": [
+          6,
+          9
+        ],
+        "guide_strength": 0.75,
+        "guide_blur": 2,
+        "prompt": "The rocket is a slender white two-stage rocket with a plain smooth white cylindrical body, two thin black bands, a clean plain white pointed nose cone with no windows, no dots and no markings, and four small dark trapezoid fins at the base, no wings, no delta fins. A continuous cinematic shot following the rocket as it climbs toward a thick layer of cumulus clouds and punches straight up through the cloud deck, emerging into dazzling low sunlight above a sea of soft white clouds. Consistent warm dawn light throughout: low golden sun, the sky glowing orange near the horizon and clear deep blue above, never dark or night-time. Photoreal, IMAX documentary look, natural colour, clean crisp image, smooth tracking camera."
+      },
+      {
+        "id": "ascent",
+        "range": [
+          9,
+          12
+        ],
+        "guide_strength": 0.75,
+        "guide_blur": 2,
+        "prompt": "The rocket is a slender white two-stage rocket with a plain smooth white cylindrical body, two thin black bands, a clean plain white pointed nose cone with no windows, no dots and no markings, and four small dark trapezoid fins at the base, no wings, no delta fins. A continuous cinematic shot as the rocket climbs above a sea of clouds into a sky darkening from deep blue to black, the camera rising above it until the curved blue limb of Earth and a thin glowing atmosphere line appear far below, in harsh direct sunlight. Photoreal, NASA footage look, crisp clean detail, deep black space, no stars."
+      },
+      {
+        "id": "separation",
+        "range": [
+          12,
+          15
+        ],
+        "guide_strength": 0.75,
+        "guide_blur": 2,
+        "prompt": "The rocket is a slender white two-stage rocket with a plain smooth white cylindrical body, two thin black bands, a clean plain white pointed nose cone with no windows, no dots and no markings, and four small dark trapezoid fins at the base, no wings, no delta fins. A continuous cinematic shot high above Earth. The engine cuts off and the spent first stage separates cleanly and tumbles away toward Earth. Then the white nose fairing splits into two smooth halves that hinge open and drift apart, revealing a satellite wrapped in gold foil inside. Photoreal, NASA footage look, crisp clean detail, deep black space, no stars."
+      },
+      {
+        "id": "deploy",
+        "range": [
+          15,
+          18
+        ],
+        "guide_strength": 0.75,
+        "guide_blur": 2,
+        "prompt": "The rocket is a slender white two-stage rocket with a plain smooth white cylindrical body, two thin black bands, a clean plain white pointed nose cone with no windows, no dots and no markings, and four small dark trapezoid fins at the base, no wings, no delta fins. A continuous cinematic shot in orbit above the curved blue Earth with swirling white clouds. The gold-foil satellite pushes clear of the rocket and unfolds two long dark-blue solar panel wings that glint in the sun as the camera arcs slowly around it, the fairing halves drifting away. Photoreal, NASA footage look, crisp clean detail, deep black space, no stars."
+      }
+    ],
+    "sampler": "euler_cfg_pp"
+  },
+  "web": {
+    "scroll_length_vh": 700,
+    "gop": 6,
+    "captions": [
+      {
+        "from": 0.01,
+        "to": 0.13,
+        "eyebrow": "Lodestar Orbital",
+        "title": "Every mission starts <em>on the ground.</em>"
+      },
+      {
+        "from": 0.22,
+        "to": 0.4,
+        "eyebrow": "Ascent",
+        "title": "Through the weather. <em>Past the noise.</em>"
+      },
+      {
+        "from": 0.56,
+        "to": 0.72,
+        "eyebrow": "Separation",
+        "title": "When the fairing opens, <em>the work begins.</em>"
+      },
+      {
+        "from": 0.84,
+        "to": 0.99,
+        "eyebrow": "On station",
+        "title": "Your satellite, <em>exactly where it belongs.</em>"
+      }
+    ]
+  },
+  "subject": "a slender white two-stage rocket with a plain smooth white cylindrical body, two thin black bands, a clean plain white pointed nose cone with no windows, no dots and no markings, and four small dark trapezoid fins at the base, no wings, no delta fins",
+  "upscale": {
+    "method": "seedvr2",
+    "resolution": 1440,
+    "batch_size": 13,
+    "chunk": 49,
+    "overlap": 8
+  }
+}

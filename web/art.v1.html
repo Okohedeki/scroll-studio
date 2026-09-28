@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Atelier Sfumato</title>
+<meta name="description" content="Learn to draw and paint the way the masters did: proportion, line, value, underpainting, colour.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,300;1,9..144,400&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #efe8da;
+    --paper-2: #e6dccb;
+    --ink: #2a241f;
+    --ink-2: rgba(42, 36, 31, .68);
+    --ink-3: rgba(42, 36, 31, .42);
+    --line: rgba(42, 36, 31, .14);
+    --sienna: #9c4a1f;
+    --sienna-2: #c26a3a;
+    --serif: "Fraunces", Georgia, serif;
+    --sans: "Inter", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, monospace;
+    --gutter: clamp(20px, 3.6vw, 56px);
+    --ease: cubic-bezier(.22, .8, .2, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: var(--paper); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  body { font-family: var(--sans); background: var(--paper); overflow-x: hidden; }
+  html.lenis, html.lenis body { height: auto; }
+  a { color: inherit; text-decoration: none; }
+  em { font-style: italic; color: var(--sienna); }
+  body::before { /* paper tooth over the whole page */
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: .35; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .45 0 0 0 0 .4 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .nav { position: fixed; inset: 0 0 auto 0; z-index: 50; display: flex; justify-content: space-between; align-items: center;
+    padding: 18px var(--gutter); transition: background .4s, border-color .4s; border-bottom: 1px solid transparent; }
+  .nav.solid { background: rgba(239, 232, 218, .86); backdrop-filter: blur(10px); border-color: var(--line); }
+  .wordmark { font-family: var(--serif); font-size: 22px; font-weight: 400; letter-spacing: -.01em; display: flex; gap: 10px; align-items: center; }
+  .wordmark i { font-style: italic; color: var(--sienna); }
+  .nav-links { display: flex; gap: 32px; font-size: 14px; color: var(--ink-2); }
+  .nav-links a:hover { color: var(--ink); }
+  .btn { display: inline-flex; gap: 10px; align-items: center; font-size: 14px; font-weight: 500; padding: 12px 20px; border-radius: 999px;
+    border: 1px solid var(--ink); transition: background .3s, color .3s; }
+  .btn:hover { background: var(--ink); color: var(--paper); }
+  .btn.fill { background: var(--sienna); border-color: var(--sienna); color: #fff8ef; }
+  .btn.fill:hover { background: var(--ink); border-color: var(--ink); }
+
+  /* ---------- The drawing ---------- */
+  .studio { position: relative; height: 720vh; }
+  .stage { position: sticky; top: 0; height: 100vh; height: 100svh; display: grid;
+    grid-template-columns: minmax(260px, 1fr) auto minmax(220px, 1fr); align-items: center; gap: clamp(24px, 4vw, 80px);
+    padding: 76px var(--gutter) 28px; }
+  .lesson { align-self: center; max-width: 420px; justify-self: end; position: relative; min-height: 300px; }
+  .lesson .card { position: absolute; inset: 0 auto auto 0; width: 100%; opacity: 0; transform: translateY(18px);
+    transition: opacity .6s var(--ease), transform .8s var(--ease); pointer-events: none; }
+  .lesson .card.on { opacity: 1; transform: none; }
+  .lesson .num { font-family: var(--mono); font-size: 12px; letter-spacing: .16em; color: var(--sienna); text-transform: uppercase; }
+  .lesson h2 { font-family: var(--serif); font-weight: 300; font-size: clamp(40px, 4.4vw, 72px); line-height: 1; letter-spacing: -.02em; margin: 18px 0 18px; }
+  .lesson p { color: var(--ink-2); line-height: 1.65; font-size: 16px; }
+  .lesson .tip { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--ink); }
+
+  .easel { position: relative; height: min(calc(100svh - 120px), 1400px); aspect-ratio: 1800 / 2683; }
+  .easel canvas, .easel svg, .easel .fallback { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .easel canvas { box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 18px 40px -12px rgba(60, 40, 20, .35), 0 50px 90px -40px rgba(60, 40, 20, .35); background: #f1ebdf; }
+  .easel .fallback { object-fit: cover; opacity: 0; transition: opacity .5s; }
+  .easel.nogl .fallback { opacity: 1; }
+  .easel .loading { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); font-family: var(--mono); font-size: 12px; letter-spacing: .14em; color: var(--ink-3); transition: opacity .4s; }
+  .easel.ready .loading { opacity: 0; }
+  #lines path { fill: none; stroke: #2b2622; stroke-opacity: .88; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+  #guides line, #guides ellipse { fill: none; stroke: var(--sienna); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-dasharray: 6 5; }
+  #guides text { font-family: var(--mono); font-size: 26px; fill: var(--sienna); letter-spacing: .08em; }
+
+  .rail { justify-self: start; align-self: center; font-family: var(--mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+  .rail ol { list-style: none; display: grid; gap: 16px; }
+  .rail li { display: grid; grid-template-columns: 26px 1fr; align-items: center; gap: 10px; transition: color .4s; }
+  .rail li .bar { grid-column: 2; height: 2px; background: var(--line); position: relative; overflow: hidden; width: 120px; margin-top: 6px; }
+  .rail li .bar i { position: absolute; inset: 0; background: var(--sienna); transform-origin: left; transform: scaleX(0); }
+  .rail li.active, .rail li.done { color: var(--ink); }
+  .rail .pct { margin-top: 26px; font-family: var(--serif); font-size: 44px; letter-spacing: -.02em; text-transform: none; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .rail .pct small { font-family: var(--mono); font-size: 11px; color: var(--ink-3); margin-left: 6px; letter-spacing: .12em; }
+  .cue { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); font-family: var(--mono); font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--ink-3); transition: opacity .4s; }
+
+  /* ---------- Content ---------- */
+  section.block { padding: clamp(90px, 14vh, 160px) var(--gutter); position: relative; }
+  .wrap { max-width: 1280px; margin: 0 auto; }
+  .kicker { font-family: var(--mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--sienna); display: block; margin-bottom: 22px; }
+  .display { font-family: var(--serif); font-weight: 300; font-size: clamp(42px, 5.6vw, 88px); line-height: 1; letter-spacing: -.02em; text-wrap: balance; }
+  .lede { font-size: 18px; line-height: 1.65; color: var(--ink-2); max-width: 52ch; }
+  .intro { display: grid; grid-template-columns: 1.2fr 1fr; gap: clamp(40px, 7vw, 120px); align-items: end; }
+  .courses { margin-top: 90px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .course { border-top: 2px solid var(--ink); padding-top: 22px; }
+  .course .meta { font-family: var(--mono); font-size: 12px; letter-spacing: .12em; color: var(--ink-3); text-transform: uppercase; }
+  .course h3 { font-family: var(--serif); font-weight: 400; font-size: 32px; margin: 14px 0 10px; letter-spacing: -.01em; }
+  .course p { color: var(--ink-2); line-height: 1.6; font-size: 15px; }
+  .course .price { margin-top: 16px; font-family: var(--serif); font-size: 20px; }
+  .band { background: var(--paper-2); border-block: 1px solid var(--line); }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+  .stat .v { font-family: var(--serif); font-weight: 300; font-size: clamp(52px, 6vw, 92px); letter-spacing: -.03em; line-height: 1; }
+  .stat .l { margin-top: 12px; color: var(--ink-3); font-size: 14px; }
+  .cta { text-align: center; }
+  .cta .display { font-size: clamp(52px, 8vw, 132px); }
+  .cta .btn { margin-top: 40px; }
+  footer { padding: 40px var(--gutter); border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--ink-3); }
+  .reveal { opacity: 0; transform: translateY(22px); transition: opacity 1s var(--ease), transform 1s var(--ease); }
+  .reveal.in { opacity: 1; transform: none; }
+
+  @media (max-width: 1000px) {
+    .stage { grid-template-columns: 1fr; grid-template-rows: auto 1fr auto; justify-items: center; padding-top: 70px; gap: 12px; }
+    .lesson { justify-self: center; min-height: 150px; max-width: 92vw; order: 2; }
+    .lesson h2 { font-size: 34px; margin: 8px 0; }
+    .lesson p, .lesson .tip { display: none; }
+    .easel { height: min(58svh, 900px); order: 1; }
+    .rail { display: none; }
+    .intro, .courses { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <a class="wordmark" href="#">Atelier <i>Sfumato</i></a>
+  <nav class="nav-links"><a href="#courses">Courses</a><a href="#method">Method</a><a href="#enrol">Enrol</a></nav>
+  <a class="btn" href="#enrol">Book a trial class</a>
+</header>
+
+<main>
+  <section class="studio" id="studio">
+    <div class="stage">
+      <div class="lesson" id="lesson"></div>
+      <div class="easel" id="easel">
+        <canvas id="gl" aria-label="The Mona Lisa, drawn and painted in stages as you scroll"></canvas>
+        <img class="fallback" src="media/mona/final.jpg" alt="The Mona Lisa by Leonardo da Vinci">
+        <svg id="art" viewBox="0 0 1800 2683" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <g id="guides"></g>
+          <g id="lines"></g>
+        </svg>
+        <div class="loading">Preparing the canvas…</div>
+      </div>
+      <div class="rail" aria-hidden="true">
+        <ol id="rail"></ol>
+        <div class="pct"><span id="pct">0</span><small>% complete</small></div>
+      </div>
+      <div class="cue" id="cue">Scroll to begin the lesson</div>
+    </div>
+  </section>
+
+  <section class="block" id="method">
+    <div class="wrap intro">
+      <h2 class="display reveal">Every masterpiece is <em>five simple lessons</em> stacked on top of each other.</h2>
+      <div class="reveal">
+        <span class="kicker">The method</span>
+        <p class="lede">We teach the way Renaissance workshops did: proportion before line, line before value, value before paint. You'll copy the masters, then leave them behind.</p>
+      </div>
+    </div>
+    <div class="wrap courses" id="courses">
+      <article class="course reveal"><div class="meta">10 weeks · Beginner</div><h3>Foundations of Drawing</h3><p>Proportion, contour and value, from cast drawing to the live model.</p><div class="price">€480</div></article>
+      <article class="course reveal"><div class="meta">12 weeks · Intermediate</div><h3>Old Master Painting</h3><p>Grisaille and umber underpainting, glazing and sfumato, in oil on panel.</p><div class="price">€720</div></article>
+      <article class="course reveal"><div class="meta">6 weekends · All levels</div><h3>Copying at the Museum</h3><p>Sketchbook sessions in front of the originals, with a tutor beside you.</p><div class="price">€360</div></article>
+    </div>
+  </section>
+
+  <section class="block band">
+    <div class="wrap stats">
+      <div class="stat reveal"><div class="v">1:8</div><div class="l">Tutor to student ratio</div></div>
+      <div class="stat reveal"><div class="v">5</div><div class="l">Lessons behind every painting</div></div>
+      <div class="stat reveal"><div class="v">6</div><div class="l">Hours of north light a day</div></div>
+      <div class="stat reveal"><div class="v">∞</div><div class="l">Patience included</div></div>
+    </div>
+  </section>
+
+  <section class="block cta" id="enrol">
+    <span class="kicker reveal">Spring term</span>
+    <h2 class="display reveal">Pick up the charcoal.<br><em>We'll handle the rest.</em></h2>
+    <a class="btn fill reveal" href="#">Book a trial class →</a>
+  </section>
+</main>
+
+<footer><span>© Atelier Sfumato. A concept site.</span><span>Mona Lisa, Leonardo da Vinci, c. 1503–1519. Public domain.</span></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const span = (p, a, b) => clamp((p - a) / (b - a));
+  const ease = (t) => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- Lessons (scroll ranges) ----------
+  const LESSONS = [
+    { at: 0.00, to: 0.12, n: "01", title: "Proportion", body: "Before a single line, find the big shapes. A vertical axis, the head as an oval, the eyes on one line, and the whole figure inside a pyramid.", tip: "Leonardo set the two horizons at different heights. It makes her seem to rise out of the landscape." },
+    { at: 0.12, to: 0.42, n: "02", title: "Line", body: "Now draw what you see, not what you know. Start where the viewer will look first — the eyes and mouth — then the hands, then everything else.", tip: "Keep the charcoal loose. Lines are questions until the value answers them." },
+    { at: 0.42, to: 0.62, n: "03", title: "Value", body: "Squint until the detail disappears and only light and dark remain. Build the shadows in layers, following the form like a hand following a cheek.", tip: "Sfumato means 'gone up in smoke': edges that melt, never lines that stop." },
+    { at: 0.62, to: 0.80, n: "04", title: "Underpainting", body: "Masters laid in the whole picture in one earth colour first. It settles every value before colour can confuse them.", tip: "Raw umber dries fast and stays warm under every glaze." },
+    { at: 0.80, to: 1.01, n: "05", title: "Colour", body: "Thin, transparent glazes, dozens of them, each one barely there. Colour doesn't cover the drawing — it tints it.", tip: "Leonardo worked on this panel for well over a decade. You can take your time." },
+  ];
+  const lessonEl = $("lesson"), railEl = $("rail");
+  const cards = LESSONS.map((l) => {
+    const c = document.createElement("div");
+    c.className = "card";
+    c.innerHTML = `<div class="num">Lesson ${l.n} / 05</div><h2>${l.title}</h2><p>${l.body}</p><div class="tip">${l.tip}</div>`;
+    lessonEl.appendChild(c);
+    const li = document.createElement("li");
+    li.innerHTML = `<span>${l.n}</span><span>${l.title}</span><span class="bar"><i></i></span>`;
+    railEl.appendChild(li);
+    return { c, li, bar: li.querySelector("i"), ...l };
+  });
+
+  // ---------- Stage timing ----------
+  const T = { guides: [0.00, 0.11], guidesOut: [0.36, 0.50], lines: [0.10, 0.42], linesSoft: [0.46, 0.62],
+              linesOut: [0.64, 0.78], tone: [0.40, 0.62], under: [0.60, 0.80], color: [0.78, 0.985] };
+
+  // ---------- SVG: guides + charcoal lines ----------
+  const NS = "http://www.w3.org/2000/svg";
+  const guidesG = $("guides"), linesG = $("lines");
+  let guideEls = [], strokes = [], totalLen = 0;
+
+  fetch("media/mona/guides.json").then((r) => r.json()).then(({ guides }) => {
+    guideEls = guides.map((g, i) => {
+      let el;
+      if (g.type === "line") {
+        el = document.createElementNS(NS, "line");
+        el.setAttribute("x1", g.a[0]); el.setAttribute("y1", g.a[1]); el.setAttribute("x2", g.b[0]); el.setAttribute("y2", g.b[1]);
+      } else {
+        el = document.createElementNS(NS, "ellipse");
+        el.setAttribute("cx", g.c[0]); el.setAttribute("cy", g.c[1]); el.setAttribute("rx", g.r[0]); el.setAttribute("ry", g.r[1]);
+        el.setAttribute("transform", `rotate(${g.rot} ${g.c[0]} ${g.c[1]})`);
+      }
+      el.setAttribute("pathLength", "1");
+      el.style.strokeDasharray = "1";
+      el.style.strokeDashoffset = "1";
+      guidesG.appendChild(el);
+      let label = null;
+      if (i === 0 || g.label !== guides[i - 1].label) {
+        label = document.createElementNS(NS, "text");
+        const [x, y] = g.type === "line" ? g.b : [g.c[0] + g.r[0] + 12, g.c[1]];
+        label.setAttribute("x", Math.min(x + 10, 1500)); label.setAttribute("y", y - 10);
+        label.textContent = g.label; label.style.opacity = 0;
+        guidesG.appendChild(label);
+      }
+      return { el, label, i, n: guides.length };
+    });
+  });
+
+  fetch("media/mona/lines.json").then((r) => r.json()).then(({ strokes: s }) => {
+    const frag = document.createDocumentFragment();
+    let acc = 0;
+    strokes = s.map((st) => {
+      const p = document.createElementNS(NS, "path");
+      p.setAttribute("d", st.d);
+      p.style.strokeDasharray = `${st.len} ${st.len}`;
+      p.style.strokeDashoffset = st.len;
+      frag.appendChild(p);
+      const o = { p, len: st.len, start: acc, shown: -1 };
+      acc += st.len;
+      return o;
+    });
+    totalLen = acc;
+    linesG.appendChild(frag);
+  });
+
+  function drawLines(f) {
+    const drawn = f * totalLen;
+    for (const s of strokes) {
+      const v = clamp((drawn - s.start) / s.len);
+      if (v === s.shown) continue;
+      s.shown = v;
+      s.p.style.strokeDashoffset = s.len * (1 - v);
+    }
+  }
+
+  // ---------- WebGL: paper -> graphite -> umber -> colour ----------
+  const easel = $("easel"), canvas = $("gl");
+  const gl = canvas.getContext("webgl2", { antialias: false, premultipliedAlpha: false });
+  let uniforms = null, glReady = false;
+  const LAYERS = ["paper", "tone", "under", "final", "mask_tone", "mask_under", "mask_color"];
+
+  function loadImage(name) {
+    return new Promise((res, rej) => {
+      const im = new Image();
+      im.onload = () => res(im); im.onerror = rej;
+      im.src = `media/mona/${name}.${name.startsWith("mask") ? "png" : "jpg"}`;
+    });
+  }
+
+  function initGL(images) {
+    const vs = `#version 300 es
+      in vec2 p; out vec2 uv;
+      void main(){ uv = vec2(p.x * .5 + .5, .5 - p.y * .5); gl_Position = vec4(p, 0., 1.); }`;
+    const fs = `#version 300 es
+      precision highp float;
+      in vec2 uv; out vec4 o;
+      uniform sampler2D paper, tone, under, fin, mT, mU, mC;
+      uniform float pT, pU, pC;
+      float rv(float m, float p){ float s = .045; return clamp((p * (1. + s) - m) / s, 0., 1.); }
+      void main(){
+        vec3 c = texture(paper, uv).rgb;
+        c = mix(c, texture(tone, uv).rgb,  rv(texture(mT, uv).r, pT));
+        c = mix(c, texture(under, uv).rgb, rv(texture(mU, uv).r, pU));
+        c = mix(c, texture(fin, uv).rgb,   rv(texture(mC, uv).r, pC));
+        o = vec4(c, 1.);
+      }`;
+    const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+    const prog = gl.createProgram();
+    gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(prog);
+    gl.useProgram(prog);
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, "p");
+    gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    const names = ["paper", "tone", "under", "fin", "mT", "mU", "mC"];
+    images.forEach((im, i) => {
+      const t = gl.createTexture();
+      gl.activeTexture(gl.TEXTURE0 + i); gl.bindTexture(gl.TEXTURE_2D, t);
+      gl.pixelStorei(gl.UNPACK_COLORSPACE_CONVERSION_WEBGL, gl.NONE);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
+      gl.generateMipmap(gl.TEXTURE_2D);   // clean downscaling on normal-DPI screens
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.uniform1i(gl.getUniformLocation(prog, names[i]), i);
+    });
+    uniforms = { pT: gl.getUniformLocation(prog, "pT"), pU: gl.getUniformLocation(prog, "pU"), pC: gl.getUniformLocation(prog, "pC") };
+    glReady = true;
+    easel.classList.add("ready");
+    resize();
+  }
+
+  function resize() {
+    if (!glReady) return;
+    const r = canvas.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    lastDrawn = -1;
+  }
+  addEventListener("resize", resize);
+
+  if (gl) {
+    Promise.all(LAYERS.map(loadImage)).then(initGL).catch((e) => { console.error(e); easel.classList.add("nogl", "ready"); });
+  } else {
+    easel.classList.add("nogl", "ready");
+  }
+
+  // ---------- Scroll loop ----------
+  const studio = $("studio"), nav = $("nav"), pct = $("pct"), cue = $("cue");
+  let target = 0, p = 0, lastDrawn = -1;
+  const progress = () => { const r = studio.getBoundingClientRect(); return clamp(-r.top / (r.height - innerHeight)); };
+
+  function frame() {
+    target = progress();
+    p += (target - p) * (reduced ? 1 : 0.12);
+    if (Math.abs(target - p) < 0.0002) p = target;
+
+    if (glReady && Math.abs(p - lastDrawn) > 0.00005) {
+      gl.uniform1f(uniforms.pT, ease(span(p, ...T.tone)));
+      gl.uniform1f(uniforms.pU, ease(span(p, ...T.under)));
+      gl.uniform1f(uniforms.pC, ease(span(p, ...T.color)));
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      lastDrawn = p;
+    }
+
+    // guides: draw in one after another, then fade as the drawing takes over
+    const g = span(p, ...T.guides), gOut = 1 - span(p, ...T.guidesOut);
+    for (const ge of guideEls) {
+      const local = clamp(g * ge.n - ge.i);
+      ge.el.style.strokeDashoffset = 1 - local;
+      if (ge.label) ge.label.style.opacity = local > .6 ? 1 : 0;
+    }
+    guidesG.style.opacity = gOut;
+
+    if (strokes.length) drawLines(ease(span(p, ...T.lines)));
+    linesG.style.opacity = (1 - 0.55 * span(p, ...T.linesSoft)) * (1 - span(p, ...T.linesOut));
+
+    const done = Math.round(p * 100);
+    if (pct.textContent != done) pct.textContent = done;
+    cue.style.opacity = 1 - clamp(p / 0.02);
+    for (const l of cards) {
+      const on = p >= l.at && p < l.to;
+      l.c.classList.toggle("on", on);
+      l.li.classList.toggle("active", on);
+      l.li.classList.toggle("done", p >= l.to);
+      l.bar.style.transform = `scaleX(${span(p, l.at, Math.min(l.to, 1))})`;
+    }
+    nav.classList.toggle("solid", scrollY > studio.offsetHeight - innerHeight);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  if (window.Lenis && !reduced) {
+    const lenis = new Lenis({ lerp: 0.1 });
+    const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); };
+    requestAnimationFrame(raf);
+  }
+
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: .2 });
+  document.querySelectorAll(".reveal").forEach((el, i) => { el.style.transitionDelay = (i % 3) * .08 + "s"; io.observe(el); });
+})();
+</script>
+</body>
+</html>

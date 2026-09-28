@@ -1,0 +1,86 @@
+{
+  "id": "jet_london",
+  "duration": 10,
+  "fps": 24,
+  "preview_res": [
+    1280,
+    720
+  ],
+  "blockout_script": "blender/jet_london.py",
+  "keyframes": {
+    "model": "z_image_turbo_bf16.safetensors",
+    "text_encoder": "qwen_3_4b_fp8_mixed.safetensors",
+    "vae": "ae.safetensors",
+    "controlnet": "Z-Image-Turbo-Fun-Controlnet-Union-2.1-2602-8steps.safetensors",
+    "control_strength": 0.8,
+    "steps": 8,
+    "res": [
+      1536,
+      864
+    ],
+    "seed": 7,
+    "frames": [
+      {
+        "name": "first",
+        "t": 0,
+        "strength": 1.0,
+        "prompt": "Photograph from inside the cabin of a luxury private jet, looking straight at a single oval aircraft window in the centre of the frame. The cabin wall is upholstered in cream quilted leather with fine contrast stitching, framed by brushed nickel trim and walnut veneer; a soft warm reading light grazes the leather. Through the window: bright open sky at golden hour, a few sunlit cumulus clouds and, far below, the hazy edge of a city. Shallow depth of field, the window frame sharp, cabin surfaces with rich texture and gentle falloff. Shot on a full-frame cinema camera with a 28mm lens, anamorphic flare, photoreal, highly detailed."
+      },
+      {
+        "name": "mid",
+        "t": 6.0,
+        "strength": 0.7,
+        "control_strength": 0.5,
+        "depth_blur": 3,
+        "prompt": "Aerial photograph from a helicopter at golden hour, looking down across central London toward the Houses of Parliament and the Elizabeth Tower (Big Ben) in the middle distance. The River Thames curves across the foreground, crossed by a stone bridge. Dense Victorian terraces with slate roofs and chimneys, Portland stone offices, glass towers, leafy squares and tree-lined streets with small cars, long warm shadows and soft haze toward the horizon. Real city, irregular building sizes and rooflines, photoreal, crisp detail, natural colour, shot on a full-frame cinema camera."
+      },
+      {
+        "name": "last",
+        "t": "end",
+        "strength": 0.9,
+        "prompt": "Aerial photograph of the Elizabeth Tower (Big Ben) at golden hour, the tower centred in frame and seen from slightly above its clock faces. Ornate Gothic Revival stonework in honey-coloured limestone, gilded clock dial with black Roman numerals glowing warmly, green-and-gold spire detailing, the long Gothic facade of the Houses of Parliament beside it. Below and behind, dense London rooftops in slate and Portland stone, the River Thames catching the low sun, soft haze over the skyline, a deepening blue sky with a few warm clouds. Shot on a full-frame cinema camera with a 28mm lens, photoreal, crisp architectural detail, natural colour."
+      }
+    ]
+  },
+  "ltx": {
+    "checkpoint": "ltx-2.3-22b-distilled-fp8.safetensors",
+    "text_encoder": "gemma_3_12B_it_fp8_scaled.safetensors",
+    "control_lora": "ltx-2.3-22b-ic-lora-union-control-ref0.5.safetensors",
+    "upscaler": "ltx-2.3-spatial-upscaler-x2-1.1.safetensors",
+    "res": [
+      1024,
+      576
+    ],
+    "upscale": false,
+    "seed": 42,
+    "control_strength": 1.0,
+    "guide_strength": 0.6,
+    "prompt": "A continuous cinematic aerial shot at golden hour. The camera begins inside the cabin of a luxury private jet, gliding slowly toward an oval aircraft window framed by cream leather panelling, brushed nickel trim and soft warm cabin lighting, with fine stitching visible on the leather. The camera passes smoothly through the window into open sky, drifting past the polished white wing with small rivets and a navigation light, then tilts down through thin sunlit cumulus clouds whose edges glow gold. Far below, London spreads out in dense detail: Portland stone terraces, slate rooftops, green squares, glass towers catching the low sun, and the River Thames glinting as it curves through the city. The camera descends in a long, steady arc toward the Houses of Parliament, its Gothic spires and ornate stonework sharply detailed, and settles on the Elizabeth Tower, Big Ben, centred in frame, its gilded clock faces glowing warmly against a deepening blue sky as streetlights begin to switch on. Photoreal, anamorphic 35mm film look, gentle atmospheric haze, rich natural colour, smooth gimbal motion.",
+    "negative_prompt": "low poly, untextured grey shapes, flat shading, blurry, smeared detail, cartoon, CGI, video game, text, watermark, people, cuts, flicker, warped buildings",
+    "guide_blur": 4
+  },
+  "web": {
+    "scroll_length_vh": 420,
+    "gop": 6,
+    "captions": [
+      {
+        "from": 0.02,
+        "to": 0.24,
+        "eyebrow": "Meridian Private",
+        "title": "Leave the ordinary <em>at forty thousand feet.</em>"
+      },
+      {
+        "from": 0.36,
+        "to": 0.6,
+        "eyebrow": "The descent",
+        "title": "The city rises <em>to meet you.</em>"
+      },
+      {
+        "from": 0.74,
+        "to": 0.97,
+        "eyebrow": "London",
+        "title": "Wheels down <em>before the clock strikes.</em>"
+      }
+    ]
+  }
+}
