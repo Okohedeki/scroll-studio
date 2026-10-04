@@ -24,7 +24,7 @@ music: cinematic electronic pulse, confident and modern, steady build, warm synt
 - duration: 4.5s
 - poster: 3.5s
 - transition_in: cut
-- status: outline
+- status: animated
 - type: hook
 - beat: curiosity
 - voiceover: "This is a blockout. — Grey boxes. A camera path."
@@ -33,7 +33,7 @@ music: cinematic electronic pulse, confident and modern, steady build, warm synt
 - focal: assets/film-before.mp4
 - roles: film-before = background (full-bleed, dim to ~70% so type reads)
 - sfx: none
-- src: compositions/frames/01-blockout.html
+- src: index.html
 
 Adapt: keep the statement-builds-across-beats signature; the "full-screen beats" sit over the blockout footage instead of a flat field.
 Scene 1 (0.0–0.6s): film-before full-bleed from media 0 s (the pad, grey towers), at ~70% brightness. Nothing else. Hard open.
@@ -48,7 +48,7 @@ Scene 4 (3.6–4.5s): held read. The type stays put; footage carries the motion.
 - duration: 7s
 - poster: 3.0s
 - transition_in: cut
-- status: outline
+- status: animated
 - type: product_intro
 - beat: reveal (the before/after climax)
 - voiceover: "Same camera. Same timing. — Rendered locally with LTX-2.3."
@@ -57,7 +57,7 @@ Scene 4 (3.6–4.5s): held read. The type stays put; footage carries the motion.
 - focal: assets/film-after.mp4
 - roles: film-after = background (full-bleed, under the before) · film-before = background (full-bleed, on top, clipped by the seam)
 - sfx: none
-- src: compositions/frames/02-wipe.html
+- src: index.html
 - handoff_in: film-before full-bleed x=0 y=0 1920×1080, scale 1, opacity 1, brightness 0.7 → animate brightness to 1.0 over the first 0.4 s; media time 4.5 s at frame start; playing 1×.
 
 Both videos play in lockstep from media 4.5 s (data-media-start 4.5 for both), stacked full-bleed: film-after below, film-before above with a `clip-path: inset(0 0 0 X%)` (the before is shown to the right of the seam, the after to the left).
@@ -73,7 +73,7 @@ Scene 4 (5.6–7.0s): mono `label` beneath: "BLENDER DEPTH → LTX-2.3 · NO API
 - duration: 5s
 - poster: 3.5s
 - transition_in: cut
-- status: outline
+- status: animated
 - type: feature_showcase
 - beat: lift
 - voiceover: "Then it scrolls. — 01 · AI film."
@@ -82,7 +82,7 @@ Scene 4 (5.6–7.0s): mono `label` beneath: "BLENDER DEPTH → LTX-2.3 · NO API
 - focal: assets/site-rocket.mp4
 - roles: film-after = background (full-bleed at start, then shrinks) · site-rocket = cutout (the floating panel)
 - sfx: none
-- src: compositions/frames/03-scrolls.html
+- src: index.html
 - handoff_in: film-after full-bleed x=0 y=0 1920×1080, scale 1, opacity 1, brightness 1, media time 11.5 s, playing 1×.
 
 Adapt: keep the floating-window hero with its screens cycling a real flow; no device bezel, no browser chrome — a flat panel with a 1px hairline.
@@ -97,7 +97,7 @@ Scene 4 (3.4–5.0s): body line in cream-muted reveals beneath: "the film is scr
 - duration: 3s
 - poster: 2.6s
 - transition_in: push-slide LEFT
-- status: outline
+- status: animated
 - type: benefit_highlight
 - beat: chapter / breather
 - voiceover: "Made three ways. — AI film. Real art. Live 3D."
@@ -106,7 +106,7 @@ Scene 4 (3.4–5.0s): body line in cream-muted reveals beneath: "the film is scr
 - focal: the line itself
 - roles: none (type only, orange register)
 - sfx: none
-- src: compositions/frames/04-three-ways.html
+- src: index.html
 
 Orange register: ground fire-orange, type ink-black.
 Scene 1 (0.0–0.9s): display "made three ways." enters per word, left-aligned at the vertical centre; mono catalogue numeral "01 / 02 / 03" faint top-left.
@@ -119,7 +119,7 @@ Scene 3 (2.4–3.0s): held on "live 3d."
 - duration: 5s
 - poster: 3.8s
 - transition_in: push-slide LEFT
-- status: outline
+- status: animated
 - type: feature_showcase
 - beat: wonder
 - voiceover: "02 · Real artwork, drawn live. — The Mona Lisa, built as you scroll."
@@ -128,7 +128,7 @@ Scene 3 (2.4–3.0s): held on "live 3d."
 - focal: assets/site-mona.mp4
 - roles: site-mona = cutout (the panel)
 - sfx: none
-- src: compositions/frames/05-mona.html
+- src: index.html
 
 Adapt: mirrored layout of Frame 3 (panel left, copy right) so the pair reads as a set; flat panel, 1px hairline, no chrome.
 Scene 1 (0.0–0.8s): panel (~62% width, left edge at pad-x, vertically centred) enters with a clip-mask wipe up; site-mona.mp4 plays from media 2.0 s (guides → contours drawing).
@@ -141,7 +141,7 @@ Scene 3 (2.2–5.0s): body (cream-muted): "guides → charcoal → graphite → 
 - duration: 5s
 - poster: 3.8s
 - transition_in: push-slide LEFT
-- status: outline
+- status: animated
 - type: feature_showcase
 - beat: scale
 - voiceover: "03 · Live 3D. — From tissue to molecule, in one scroll."
@@ -150,7 +150,7 @@ Scene 3 (2.2–5.0s): body (cream-muted): "guides → charcoal → graphite → 
 - focal: assets/site-bio.mp4
 - roles: site-bio = cutout (the panel)
 - sfx: none
-- src: compositions/frames/06-bio.html
+- src: index.html
 
 Adapt: same as Frame 3's layout (panel right, copy left) so 3/5/6 alternate right/left/right.
 Scene 1 (0.0–0.8s): panel (~68% width, right edge at pad-x, vertically centred) enters with a clip-mask wipe up; site-bio.mp4 plays from media 2.5 s (into the cell → nucleus).
@@ -163,7 +163,7 @@ Scene 3 (2.2–5.0s): a stat-card reveals beneath: stat-value "100 µm → 0.3 n
 - duration: 5.5s
 - poster: 4.8s
 - transition_in: crossfade 0.4s
-- status: outline
+- status: animated
 - type: benefit_highlight
 - beat: mechanism → trust
 - voiceover: "Blender blockout → Z-Image keyframes → LTX-2.3 → scroll site. — One RTX 4090. No API keys."
@@ -172,7 +172,7 @@ Scene 3 (2.2–5.0s): a stat-card reveals beneath: stat-value "100 µm → 0.3 n
 - focal: the orange line connecting the stations
 - roles: film-before = supporting (small thumbnail, station 1) · film-after = supporting (small thumbnail, station 3)
 - sfx: none
-- src: compositions/frames/07-pipeline.html
+- src: index.html
 
 Adapt: keep the stations-on-one-line signature, but no camera pan: the frame is wide enough for four stations in a full-width strip across the upper-middle; the travelling element is the orange line drawing station to station (`svg-path-draw`).
 Scene 1 (0.0–0.6s): kicker "HOW IT WORKS" top-left. A 2px fire-orange line starts drawing from the left margin.
@@ -185,7 +185,7 @@ Scene 3 (3.4–5.5s): below the strip, h1 "one rtx 4090. no api keys." per-word 
 - duration: 3.5s
 - poster: 2.5s
 - transition_in: crossfade 0.5s
-- status: outline
+- status: animated
 - type: cta
 - beat: lockup
 - voiceover: "Scroll Studio. — github.com/Okohedeki/scroll-studio"
@@ -194,9 +194,16 @@ Scene 3 (3.4–5.5s): below the strip, h1 "one rtx 4090. no api keys." per-word 
 - focal: the wordmark
 - roles: none
 - sfx: none
-- src: compositions/frames/08-end.html
+- src: index.html
 
 Adapt: the wordmark is type; it assembles by per-letter cascade, no logo mark.
 Scene 1 (0.0–1.2s): display "scroll studio" assembles letter by letter (rise + clip, `power3`), centred-left at the optical middle; a 36×2 fire-orange rule stub draws in above it.
 Scene 2 (1.2–2.0s): mono label beneath: "GITHUB.COM/OKOHEDEKI/SCROLL-STUDIO", then a smaller cream-muted line "scroll-driven sites · local ai film · no api keys".
 Scene 3 (2.0–3.5s): still hold. Final 0.4s: the whole frame fades to ink-black (the only real exit in the video).
+
+## Build note
+
+Built as one monolithic `index.html` (root media, all motion on the main timeline) instead of per-frame
+workers: the frame-worker contract hoists videos to the root with fixed geometry, which can't express the
+frame-locked wipe (Frame 2) or the film-to-panel morph (Frame 3). Global frame starts: 0, 4.5, 11.5, 16.5,
+19.5, 24.5, 29.5, 35.0; total 38.5 s.

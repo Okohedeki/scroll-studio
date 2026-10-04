@@ -3,6 +3,18 @@
 Scroll-driven marketing sites, made three ways: AI film rendered locally, the real artwork drawn live, and live 3D.
 Everything runs on a local RTX 4090. There are no API keys.
 
+## Launch video
+
+[![Scroll Studio launch video: the grey blockout wipes into the finished film](docs/demos/launch.gif)](docs/demos/launch.mp4)
+
+A 38-second launch film (click the preview for the full MP4 with sound). The grey Blender blockout wipes into the
+finished LTX-2.3 film on the same camera and timing. The film then becomes the scroll site, followed by the other two
+demos, the pipeline and the end card. It was made with [HyperFrames](https://github.com/heygen-com/hyperframes)
+(HTML compositions rendered to MP4) in `docs/launch/scroll-studio-launch/`. The music bed was generated locally by
+`tools/make_music.py` (MusicGen stereo-large on the GPU; weights are CC-BY-NC). To re-render, regenerate the
+footage (`capture/`, `assets/*.mp4` and `assets/bgm/` are kept out of git), then run `npx hyperframes render` in
+that folder.
+
 ## Demos
 
 Each demo is a scroll-through of the page, recorded with `tools/capture_demo.py`. Click a preview for the full-quality MP4.
