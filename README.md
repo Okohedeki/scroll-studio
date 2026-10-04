@@ -1,4 +1,42 @@
-# Scroll-film pipeline (local, no API keys)
+# Scroll Studio
+
+Scroll-driven marketing sites, made three ways: AI film rendered locally, the real artwork drawn live, and live 3D.
+Everything runs on a local RTX 4090. There are no API keys.
+
+## Demos
+
+Each demo is a scroll-through of the page, recorded with `tools/capture_demo.py`. Click a preview for the full-quality MP4.
+
+### Lodestar Orbital: launch to orbit (AI film)
+[![Rocket launch scroll demo](docs/demos/rocket.gif)](docs/demos/rocket.mp4)
+
+`web/orbital.html` scrubs an 18-second film rendered locally with **LTX-2.3**: pad → lift-off → through the clouds →
+stage separation → fairing opens → the satellite deploys. The camera follows a Blender blockout's depth pass, and a
+locked rocket description plus timed Z-Image keyframes keep the vehicle consistent. Native 1920×1088, in six 3-second segments.
+The mission HUD (T+ clock, altitude, velocity, events) is tied to scroll position.
+
+### Atelier Sfumato: drawing the Mona Lisa (real artwork, drawn live)
+[![Mona Lisa scroll demo](docs/demos/mona-lisa.gif)](docs/demos/mona-lisa.mp4)
+
+`web/art.html` builds the painting in five lessons as you scroll: proportion guides → charcoal contours (face first) →
+graphite value → umber underpainting → colour glazes. Every stage comes from the real painting (public domain) via
+`art/build_mona.py`, so nothing drifts. WebGL composites the layers at native screen resolution, and the contours are
+SVG strokes that draw themselves.
+
+### Cellwright Bio: from tissue to molecule (live 3D)
+[![Biomedical scroll demo](docs/demos/biomedical.gif)](docs/demos/biomedical.mp4)
+
+`web/bio.html` zooms through six orders of magnitude with **three.js**: a field of cells → inside one cell →
+chromatin in the nucleus → the DNA double helix → a small molecule docking on a highlighted target. It has a
+fluorescence-microscopy look (fresnel shaders + bloom) and a live scale bar that runs from 100 µm to 0.3 nm.
+
+Run any of them locally: `python serve.py`, then open `http://localhost:5173/orbital.html`, `/art.html` or `/bio.html`.
+The film pages need their media regenerated first (`run.py ... --stage encode`, `art/build_mona.py`), because renders
+and site media are kept out of git.
+
+---
+
+# Film pipeline (local, no API keys)
 
 Blender blockout → detailed keyframes (Z-Image) → LTX-2.3 guided by Blender depth → scroll-scrubbed site.
 Everything runs on the local RTX 4090 through ComfyUI.
