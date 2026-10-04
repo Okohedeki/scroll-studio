@@ -1,0 +1,11 @@
+{
+  "name": "scroll-studio-launch",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes hyperframes@0.8.125 preview",
+    "check": "npx --yes hyperframes@0.8.125 check",
+    "render": "npx --yes hyperframes@0.8.125 render",
+    "publish": "npx --yes hyperframes@0.8.125 publish"
+  }
+}

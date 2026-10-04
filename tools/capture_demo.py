@@ -4,6 +4,9 @@
   python tools/capture_demo.py art.html     "#studio"   docs/demos/mona-lisa
   python tools/capture_demo.py bio.html     "#journey"  docs/demos/biomedical
 
+Launch-video footage at full HD (MP4 only):
+  DEMO_W=1920 DEMO_H=1080 DEMO_OUT_W=1920 DEMO_FRAMES=192 DEMO_NOGIF=1 python tools/capture_demo.py ...
+
 The page is served by serve.py (http://localhost:5173). The section selector is the scroll-driven part;
 the recording scrolls from its top to its bottom with an ease-in-out, then holds on the last frame.
 """
@@ -21,8 +24,10 @@ import websocket
 
 CHROME = os.environ.get("CHROME", r"C:\Program Files\Google\Chrome\Application\chrome.exe")
 BASE = os.environ.get("DEMO_BASE", "http://localhost:5173/")
-W, H = 1440, 810
-FRAMES, HOLD, FPS = 150, 18, 24      # ~6 s of scrolling plus a short hold
+W, H = int(os.environ.get("DEMO_W", 1440)), int(os.environ.get("DEMO_H", 810))
+FRAMES = int(os.environ.get("DEMO_FRAMES", 150))   # ~6 s of scrolling
+HOLD, FPS = 18, 24                                 # plus a short hold
+OUT_W = int(os.environ.get("DEMO_OUT_W", 1280))    # MP4 width; GIF is skipped when DEMO_NOGIF is set
 SETTLE = 0.22                        # seconds per frame for the page's own easing to catch up
 PORT = 9333
 
@@ -91,8 +96,13 @@ def main(page, selector, out_prefix):
     os.makedirs(os.path.dirname(out_prefix), exist_ok=True)
     src = os.path.join(frames_dir, "%04d.png")
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-framerate", str(FPS), "-i", src,
-                    "-vf", "scale=1280:-2:flags=lanczos", "-c:v", "libx264", "-crf", "22", "-preset", "slow",
+                    "-vf", f"scale={OUT_W}:-2:flags=lanczos", "-c:v", "libx264", "-crf", "18" if OUT_W > 1280 else "22", "-preset", "slow",
                     "-pix_fmt", "yuv420p", "-movflags", "+faststart", out_prefix + ".mp4"], check=True)
+    if os.environ.get("DEMO_NOGIF"):
+        shutil.rmtree(frames_dir, ignore_errors=True)
+        shutil.rmtree(prof, ignore_errors=True)
+        print(f"  {out_prefix}.mp4: {os.path.getsize(out_prefix + '.mp4') / 1e6:.1f} MB")
+        return
     # GIF: 720 px, 10 fps, per-demo palette with light dithering, kept small for the README
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-framerate", str(FPS), "-i", src,
                     "-vf", "fps=10,scale=720:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128:stats_mode=diff[p];"

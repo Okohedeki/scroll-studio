@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>Scroll Studio launch</title>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <style>
+      @font-face { font-family: "Barlow"; src: url("assets/fonts/barlow-400.woff2") format("woff2"); font-weight: 400; }
+      @font-face { font-family: "Barlow"; src: url("assets/fonts/barlow-600.woff2") format("woff2"); font-weight: 600; }
+      @font-face { font-family: "Barlow"; src: url("assets/fonts/barlow-700.woff2") format("woff2"); font-weight: 700; }
+      @font-face { font-family: "Barlow"; src: url("assets/fonts/barlow-800.woff2") format("woff2"); font-weight: 800; }
+      @font-face { font-family: "Barlow"; src: url("assets/fonts/barlow-900.woff2") format("woff2"); font-weight: 900; }
+      @font-face { font-family: "IBM Plex Mono"; src: url("assets/fonts/plex-mono-400.woff2") format("woff2"); font-weight: 400; }
+      @font-face { font-family: "IBM Plex Mono"; src: url("assets/fonts/plex-mono-500.woff2") format("woff2"); font-weight: 500; }
+
+      /* Broadside tokens (frame.md) */
+      :root {
+        --ink: #111111;
+        --ink-alt: #1a1a18;
+        --orange: #e85d26;
+        --cream: #f0ece5;
+        --muted: #888880;
+        --hint: #505048;
+        --border: #282826;
+        --px: 106px;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: #111111; }
+      #root {
+        position: relative; width: 100%; height: 100%; overflow: hidden;
+        background: var(--ink); color: var(--cream);
+        font-family: "Barlow", sans-serif;
+      }
+      .layer { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+      .ground { background: var(--ink); }
+      video { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+      .label { font-family: "IBM Plex Mono", monospace; font-weight: 500; font-size: 22px; letter-spacing: 0.14em; text-transform: uppercase; line-height: 1.4; }
+      .kicker { color: var(--orange); }
+      .h1 { font-weight: 800; font-size: 136px; line-height: 0.95; letter-spacing: -0.03em; }
+      .h2 { font-weight: 700; font-size: 80px; line-height: 1.04; letter-spacing: -0.02em; }
+      .h3 { font-weight: 700; font-size: 42px; line-height: 1.1; letter-spacing: -0.01em; }
+      .lead { font-weight: 400; font-size: 30px; line-height: 1.45; color: var(--muted); }
+      .o { color: var(--orange); }
+      .rule { width: 36px; height: 2px; background: var(--orange); }
+
+      /* split text: mask + word */
+      .m { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.1em; margin-bottom: -0.1em; }
+      .w { display: inline-block; }
+
+      /* ---------- frames 1–3: the film ---------- */
+      #wFilm { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+      #scrim1 { background: linear-gradient(to top, rgba(17,17,17,0.88) 0%, rgba(17,17,17,0.55) 32%, rgba(17,17,17,0) 62%); }
+      #scrim2 { background: linear-gradient(to bottom, rgba(17,17,17,0.72) 0%, rgba(17,17,17,0.35) 30%, rgba(17,17,17,0) 55%); }
+      #seam { position: absolute; left: -1px; top: 0; width: 2px; height: 1080px; background: var(--orange); box-shadow: 0 0 18px 2px rgba(232,93,38,0.55); }
+      #t1 { position: absolute; left: var(--px); bottom: 150px; width: 1500px; }
+      #t1 .rule { margin-bottom: 28px; }
+      #t1 .tokens { position: relative; height: 32px; margin-top: 30px; color: var(--cream); }
+      #t1 .tokens span { position: absolute; left: 0; top: 0; }
+      .tag { position: absolute; top: 92px; color: var(--cream); }
+      #tagBefore { right: var(--px); color: var(--muted); }
+      #tagAfter { left: var(--px); }
+      #t2 { position: absolute; left: var(--px); top: 160px; width: 1400px; }
+      #t2 .lines { position: relative; height: 270px; }
+      #t2 .set { position: absolute; left: 0; top: 0; }
+      #t2 .label { margin-top: 34px; }
+      #panelLine3 { position: absolute; left: 624px; top: 205px; width: 1190px; height: 670px; border: 1px solid rgba(240,236,229,0.14); }
+      .col { position: absolute; top: 250px; width: 462px; }
+      .col .label { margin-bottom: 26px; }
+      .col .lead { margin-top: 30px; }
+
+      /* ---------- frame 4: orange chapter ---------- */
+      #f4in { background: var(--orange); color: var(--ink); }
+      #nums { position: absolute; left: var(--px); top: 110px; display: flex; gap: 36px; color: var(--ink); font-size: 34px; }
+      #nums span { opacity: 0.35; }
+      #t4 { position: absolute; left: var(--px); top: 330px; width: 1708px; }
+      #t4 .cycle { position: relative; height: 150px; margin-top: 40px; }
+      #t4 .cycle span { position: absolute; left: 0; top: 0; font-weight: 900; font-size: 140px; line-height: 1; letter-spacing: -0.03em; white-space: nowrap; }
+
+      /* ---------- frames 5–6: showcase panels ---------- */
+      .panel { position: absolute; width: 1190px; height: 670px; top: 205px; border: 1px solid rgba(240,236,229,0.14); overflow: hidden; }
+      #p5 { left: var(--px); }
+      #p6 { left: 624px; }
+      #c5 { left: 1352px; }
+      #c6 { left: var(--px); }
+      .stat { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--border); }
+      .stat .v { font-weight: 900; font-size: 60px; line-height: 1; letter-spacing: -0.03em; color: var(--orange); white-space: nowrap; }
+      .stat .label { margin-top: 14px; color: var(--muted); font-size: 18px; }
+
+      /* ---------- frame 7: pipeline ---------- */
+      #k7 { position: absolute; left: var(--px); top: 110px; }
+      .station { position: absolute; top: 200px; width: 391px; }
+      .station .thumb { width: 391px; height: 220px; border: 1px solid rgba(240,236,229,0.14); overflow: hidden; }
+      .station .thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+      .station .num { margin-top: 52px; color: var(--orange); }
+      .station .h3 { margin-top: 8px; }
+      .station .tagline { margin-top: 12px; color: var(--muted); font-size: 17px; }
+      #line7 { position: absolute; left: var(--px); top: 456px; width: 1708px; height: 2px; background: var(--orange); }
+      .node { position: absolute; top: 451px; width: 12px; height: 12px; background: var(--orange); }
+      #t7 { position: absolute; left: var(--px); top: 730px; font-size: 112px; }
+
+      /* ---------- frame 8: end card ---------- */
+      #t8 { position: absolute; left: var(--px); top: 270px; }
+      #t8 .rule { margin-bottom: 40px; }
+      #word { font-weight: 900; font-size: 290px; line-height: 0.88; letter-spacing: -0.04em; white-space: nowrap; }
+      #word .m { padding-bottom: 0.06em; }
+      #url { margin-top: 56px; font-size: 28px; color: var(--cream); }
+      #sub { margin-top: 14px; }
+      #fadeOut { background: var(--ink); }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-h3u0" id="root" data-composition-id="main" data-start="0" data-duration="38.5" data-width="1920" data-height="1080">
+      <!-- Frames 1–3 share one stage: the blockout, the film under it, then the film becoming the site -->
+      <div data-hf-id="hf-yczq" id="stageA" class="layer">
+        <div data-hf-id="hf-dvvu" id="wFilm">
+          <video data-hf-id="hf-aq9m" id="vAfter" class="clip" src="assets/film-after.mp4" muted playsinline data-start="4.5" data-duration="9.1" data-media-start="4.5" data-track-index="1"></video>
+          <div data-hf-id="hf-y553" id="rocketFade" class="layer">
+            <video data-hf-id="hf-5iwy" id="vRocket" class="clip" src="assets/site-rocket.mp4" muted playsinline data-start="13" data-duration="4.2" data-media-start="1.5" data-track-index="2"></video>
+          </div>
+        </div>
+        <div data-hf-id="hf-xulj" id="panelLine3" class="clip" data-start="11.5" data-duration="5.7" data-track-index="3"></div>
+
+        <div data-hf-id="hf-1mnh" id="wBefore" class="layer">
+          <video data-hf-id="hf-9fer" id="vBefore" class="clip" src="assets/film-before.mp4" muted playsinline data-start="0" data-duration="11.5" data-track-index="4"></video>
+        </div>
+
+        <!-- Frame 1: this is a blockout -->
+        <div data-hf-id="hf-1pc0" id="scrim1" class="layer clip" data-start="0" data-duration="4.5" data-track-index="5"></div>
+        <div data-hf-id="hf-y2kv" id="f1" class="layer clip" data-start="0" data-duration="4.5" data-track-index="6">
+          <div data-hf-id="hf-fe40" id="t1">
+            <div data-hf-id="hf-djvb" class="rule" id="rule1"></div>
+            <div data-hf-id="hf-srtl" class="h1 split" id="h1a">this is a blockout<span data-hf-id="hf-kaai" class="o">.</span></div>
+            <div data-hf-id="hf-ki18" class="label tokens">
+              <span data-hf-id="hf-acfz" id="tok1">Blender</span>
+              <span data-hf-id="hf-li0g" id="tok2">Grey boxes</span>
+              <span data-hf-id="hf-22t1" id="tok3">Grey boxes · a camera path</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Frame 2: the wipe -->
+        <div data-hf-id="hf-y1u0" id="seam" class="clip" data-start="4.5" data-duration="4.6" data-track-index="7"></div>
+        <div data-hf-id="hf-63fn" id="f2" class="layer clip" data-start="4.5" data-duration="7" data-track-index="8">
+          <div data-hf-id="hf-i0np" id="scrim2" class="layer"></div>
+          <div data-hf-id="hf-7moy" id="tagBefore" class="tag label">Before · Blender blockout</div>
+          <div data-hf-id="hf-6g9r" id="tagAfter" class="tag label"><span data-hf-id="hf-ro8a" class="o">After</span> · LTX-2.3 film</div>
+          <div data-hf-id="hf-q9ln" id="t2">
+            <div data-hf-id="hf-qvs1" class="lines">
+              <div data-hf-id="hf-leab" class="set" id="setA">
+                <div data-hf-id="hf-dd5w" class="h1 split">same camera.</div>
+                <div data-hf-id="hf-d9lb" class="h1 split">same timing.</div>
+              </div>
+              <div data-hf-id="hf-cqeg" class="set" id="setB">
+                <div data-hf-id="hf-lkjk" class="h1 split">rendered locally</div>
+                <div data-hf-id="hf-tzw1" class="h1 split">with <span data-hf-id="hf-7eo2" class="o">ltx-2.3.</span></div>
+              </div>
+            </div>
+            <div data-hf-id="hf-4unw" class="label" id="lab2">Blender depth › LTX-2.3 · no API keys</div>
+          </div>
+        </div>
+
+        <!-- Frame 3: then it scrolls -->
+        <div data-hf-id="hf-gp8k" id="f3" class="layer clip" data-start="11.5" data-duration="5.7" data-track-index="9">
+          <div data-hf-id="hf-qpvi" class="col" id="c3">
+            <div data-hf-id="hf-5jmu" class="label kicker" id="k3">01 — AI film</div>
+            <div data-hf-id="hf-9gw4" class="h2 split" id="h3a">then it scrolls.</div>
+            <div data-hf-id="hf-9az6" class="lead split" id="l3">the film is scrubbed by your scroll. mission hud included.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 4: made three ways (orange register) -->
+      <div data-hf-id="hf-dfah" id="f4" class="layer clip" data-start="16.5" data-duration="3.6" data-track-index="10">
+        <div data-hf-id="hf-ogta" id="f4in" class="layer">
+          <div data-hf-id="hf-eoj7" id="nums" class="label"><span data-hf-id="hf-pd0y" id="n1">01</span><span data-hf-id="hf-e2ag" id="n2">02</span><span data-hf-id="hf-16bu" id="n3">03</span></div>
+          <div data-hf-id="hf-3jrx" id="t4">
+            <div data-hf-id="hf-a86s" class="h1 split" id="h4">made three ways.</div>
+            <div data-hf-id="hf-q50q" class="cycle">
+              <span data-hf-id="hf-7j2p" id="cy1">ai film.</span>
+              <span data-hf-id="hf-1g3b" id="cy2">real art, drawn live.</span>
+              <span data-hf-id="hf-tyfw" id="cy3">live 3d.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 5: the Mona Lisa -->
+      <div data-hf-id="hf-iuqq" id="f5" class="layer">
+        <div data-hf-id="hf-2a8o" class="layer ground"></div>
+        <div data-hf-id="hf-rd5p" class="panel" id="p5">
+          <video data-hf-id="hf-0e1v" id="vMona" class="clip" src="assets/site-mona.mp4" muted playsinline data-start="19.5" data-duration="5.7" data-media-start="2" data-track-index="11"></video>
+        </div>
+        <div data-hf-id="hf-ki41" id="t5" class="clip" data-start="19.5" data-duration="5.7" data-track-index="12">
+          <div data-hf-id="hf-ym3k" class="col" id="c5">
+            <div data-hf-id="hf-9ze8" class="label kicker" id="k5">02 — Real art, drawn live</div>
+            <div data-hf-id="hf-mw2i" class="h2 split" id="h5">the mona lisa, built as you scroll.</div>
+            <div data-hf-id="hf-cs32" class="lead split" id="l5">guides › charcoal › graphite › umber › glaze. from the real painting.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 6: tissue to molecule -->
+      <div data-hf-id="hf-ewmp" id="f6" class="layer">
+        <div data-hf-id="hf-2ab4" class="layer ground"></div>
+        <div data-hf-id="hf-vb9q" class="panel" id="p6">
+          <video data-hf-id="hf-cihm" id="vBio" class="clip" src="assets/site-bio.mp4" muted playsinline data-start="24.5" data-duration="5.5" data-media-start="2.5" data-track-index="13"></video>
+        </div>
+        <div data-hf-id="hf-uxca" id="t6" class="clip" data-start="24.5" data-duration="5.5" data-track-index="14">
+          <div data-hf-id="hf-9hl7" class="col" id="c6">
+            <div data-hf-id="hf-j58g" class="label kicker" id="k6">03 — Live 3D</div>
+            <div data-hf-id="hf-9tzs" class="h2 split" id="h6">tissue to molecule, in one scroll.</div>
+            <div data-hf-id="hf-z0ez" class="stat" id="s6">
+              <div data-hf-id="hf-q3ex" class="v">100 µm › 0.3 nm</div>
+              <div data-hf-id="hf-n6vo" class="label">Six orders of magnitude · three.js</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Frame 7: the pipeline -->
+      <div data-hf-id="hf-d878" id="f7" class="layer clip" data-start="29.5" data-duration="5.9" data-track-index="15">
+        <div data-hf-id="hf-3tpy" id="f7in" class="layer ground">
+          <div data-hf-id="hf-jh8k" id="k7" class="label kicker">How it works</div>
+          <div data-hf-id="hf-1yfm" id="line7"></div>
+          <div data-hf-id="hf-9k3q" class="node" id="nd0" style="left:106px"></div>
+          <div data-hf-id="hf-doqa" class="node" id="nd1" style="left:545px"></div>
+          <div data-hf-id="hf-gnvy" class="node" id="nd2" style="left:984px"></div>
+          <div data-hf-id="hf-em9i" class="node" id="nd3" style="left:1423px"></div>
+          <div data-hf-id="hf-omf1" class="station" id="st0" style="left:106px">
+            <div data-hf-id="hf-mixc" class="thumb"><img data-hf-id="hf-sm5b" src="assets/thumb-blockout.jpg" alt=""></div>
+            <div data-hf-id="hf-5gup" class="label num">01</div>
+            <div data-hf-id="hf-h59w" class="h3">blender blockout</div>
+            <div data-hf-id="hf-r2q6" class="label tagline">Grey boxes · log-depth pass</div>
+          </div>
+          <div data-hf-id="hf-mdj5" class="station" id="st1" style="left:545px">
+            <div data-hf-id="hf-opbc" class="thumb"><img data-hf-id="hf-klki" src="assets/thumb-keyframe.jpg" alt=""></div>
+            <div data-hf-id="hf-6nrs" class="label num">02</div>
+            <div data-hf-id="hf-4t5a" class="h3">z-image keyframes</div>
+            <div data-hf-id="hf-6ptf" class="label tagline">8-step · depth controlnet</div>
+          </div>
+          <div data-hf-id="hf-vpe1" class="station" id="st2" style="left:984px">
+            <div data-hf-id="hf-nie9" class="thumb"><img data-hf-id="hf-u7ic" src="assets/thumb-film.jpg" alt=""></div>
+            <div data-hf-id="hf-69gr" class="label num">03</div>
+            <div data-hf-id="hf-t34h" class="h3">ltx-2.3 film</div>
+            <div data-hf-id="hf-mqw6" class="label tagline">22B · depth-guided IC-LoRA</div>
+          </div>
+          <div data-hf-id="hf-2pl7" class="station" id="st3" style="left:1423px">
+            <div data-hf-id="hf-nwpa" class="thumb"><img data-hf-id="hf-321r" src="assets/thumb-site.jpg" alt=""></div>
+            <div data-hf-id="hf-49xm" class="label num">04</div>
+            <div data-hf-id="hf-62p9" class="h3">scroll site</div>
+            <div data-hf-id="hf-xr8v" class="label tagline">Scrub · WebGL · three.js</div>
+          </div>
+          <div data-hf-id="hf-h6gv" id="t7" class="h1 split">one rtx 4090. <span data-hf-id="hf-vjxd" class="o">no api keys.</span></div>
+        </div>
+      </div>
+
+      <!-- Frame 8: end card -->
+      <div data-hf-id="hf-p5ie" id="f8" class="layer clip" data-start="35" data-duration="3.5" data-track-index="16">
+        <div data-hf-id="hf-f9oh" id="f8in" class="layer ground">
+          <div data-hf-id="hf-9sz5" id="t8">
+            <div data-hf-id="hf-i65q" class="rule" id="rule8"></div>
+            <div data-hf-id="hf-t632" id="word">scroll studio</div>
+            <div data-hf-id="hf-20oi" class="label" id="url">github.com/Okohedeki/scroll-studio</div>
+            <div data-hf-id="hf-rktq" class="lead" id="sub">scroll-driven sites · local ai film · no api keys</div>
+          </div>
+          <div data-hf-id="hf-a2bp" id="fadeOut" class="layer"></div>
+        </div>
+      </div>
+
+      <audio data-hf-id="hf-rb9t" id="music" src="assets/bgm/bed.wav" data-start="0" data-duration="38.5" data-track-index="20" data-volume="0.85"></audio>
+    </div>
+
+    <script>
+      // Split text into masked words (keeps inline colour spans), or letters for the wordmark.
+      function splitWords(el) {
+        const parts = [];
+        el.childNodes.forEach((n) => {
+          const cls = n.nodeType === 1 ? n.className : "";
+          n.textContent.split(/(\s+)/).forEach((tok) => {
+            if (!tok) return;
+            if (/^\s+$/.test(tok)) parts.push(" ");
+            else parts.push(`<span class="m"><span class="w ${cls}">${tok}</span></span>`);
+          });
+        });
+        el.innerHTML = parts.join("");
+        return el.querySelectorAll(".w");
+      }
+      function splitLetters(el) {
+        el.innerHTML = [...el.textContent]
+          .map((c) => (c === " " ? " " : `<span class="m"><span class="w">${c}</span></span>`))
+          .join("");
+        return el.querySelectorAll(".w");
+      }
+      const W = {};
+      document.querySelectorAll(".split").forEach((el, i) => { W[el.id || "s" + i] = splitWords(el); el.dataset.k = el.id || "s" + i; });
+      const words = (sel) => document.querySelector(sel).querySelectorAll(".w");
+      const letters = splitLetters(document.getElementById("word"));
+
+      const tl = gsap.timeline({ paused: true });
+      const E = "power3.out";
+      const rise = (targets, at, stagger = 0.08, dur = 0.7) =>
+        tl.fromTo(targets, { yPercent: 115 }, { yPercent: 0, duration: dur, ease: E, stagger }, at);
+      const wipeIn = (el, at, dur = 0.5) =>
+        tl.fromTo(el, { clipPath: "inset(0% 100% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: dur, ease: "power2.out" }, at);
+      const fadeUp = (el, at, dur = 0.6) =>
+        tl.fromTo(el, { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: dur, ease: E }, at);
+      const push = (outEl, inEl, at) => {
+        if (outEl) tl.fromTo(outEl, { x: 0 }, { x: -1920, duration: 0.6, ease: "power3.inOut" }, at);
+        tl.fromTo(inEl, { x: 1920 }, { x: 0, duration: 0.6, ease: "power3.inOut" }, at);
+      };
+      const showAt = (el, on, off) => {
+        tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.001 }, on);
+        if (off != null) tl.to(el, { opacity: 0, duration: 0.001 }, off);
+      };
+
+      // ---- Frame 1 (0–4.5): the blockout, dimmed, with the claim ----
+      tl.fromTo("#wBefore", { filter: "brightness(0.62)" }, { filter: "brightness(1)", duration: 0.5, ease: "power2.out" }, 4.5);
+      tl.fromTo("#rule1", { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.5, ease: E }, 0.6);
+      rise(words("#h1a"), 0.7, 0.12);
+      showAt("#tok1", 2.2, 2.7);
+      showAt("#tok2", 2.7, 3.2);
+      showAt("#tok3", 3.2);
+
+      // ---- Frame 2 (4.5–11.5): the seam wipes the blockout into the film ----
+      wipeIn("#tagBefore", 4.6);
+      tl.fromTo("#wBefore", { clipPath: "inset(0% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 100%)", duration: 3.4, ease: "power2.inOut", immediateRender: false }, 5.3);
+      tl.fromTo("#seam", { x: 0 }, { x: 1922, duration: 3.4, ease: "power2.inOut" }, 5.3);
+      tl.to("#seam", { opacity: 0, duration: 0.25 }, 8.6);
+      tl.to("#tagBefore", { opacity: 0, duration: 0.2 }, 8.35);
+      wipeIn("#tagAfter", 6.2);
+      tl.fromTo("#scrim2", { opacity: 0 }, { opacity: 1, duration: 0.6, ease: "power2.out" }, 6.4);
+      rise(document.querySelectorAll("#setA .w"), 6.7, 0.1);
+      tl.to(document.querySelectorAll("#setA .w"), { yPercent: -115, duration: 0.45, ease: "power3.in", stagger: 0.05 }, 8.8);
+      tl.fromTo("#setA", { autoAlpha: 1 }, { autoAlpha: 0, duration: 0.001 }, 9.45);
+      tl.fromTo("#setB", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.001, immediateRender: true }, 9.45);
+      rise(document.querySelectorAll("#setB .w"), 9.45, 0.07);
+      wipeIn("#lab2", 10.1, 0.6);
+
+      // ---- Frame 3 (11.5–16.5): the film becomes the site ----
+      tl.fromTo("#wFilm", { x: 0, y: 0, scale: 1, transformOrigin: "0% 0%" },
+                { x: 624, y: 205, scale: 1190 / 1920, duration: 0.9, ease: "power3.inOut" }, 12.5);
+      tl.fromTo("#rocketFade", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.inOut" }, 13.2);
+      tl.fromTo("#panelLine3", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 13.4);
+      wipeIn("#k3", 13.4);
+      rise(words("#h3a"), 13.6, 0.1);
+      fadeUp(words("#l3"), 14.9, 0.5);
+
+      // ---- Frame 4 (16.5–19.5): orange chapter card ----
+      push("#stageA", "#f4in", 16.5);
+      rise(words("#h4"), 17.0, 0.09);
+      showAt("#cy1", 17.5, 18.1);
+      showAt("#cy2", 18.1, 18.7);
+      showAt("#cy3", 18.7);
+      tl.fromTo("#n1", { opacity: 0.35 }, { opacity: 1, duration: 0.001 }, 17.5);
+      tl.fromTo("#n2", { opacity: 0.35 }, { opacity: 1, duration: 0.001 }, 18.1);
+      tl.fromTo("#n3", { opacity: 0.35 }, { opacity: 1, duration: 0.001 }, 18.7);
+
+      // ---- Frame 5 (19.5–24.5): Mona Lisa ----
+      tl.fromTo("#f5", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.001 }, 19.5);
+      tl.to("#f5", { autoAlpha: 0, duration: 0.001 }, 25.15);
+      push("#f4in", "#f5", 19.5);
+      wipeIn("#k5", 20.2);
+      rise(words("#h5"), 20.4, 0.08);
+      tl.fromTo(words("#l5"), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.45, ease: E, stagger: 0.16 }, 21.7);
+
+      // ---- Frame 6 (24.5–29.5): tissue to molecule ----
+      tl.fromTo("#f6", { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.001 }, 24.5);
+      tl.to("#f6", { autoAlpha: 0, duration: 0.001 }, 30.0);
+      push("#f5", "#f6", 24.5);
+      wipeIn("#k6", 25.2);
+      rise(words("#h6"), 25.4, 0.08);
+      fadeUp("#s6 .v", 26.8);
+      wipeIn("#s6 .label", 27.2, 0.6);
+
+      // ---- Frame 7 (29.5–35.0): the pipeline draws itself ----
+      tl.fromTo("#f7in", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.inOut" }, 29.5);
+      wipeIn("#k7", 29.7);
+      tl.fromTo("#line7", { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 3.0, ease: "none" }, 29.9);
+      [0, 1, 2, 3].forEach((i) => {
+        const at = 29.9 + (3.0 * (i * 439)) / 1708;
+        tl.fromTo(`#nd${i}`, { scale: 0 }, { scale: 1, duration: 0.3, ease: E }, at);
+        tl.fromTo(`#st${i} .thumb`, { clipPath: "inset(100% 0% 0% 0%)" }, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.6, ease: "power3.out" }, at);
+        fadeUp(`#st${i} .num`, at + 0.1, 0.5);
+        fadeUp(`#st${i} .h3`, at + 0.18, 0.5);
+        fadeUp(`#st${i} .tagline`, at + 0.26, 0.5);
+      });
+      rise(words("#t7"), 33.1, 0.09);
+
+      // ---- Frame 8 (35.0–38.5): wordmark lockup, then the only real exit ----
+      tl.fromTo("#f8in", { opacity: 0 }, { opacity: 1, duration: 0.5, ease: "power1.inOut" }, 35.0);
+      tl.fromTo("#rule8", { scaleX: 0, transformOrigin: "0% 50%" }, { scaleX: 1, duration: 0.5, ease: E }, 35.3);
+      tl.fromTo(letters, { yPercent: 105 }, { yPercent: 0, duration: 0.8, ease: E, stagger: 0.045 }, 35.4);
+      wipeIn("#url", 36.4, 0.6);
+      fadeUp("#sub", 36.7);
+      tl.fromTo("#fadeOut", { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "power1.in" }, 38.1);
+
+      window.__timelines["main"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
