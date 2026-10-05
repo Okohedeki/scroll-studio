@@ -44,6 +44,7 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     const obj = await make(lv.params || {}, kit);
     scene.add(obj.group);
     levels.push(obj);
+    ctx.progress(levels.length / cfg.levels.length * 0.9);
   }
   const dust = kit.points(900, () => new THREE.Vector3(kit.rnd(-60, 60), kit.rnd(-35, 35), kit.rnd(-60, 10)),
     new THREE.Color(cfg.dust || "#8fb8d8").getHex(), 0.1, 0.35);
@@ -76,6 +77,8 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     camera.updateProjectionMatrix();
   }
   resize();
+  renderer.compile(scene, camera);   // compile every shader now, not on the first scroll
+  composer.render();
 
   let z = 0, cx = 0, cy = 0;
   return {

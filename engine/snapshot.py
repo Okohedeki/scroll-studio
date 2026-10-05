@@ -18,7 +18,7 @@ from .record import CDP, _chrome, _free_port
 from .serve import serve
 
 
-def snapshot(dist: Path, shots: list[str], out_dir: Path, size=(1600, 900), wait: float = 4.0,
+def snapshot(dist: Path, shots: list[str], out_dir: Path, size=(1600, 900), wait: float = 2.0,
              log: Callable[[str], None] = print) -> list[Path]:
     """shots: 'scene:progress' (e.g. 'hero:0.4'), 'top', 'bottom', or 'y:<pixels>'."""
     import requests
@@ -54,6 +54,10 @@ def snapshot(dist: Path, shots: list[str], out_dir: Path, size=(1600, 900), wait
             cdp.call("Page.navigate", url=url)
             for _ in range(80):
                 if cdp.js("document.readyState") == "complete":
+                    break
+                time.sleep(0.25)
+            for _ in range(240):   # the loading screen holds scrolling until every scene's media is in
+                if cdp.js("document.documentElement.dataset.ssReady === '1' || !document.getElementById('ss-loader')"):
                     break
                 time.sleep(0.25)
             if shot == "bottom":

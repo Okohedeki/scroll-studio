@@ -59,6 +59,8 @@ class Scene {
   captions: { el: HTMLElement; from: number; to: number; state: string }[] = [];
   hud: Record<string, any> = {};
   scaleOverride: string | null = null;
+  loaded = 0;
+  onProgress: () => void = () => {};
 
   constructor(el: HTMLElement) {
     this.el = el;
@@ -89,12 +91,15 @@ class Scene {
       this.player = await factory(this.cfg, {
         section: this.el, visual: this.el.querySelector<HTMLElement>(".ss-visual")!, data: this.data,
         setScale: (label) => { this.scaleOverride = label; },
+        progress: (f) => { this.loaded = Math.max(this.loaded, Math.min(1, f)); this.onProgress(); },
       });
       this.el.classList.add("ss-ready");
     } catch (err) {
       console.error(`[scroll-studio] ${this.type} player failed`, err);
       this.el.classList.add("ss-failed");
     }
+    this.loaded = 1;
+    this.onProgress();
   }
 
   near(): boolean {
@@ -186,7 +191,6 @@ class Scene {
 
 // ---------------------------------------------------------------- boot
 const scenes = [...document.querySelectorAll<HTMLElement>("[data-scene]")].map((el) => new Scene(el));
-scenes.forEach((s) => s.mount());
 
 const nav = document.getElementById("ss-nav");
 function frame() {
@@ -199,13 +203,49 @@ requestAnimationFrame(frame);
 
 addEventListener("resize", () => scenes.forEach((s) => s.player?.resize?.()));
 
-// Smooth scrolling (off for reduced motion and for ?p= captures)
+// Smooth scrolling (off for reduced motion and for ?p= captures); started once loading finishes
 let lenis: Lenis | null = null;
-if (!reducedMotion && debugP === null) {
+function startSmoothScroll() {
+  if (reducedMotion || debugP !== null || lenis) return;
   lenis = new Lenis({ lerp: 0.1 });
   const raf = (time: number) => { lenis!.raf(time); requestAnimationFrame(raf); };
   requestAnimationFrame(raf);
 }
+
+// ---------------------------------------------------------------- loading screen
+// Every scene loads its media completely (videos downloaded, frames decoded, tiles drawn) before the page
+// unlocks, so scrolling never outruns the assets. Progress = average of the scenes plus fonts and images.
+const loaderEl = document.getElementById("ss-loader");
+const loaderCfg = (window as any).__ssLoader || { maxWait: 45, minTime: 0.6 };
+const extras: Promise<unknown>[] = [document.fonts?.ready ?? Promise.resolve()];
+document.querySelectorAll<HTMLElement>(".ss-cta__bg").forEach((el) => {
+  const m = el.style.backgroundImage.match(/url\(["']?([^"')]+)/);
+  if (m) extras.push(new Promise((r) => { const im = new Image(); im.onload = im.onerror = r; im.src = m[1]; }));
+});
+let extrasDone = 0;
+extras.forEach((p) => p.then(() => { extrasDone++; renderProgress(); }));
+function renderProgress() {
+  if (!loaderEl) return;
+  const total = scenes.length + extras.length;
+  const f = total ? (scenes.reduce((a, s) => a + s.loaded, 0) + extrasDone) / total : 1;
+  (loaderEl.querySelector(".ss-loader__bar i") as HTMLElement).style.transform = `scaleX(${f})`;
+  loaderEl.querySelector(".ss-loader__pct span")!.textContent = String(Math.round(f * 100));
+}
+scenes.forEach((s) => { s.onProgress = renderProgress; });
+const t0load = performance.now();
+const everything = Promise.all([...scenes.map((s) => s.mount()), ...extras]);
+const giveUp = new Promise((r) => setTimeout(r, loaderCfg.maxWait * 1000));
+Promise.race([everything, giveUp]).then(async () => {
+  const wait = loaderCfg.minTime * 1000 - (performance.now() - t0load);
+  if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+  renderProgress();
+  if (debugP === null) scrollTo(0, 0);
+  document.documentElement.classList.remove("ss-loading");
+  document.documentElement.dataset.ssReady = "1";   // snapshots and recordings wait for this
+  if (loaderEl) { loaderEl.classList.add("ss-leaving"); setTimeout(() => loaderEl.remove(), 900); }
+  startSmoothScroll();
+  if (debugP !== null) jump?.();
+});
 document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((a) => a.addEventListener("click", (e) => {
   const id = a.getAttribute("href")!;
   if (id.length < 2) return;
@@ -217,6 +257,7 @@ document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((a) => a.ad
 }));
 
 // ?p=0.5&s=<scene id>: jump so that scene sits at that progress (snapshots, recordings, UI preview)
+let jump: (() => void) | null = null;
 if (debugP !== null) {
   const target = debugP;
   const go = () => {
@@ -234,6 +275,7 @@ if (debugP !== null) {
       scrollTo(0, a + (b - a) * target);
     }
   };
+  jump = go;
   addEventListener("load", go);
   setTimeout(go, 300);
 }

@@ -49,7 +49,8 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   // ---------- SVG guides and contour strokes
   let guideEls: { el: SVGGeometryElement; label: SVGTextElement | null; i: number; n: number }[] = [];
   let strokes: { p: SVGPathElement; len: number; start: number; shown: number }[] = [], totalLen = 0;
-  if (cfg.guides) fetch(cfg.guides).then((r) => r.json()).then(({ guides }) => {
+  const waits: Promise<unknown>[] = [];
+  if (cfg.guides) waits.push(fetch(cfg.guides).then((r) => r.json()).then(({ guides }) => {
     guideEls = guides.map((g: any, i: number) => {
       let el: SVGGeometryElement;
       if (g.type === "line") {
@@ -76,8 +77,8 @@ const factory: PlayerFactory = async (cfg, ctx) => {
       }
       return { el, label, i, n: guides.length };
     });
-  });
-  if (cfg.lines) fetch(cfg.lines).then((r) => r.json()).then(({ strokes: s }) => {
+  }));
+  if (cfg.lines) waits.push(fetch(cfg.lines).then((r) => r.json()).then(({ strokes: s }) => {
     const frag = document.createDocumentFragment();
     let acc = 0;
     strokes = s.map((st: any) => {
@@ -92,7 +93,7 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     });
     totalLen = acc;
     linesG.appendChild(frag);
-  });
+  }));
 
   // ---------- WebGL layer compositing
   const gl = canvas.getContext("webgl2", { antialias: false, premultipliedAlpha: false, preserveDrawingBuffer: true });
@@ -101,7 +102,8 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   async function initGL() {
     if (!gl) throw new Error("no webgl2");
     const names = ["paper", "tone", "under", "final", "mask_tone", "mask_under", "mask_color"];
-    const imgs = await Promise.all(names.map((n) => loadImage(L[n])));
+    let n = 0;
+    const imgs = await Promise.all(names.map((nm) => loadImage(L[nm]).then((im) => { ctx.progress(++n / names.length * 0.9); return im; })));
     const sh = (type: number, src: string) => { const s = gl.createShader(type)!; gl.shaderSource(s, src); gl.compileShader(s);
       if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) || "shader"); return s; };
     const prog = gl.createProgram()!;
@@ -148,13 +150,14 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     gl.viewport(0, 0, canvas.width, canvas.height);
     lastKey = "";
   }
-  initGL().catch((e) => {
+  waits.push(initGL().catch((e) => {
     console.warn("[artwork] WebGL unavailable, showing the finished image", e);
     const img = document.createElement("img");
     img.src = L.final;
     Object.assign(img.style, { position: "absolute", inset: "0", width: "100%", height: "100%", objectFit: "cover" });
     easel.insertBefore(img, svg);
-  });
+  }));
+  await Promise.all(waits);
 
   return {
     resize,

@@ -14,8 +14,35 @@
 {{ css_vars | safe }}
 </style>
 <link rel="stylesheet" href="runtime/studio.css">
+{% if site.loader.enabled %}
+<style>
+  html.ss-loading, html.ss-loading body { overflow: hidden; height: 100%; }
+  .ss-loader { position: fixed; inset: 0; z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+    background: var(--bg); color: var(--ink); transition: opacity .7s cubic-bezier(.22,.8,.2,1), visibility .7s; }
+  html.ss-loading .ss-loader, .ss-loader.ss-leaving { display: flex; }
+  .ss-loader.ss-leaving { opacity: 0; visibility: hidden; }
+  .ss-loader__name { font-family: var(--font-display); font-weight: var(--display-weight); font-size: clamp(28px, 3.4vw, 46px); letter-spacing: -.02em; }
+  .ss-loader__bar { width: min(320px, 60vw); height: 2px; background: var(--line); position: relative; overflow: hidden; }
+  .ss-loader__bar i { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(0); transition: transform .3s; }
+  .ss-loader__pct { font-family: var(--font-mono); font-size: 12px; letter-spacing: .2em; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+</style>
+<script>
+  // Lock scrolling from the very first paint; the runtime unlocks it once every scene is ready.
+  // If the runtime can't run at all, open the page anyway after max_wait seconds.
+  document.documentElement.classList.add("ss-loading");
+  window.__ssLoader = { maxWait: {{ site.loader.max_wait }}, minTime: {{ site.loader.min_time }} };
+  setTimeout(function () { document.documentElement.classList.remove("ss-loading"); }, {{ (site.loader.max_wait + 5) * 1000 }});
+</script>
+{% endif %}
 </head>
 <body>
+{% if site.loader.enabled %}
+<div class="ss-loader" id="ss-loader" role="status" aria-live="polite">
+  <div class="ss-loader__name">{{ site.loader.label or site.name }}</div>
+  <div class="ss-loader__bar"><i></i></div>
+  <div class="ss-loader__pct"><span>0</span>%</div>
+</div>
+{% endif %}
 {% import "blocks.html.j2" as blocks %}
 {% import "scene.html.j2" as scene %}
 

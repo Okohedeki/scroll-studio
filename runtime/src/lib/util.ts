@@ -68,3 +68,28 @@ export function scaleAt(labels: string[], z: number): string {
   const t = clamp(z - i);
   return formatScale(Math.exp(Math.log(a.v) * (1 - t) + Math.log(b.v) * t), [a.unit, b.unit]);
 }
+
+/** Download a file completely, reporting progress, and return it as a blob URL (instant seeking afterwards). */
+export async function fetchBlobURL(url: string, onProgress: (f: number) => void, type?: string): Promise<string> {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`${r.status} ${url}`);
+  const total = Number(r.headers.get("content-length") || 0);
+  if (!r.body || !total) { const b = await r.blob(); onProgress(1); return URL.createObjectURL(b); }
+  const reader = r.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let got = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    got += value.length;
+    onProgress(Math.min(1, got / total));
+  }
+  return URL.createObjectURL(new Blob(chunks as BlobPart[], { type: type || r.headers.get("content-type") || "" }));
+}
+
+/** Load an image and decode it off the main thread so drawing it later never stalls. */
+export async function loadBitmap(src: string): Promise<ImageBitmap | HTMLImageElement> {
+  const im = await loadImage(src);
+  try { return await createImageBitmap(im); } catch { return im; }
+}

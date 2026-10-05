@@ -98,7 +98,11 @@ def record(dist: Path, out: Path, section: Optional[str] = None, size=(1920, 108
             if cdp.js("document.readyState") == "complete":
                 break
             time.sleep(0.25)
-        time.sleep(4)
+        for _ in range(240):   # the loading screen holds scrolling until every scene's media is in
+            if cdp.js("document.documentElement.dataset.ssReady === '1' || !document.getElementById('ss-loader')"):
+                break
+            time.sleep(0.25)
+        time.sleep(1.5)
         sel = json.dumps(f"#{section}") if section else "null"
         start, end = cdp.js(f"""(() => {{ const s = {sel} ? document.querySelector({sel}) : null;
             if (!s) return [0, document.documentElement.scrollHeight - innerHeight];

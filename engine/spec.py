@@ -329,6 +329,15 @@ class Nav(Model):
     cta: Optional[Link] = None
 
 
+class Loader(Model):
+    """Loading screen: scrolling stays locked until every scene's media has loaded (videos fully downloaded,
+    frames decoded, map tiles drawn), with a progress bar."""
+    enabled: bool = True
+    label: Optional[str] = Field(None, description="Text under the bar (defaults to the site name)")
+    max_wait: float = Field(45.0, description="Seconds after which the site opens anyway")
+    min_time: float = Field(0.6, description="Minimum seconds on screen, so it never flashes")
+
+
 class Footer(Model):
     left: Optional[str] = None
     right: Optional[str] = None
@@ -340,6 +349,7 @@ class Site(Model):
     lang: str = "en"
     theme: Theme = Field(default_factory=Theme)
     nav: Nav = Field(default_factory=Nav)
+    loader: Loader = Field(default_factory=Loader)
     sections: list[Section]
     footer: Footer = Field(default_factory=Footer)
 

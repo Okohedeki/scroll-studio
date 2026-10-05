@@ -76,15 +76,12 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_WRAP_T, gl!.CLAMP_TO_EDGE);
     return t;
   }
-  // first chapter first so the page shows something quickly, the rest in the background
-  for (let i = 0; i < cfg.chapters.length; i++) {
-    const ch = cfg.chapters[i];
-    const load = async () => {
-      const [im, dp] = await Promise.all([loadImage(ch.image), loadImage(ch.depth)]);
-      chapters[i] = { img: texture(im), dep: texture(dp), w: im.naturalWidth, h: im.naturalHeight, focus: ch.focus ?? 0.5, move: ch.move || cfg.move || "dolly" };
-    };
-    if (i === 0) await load(); else load();
-  }
+  let loaded = 0;
+  await Promise.all(cfg.chapters.map(async (ch: any, i: number) => {
+    const [im, dp] = await Promise.all([loadImage(ch.image), loadImage(ch.depth)]);
+    chapters[i] = { img: texture(im), dep: texture(dp), w: im.naturalWidth, h: im.naturalHeight, focus: ch.focus ?? 0.5, move: ch.move || cfg.move || "dolly" };
+    ctx.progress(++loaded / cfg.chapters.length);
+  }));
 
   let cw = 1, ch = 1;
   function resize() {

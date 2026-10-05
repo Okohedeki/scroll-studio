@@ -34,6 +34,8 @@ export interface PlayerContext {
   data: SectionData;
   /** a player can drive the scale HUD itself (e.g. zoom level -> label) */
   setScale?: (label: string) => void;
+  /** report loading progress 0-1; the factory's promise resolving means "fully ready" */
+  progress: (f: number) => void;
 }
 
 export interface Player {

@@ -64,6 +64,18 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     .maplibregl-ctrl-attrib { font-size: 10px; }`;
   ctx.visual.appendChild(style);
 
+  // ready = style loaded and the first view's tiles drawn (capped, so a slow tile server can't block the page)
+  // (polls tile state instead of waiting for "idle", which also needs painting and stalls in background tabs)
+  await new Promise<void>((resolve) => {
+    const t0 = performance.now();
+    const check = () => {
+      if ((map.isStyleLoaded() && map.areTilesLoaded()) || performance.now() - t0 > 12000) return resolve();
+      setTimeout(check, 150);
+    };
+    map.once("load", check);
+  });
+  ctx.progress(1);
+
   const slice = (id: string, coords: number[][], f: number) => {
     const acc = lengths[id], total = acc[acc.length - 1], target = total * clamp(f);
     let i = 1;

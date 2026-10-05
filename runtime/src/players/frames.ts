@@ -1,6 +1,12 @@
-/** sequence: pre-rendered frames drawn to a canvas (Apple-style product scrolls). */
+/** sequence: pre-rendered frames drawn to a canvas (Apple-style product scrolls).
+ *
+ * Every frame is downloaded and decoded to an ImageBitmap before the page unlocks, so drawing never stalls.
+ * Between two rendered frames the canvas cross-fades by the fractional scroll position, which turns a
+ * 96-frame render into continuous motion instead of visible steps. */
 import type { PlayerFactory } from "../lib/types";
-import { follow, isMobile } from "../lib/util";
+import { follow, isMobile, loadBitmap } from "../lib/util";
+
+type Frame = ImageBitmap | HTMLImageElement;
 
 const factory: PlayerFactory = async (cfg, ctx) => {
   const set = isMobile() && cfg.mobile ? cfg.mobile : cfg.desktop;
@@ -9,59 +15,63 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   ctx.visual.appendChild(canvas);
   ctx.visual.style.background = cfg.background || "transparent";
   const g = canvas.getContext("2d", { alpha: true })!;
-  const frames: (HTMLImageElement | null)[] = new Array(count).fill(null);
+  g.imageSmoothingQuality = "high";
   const url = (i: number) => `${set.base}${String(i + 1).padStart(4, "0")}.${set.ext}`;
+  const frames: (Frame | null)[] = new Array(count).fill(null);
 
-  // Load in passes: every 16th frame, then every 8th ... so scrubbing is usable almost immediately.
+  // Load everything, 8 at a time, in an order that fills the timeline evenly (every 16th, then 8th, ...).
   const order: number[] = [];
   for (let step = 16; step >= 1; step /= 2) for (let i = 0; i < count; i += step) if (!order.includes(i)) order.push(i);
-  let next = 0;
-  const pump = () => {
-    if (next >= order.length) return;
-    const i = order[next++];
-    const im = new Image();
-    im.decoding = "async";
-    im.onload = () => { frames[i] = im; dirty = true; pump(); };
-    im.onerror = () => pump();
-    im.src = url(i);
-  };
-  for (let k = 0; k < 6; k++) pump();
+  let done = 0;
+  await new Promise<void>((resolve) => {
+    let next = 0, active = 0;
+    const pump = () => {
+      while (active < 8 && next < order.length) {
+        const i = order[next++];
+        active++;
+        loadBitmap(url(i)).then((b) => { frames[i] = b; }).catch(() => {}).finally(() => {
+          active--; done++;
+          ctx.progress(done / count);
+          if (done === count) resolve(); else pump();
+        });
+      }
+    };
+    pump();
+  });
 
-  let dpr = 1, dirty = true, cur = 0, drawn = -1;
+  let dpr = 1;
   function resize() {
     dpr = Math.min(devicePixelRatio || 1, 2);
     const r = canvas.getBoundingClientRect();
     canvas.width = Math.round(r.width * dpr);
     canvas.height = Math.round(r.height * dpr);
-    dirty = true;
+    last = -1;
   }
+  let last = -1, cur = 0;
   resize();
-
-  function nearest(i: number): HTMLImageElement | null {
-    for (let d = 0; d < count; d++) {
-      if (frames[i - d]) return frames[i - d];
-      if (frames[i + d]) return frames[i + d];
-    }
-    return null;
+  const size = (f: Frame) => [(f as any).width || (f as HTMLImageElement).naturalWidth, (f as any).height || (f as HTMLImageElement).naturalHeight];
+  function draw(f: Frame, alpha: number) {
+    const cw = canvas.width, ch = canvas.height, [fw, fh] = size(f);
+    const fit = cfg.fit === "contain" ? Math.min : Math.max;
+    const k = fit(cw / fw, ch / fh), w = fw * k, h = fh * k;
+    const shift = isMobile() ? 0 : (cfg.shift || 0) * cw;
+    g.globalAlpha = alpha;
+    g.drawImage(f as CanvasImageSource, (cw - w) / 2 + shift, (ch - h) / 2, w, h);
   }
 
   return {
     resize,
     update(s) {
       cur += (s.p * (count - 1) - cur) * follow;
-      const i = Math.round(cur);
-      if (i === drawn && !dirty) return;
-      const im = nearest(i);
-      if (!im) return;
-      const cw = canvas.width, ch = canvas.height;
-      const fit = cfg.fit === "contain" ? Math.min : Math.max;
-      const k = fit(cw / im.naturalWidth, ch / im.naturalHeight);
-      const w = im.naturalWidth * k, h = im.naturalHeight * k;
-      g.clearRect(0, 0, cw, ch);
-      const shift = isMobile() ? 0 : (cfg.shift || 0) * cw;
-      g.drawImage(im, (cw - w) / 2 + shift, (ch - h) / 2, w, h);
-      drawn = frames[i] ? i : -1;
-      dirty = false;
+      if (Math.abs(cur - last) < 0.002) return;
+      last = cur;
+      const i = Math.min(count - 1, Math.floor(cur)), t = cur - i;
+      const a = frames[i], b = frames[Math.min(count - 1, i + 1)];
+      if (!a) return;
+      g.clearRect(0, 0, canvas.width, canvas.height);
+      draw(a, 1);
+      if (b && b !== a && t > 0.01) draw(b, t);
+      g.globalAlpha = 1;
     },
   };
 };
