@@ -12,7 +12,10 @@ site.yaml ──► studio build ──► dist/  (plain static files: host anyw
  Claude (MCP)      ├─ scene3d   live three.js zoom journeys built from presets or your glTF models
  CLI               ├─ sequence  Blender (Cycles) renders a 3D model: turntable, explode, reassemble
                    ├─ parallax  photos + estimated depth (Depth Anything V2) → 2.5D camera moves
-                   └─ type      kinetic typography: reveal, stack, swap, scale
+                   ├─ type      kinetic typography: reveal, stack, swap, scale
+                   ├─ vector    SVG or vectorised artwork drawing itself stroke by stroke
+                   ├─ chart     CSV data stories with D3: series, zooms, annotations per step
+                   └─ map       live vector maps (MapLibre): camera flights and routes per step
 ```
 
 ## Examples
@@ -28,6 +31,11 @@ Every example is a `site.yaml` in [`examples/`](examples/) and rebuilds with `st
 | [Northstar Observatory](examples/northstar-observatory/site.yaml) | Astronomy | `scene3d` | A fall from the whole galaxy to one living planet |
 | [Fischer & Vale](examples/fischer-vale/site.yaml) | Luxury goods | `sequence` | A glass chess set lifts off its board and settles back |
 | [FORM/26](examples/form-conference/site.yaml) | Events | `type` | A conference site told in kinetic type |
+| [Wunderkammer](examples/wunderkammer/site.yaml) | Museum | `vector` | Dürer's *Rhinoceros* (1515) re-cut line by line |
+| [Daybreak Institute](examples/daybreak-institute/site.yaml) | Research | `chart` | Real solar data (IRENA) told as a scrolling data story |
+| [Tidewater Lines](examples/tidewater-lines/site.yaml) | Logistics | `map` | Shanghai to Rotterdam, port by port, on a live map |
+| [Casa Alta](examples/casa-alta/site.yaml) | Hospitality | `parallax` | Generated photos of a cliff hotel in 2.5D (needs ComfyUI to build) |
+| [Hale & Rowe](examples/hale-rowe/site.yaml) | Architecture | `artwork` | A house drawn from construction lines to finished photo (needs ComfyUI) |
 
 ## Quick start
 
