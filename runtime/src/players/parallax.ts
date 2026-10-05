@@ -98,7 +98,8 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     return ca > ia ? [1, ca / ia] : [ia / ca, 1];
   };
 
-  const steps = ctx.data.steps.map((s, i) => (s.intro ? -1 : i)).filter((i) => i >= 0);
+  // chapter k plays across step cfg.chapters[k].step
+  const steps: number[] = cfg.chapters.map((c: any, k: number) => c.step ?? k);
   let px = 0, py = 0;
   const bind = (unit: number, t: WebGLTexture) => { gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t); };
 

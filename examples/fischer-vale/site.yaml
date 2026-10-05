@@ -23,8 +23,8 @@ sections:
       - { t: 0.0, yaw: -28, pitch: 50, explode: 0, zoom: 1.35 }
       - { t: 0.35, yaw: 15, pitch: 30, explode: 0.9, zoom: 1.2 }
       - { t: 0.6, yaw: 70, pitch: 20, explode: 1.0, zoom: 1.25 }
-      - { t: 0.85, yaw: 118, pitch: 15, explode: 0, zoom: 1.55 }
-      - { t: 1.0, yaw: 138, pitch: 11, explode: 0, zoom: 1.75 }
+      - { t: 0.85, yaw: 118, pitch: 16, explode: 0, zoom: 1.3 }
+      - { t: 1.0, yaw: 138, pitch: 13, explode: 0, zoom: 1.38 }
     steps:
       - intro: true
         kicker: Fischer & Vale

@@ -14,9 +14,13 @@ VERSION = 2
 
 def build(sec: ParallaxScene, ctx: BuildContext, theme: dict) -> dict:
     from ..backends import depth as depthmod
-    steps = [s for s in sec.steps if not s.intro]
-    if not steps or any(s.image is None for s in steps):
+    # every step with an image is a chapter (an intro step may have one); other non-intro steps are an error
+    if any(s.image is None for s in sec.steps if not s.intro):
         raise BuildError(f"parallax section '{sec.id}': every non-intro step needs an `image`")
+    idx = [i for i, s in enumerate(sec.steps) if s.image is not None]
+    if not idx:
+        raise BuildError(f"parallax section '{sec.id}' has no images")
+    steps = [sec.steps[i] for i in idx]
     chapters, credits = [], []
     for i, st in enumerate(steps):
         src = resolve_image(ctx.project, st.image, ctx.log)
@@ -42,7 +46,7 @@ def build(sec: ParallaxScene, ctx: BuildContext, theme: dict) -> dict:
         ctx.progress((i + 1) / len(steps), f"photo {i + 1}/{len(steps)}")
         d = np.asarray(Image.open(dep_out), np.float32) / 255
         focus = float(np.percentile(d, 40))
-        chapters.append({"image": ctx.url(img_out), "depth": ctx.url(dep_out), "focus": round(focus, 3),
+        chapters.append({"step": idx[i], "image": ctx.url(img_out), "depth": ctx.url(dep_out), "focus": round(focus, 3),
                          "move": sec.moves[i] if i < len(sec.moves) else sec.move})
         if credit(st.image):
             credits.append(credit(st.image))

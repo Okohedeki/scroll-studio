@@ -86,12 +86,28 @@ def build_site(project: Project, log: Callable[[str], None] = print,
             credits += entry["config"].get("credits", [])
         sections.append(entry)
 
+    # Block media given as project files are copied into the site; URLs pass through untouched.
+    media = dist / "assets" / "_media"
+    def publish(ref):
+        if not ref or ref.startswith(("http://", "https://", "/", "assets/", "../")):
+            return ref
+        src = project.path(ref)
+        if not src.exists():
+            raise BuildError(f"block media not found: {ref}")
+        media.mkdir(parents=True, exist_ok=True)
+        shutil.copy(src, media / src.name)
+        return f"assets/_media/{src.name}"
+    for e in sections:
+        if e["s"].type == "gallery":
+            e["s"] = e["s"].model_copy(update={"items": [it.model_copy(update={"image": publish(it.image), "video": publish(it.video)})
+                                                         for it in e["s"].items]})
+
     # CTA backgrounds can borrow a scene's final frame
     finals = {e["s"].id: (e["config"] or {}).get("end") for e in sections if e["scene"]}
     for e in sections:
         bg = getattr(e["s"], "background", None)
         if e["s"].type == "cta" and bg:
-            e["bg"] = finals.get(bg[6:]) if bg.startswith("scene:") else bg
+            e["bg"] = finals.get(bg[6:]) if bg.startswith("scene:") else publish(bg)
 
     rt = dist / "runtime"
     if rt.exists():
