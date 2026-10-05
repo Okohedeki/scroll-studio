@@ -129,6 +129,21 @@ def snapshot(name: str, at: list[str] = typer.Option(..., help="scene:progress, 
 
 
 @app.command()
+def poster(name: str, at: str = typer.Option(..., help="scene:progress (e.g. studio:0.88), top, bottom or y:<px>"),
+           out: Path = typer.Option(..., help="JPG to write"), width: int = 1280):
+    """A poster JPG of a built site at one scroll position (screenshot -> FFmpeg -> JPG)."""
+    import tempfile
+    from .project import ffmpeg
+    from .snapshot import snapshot as snap
+    root = resolve(name)
+    with tempfile.TemporaryDirectory() as tmp:
+        shot = snap(root / "dist", [at], Path(tmp), log=lambda m: None)[0]
+        out.parent.mkdir(parents=True, exist_ok=True)
+        ffmpeg("-i", shot, "-vf", f"scale={width}:-2:flags=lanczos", "-q:v", "3", out)
+    typer.echo(f"poster -> {out}")
+
+
+@app.command()
 def schema():
     """Print the site.yaml JSON Schema."""
     from .spec import Site

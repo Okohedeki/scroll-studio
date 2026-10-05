@@ -23,7 +23,8 @@ site.yaml ──► studio build ──► dist/  (plain static files: host anyw
 [![Lodestar Orbital preview](examples/showcase/previews/lodestar-orbital.jpg)](examples/showcase/previews/lodestar-orbital.mp4)
 
 *Lodestar Orbital: click for the scroll-through video.* Make previews for any project with
-`studio previews <project> ... --out <folder>` (a video and a poster each); they stay out of git.
+`studio previews <project> ... --out <folder>` (a video and a poster each), or a single poster at a chosen
+moment with `studio poster <project> --at <scene>:<progress> --out poster.jpg`. Previews stay out of git.
 
 The [showcase site](examples/showcase/site.yaml) puts every example on one page with its preview.
 
