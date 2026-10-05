@@ -88,12 +88,34 @@ def preview(name: str, port: int = 5173):
 
 @app.command()
 def record(name: str, section: Optional[str] = None, seconds: float = 12.0, out: Optional[Path] = None,
-           gif: bool = False, width: int = 1920, height: int = 1080, out_width: Optional[int] = None):
+           gif: bool = False, width: int = 1920, height: int = 1080, out_width: Optional[int] = None,
+           poster_at: float = typer.Option(0.5, help="Where in the recording (0-1) to take the poster JPG")):
     """Record a scroll-through to MP4 (for README, social posts, Reddit)."""
     from .record import record as rec
     root = resolve(name)
     out = out or root / "recordings" / f"{section or 'page'}.mp4"
-    rec(root / "dist", out, section=section, size=(width, height), seconds=seconds, gif=gif, out_width=out_width)
+    rec(root / "dist", out, section=section, size=(width, height), seconds=seconds, gif=gif, out_width=out_width, poster_at=poster_at)
+
+
+@app.command()
+def previews(names: list[str], out: Path = typer.Option(..., help="Folder for <project>.mp4 + <project>.jpg"),
+             seconds: float = 10.0, out_width: int = 1280, poster_at: float = 0.5, skip_existing: bool = True):
+    """Preview video + poster for each project's first scene (for galleries and READMEs)."""
+    from .project import Project
+    from .record import record as rec
+    from .spec import is_scene
+    out.mkdir(parents=True, exist_ok=True)
+    for name in names:
+        root = resolve(name)
+        dst = out / f"{root.name}.mp4"
+        if skip_existing and dst.exists():
+            typer.echo(f"skip {root.name} (exists)")
+            continue
+        site = Project(root).load()
+        first = next((s for s in site.sections if is_scene(s)), None)
+        # kinetic-type scenes are short; for type-led sites record the whole page instead
+        section = first.id if first is not None and first.type != "type" else None
+        rec(root / "dist", dst, section=section, seconds=seconds, out_width=out_width, poster_at=poster_at)
 
 
 @app.command()

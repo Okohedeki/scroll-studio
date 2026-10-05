@@ -1,5 +1,6 @@
 # The Scroll Studio showcase: every example site, built by the engine. Tiles link to each example's dist/,
 # so serve the examples/ folder (studio's examples server, or publish it as one static site).
+# Previews are made locally with:  studio previews examples/<name> ... --out examples/showcase/previews
 name: Scroll Studio
 description: An open-source engine for scroll-driven websites. Every site below was built from one YAML file.
 theme:
@@ -20,16 +21,16 @@ sections:
     kicker: Built with Scroll Studio
     title: Nine kinds of scroll, <em>one engine.</em>
     items:
-      - { title: Lodestar Orbital, kicker: "film · aerospace", href: ../lodestar-orbital/dist/index.html, image: inputs/lodestar-orbital.jpg, video: inputs/lodestar-orbital.mp4, body: "A rocket launch to orbit, generated locally with LTX-2.3." }
-      - { title: Fischer & Vale, kicker: "sequence · luxury goods", href: ../fischer-vale/dist/index.html, image: inputs/fischer-vale.jpg, video: inputs/fischer-vale.mp4, body: "A glass chess set rendered in Blender lifts off its board." }
-      - { title: Atelier Sfumato, kicker: "artwork · education", href: ../atelier-sfumato/dist/index.html, image: inputs/atelier-sfumato.jpg, video: inputs/atelier-sfumato.mp4, body: "The Mona Lisa, drawn and painted in five lessons." }
-      - { title: Cellwright Bio, kicker: "scene3d · biotech", href: ../cellwright-bio/dist/index.html, image: inputs/cellwright-bio.jpg, video: inputs/cellwright-bio.mp4, body: "From tissue to a molecule docking on DNA, live in three.js." }
-      - { title: Northstar Observatory, kicker: "scene3d · astronomy", href: ../northstar-observatory/dist/index.html, image: inputs/northstar-observatory.jpg, video: inputs/northstar-observatory.mp4, body: "A fall from the whole galaxy to one living planet." }
-      - { title: Tidewater Lines, kicker: "map · logistics", href: ../tidewater-lines/dist/index.html, image: inputs/tidewater-lines.jpg, video: inputs/tidewater-lines.mp4, body: "Shanghai to Rotterdam, port by port, on a live map." }
-      - { title: Daybreak Institute, kicker: "chart · research", href: ../daybreak-institute/dist/index.html, image: inputs/daybreak-institute.jpg, video: inputs/daybreak-institute.mp4, body: "Fifteen years of real solar data told as a story." }
-      - { title: Wunderkammer, kicker: "vector · museum", href: ../wunderkammer/dist/index.html, image: inputs/wunderkammer.jpg, video: inputs/wunderkammer.mp4, body: "Dürer's Rhinoceros, re-cut line by line." }
-      - { title: Meridian, kicker: "film · private aviation", href: ../meridian/dist/index.html, image: inputs/meridian.jpg, video: inputs/meridian.mp4, body: "A jet descends through cloud over London." }
-      - { title: FORM/26, kicker: "type · events", href: ../form-conference/dist/index.html, image: inputs/form-conference.jpg, video: inputs/form-conference.mp4, body: "A conference site told in kinetic type." }
+      - { title: Lodestar Orbital, kicker: "film · aerospace", href: ../lodestar-orbital/dist/index.html, image: previews/lodestar-orbital.jpg, video: previews/lodestar-orbital.mp4, body: "A rocket launch to orbit, generated locally with LTX-2.3." }
+      - { title: Fischer & Vale, kicker: "sequence · luxury goods", href: ../fischer-vale/dist/index.html, image: previews/fischer-vale.jpg, video: previews/fischer-vale.mp4, body: "A glass chess set rendered in Blender lifts off its board." }
+      - { title: Atelier Sfumato, kicker: "artwork · education", href: ../atelier-sfumato/dist/index.html, image: previews/atelier-sfumato.jpg, video: previews/atelier-sfumato.mp4, body: "The Mona Lisa, drawn and painted in five lessons." }
+      - { title: Cellwright Bio, kicker: "scene3d · biotech", href: ../cellwright-bio/dist/index.html, image: previews/cellwright-bio.jpg, video: previews/cellwright-bio.mp4, body: "From tissue to a molecule docking on DNA, live in three.js." }
+      - { title: Northstar Observatory, kicker: "scene3d · astronomy", href: ../northstar-observatory/dist/index.html, image: previews/northstar-observatory.jpg, video: previews/northstar-observatory.mp4, body: "A fall from the whole galaxy to one living planet." }
+      - { title: Tidewater Lines, kicker: "map · logistics", href: ../tidewater-lines/dist/index.html, image: previews/tidewater-lines.jpg, video: previews/tidewater-lines.mp4, body: "Shanghai to Rotterdam, port by port, on a live map." }
+      - { title: Daybreak Institute, kicker: "chart · research", href: ../daybreak-institute/dist/index.html, image: previews/daybreak-institute.jpg, video: previews/daybreak-institute.mp4, body: "Fifteen years of real solar data told as a story." }
+      - { title: Wunderkammer, kicker: "vector · museum", href: ../wunderkammer/dist/index.html, image: previews/wunderkammer.jpg, video: previews/wunderkammer.mp4, body: "Dürer's Rhinoceros, re-cut line by line." }
+      - { title: Meridian, kicker: "film · private aviation", href: ../meridian/dist/index.html, image: previews/meridian.jpg, video: previews/meridian.mp4, body: "A jet descends through cloud over London." }
+      - { title: FORM/26, kicker: "type · events", href: ../form-conference/dist/index.html, image: previews/form-conference.jpg, video: previews/form-conference.mp4, body: "A conference site told in kinetic type." }
   - type: features
     kicker: How it works
     title: One spec in, <em>one static site out.</em>

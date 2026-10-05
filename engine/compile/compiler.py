@@ -92,8 +92,9 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         if not ref or ref.startswith(("http://", "https://", "/", "assets/", "../")):
             return ref
         src = project.path(ref)
-        if not src.exists():
-            raise BuildError(f"block media not found: {ref}")
+        if not src.exists():   # e.g. a gallery preview not generated on this machine: the tile falls back to its image
+            log(f"  note: {ref} not found, skipped")
+            return None
         media.mkdir(parents=True, exist_ok=True)
         shutil.copy(src, media / src.name)
         return f"assets/_media/{src.name}"

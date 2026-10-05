@@ -20,15 +20,12 @@ site.yaml ──► studio build ──► dist/  (plain static files: host anyw
 
 ## Examples
 
-<table>
-<tr><td width="50%"><a href="examples/showcase/inputs/lodestar-orbital.mp4"><img src="examples/showcase/inputs/lodestar-orbital.jpg" alt="Lodestar Orbital"></a><br><b>Lodestar Orbital</b></td><td width="50%"><a href="examples/showcase/inputs/fischer-vale.mp4"><img src="examples/showcase/inputs/fischer-vale.jpg" alt="Fischer & Vale"></a><br><b>Fischer & Vale</b></td></tr>
-<tr><td width="50%"><a href="examples/showcase/inputs/atelier-sfumato.mp4"><img src="examples/showcase/inputs/atelier-sfumato.jpg" alt="Atelier Sfumato"></a><br><b>Atelier Sfumato</b></td><td width="50%"><a href="examples/showcase/inputs/cellwright-bio.mp4"><img src="examples/showcase/inputs/cellwright-bio.jpg" alt="Cellwright Bio"></a><br><b>Cellwright Bio</b></td></tr>
-<tr><td width="50%"><a href="examples/showcase/inputs/northstar-observatory.mp4"><img src="examples/showcase/inputs/northstar-observatory.jpg" alt="Northstar Observatory"></a><br><b>Northstar Observatory</b></td><td width="50%"><a href="examples/showcase/inputs/tidewater-lines.mp4"><img src="examples/showcase/inputs/tidewater-lines.jpg" alt="Tidewater Lines"></a><br><b>Tidewater Lines</b></td></tr>
-<tr><td width="50%"><a href="examples/showcase/inputs/daybreak-institute.mp4"><img src="examples/showcase/inputs/daybreak-institute.jpg" alt="Daybreak Institute"></a><br><b>Daybreak Institute</b></td><td width="50%"><a href="examples/showcase/inputs/wunderkammer.mp4"><img src="examples/showcase/inputs/wunderkammer.jpg" alt="Wunderkammer"></a><br><b>Wunderkammer</b></td></tr>
-<tr><td width="50%"><a href="examples/showcase/inputs/meridian.mp4"><img src="examples/showcase/inputs/meridian.jpg" alt="Meridian"></a><br><b>Meridian</b></td><td width="50%"><a href="examples/showcase/inputs/form-conference.mp4"><img src="examples/showcase/inputs/form-conference.jpg" alt="FORM/26"></a><br><b>FORM/26</b></td></tr>
-</table>
+[![Lodestar Orbital preview](examples/showcase/previews/lodestar-orbital.jpg)](examples/showcase/previews/lodestar-orbital.mp4)
 
-Click a preview for its scroll-through video. The [showcase site](examples/showcase/site.yaml) puts them all on one page.
+*Lodestar Orbital: click for the scroll-through video.* Make previews for any project with
+`studio previews <project> ... --out <folder>` (a video and a poster each); they stay out of git.
+
+The [showcase site](examples/showcase/site.yaml) puts every example on one page with its preview.
 
 Every example is a `site.yaml` in [`examples/`](examples/) and rebuilds with `studio build examples/<name>`.
 

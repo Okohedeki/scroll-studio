@@ -66,7 +66,7 @@ class CDP:
 
 
 def record(dist: Path, out: Path, section: Optional[str] = None, size=(1920, 1080), seconds: float = 12.0,
-           fps: int = 24, settle: float = 0.2, gif: bool = False, out_width: Optional[int] = None,
+           fps: int = 24, settle: float = 0.2, gif: bool = False, out_width: Optional[int] = None, poster_at: float = 0.5,
            log: Callable[[str], None] = print, progress: Callable[[float, str], None] = lambda f, m="": None) -> Path:
     import requests
     W, H = size
@@ -127,7 +127,9 @@ def record(dist: Path, out: Path, section: Optional[str] = None, size=(1920, 108
     if gif:
         ffmpeg("-framerate", str(fps), "-i", src, "-vf", "fps=10,scale=720:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128:"
                "stats_mode=diff[p];[b][p]paletteuse=dither=sierra2_4a:diff_mode=rectangle", out.with_suffix(".gif"))
-    shutil.copy(frames_dir / f"{n // 2:05d}.jpg", out.with_name(out.stem + "-mid.jpg"))
+    # poster: one frame of the recording, at the recording's own width
+    pf = frames_dir / f"{min(n - 1, max(0, int(poster_at * (n - 1)))):05d}.jpg"
+    ffmpeg("-i", pf, "-vf", f"scale={ow}:-2:flags=lanczos", "-q:v", "3", out.with_suffix(".jpg"))
     shutil.rmtree(frames_dir, ignore_errors=True)
     shutil.rmtree(prof, ignore_errors=True)
     log(f"-> {out.with_suffix('.mp4')}")

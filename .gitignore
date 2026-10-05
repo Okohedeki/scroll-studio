@@ -21,3 +21,8 @@ ui/dist/
 .env*
 *.pem
 *.key
+
+# Preview videos and posters are made locally with `studio previews`; one is kept as an example
+examples/showcase/previews/*
+!examples/showcase/previews/lodestar-orbital.mp4
+!examples/showcase/previews/lodestar-orbital.jpg
