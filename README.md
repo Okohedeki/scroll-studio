@@ -20,11 +20,14 @@ site.yaml ──► studio build ──► dist/  (plain static files: host anyw
 
 ## Examples
 
+**Live samples: https://okohedeki.github.io/scroll-studio-showcase/**
+
 [![Lodestar Orbital preview](examples/showcase/previews/lodestar-orbital.jpg)](examples/showcase/previews/lodestar-orbital.mp4)
 
 *Lodestar Orbital: click for the scroll-through video.* Make previews for any project with
 `studio previews <project> ... --out <folder>` (a video and a poster each), or a single poster at a chosen
-moment with `studio poster <project> --at <scene>:<progress> --out poster.jpg`. Previews stay out of git.
+moment with `studio poster <project> --at <scene>:<progress> --out poster.jpg`. Previews stay out of git. To put several built sites online together (GitHub Pages or any static host):
+`studio publish <project> ... --out <folder> --home showcase`.
 
 The [showcase site](examples/showcase/site.yaml) puts every example on one page with its preview.
 

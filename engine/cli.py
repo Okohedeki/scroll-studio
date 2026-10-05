@@ -144,6 +144,41 @@ def poster(name: str, at: str = typer.Option(..., help="scene:progress (e.g. stu
 
 
 @app.command()
+def publish(names: list[str], out: Path = typer.Option(..., help="Folder to deploy (e.g. a GitHub Pages repo)"),
+            home: Optional[str] = typer.Option(None, help="Project whose page becomes the folder's index.html")):
+    """Assemble built projects into one static folder: out/<project>/... ready for GitHub Pages or any host.
+
+    Cross-links between projects written as ../<project>/dist/ (how the showcase gallery links locally) are
+    rewritten to ../<project>/. A .nojekyll file keeps GitHub Pages from dropping folders that start with _.
+    """
+    import re as _re
+    roots = [resolve(n) for n in names]
+    for r in roots:
+        if not (r / "dist" / "index.html").exists():
+            raise typer.BadParameter(f"{r.name} is not built: run studio build first")
+    out.mkdir(parents=True, exist_ok=True)
+    pattern = _re.compile(r"\.\./(" + "|".join(_re.escape(r.name) for r in roots) + r")/dist/")
+    for r in roots:
+        dst = out / r.name
+        if dst.exists():
+            shutil.rmtree(dst)
+        shutil.copytree(r / "dist", dst)
+        for html in dst.rglob("*.html"):
+            text = html.read_text(encoding="utf-8")
+            new = pattern.sub(lambda m: f"../{m.group(1)}/", text)
+            if new != text:
+                html.write_text(new, encoding="utf-8")
+        typer.echo(f"  {r.name}/")
+    (out / ".nojekyll").write_text("")
+    if home:
+        (out / "index.html").write_text(
+            f'<!doctype html><meta charset="utf-8"><title>Scroll Studio</title>'
+            f'<meta http-equiv="refresh" content="0; url={home}/"><link rel="canonical" href="{home}/">'
+            f'<a href="{home}/">Scroll Studio showcase</a>', encoding="utf-8")
+    typer.echo(f"published {len(roots)} site(s) to {out}")
+
+
+@app.command()
 def schema():
     """Print the site.yaml JSON Schema."""
     from .spec import Site
