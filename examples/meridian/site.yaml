@@ -1,0 +1,192 @@
+# Meridian: private aviation. An AI film of a jet descending over London, scrubbed by scroll.
+# `video:` uses the film already rendered for this example; delete it to regenerate from `shot:`.
+name: Meridian
+description: Private aviation into the centre of your day.
+theme:
+  preset: brass
+nav:
+  cta:
+    label: Request a flight
+    href: '#request'
+sections:
+- id: descent
+  type: film
+  layout: overlay
+  length: 4.2
+  cue: Scroll to descend
+  video: inputs/film.mp4
+  hud:
+    kind: telemetry
+    fields:
+    - label: Altitude
+      unit: ft
+      from: 41000
+      to: 0
+      curve: 0.9
+      grouping: true
+    - label: Ground speed
+      unit: kt
+      from: 480
+      to: 140
+      curve: 1.0
+      decimals: 0
+    events:
+    - at: 0.05
+      label: Top of descent
+    - at: 0.4
+      label: Through the cloud
+    - at: 0.7
+      label: Thames in sight
+    - at: 0.92
+      label: Westminster
+  steps:
+  - kicker: Meridian Private
+    title: Leave the ordinary <em>at forty thousand feet.</em>
+    at:
+    - 0.02
+    - 0.24
+  - kicker: The descent
+    title: The city rises <em>to meet you.</em>
+    at:
+    - 0.36
+    - 0.6
+  - kicker: London
+    title: Wheels down <em>before the clock strikes.</em>
+    at:
+    - 0.74
+    - 0.97
+  shot:
+    blockout:
+      preset: jet-city
+    duration: 10
+    fps: 24
+    preview_res:
+    - 1280
+    - 720
+    keyframes:
+      model: z_image_turbo_bf16.safetensors
+      text_encoder: qwen_3_4b_fp8_mixed.safetensors
+      vae: ae.safetensors
+      controlnet: Z-Image-Turbo-Fun-Controlnet-Union-2.1-2602-8steps.safetensors
+      control_strength: 0.8
+      steps: 8
+      res:
+      - 1536
+      - 864
+      seed: 7
+      frames:
+      - name: first
+        t: 0
+        strength: 1.0
+        prompt: 'Photograph from inside the cabin of a luxury private jet, looking straight at a single oval aircraft window
+          in the centre of the frame. The cabin wall is upholstered in cream quilted leather with fine contrast stitching,
+          framed by brushed nickel trim and walnut veneer; a soft warm reading light grazes the leather. Through the window:
+          bright open sky at golden hour, a few sunlit cumulus clouds and, far below, the hazy edge of a city. Shallow depth
+          of field, the window frame sharp, cabin surfaces with rich texture and gentle falloff. Shot on a full-frame cinema
+          camera with a 28mm lens, anamorphic flare, photoreal, highly detailed.'
+      - name: mid
+        t: 6.0
+        strength: 0.7
+        control_strength: 0.5
+        depth_blur: 3
+        prompt: Aerial photograph from a helicopter at golden hour, looking down across central London toward the Houses of
+          Parliament and the Elizabeth Tower (Big Ben) in the middle distance. The River Thames curves across the foreground,
+          crossed by a stone bridge. Dense Victorian terraces with slate roofs and chimneys, Portland stone offices, glass
+          towers, leafy squares and tree-lined streets with small cars, long warm shadows and soft haze toward the horizon.
+          Real city, irregular building sizes and rooflines, photoreal, crisp detail, natural colour, shot on a full-frame
+          cinema camera.
+      - name: last
+        t: end
+        strength: 0.9
+        prompt: Aerial photograph of the Elizabeth Tower (Big Ben) at golden hour, the tower centred in frame and seen from
+          slightly above its clock faces. Ornate Gothic Revival stonework in honey-coloured limestone, gilded clock dial with
+          black Roman numerals glowing warmly, green-and-gold spire detailing, the long Gothic facade of the Houses of Parliament
+          beside it. Below and behind, dense London rooftops in slate and Portland stone, the River Thames catching the low
+          sun, soft haze over the skyline, a deepening blue sky with a few warm clouds. Shot on a full-frame cinema camera
+          with a 28mm lens, photoreal, crisp architectural detail, natural colour.
+    ltx:
+      checkpoint: ltx-2.3-22b-distilled-fp8.safetensors
+      text_encoder: gemma_3_12B_it_fp8_scaled.safetensors
+      control_lora: ltx-2.3-22b-ic-lora-union-control-ref0.5.safetensors
+      upscaler: ltx-2.3-spatial-upscaler-x2-1.1.safetensors
+      res:
+      - 1024
+      - 576
+      upscale: false
+      seed: 42
+      control_strength: 1.0
+      guide_strength: 0.6
+      prompt: 'A continuous cinematic aerial shot at golden hour. The camera begins inside the cabin of a luxury private jet,
+        gliding slowly toward an oval aircraft window framed by cream leather panelling, brushed nickel trim and soft warm
+        cabin lighting, with fine stitching visible on the leather. The camera passes smoothly through the window into open
+        sky, drifting past the polished white wing with small rivets and a navigation light, then tilts down through thin
+        sunlit cumulus clouds whose edges glow gold. Far below, London spreads out in dense detail: Portland stone terraces,
+        slate rooftops, green squares, glass towers catching the low sun, and the River Thames glinting as it curves through
+        the city. The camera descends in a long, steady arc toward the Houses of Parliament, its Gothic spires and ornate
+        stonework sharply detailed, and settles on the Elizabeth Tower, Big Ben, centred in frame, its gilded clock faces
+        glowing warmly against a deepening blue sky as streetlights begin to switch on. Photoreal, anamorphic 35mm film look,
+        gentle atmospheric haze, rich natural colour, smooth gimbal motion.'
+      negative_prompt: low poly, untextured grey shapes, flat shading, blurry, smeared detail, cartoon, CGI, video game, text,
+        watermark, people, cuts, flicker, warped buildings
+      guide_blur: 4
+- type: intro
+  id: journey
+  nav_label: Journey
+  kicker: Door to door
+  title: Twenty minutes ago you were <em>above the clouds.</em>
+  body: Meridian flies you into the centre of your day, not the edge of it. Private terminals, no queues, and a car waiting
+    on the apron. You set the time; the aircraft follows.
+  button:
+    label: Plan a journey
+    href: '#request'
+- type: features
+  items:
+  - tag: '01'
+    title: Fifteen-minute boarding
+    body: Arrive at the private terminal, walk straight to the aircraft and go wheels up while your coffee is still hot.
+  - tag: '02'
+    title: Airfields others skip
+    body: Land closer to where you are going, at city airfields that commercial airlines cannot use.
+  - tag: '03'
+    title: One call, whole trip
+    body: Your concierge handles the cars, the catering and the connections, so the journey takes care of itself.
+- type: stats
+  items:
+  - value: '1200'
+    unit: +
+    label: Airfields worldwide
+  - value: '15'
+    unit: min
+    label: Kerb to cabin
+  - value: '24'
+    unit: /7
+    label: Concierge, every time zone
+  - value: '38'
+    unit: jets
+    label: On call across Europe
+- type: features
+  id: fleet
+  nav_label: Fleet
+  kicker: The fleet
+  title: Choose your <em>altitude.</em>
+  items:
+  - tag: Light jet
+    title: Vesper
+    body: Seats 6 · Range 2,000 km · Cruise 780 km/h. Ideal for city hops.
+  - tag: Midsize
+    title: Aurelia
+    body: Seats 9 · Range 5,600 km · Cruise 850 km/h. Ideal across Europe.
+  - tag: Ultra-long range
+    title: Meridian One
+    body: Seats 14 · Range 13,000 km · Cruise 900 km/h. London to anywhere.
+- type: cta
+  id: request
+  kicker: Membership
+  title: Your city. <em>Your hour.</em>
+  button:
+    label: Request a flight
+    href: '#'
+  background: scene:descent
+footer:
+  left: © Meridian. A concept site.
+  right: Film generated locally with LTX-2.3

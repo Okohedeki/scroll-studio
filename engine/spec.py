@@ -53,7 +53,7 @@ class Hud(Model):
     """Overlay instruments tied to scroll progress."""
     kind: Literal["telemetry", "scale", "progress", "legend", "none"] = "none"
     fields: list[dict[str, Any]] = Field(default_factory=list,
-        description="telemetry: [{label, unit, to, curve, decimals}] values grow from 0 to `to` with progress^curve")
+        description="telemetry: [{label, unit, from, to, curve, decimals, grouping}] values go from `from` (default 0) to `to` with progress^curve")
     events: list[dict[str, Any]] = Field(default_factory=list, description="telemetry: [{at, label}] lit when progress >= at")
     clock: Optional[dict[str, Any]] = Field(None, description="telemetry: {prefix, start, end, zero} seconds; zero = progress where T=0")
     scales: list[str] = Field(default_factory=list, description="scale: one label per level, e.g. ['100 µm','10 µm']")

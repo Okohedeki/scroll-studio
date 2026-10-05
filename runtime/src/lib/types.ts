@@ -5,7 +5,7 @@ export interface Step {
 
 export interface Hud {
   kind: "telemetry" | "scale" | "progress" | "legend" | "none";
-  fields: { label: string; unit?: string; to: number; curve?: number; decimals?: number }[];
+  fields: { label: string; unit?: string; from?: number; to: number; curve?: number; decimals?: number; grouping?: boolean }[];
   events: { at: number; label: string }[];
   clock?: { prefix?: string; start: number; end: number; zero?: number } | null;
   scales: string[];

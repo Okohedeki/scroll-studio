@@ -26,7 +26,7 @@ from ..inputs import credit, image_key, resolve_image
 from ..project import BuildContext, file_key
 from ..spec import ArtworkScene
 
-VERSION = 3   # bump when the layer recipes change, so cached builds refresh
+VERSION = 5   # bump when the layer recipes change, so cached builds refresh
 
 
 def _hex(h: str) -> np.ndarray:
@@ -57,8 +57,9 @@ def saliency(img_bgr: np.ndarray) -> np.ndarray:
     return cv2.resize(sal * (0.6 + 0.4 * centre), (w, h), interpolation=cv2.INTER_CUBIC)
 
 
-def detect_focus(img_bgr: np.ndarray, log) -> tuple[list[tuple[float, float, float, float]], np.ndarray]:
-    """Return focus regions [(cx, cy, rx, ry)] in 0-1 coords (most important first) and the saliency map."""
+def detect_focus(img_bgr: np.ndarray, log) -> tuple[list[tuple[float, float, float, float]], np.ndarray, int]:
+    """Return focus regions [(cx, cy, rx, ry)] in 0-1 coords (most important first), the saliency map and
+    how many of the regions are faces (they come first)."""
     h, w = img_bgr.shape[:2]
     sal = saliency(img_bgr)
     regions: list[tuple[float, float, float, float]] = []
@@ -67,11 +68,12 @@ def detect_focus(img_bgr: np.ndarray, log) -> tuple[list[tuple[float, float, flo
     faces = cascade.detectMultiScale(gray, scaleFactor=1.08, minNeighbors=6, minSize=(max(24, w // 20), max(24, w // 20)))
     for (x, y, fw, fh) in sorted(faces, key=lambda f: -f[2] * f[3])[:3]:
         regions.append(((x + fw / 2) / w, (y + fh / 2) / h, fw / w * 0.75, fh / h * 0.9))
+    n_faces = len(regions)
     if regions:
         log(f"  focus: {len(regions)} face(s)")
     # saliency peaks fill in (or provide) the rest
     s = sal.copy()
-    for _ in range(3 - min(len(regions), 2)):
+    for _ in range(0 if regions else 2):   # with faces, the saliency field below orders the rest
         y, x = np.unravel_index(np.argmax(s), s.shape)
         if s[y, x] < 0.25:
             break
@@ -82,7 +84,7 @@ def detect_focus(img_bgr: np.ndarray, log) -> tuple[list[tuple[float, float, flo
     if not regions:
         regions.append((0.5, 0.45, 0.15, 0.15))
     log("  focus: " + ", ".join(f"({r[0]:.2f}, {r[1]:.2f})" for r in regions))
-    return regions, sal
+    return regions, sal, n_faces
 
 
 def subject_box(sal: np.ndarray) -> tuple[float, float, float, float]:
@@ -185,8 +187,7 @@ def build_lines(img_bgr, h, w, regions, sal, density=1.0, seed=1503):
         gray = cv2.bilateralFilter(gray, 9, 50, 9)
     gray = cv2.GaussianBlur(gray, (0, 0), 1.2)
     gray = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(6, 6)).apply(gray)
-    med = float(np.median(gray))
-    edges = cv2.Canny(gray, max(10, 0.45 * med), max(40, 1.2 * med))
+    edges = cv2.Canny(gray, 30, 80)   # CLAHE above normalises contrast, so fixed thresholds hold across images
     contours, _ = cv2.findContours(edges, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
     sx = w / ws
     sal_s = cv2.resize(sal, (64, 64))
@@ -207,7 +208,7 @@ def build_lines(img_bgr, h, w, regions, sal, density=1.0, seed=1503):
     return [{"d": "M" + " L".join(f"{x:.1f} {y:.1f}" for x, y in s["pts"]), "len": round(s["len"], 1)} for s in strokes]
 
 
-def build_guides(w, h, regions, box):
+def build_guides(w, h, regions, box, n_labelled=1):
     P = lambda x, y: [round(x * w, 1), round(y * h, 1)]
     x0, y0, x1, y1 = box
     cx, cy, rx, ry = regions[0]
@@ -220,7 +221,7 @@ def build_guides(w, h, regions, box):
         {"type": "line", "a": P(0.02, 1 / 3), "b": P(0.98, 1 / 3), "label": "thirds"},
         {"type": "line", "a": P(0.02, 2 / 3), "b": P(0.98, 2 / 3), "label": "thirds"},
     ]
-    for i, (fx, fy, frx, fry) in enumerate(regions[:3]):
+    for i, (fx, fy, frx, fry) in enumerate(regions[:max(1, n_labelled)]):
         g.append({"type": "ellipse", "c": P(fx, fy), "r": [round(frx * w * 1.15, 1), round(fry * h * 1.2, 1)], "rot": 0,
                   "label": "focus" if i == 0 else f"focus {i + 1}"})
     return g
@@ -244,9 +245,10 @@ def build(sec: ArtworkScene, ctx: BuildContext, theme: dict) -> dict:
         H = round(W * src.height / src.width)
         img = np.asarray(src.resize((W, H), Image.LANCZOS), np.float32)
         bgr = cv2.cvtColor(img.astype(np.uint8), cv2.COLOR_RGB2BGR)
-        regions, sal = detect_focus(bgr, ctx.log)
+        regions, sal, n_faces = detect_focus(bgr, ctx.log)
         if sec.focus != "auto":
             regions = [(float(x), float(y), 0.12, 0.14) for x, y in sec.focus]
+            n_faces = len(regions)
         lum = (0.299 * img[..., 0] + 0.587 * img[..., 1] + 0.114 * img[..., 2]) / 255
         paper = build_paper(H, W, _hex(sec.paper))
         layers = {"paper": paper, "tone": build_tone(lum, paper), "under": build_under(lum, paper, _hex(sec.underpaint)), "final": img}
@@ -258,7 +260,7 @@ def build(sec: ArtworkScene, ctx: BuildContext, theme: dict) -> dict:
         ctx.progress(0.7, "contours")
         lines = build_lines(bgr, H, W, regions, sal, sec.line_density)
         (web / "lines.json").write_text(json.dumps({"w": W, "h": H, "strokes": lines}, separators=(",", ":")))
-        (web / "guides.json").write_text(json.dumps({"w": W, "h": H, "guides": build_guides(W, H, regions, subject_box(sal))}))
+        (web / "guides.json").write_text(json.dumps({"w": W, "h": H, "guides": build_guides(W, H, regions, subject_box(sal), min(n_faces, 3))}))
         ctx.log(f"  {W}x{H}, {len(lines)} strokes")
 
     ctx.stage("layers", key, outs, run)

@@ -1,0 +1,73 @@
+# Cellwright Bio: a live 3D zoom through six orders of magnitude, from tissue to a molecule docking on DNA.
+# Scene type `scene3d`: each level is a generator preset; one step zooms one level deeper.
+name: Cellwright Bio
+description: "From tissue to molecule: a scroll-driven journey through the scales of biology."
+theme: { preset: lab }
+nav:
+  logo: "M7 3c0 6 10 6 10 12M17 3c0 6-10 6-10 12M7 21c0-2.2 1.1-3.6 2.8-4.6M17 21c0-2.2-1.1-3.6-2.8-4.6M8.5 6h7M8.5 12h7M8.5 18h7"
+  cta: { label: Partner with us, href: "#partner" }
+sections:
+  - id: journey
+    type: scene3d
+    nav_label: Platform
+    layout: cards
+    style: glow
+    zoom: 14
+    final: dock
+    levels:
+      - { preset: cell-field }
+      - { preset: cell }
+      - { preset: nucleus }
+      - { preset: helix }
+    hud:
+      kind: scale
+      scales: ["100 µm", "10 µm", "1 µm", "2 nm", "0.3 nm"]
+      legend:
+        - { label: Membrane, color: "#45f0a0" }
+        - { label: Nucleus, color: "#5b8cff" }
+        - { label: Target, color: "#ff4fd8" }
+    steps:
+      - intro: true
+        kicker: Cellwright Bio
+        title: From tissue <em>to molecule.</em>
+        body: We design medicines at the scale where disease actually begins. Scroll down through six orders of magnitude, from a field of cells to a single gene.
+        hint: Scroll to zoom in
+      - { kicker: 01 / 05 · 100 µm, title: Disease starts <em>small.</em>, length: 1.2,
+          body: "Long before symptoms, something changes in a tissue: a few cells behaving differently from their neighbours.",
+          fact: "Fluorescence imaging: membranes in green, nuclei in blue." }
+      - { kicker: 02 / 05 · 10 µm, title: Inside <em>one cell.</em>, length: 1.5,
+          body: "Mitochondria power it, vesicles move cargo, and at the centre the nucleus holds the instructions for all of it.",
+          fact: A typical human cell is about 10 micrometres across. }
+      - { kicker: 03 / 05 · 1 µm, title: "The genome, <em>unwound.</em>", length: 1.3,
+          body: "Two metres of DNA packed into a nucleus a hundred times narrower than a hair, folded so the right genes stay within reach.",
+          fact: "Chromatin: DNA wrapped around proteins, coiled and looped." }
+      - { kicker: 04 / 05 · 2 nm, title: Reading <em>the code.</em>, length: 1.5,
+          body: "Down at the double helix, every disease variant is a precise address: a handful of letters in three billion.",
+          fact: The helix is 2 nanometres wide and turns once every 10.5 base pairs. }
+      - { kicker: 05 / 05 · 0.3 nm, title: One target. <em>One molecule.</em>, length: 1.6,
+          body: "We design compounds that find that address and bind it, and nothing else. This is where a medicine begins.",
+          fact: "Designed against structure, validated in patient-derived cells." }
+  - type: intro
+    id: programs
+    nav_label: Programs
+    kicker: Platform
+    title: Precision starts with <em>seeing clearly.</em>
+    body: Our platform pairs single-cell imaging with structural modelling, so every candidate is designed against the exact sequence it needs to reach, in the cells where it matters.
+  - type: features
+    items:
+      - { tag: CW-101 · Discovery, title: Rare metabolic disease, body: Small molecules that restore a single misfolded enzyme in liver cells., meter: 0.28 }
+      - { tag: CW-204 · Lead optimisation, title: Inherited retinal disease, body: Sequence-targeted therapy for one of the most common causative variants., meter: 0.52 }
+      - { tag: CW-310 · Preclinical, title: Neuromuscular disorders, body: Splice-modulating compounds designed against patient-derived cells., meter: 0.74 }
+  - type: stats
+    items:
+      - { value: "10⁶×", label: Range of scales we model }
+      - { value: "3", label: Programs in development }
+      - { value: "40", unit: M, label: Single cells imaged }
+      - { value: "1", label: Base pair at a time }
+  - type: cta
+    id: partner
+    nav_label: Partner
+    kicker: Partnerships
+    title: Bring us the target.<br><em>We'll find the molecule.</em>
+    button: { label: Partner with us, href: "#" }
+footer: { left: "© Cellwright Bio. A concept site; programs and figures are illustrative.", right: Tissue · Cell · Nucleus · DNA · Target }

@@ -1,0 +1,75 @@
+# Atelier Sfumato: an art school whose lesson draws the Mona Lisa as you scroll.
+# Scene type `artwork`: any image becomes guides -> contour lines -> graphite -> underpainting -> colour.
+# Focus is detected automatically (faces first), so the drawing starts at her face.
+name: Atelier Sfumato
+description: "Learn to draw and paint the way the masters did: proportion, line, value, underpainting, colour."
+theme: { preset: paper }
+nav:
+  cta: { label: Book a trial class, href: "#enrol" }
+sections:
+  - id: studio
+    type: artwork
+    nav_label: The lesson
+    layout: split
+    image: { file: inputs/mona_lisa.jpg, credit: "Mona Lisa, Leonardo da Vinci, c. 1503–1519. Public domain." }
+    hud: { kind: progress, scales: [Blank canvas] }
+    steps:
+      - intro: true
+        kicker: A lesson in five parts
+        title: Paint the <em>Mona Lisa</em> with us, one layer at a time.
+        body: "Scroll, and watch the most famous portrait in the world come together the way it was actually made: proportion, line, value, underpainting, then colour."
+        hint: Scroll to begin
+        length: 1.0
+      - kicker: Lesson 01 / 05
+        title: Proportion
+        body: Before a single line, find the big shapes. A vertical axis, the head as an oval, the whole figure inside a triangle.
+        fact: Leonardo set the two horizons at different heights. It makes her seem to rise out of the landscape.
+        length: 1.1
+      - kicker: Lesson 02 / 05
+        title: Line
+        body: Now draw what you see, not what you know. Start where the viewer will look first, the face, then the hands, then everything else.
+        fact: Keep the charcoal loose. Lines are questions until the value answers them.
+        length: 1.9
+      - kicker: Lesson 03 / 05
+        title: Value
+        body: Squint until the detail disappears and only light and dark remain. Build the shadows in layers, following the form like a hand following a cheek.
+        fact: "Sfumato means 'gone up in smoke': edges that melt, never lines that stop."
+        length: 1.4
+      - kicker: Lesson 04 / 05
+        title: Underpainting
+        body: Masters laid in the whole picture in one earth colour first. It settles every value before colour can confuse them.
+        fact: Raw umber dries fast and stays warm under every glaze.
+        length: 1.4
+      - kicker: Lesson 05 / 05
+        title: Colour
+        body: Thin, transparent glazes, dozens of them, each one barely there. Colour doesn't cover the drawing, it tints it.
+        fact: Leonardo worked on this panel for well over a decade. You can take your time.
+        length: 1.6
+  - type: intro
+    id: method
+    kicker: The method
+    title: Every masterpiece is <em>five simple lessons</em> stacked on top of each other.
+    body: "We teach the way Renaissance workshops did: proportion before line, line before value, value before paint. You'll copy the masters, then leave them behind."
+  - type: features
+    id: courses
+    nav_label: Courses
+    items:
+      - { tag: 10 weeks · Beginner, title: Foundations of Drawing, body: "Proportion, contour and value, from cast drawing to the live model." }
+      - { tag: 12 weeks · Intermediate, title: Old Master Painting, body: "Umber underpainting, glazing and sfumato, in oil on panel." }
+      - { tag: 6 weekends · All levels, title: Copying at the Museum, body: "Sketchbook sessions in front of the originals, with a tutor beside you." }
+  - type: stats
+    items:
+      - { value: "8", unit: ":1", label: "Students per tutor, at most" }
+      - { value: "5", label: Lessons behind every painting }
+      - { value: "6", unit: hrs, label: Of north light a day }
+      - { value: "∞", label: Patience included }
+  - type: quote
+    text: You can have no dominion greater or less than that over <em>yourself.</em>
+    who: Leonardo da Vinci, notebooks
+  - type: cta
+    id: enrol
+    nav_label: Enrol
+    kicker: Spring term
+    title: Pick up the charcoal.<br><em>We'll handle the rest.</em>
+    button: { label: Book a trial class, href: "#" }
+footer: { left: "© Atelier Sfumato. A concept site." }

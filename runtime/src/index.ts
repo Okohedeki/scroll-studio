@@ -154,8 +154,8 @@ class Scene {
       const zero = h.clock?.zero ?? 0;
       const flight = clamp((p - zero) / (1 - zero));
       h.fields.forEach((f, i) => {
-        const v = f.to * Math.pow(flight, f.curve ?? 1.5);
-        if (H.fields[i]) H.fields[i].textContent = v.toFixed(f.decimals ?? 1);
+        const v = (f.from ?? 0) + (f.to - (f.from ?? 0)) * Math.pow(flight, f.curve ?? 1.5);
+        if (H.fields[i]) H.fields[i].textContent = f.grouping ? Math.round(v).toLocaleString("en-US") : v.toFixed(f.decimals ?? 1);
       });
       H.events.forEach((li: HTMLElement) => li.classList.toggle("ss-done", p >= +li.dataset.at!));
       if (h.clock && H.clock) {
