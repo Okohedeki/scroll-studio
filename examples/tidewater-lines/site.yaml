@@ -1,0 +1,79 @@
+# Tidewater Lines: a container shipping line. Scene type `map`: a live vector map (OpenFreeMap tiles, no key)
+# whose camera flies port to port as you scroll, drawing the Asia-Europe route behind it.
+name: Tidewater Lines
+description: Weekly container service from Shanghai to Rotterdam, 21,000 km in 32 days.
+theme:
+  preset: night
+  colors: { accent: "#38bdf8", accent2: "#7dd3fc", accent_ink: "#03141f" }
+  fonts: { display: "Archivo", body: "Inter", mono: "JetBrains Mono" }
+nav:
+  cta: { label: Book a slot, href: "#book" }
+sections:
+  - id: route
+    type: map
+    nav_label: The route
+    layout: cards
+    style: https://tiles.openfreemap.org/styles/fiord
+    routes:
+      - id: aex
+        color: "#38bdf8"
+        points: [[122.06, 30.62], [122.6, 29.0], [119.9, 24.5], [116.0, 20.0], [110.0, 12.0], [105.5, 3.5], [104.0, 1.25], [103.85, 1.22],
+                 [101.0, 2.8], [98.0, 5.5], [95.0, 6.5], [80.5, 5.6], [72.0, 11.0], [55.0, 13.0], [49.0, 12.0], [43.4, 12.6], [39.5, 20.0],
+                 [34.5, 27.0], [32.55, 29.9], [32.35, 30.6], [32.3, 31.3], [28.0, 33.5], [20.0, 35.5], [12.0, 37.5], [4.0, 37.8],
+                 [-5.5, 35.95], [-9.8, 37.0], [-10.0, 43.5], [-5.5, 48.5], [1.5, 50.8], [3.5, 51.9], [4.03, 51.96]]
+    markers:
+      - { lng: 122.06, lat: 30.62, label: Shanghai }
+      - { lng: 103.85, lat: 1.22, label: Singapore }
+      - { lng: 32.35, lat: 30.6, label: Suez }
+      - { lng: 4.03, lat: 51.96, label: Rotterdam }
+    steps:
+      - intro: true
+        kicker: Tidewater Lines · AEX service
+        title: Shanghai to Rotterdam, <em>every Thursday.</em>
+        body: One loop, eleven ships, the same day every week. Scroll to sail it.
+        hint: Scroll to cast off
+        state: { center: [66, 26], zoom: 2.1, pitch: 0, routes: { aex: 0 } }
+      - kicker: Day 0 · Shanghai
+        title: Loading at <em>Yangshan.</em>
+        body: Our ships berth at the deep-water terminal on the islands south of the city, loading around 14,000 containers in two days.
+        length: 1.3
+        state: { center: [122.06, 30.62], zoom: 10.6, pitch: 55, bearing: -25, routes: { aex: 0.01 } }
+      - kicker: Day 6 · Singapore
+        title: Through <em>the strait.</em>
+        body: The busiest shipping lane in the world. We call at Singapore to swap boxes for Southeast Asia, then turn west into the Malacca Strait.
+        length: 1.4
+        state: { center: [103.85, 1.2], zoom: 10.2, pitch: 55, bearing: 35, routes: { aex: 0.188 } }
+      - kicker: Day 19 · Suez
+        title: A canal <em>one ship wide.</em>
+        body: 193 km of canal in a single convoy, about twelve hours from the Red Sea to the Mediterranean.
+        length: 1.4
+        state: { center: [32.42, 30.35], zoom: 9.6, pitch: 60, bearing: 12, routes: { aex: 0.641 } }
+      - kicker: Day 32 · Rotterdam
+        title: Alongside <em>at Maasvlakte.</em>
+        body: Europe's largest port, built out into the North Sea. From the quay, rail and barge carry the boxes inland within a day.
+        length: 1.4
+        state: { center: [4.03, 51.96], zoom: 11.2, pitch: 60, bearing: -30, routes: { aex: 1.0 } }
+      - kicker: The loop
+        title: Then it all <em>happens again.</em>
+        body: Eleven ships on one rotation means a departure every week, in both directions.
+        length: 1.4
+        state: { center: [66, 26], zoom: 2.25, pitch: 15, bearing: 0, routes: { aex: 1.0 } }
+  - type: stats
+    items:
+      - { value: "21000", unit: km, label: Port to port }
+      - { value: "32", unit: days, label: Shanghai to Rotterdam }
+      - { value: "11", label: Ships on the loop }
+      - { value: "52", label: Departures a year }
+  - type: features
+    kicker: The service
+    title: Everything between <em>the two quays.</em>
+    items:
+      - { tag: Cargo, title: Full and part loads, body: "Dry, reefer and out-of-gauge, from one box to a whole bay." }
+      - { tag: Visibility, title: Live tracking, body: "Position, ETA and temperature for every container, hourly." }
+      - { tag: Inland, title: Door to door, body: "Rail and barge links from Rotterdam to 40 European hubs." }
+  - type: cta
+    id: book
+    kicker: Next sailing Thursday
+    title: Find a slot <em>on the next ship.</em>
+    button: { label: Book a slot, href: "#" }
+footer: { left: "© Tidewater Lines. A concept site; the route line is approximate." }

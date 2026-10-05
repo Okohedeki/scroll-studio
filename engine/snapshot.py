@@ -18,7 +18,7 @@ from .record import CDP, _chrome, _free_port
 from .serve import serve
 
 
-def snapshot(dist: Path, shots: list[str], out_dir: Path, size=(1600, 900), wait: float = 2.5,
+def snapshot(dist: Path, shots: list[str], out_dir: Path, size=(1600, 900), wait: float = 4.0,
              log: Callable[[str], None] = print) -> list[Path]:
     """shots: 'scene:progress' (e.g. 'hero:0.4'), 'top', 'bottom', or 'y:<pixels>'."""
     import requests

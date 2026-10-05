@@ -187,6 +187,30 @@ class ChartScene(SceneBase):
     colors: list[str] = Field(default_factory=list, description="Series colours in `include` order (defaults to the theme)")
 
 
+class Route(Model):
+    id: str
+    points: list[tuple[float, float]] = Field(..., description="[lng, lat] waypoints")
+    color: Optional[str] = None
+    geodesic: bool = Field(False, description="Bend each leg along the great circle (flights)")
+
+
+class Marker(Model):
+    lng: float
+    lat: float
+    label: str
+
+
+class MapScene(SceneBase):
+    """A geographic journey on a live vector map. Each step's `state` moves the camera and draws routes:
+    {center: [lng, lat], zoom, pitch, bearing, routes: {route_id: 0-1}}. Tiles come from OpenFreeMap (no key)."""
+    type: Literal["map"] = "map"
+    layout: Literal["overlay", "split", "cards"] = "cards"
+    style: str = Field("https://tiles.openfreemap.org/styles/liberty", description="MapLibre style URL")
+    dark: bool = Field(False, description="Darken and desaturate the base map to sit under a dark theme")
+    routes: list[Route] = Field(default_factory=list)
+    markers: list[Marker] = Field(default_factory=list)
+
+
 class TypeScene(SceneBase):
     """Kinetic typography driven by scroll."""
     type: Literal["type"] = "type"
@@ -281,11 +305,11 @@ class GalleryBlock(BlockBase):
 
 
 Section = Annotated[Union[
-    FilmScene, ArtworkScene, Scene3DScene, SequenceScene, ParallaxScene, TypeScene, VectorScene, ChartScene,
+    FilmScene, ArtworkScene, Scene3DScene, SequenceScene, ParallaxScene, TypeScene, VectorScene, ChartScene, MapScene,
     IntroBlock, FeaturesBlock, StatsBlock, TimelineBlock, QuoteBlock, CtaBlock, GalleryBlock,
 ], Field(discriminator="type")]
 
-SCENE_TYPES = ("film", "artwork", "scene3d", "sequence", "parallax", "type", "vector", "chart")
+SCENE_TYPES = ("film", "artwork", "scene3d", "sequence", "parallax", "type", "vector", "chart", "map")
 
 
 # ---------------------------------------------------------------- site

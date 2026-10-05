@@ -13,6 +13,7 @@ MODULES = {
     "type": "type",
     "vector": "vector",
     "chart": "chart",
+    "map": "map",
 }
 
 
