@@ -30,6 +30,8 @@ def snapshot(dist: Path, shots: list[str], out_dir: Path, size=(1600, 900), wait
                              f"--window-size={W},{H}", "--hide-scrollbars", "--enable-gpu", "--ignore-gpu-blocklist",
                              "--enable-unsafe-swiftshader", "about:blank"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     out_dir.mkdir(parents=True, exist_ok=True)
+    for old in out_dir.glob("*.png"):   # a fresh set each time, so the sheet never mixes runs
+        old.unlink()
     paths = []
     try:
         ws = None

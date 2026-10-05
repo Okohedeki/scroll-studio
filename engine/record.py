@@ -110,8 +110,9 @@ def record(dist: Path, out: Path, section: Optional[str] = None, size=(1920, 108
             e = t * t * (3 - 2 * t)
             cdp.js(f"window.scrollTo(0, {start + (end - start) * e:.1f})")
             time.sleep(settle)
-            png = cdp.call("Page.captureScreenshot", format="png")["data"]
-            (frames_dir / f"{i:05d}.png").write_bytes(base64.b64decode(png))
+            # JPEG at high quality is several times faster to capture than PNG and indistinguishable after H.264
+            jpg = cdp.call("Page.captureScreenshot", format="jpeg", quality=94)["data"]
+            (frames_dir / f"{i:05d}.jpg").write_bytes(base64.b64decode(jpg))
             progress(i / (n + hold), f"frame {i + 1}/{n + hold}")
         cdp.ws.close()
     finally:
@@ -119,14 +120,14 @@ def record(dist: Path, out: Path, section: Optional[str] = None, size=(1920, 108
         httpd.shutdown()
     out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    src = str(frames_dir / "%05d.png")
+    src = str(frames_dir / "%05d.jpg")
     ow = out_width or W
     ffmpeg("-framerate", str(fps), "-i", src, "-vf", f"scale={ow}:-2:flags=lanczos", "-c:v", "libx264",
            "-crf", "18", "-preset", "slow", "-pix_fmt", "yuv420p", "-movflags", "+faststart", out.with_suffix(".mp4"))
     if gif:
         ffmpeg("-framerate", str(fps), "-i", src, "-vf", "fps=10,scale=720:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128:"
                "stats_mode=diff[p];[b][p]paletteuse=dither=sierra2_4a:diff_mode=rectangle", out.with_suffix(".gif"))
-    shutil.copy(frames_dir / f"{n // 2:05d}.png", out.with_name(out.stem + "-mid.png"))
+    shutil.copy(frames_dir / f"{n // 2:05d}.jpg", out.with_name(out.stem + "-mid.jpg"))
     shutil.rmtree(frames_dir, ignore_errors=True)
     shutil.rmtree(prof, ignore_errors=True)
     log(f"-> {out.with_suffix('.mp4')}")
