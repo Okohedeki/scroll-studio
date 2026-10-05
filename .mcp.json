@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "scroll-studio": {
+      "command": "python",
+      "args": ["-m", "engine.mcp_server"]
+    }
+  }
+}

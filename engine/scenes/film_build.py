@@ -21,7 +21,13 @@ FFMPEG = settings()["ffmpeg"]
 
 def sh(cmd):
     print("  $", " ".join(str(c) for c in cmd), flush=True)
-    subprocess.run([str(c) for c in cmd], check=True)
+    # capture and re-print: a child writing straight to fd 1 would corrupt the MCP channel
+    p = subprocess.run([str(c) for c in cmd], capture_output=True, text=True, encoding="utf-8", errors="replace")
+    if p.stdout.strip():
+        print(p.stdout[-4000:], flush=True)
+    if p.returncode != 0:
+        raise RuntimeError(f"{os.path.basename(str(cmd[0]))} failed ({p.returncode}):
+{(p.stderr or p.stdout)[-3000:]}")
 
 
 def ff(*args):

@@ -1,0 +1,81 @@
+# Every model Scroll Studio can use. ComfyUI models go in ComfyUI's model folders (see docs/INSTALL.md);
+# Hugging Face models download automatically into <model_dir>/hf on first use.
+# Licences belong to the model authors and are NOT covered by Scroll Studio's MIT licence. Check before commercial use.
+
+comfyui:
+  - name: LTX-2.3 22B distilled (fp8)
+    file: checkpoints/ltx-2.3-22b-distilled-fp8.safetensors
+    source: https://huggingface.co/Lightricks/LTX-2.3
+    size_gb: 27
+    vram_gb: 20
+    licence: LTX-2 Community License
+    used_by: [film]
+  - name: Gemma 3 12B text encoder (fp8)
+    file: text_encoders/gemma_3_12B_it_fp8_scaled.safetensors
+    source: https://huggingface.co/Comfy-Org/ltx-2
+    size_gb: 13
+    licence: Gemma Terms of Use
+    used_by: [film]
+  - name: LTX-2.3 IC-LoRA Union Control
+    file: loras/ltx-2.3-22b-ic-lora-union-control-ref0.5.safetensors
+    source: https://huggingface.co/Lightricks/LTX-2.3
+    size_gb: 1.2
+    licence: LTX-2 Community License
+    used_by: [film]
+  - name: LTX-2.3 spatial upscaler x2
+    file: latent_upscale_models/ltx-2.3-spatial-upscaler-x2-1.1.safetensors
+    source: https://huggingface.co/Lightricks/LTX-2.3
+    size_gb: 1
+    licence: LTX-2 Community License
+    used_by: [film (upscale)]
+  - name: Z-Image Turbo (bf16)
+    file: diffusion_models/z_image_turbo_bf16.safetensors
+    source: https://huggingface.co/Comfy-Org/z_image_turbo
+    size_gb: 12
+    vram_gb: 13
+    licence: Apache-2.0
+    used_by: [film (keyframes), "any image `generate:`"]
+  - name: Qwen3 4B text encoder (fp8)
+    file: text_encoders/qwen_3_4b_fp8_mixed.safetensors
+    source: https://huggingface.co/Comfy-Org/z_image_turbo
+    size_gb: 5
+    licence: Apache-2.0
+    used_by: [film, "image `generate:`"]
+  - name: Flux VAE (ae)
+    file: vae/ae.safetensors
+    source: https://huggingface.co/Comfy-Org/z_image_turbo
+    size_gb: 0.3
+    licence: Apache-2.0
+    used_by: [film, "image `generate:`"]
+  - name: Z-Image Turbo Fun ControlNet Union 2.1
+    file: model_patches/Z-Image-Turbo-Fun-Controlnet-Union-2.1-2602-8steps.safetensors
+    source: https://huggingface.co/alibaba-pai/Z-Image-Turbo-Fun-Controlnet-Union-2.1
+    size_gb: 3
+    licence: Apache-2.0
+    used_by: [film (keyframes)]
+
+huggingface:
+  - name: Depth Anything V2 Small
+    repo: depth-anything/Depth-Anything-V2-Small-hf
+    size_gb: 0.1
+    licence: Apache-2.0
+    used_by: [parallax (default)]
+  - name: Depth Anything V2 Base / Large
+    repo: depth-anything/Depth-Anything-V2-Large-hf
+    size_gb: 1.3
+    licence: CC-BY-NC-4.0 (non-commercial)
+    used_by: [parallax (depth_model: base | large)]
+
+optional:
+  - name: BiRefNet / rembg
+    note: subject cut-outs (pip extra `ml`), planned for artwork and sequence-from-photos
+    licence: MIT
+  - name: Hunyuan3D-2 or TRELLIS
+    note: image -> 3D model for `sequence` from product photos (planned)
+    licence: Tencent Hunyuan Community (region limits) / MIT
+  - name: RIFE 4.x
+    note: frame interpolation for smoother sequences and the planned `morph` type
+    licence: MIT
+  - name: MusicGen (stereo large)
+    note: optional music beds for recordings
+    licence: CC-BY-NC-4.0 (non-commercial)
