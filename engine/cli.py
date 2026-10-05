@@ -179,6 +179,29 @@ def publish(names: list[str], out: Path = typer.Option(..., help="Folder to depl
 
 
 @app.command()
+def combine(videos: list[Path], out: Path = typer.Option(..., help="MP4 to write"),
+            fade: float = typer.Option(0.6, help="Crossfade between clips, seconds")):
+    """Join recordings into one video with crossfades (e.g. a reel of several sites)."""
+    from .project import ffmpeg, probe
+    if len(videos) < 2:
+        raise typer.BadParameter("give at least two videos")
+    durs = [float(probe(v)["duration"]) for v in videos]
+    w, h = int(probe(videos[0])["width"]), int(probe(videos[0])["height"])
+    inputs, chains, last, offset = [], [], "[v0]", 0.0
+    for i, v in enumerate(videos):
+        inputs += ["-i", str(v)]
+        chains.append(f"[{i}:v]scale={w}:{h}:force_original_aspect_ratio=decrease,pad={w}:{h}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=24,format=yuv420p[v{i}]")
+    for i in range(1, len(videos)):
+        offset += durs[i - 1] - fade
+        chains.append(f"{last}[v{i}]xfade=transition=fade:duration={fade}:offset={offset:.3f}[x{i}]")
+        last = f"[x{i}]"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    ffmpeg(*inputs, "-filter_complex", ";".join(chains), "-map", last, "-c:v", "libx264", "-crf", "18", "-preset", "slow",
+           "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(out))
+    typer.echo(f"-> {out} ({sum(durs) - fade * (len(videos) - 1):.1f}s)")
+
+
+@app.command()
 def schema():
     """Print the site.yaml JSON Schema."""
     from .spec import Site
