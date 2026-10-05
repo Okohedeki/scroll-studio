@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="{{ site.lang }}" class="mode-{{ theme.mode }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{ site.name }}</title>
+{% if site.description %}<meta name="description" content="{{ site.description }}">{% endif %}
+<meta name="generator" content="Scroll Studio">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+{% for href in font_links %}<link rel="stylesheet" href="{{ href }}">
+{% endfor %}
+<style>
+{{ css_vars | safe }}
+</style>
+<link rel="stylesheet" href="runtime/studio.css">
+</head>
+<body>
+{% import "blocks.html.j2" as blocks %}
+{% import "scene.html.j2" as scene %}
+
+<header class="ss-nav" id="ss-nav"><div class="ss-nav__in">
+  <a class="ss-wordmark" href="#">
+    {% if site.nav.logo and site.nav.logo.startswith("M") %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="{{ site.nav.logo }}"/></svg>{% elif site.nav.logo %}<img src="{{ site.nav.logo }}" alt="">{% endif %}
+    <span>{{ site.name }}</span>
+  </a>
+  <nav class="ss-nav__links">{% for l in nav_links %}<a href="{{ l.href }}">{{ l.label }}</a>{% endfor %}</nav>
+  {% if site.nav.cta %}<a class="ss-btn" href="{{ site.nav.cta.href }}">{{ site.nav.cta.label }} <span class="ss-arrow">→</span></a>{% else %}<span></span>{% endif %}
+</div></header>
+
+<main>
+{% for e in sections %}
+{% if e.scene %}{{ scene.render(e.s, e.config, e.sdata) }}{% else %}{{ blocks.render(e.s, e) }}{% endif %}
+{% endfor %}
+</main>
+
+<footer class="ss-footer"><div class="ss-wrap ss-footer__in">
+  <span>{{ (site.footer.left or ("© " ~ site.name)) | rich }}</span>
+  <span>{{ (site.footer.right or "") | rich }}{% for c in credits %}{% if loop.first and site.footer.right %} · {% endif %}{{ c }}{% if not loop.last %} · {% endif %}{% endfor %}</span>
+</div></footer>
+
+<script type="module" src="runtime/index.js"></script>
+</body>
+</html>

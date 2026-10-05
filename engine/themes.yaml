@@ -1,0 +1,75 @@
+# Theme presets. A site picks one with theme.preset and can override any token in site.yaml.
+# Colours: bg, bg2 (bands), ink (text), accent, accent2 (lighter accent), accent_ink (text on accent buttons).
+# ink2/ink3/line are derived from ink unless given. Fonts are Google Fonts families.
+
+night:        # dark, technical: launches, deep tech, hardware
+  mode: dark
+  colors: { bg: "#050608", bg2: "#0b0d11", ink: "#eef0f2", accent: "#ff6b2c", accent2: "#ffa66b", accent_ink: "#140803" }
+  fonts: { display: "Space Grotesk", body: "Space Grotesk", mono: "IBM Plex Mono" }
+  display_weight: 500
+  em_italic: false
+  radius: 4px
+
+brass:        # dark, editorial luxury: travel, hospitality, watches
+  mode: dark
+  colors: { bg: "#07080b", bg2: "#0d0f14", ink: "#f2ece1", accent: "#c8a46b", accent2: "#e4c894", accent_ink: "#1a1206" }
+  fonts: { display: "Instrument Serif", body: "Inter Tight", mono: "JetBrains Mono" }
+  display_weight: 400
+  em_italic: true
+  radius: 999px
+
+paper:        # light, warm: art, education, craft, publishing
+  mode: light
+  colors: { bg: "#efe8da", bg2: "#e6dccb", ink: "#2a241f", accent: "#9c4a1f", accent2: "#b8643a", accent_ink: "#fff8ef" }
+  fonts: { display: "Fraunces", body: "Inter", mono: "IBM Plex Mono" }
+  display_weight: 300
+  em_italic: true
+  radius: 999px
+
+lab:          # dark, luminous: biotech, science, research
+  mode: dark
+  colors: { bg: "#04070c", bg2: "#0a111b", ink: "#e8f1f8", accent: "#45f0a0", accent2: "#8dffc8", accent_ink: "#022514" }
+  fonts: { display: "Sora", body: "Sora", mono: "IBM Plex Mono" }
+  display_weight: 300
+  em_italic: false
+  radius: 999px
+
+cosmos:       # deep blue-black with violet: space, astronomy, observatories
+  mode: dark
+  colors: { bg: "#03040a", bg2: "#090b18", ink: "#ecebff", accent: "#a98bff", accent2: "#d2c3ff", accent_ink: "#120a2b" }
+  fonts: { display: "Unbounded", body: "Manrope", mono: "JetBrains Mono" }
+  display_weight: 400
+  em_italic: false
+  radius: 999px
+
+studio:       # light, neutral, precise: consumer products, design objects
+  mode: light
+  colors: { bg: "#f3f1ee", bg2: "#e9e6e1", ink: "#16150f", accent: "#1f4d3a", accent2: "#2f6b52", accent_ink: "#f3f1ee" }
+  fonts: { display: "Bricolage Grotesque", body: "Inter", mono: "DM Mono" }
+  display_weight: 600
+  em_italic: false
+  radius: 10px
+
+dusk:         # warm dark: resorts, real estate, food and wine
+  mode: dark
+  colors: { bg: "#120d0a", bg2: "#1b1410", ink: "#f6ece0", accent: "#e09a5f", accent2: "#f2c08f", accent_ink: "#2a160a" }
+  fonts: { display: "Cormorant Garamond", body: "Figtree", mono: "IBM Plex Mono" }
+  display_weight: 500
+  em_italic: true
+  radius: 2px
+
+ink:          # high-contrast type-first: agencies, events, manifestos
+  mode: light
+  colors: { bg: "#f2f0e9", bg2: "#e7e4da", ink: "#0d0d0c", accent: "#ff3d00", accent2: "#ff7a45", accent_ink: "#ffffff" }
+  fonts: { display: "Archivo", body: "Archivo", mono: "Space Mono" }
+  display_weight: 800
+  em_italic: false
+  radius: 0px
+
+blueprint:    # cool light: architecture, engineering, construction
+  mode: light
+  colors: { bg: "#eef1f4", bg2: "#e2e7ec", ink: "#14202b", accent: "#1d5fd1", accent2: "#4f86e6", accent_ink: "#ffffff" }
+  fonts: { display: "Newsreader", body: "IBM Plex Sans", mono: "IBM Plex Mono" }
+  display_weight: 400
+  em_italic: true
+  radius: 3px

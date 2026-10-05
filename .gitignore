@@ -1,15 +1,22 @@
-# Renders, frames, keyframes, upscale chunks (regenerate with run.py)
+# Per-project build cache, built sites, review output (regenerate with `studio build/snapshot/record`)
+.build/
+dist/
+snapshots/
+recordings/
+# User projects live outside git by default (see studio.toml `projects`)
+projects/
+# Local machine config
+studio.toml
+# Old pipeline outputs
 out/
-# Encoded site media and build previews (regenerate with run.py --stage encode / art/build_mona.py)
-web/media/
-art/out/
-# Downloaded source images (see README for sources)
-art/src/
-# Blender saves, Python caches, environments
-*.blend
-*.blend1
+# Node / Python
+node_modules/
 __pycache__/
+*.egg-info/
 .venv*/
+ui/dist/
+# Blender saves
+*.blend1
 # Secrets
 .env*
 *.pem

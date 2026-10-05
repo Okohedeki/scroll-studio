@@ -1,0 +1,4 @@
+# Scroll Studio: full install (engine + ML stages). Equivalent to `pip install -e .[all]`.
+# torch must be the CUDA build that matches your driver, installed first:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu128   (see docs/INSTALL.md)
+-e .[all]

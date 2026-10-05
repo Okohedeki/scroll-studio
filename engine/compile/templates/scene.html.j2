@@ -1,0 +1,75 @@
+{# A scroll scene: shell markup only. The runtime mounts the visual into .ss-visual from the JSON config. #}
+
+{% macro card(step, i, n) %}
+<div class="ss-card">
+  {% if step.kicker %}<div class="ss-num">{{ step.kicker | rich }}</div>{% endif %}
+  {% if step.intro %}<h1 class="ss-h1">{{ step.title | rich }}</h1>{% else %}<h2 class="ss-h2">{{ step.title | rich }}</h2>{% endif %}
+  {% if step.body %}<p class="ss-body">{{ step.body | rich }}</p>{% endif %}
+  {% if step.fact %}<div class="ss-fact">{{ step.fact | rich }}</div>{% endif %}
+  {% if step.hint %}<div class="ss-hint">{{ step.hint }}</div>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro hud(h) %}
+{% if h.kind == "telemetry" %}
+<div class="ss-hud ss-telemetry" aria-hidden="true">
+  {% for f in h.fields %}<div class="ss-row"><span>{{ f.label }}</span><b><span data-field="{{ loop.index0 }}">0</span><small>{{ f.unit or "" }}</small></b></div>{% endfor %}
+  {% if h.events %}<ul class="ss-events">{% for ev in h.events %}<li data-at="{{ ev.at }}">{{ ev.label }}</li>{% endfor %}</ul>{% endif %}
+</div>
+{% if h.clock %}<div class="ss-clock" aria-hidden="true"><span>{{ h.clock.prefix or "T" }}</span><b data-clock>--:--:--</b><span class="ss-bar"><i data-bar></i></span></div>{% endif %}
+{% elif h.kind == "scale" %}
+<div class="ss-hud ss-scalehud" aria-hidden="true">
+  {% if h.legend %}<div class="ss-legend">{% for l in h.legend %}<span style="--dot: {{ l.color }}">{{ l.label }}</span>{% endfor %}</div>{% endif %}
+  <div class="ss-scalebar"><b data-scale>{{ h.scales[0] if h.scales else "" }}</b><i></i></div>
+</div>
+{% elif h.kind == "legend" %}
+<div class="ss-hud ss-scalehud" aria-hidden="true"><div class="ss-legend">{% for l in h.legend %}<span style="--dot: {{ l.color }}">{{ l.label }}</span>{% endfor %}</div></div>
+{% endif %}
+{% endmacro %}
+
+{% macro render(s, cfg, sdata) %}
+<section class="ss-scene ss-{{ s.layout }} ss-side-{{ s.side }} ss-type-{{ s.type }} ss-shade-{{ s.shade }}" id="{{ s.id }}" data-scene="{{ s.type }}">
+{% if s.layout == "overlay" %}
+  <div class="ss-track" style="height: {{ s.length | vh }}">
+    <div class="ss-stage">
+      <div class="ss-visual">{% if cfg.poster %}<img class="ss-poster" src="{{ cfg.poster }}" alt="">{% endif %}</div>
+      <div class="ss-shade"></div>
+      <div class="ss-captions">
+        {% for st in s.steps %}
+        <div class="ss-caption" data-from="{{ (st.at or [0, 1])[0] }}" data-to="{{ (st.at or [0, 1])[1] }}">
+          {% if st.kicker %}<div class="ss-eyebrow"><i></i><span>{{ st.kicker | rich }}</span></div>{% endif %}
+          {% if st.intro %}<h1 class="ss-h1 ss-split-words">{{ st.title | rich }}</h1>{% else %}<h2 class="ss-display ss-split-words">{{ st.title | rich }}</h2>{% endif %}
+          {% if st.body %}<p class="ss-body">{{ st.body | rich }}</p>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {{ hud(s.hud) }}
+      {% if s.cue %}<div class="ss-cue">{{ s.cue }}</div>{% endif %}
+      <div class="ss-outro"></div>
+    </div>
+  </div>
+{% elif s.layout == "split" %}
+  <div class="ss-split-grid">
+    <div class="ss-steps">
+      {% for st in s.steps %}<article class="ss-step{% if st.intro %} ss-intro{% endif %}" style="--h: {{ st.length | vh }}">{{ card(st, loop.index0, s.steps | length) }}</article>{% endfor %}
+    </div>
+    <div class="ss-pin">
+      <div class="ss-visual"></div>
+      {% if s.hud.kind == "progress" %}<div class="ss-progress" aria-hidden="true"><span><b data-pnum>—</b> <span data-ptitle>{{ s.hud.scales[0] if s.hud.scales else "" }}</span></span><span class="ss-track-bar"><i data-pbar></i></span><span><b data-ppct>0</b>%</span></div>{% endif %}
+      {{ hud(s.hud) }}
+    </div>
+  </div>
+{% else %}
+  <div class="ss-pin ss-pin--full">
+    <div class="ss-visual"></div>
+    <div class="ss-shade"></div>
+    {{ hud(s.hud) }}
+  </div>
+  <div class="ss-steps ss-steps--over">
+    {% for st in s.steps %}<article class="ss-step{% if st.intro %} ss-intro{% endif %}" style="--h: {{ st.length | vh }}">{{ card(st, loop.index0, s.steps | length) }}</article>{% endfor %}
+  </div>
+{% endif %}
+  <script type="application/json" class="ss-config">{{ cfg | tojson }}</script>
+  <script type="application/json" class="ss-section">{{ sdata | tojson }}</script>
+</section>
+{% endmacro %}

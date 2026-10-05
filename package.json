@@ -1,0 +1,12 @@
+{
+  "name": "scroll-studio",
+  "private": true,
+  "license": "MIT",
+  "workspaces": ["runtime", "ui"],
+  "scripts": {
+    "build": "npm run build -w runtime && npm run build -w ui",
+    "build:runtime": "npm run build -w runtime",
+    "build:ui": "npm run build -w ui",
+    "dev:ui": "npm run dev -w ui"
+  }
+}

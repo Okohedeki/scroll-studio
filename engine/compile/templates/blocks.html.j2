@@ -1,0 +1,72 @@
+{# Static content blocks. Every block is complete without JavaScript; the runtime only adds reveals and count-ups. #}
+
+{% macro render(b, e) %}
+{% set band = " ss-band" if b.band else "" %}
+{% if b.type == "intro" %}
+<section class="ss-block{{ band }}"{% if b.id %} id="{{ b.id }}"{% endif %}><div class="ss-wrap ss-intro2">
+  <h2 class="ss-display ss-reveal">{{ b.title | rich }}</h2>
+  <div class="ss-reveal">
+    {% if b.kicker %}<span class="ss-kicker">{{ b.kicker }}</span>{% endif %}
+    {% if b.body %}<p class="ss-lede">{{ b.body | rich }}</p>{% endif %}
+    {% if b.button %}<a class="ss-btn ss-btn--hot" href="{{ b.button.href }}">{{ b.button.label }} <span class="ss-arrow">→</span></a>{% endif %}
+  </div>
+</div></section>
+
+{% elif b.type == "features" %}
+<section class="ss-block{{ band }}"{% if b.id %} id="{{ b.id }}"{% endif %}><div class="ss-wrap">
+  {% if b.title %}<div class="ss-head ss-reveal">{% if b.kicker %}<span class="ss-kicker">{{ b.kicker }}</span>{% endif %}<h2 class="ss-display">{{ b.title | rich }}</h2></div>{% endif %}
+  <div class="ss-features ss-features--{{ b.items | length }}">
+    {% for f in b.items %}
+    <div class="ss-feature ss-reveal">
+      {% if f.tag %}<span class="ss-tag">{{ f.tag }}</span>{% endif %}
+      <div><h3>{{ f.title | rich }}</h3>{% if f.body %}<p>{{ f.body | rich }}</p>{% endif %}
+      {% if f.meter is not none %}<div class="ss-meter"><i style="width: {{ (f.meter * 100) | round }}%"></i></div>{% endif %}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div></section>
+
+{% elif b.type == "stats" %}
+<section class="ss-block ss-band"{% if b.id %} id="{{ b.id }}"{% endif %}><div class="ss-wrap ss-stats ss-stats--{{ b.items | length }}">
+  {% for st in b.items %}
+  <div class="ss-stat ss-reveal"><div class="ss-v"{% if st.value | countable %} data-count="{{ st.value | replace(',', '') }}"{% endif %}>{{ st.value }}{% if st.unit %}<sup>{{ st.unit }}</sup>{% endif %}</div><div class="ss-l">{{ st.label }}</div></div>
+  {% endfor %}
+</div></section>
+
+{% elif b.type == "timeline" %}
+<section class="ss-block{{ band }}"{% if b.id %} id="{{ b.id }}"{% endif %}><div class="ss-wrap">
+  {% if b.title %}<div class="ss-head ss-reveal">{% if b.kicker %}<span class="ss-kicker">{{ b.kicker }}</span>{% endif %}<h2 class="ss-display">{{ b.title | rich }}</h2></div>{% endif %}
+  <div class="ss-timeline ss-timeline--{{ b.items | length }}">
+    {% for t in b.items %}<div class="ss-tl ss-reveal"><span class="ss-when">{{ t.when }}</span><h4>{{ t.title | rich }}</h4>{% if t.body %}<p>{{ t.body | rich }}</p>{% endif %}</div>{% endfor %}
+  </div>
+</div></section>
+
+{% elif b.type == "quote" %}
+<section class="ss-block{{ band }}"{% if b.id %} id="{{ b.id }}"{% endif %}><div class="ss-wrap ss-quote ss-reveal">
+  <blockquote>{{ b.text | rich }}</blockquote>{% if b.who %}<cite>{{ b.who }}</cite>{% endif %}
+</div></section>
+
+{% elif b.type == "cta" %}
+<section class="ss-block ss-cta"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {% if e.bg %}<div class="ss-cta__bg" style="background-image: url('{{ e.bg }}')"></div>{% endif %}
+  <div class="ss-cta__in">
+    {% if b.kicker %}<span class="ss-kicker ss-reveal">{{ b.kicker }}</span>{% endif %}
+    <h2 class="ss-display ss-reveal">{{ b.title | rich }}</h2>
+    {% if b.button %}<a class="ss-btn ss-btn--hot ss-reveal" href="{{ b.button.href }}">{{ b.button.label }} <span class="ss-arrow">→</span></a>{% endif %}
+  </div>
+</section>
+
+{% elif b.type == "gallery" %}
+<section class="ss-block{{ band }}"{% if b.id %} id="{{ b.id }}"{% endif %}><div class="ss-wrap">
+  {% if b.title %}<div class="ss-head ss-reveal">{% if b.kicker %}<span class="ss-kicker">{{ b.kicker }}</span>{% endif %}<h2 class="ss-display">{{ b.title | rich }}</h2></div>{% endif %}
+  <div class="ss-gallery">
+    {% for g in b.items %}
+    <a class="ss-tile ss-reveal" href="{{ g.href }}">
+      <div class="ss-tile__media">{% if g.video %}<video src="{{ g.video }}" muted loop playsinline preload="metadata"{% if g.image %} poster="{{ g.image }}"{% endif %}></video>{% elif g.image %}<img src="{{ g.image }}" alt="" loading="lazy">{% endif %}</div>
+      <div class="ss-tile__text">{% if g.kicker %}<span class="ss-tag">{{ g.kicker }}</span>{% endif %}<h3>{{ g.title | rich }}</h3>{% if g.body %}<p>{{ g.body | rich }}</p>{% endif %}</div>
+    </a>
+    {% endfor %}
+  </div>
+</div></section>
+{% endif %}
+{% endmacro %}
