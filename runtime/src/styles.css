@@ -58,7 +58,7 @@ em { font-style: var(--em-style); color: var(--accent-2); }
   linear-gradient(to bottom, rgba(var(--bg-rgb), .55), transparent 20%),
   linear-gradient(to right, rgba(var(--bg-rgb), .8), rgba(var(--bg-rgb), .2) 45%, transparent 70%),
   linear-gradient(to top, rgba(var(--bg-rgb), .8), transparent 35%); }
-.ss-shade-none .ss-shade { background: none; }
+.ss-shade-none .ss-shade, .ss-type-type .ss-shade { background: none; }
 .ss-captions { position: absolute; left: var(--gutter); top: 50%; transform: translateY(-50%); width: min(680px, 82vw); height: 340px; }
 .ss-caption { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 100%; pointer-events: none; }
 .ss-eyebrow { color: var(--accent); display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }

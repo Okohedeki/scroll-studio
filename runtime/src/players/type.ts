@@ -9,15 +9,9 @@ import type { PlayerFactory } from "../lib/types";
 import { clamp, easeInOut, smooth } from "../lib/util";
 
 function words(html: string): string[] {
-  // keep <em> spans as accent words
-  const out: string[] = [];
-  const re = /<em>(.*?)<\/em>|([^\s<]+)/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(html))) {
-    if (m[1]) m[1].split(/\s+/).forEach((w) => out.push(`<em>${w}</em>`));
-    else out.push(m[2]);
-  }
-  return out;
+  // one span per word; an accent span covering several words becomes one <em> per word, punctuation stays attached
+  const expanded = html.replace(/<em>(.*?)<\/em>/g, (_, inner: string) => inner.split(/\s+/).map((w) => `<em>${w}</em>`).join(" "));
+  return expanded.split(/\s+/).filter(Boolean);
 }
 
 const factory: PlayerFactory = async (cfg, ctx) => {
@@ -35,7 +29,7 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   .ss-type--stack .ln { display: block; will-change: transform, opacity; }
   .ss-type--swap .ss-type__text { font-size: clamp(44px, 7vw, 132px); text-align: center; }
   .ss-type--swap .roll { display: inline-block; position: relative; overflow: hidden; vertical-align: bottom; height: 1.06em; color: var(--accent); }
-  .ss-type--swap .roll i { display: block; font-style: normal; will-change: transform; }
+  .ss-type--swap .roll i { display: block; height: 1.06em; line-height: 1.06em; font-style: normal; will-change: transform; }
   .ss-type--scale .ss-type__text { font-size: clamp(60px, 12vw, 240px); white-space: nowrap; text-transform: uppercase; }
   .ss-type--scale .ch { display: inline-block; will-change: transform, opacity; }
   `;
@@ -73,9 +67,8 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     text.innerHTML = [...(cfg.text as string)].map((c) => `<span class="ch">${c === " " ? "&nbsp;" : c}</span>`).join("");
     const chars = [...text.querySelectorAll<HTMLElement>(".ch")];
     update = (p) => {
-      const settle = easeInOut(clamp(p / 0.55));
-      text.style.transform = `scale(${6 - 5 * settle})`;
-      text.style.opacity = String(clamp(p / 0.1));
+      const settle = easeInOut(clamp(p / 0.5));
+      text.style.transform = `scale(${2.6 - 1.6 * settle})`;
       const burst = smooth(0.7, 1, p);
       chars.forEach((c, i) => {
         const dir = (i / Math.max(1, chars.length - 1) - 0.5) * 2;

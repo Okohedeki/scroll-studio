@@ -71,9 +71,14 @@ def has_mesh_parent(o):
 parts = [o for o in meshes if not has_mesh_parent(o)]
 base = {o.name: o.matrix_world.copy() for o in parts}
 dirs = {}
+def footprint(o):
+    w = [o.matrix_world @ Vector(v) for v in o.bound_box]
+    return (max(p.x for p in w) - min(p.x for p in w)) * (max(p.y for p in w) - min(p.y for p in w))
+anchor = max(parts, key=footprint).name if len(parts) > 1 else None   # the base (board, chassis) stays put
 for o in parts:
     c = sum((o.matrix_world @ Vector(v) for v in o.bound_box), Vector()) / 8
-    dirs[o.name] = c
+    lift = 0.22 + 0.3 * ((sum(map(ord, o.name)) * 2654435761) % 1000) / 1000   # staggered, deterministic
+    dirs[o.name] = Vector((c.x * 0.35, c.y * 0.35, lift)) if o.name != anchor else Vector((0, 0, 0))
 
 floor_z = min((o.matrix_world @ Vector(v)).z for o in meshes for v in o.bound_box)
 
@@ -106,7 +111,10 @@ scene.world = world
 world.use_nodes = True
 nt = world.node_tree
 env = nt.nodes.new("ShaderNodeTexEnvironment")
-hdri = bpy.utils.system_resource("DATAFILES", path=f"studiolights/world/{a.hdri}.exr")
+hdri = next((p for p in (os.path.join(bpy.utils.resource_path(k), "datafiles", "studiolights", "world", f"{a.hdri}.exr")
+                          for k in ("LOCAL", "SYSTEM", "USER")) if os.path.exists(p)), None)
+if hdri is None:
+    raise SystemExit(f"studio light '{a.hdri}' not found in Blender's datafiles")
 env.image = bpy.data.images.load(hdri)
 bgn = nt.nodes["Background"]
 bgn.inputs["Strength"].default_value = 1.0
@@ -151,10 +159,9 @@ for f in frames:
     ex = k.get("explode", 0)
     for o in parts:
         v = dirs[o.name]
-        o.matrix_world = Matrix.Translation(Vector((v.x, v.y, max(v.z, 0) + 0.3)) * ex * 0.9) @ base[o.name]
-    floor.location.z = floor_z - ex * 0.25
+        o.matrix_world = Matrix.Translation(v * ex) @ base[o.name]
     yaw, pitch = math.radians(k.get("yaw", 0)), math.radians(k.get("pitch", 15))
-    dist = base_dist * (1 + ex * 0.55) / max(k.get("zoom", 1), 0.05)
+    dist = base_dist * (1 + ex * 0.15) / max(k.get("zoom", 1), 0.05)
     cam.location = Vector((math.sin(yaw) * math.cos(pitch), -math.cos(yaw) * math.cos(pitch), math.sin(pitch))) * dist
     cam.rotation_euler = (-cam.location).to_track_quat("-Z", "Y").to_euler()
     scene.render.filepath = os.path.join(a.out, "frames", f"{f:04d}.png")

@@ -1,0 +1,64 @@
+# Fischer & Vale: a luxury chess maker. Scene type `sequence`: a 3D model rendered by Blender (Cycles)
+# into frames; scrolling lifts the pieces off the board, circles the set and settles them back.
+# The model downloads on first build: "A Beautiful Game" from the Khronos glTF sample assets (CC BY 4.0).
+name: Fischer & Vale
+description: Hand-turned chess sets in walnut, maple and blown glass.
+theme:
+  preset: brass
+  colors: { bg: "#0b0b0d", bg2: "#121216" }
+nav:
+  cta: { label: Commission a set, href: "#commission" }
+sections:
+  - id: set
+    type: sequence
+    nav_label: The set
+    layout: cards
+    side: right
+    model: https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ABeautifulGame/glTF-Binary/ABeautifulGame.glb
+    credit: "“A Beautiful Game” © ASWF / MaterialX Project, glTF by Ed Mackey, CC BY 4.0"
+    frames: 96
+    samples: 64
+    hdri: interior
+    keys:
+      - { t: 0.0, yaw: -28, pitch: 50, explode: 0, zoom: 1.35 }
+      - { t: 0.35, yaw: 15, pitch: 30, explode: 0.9, zoom: 1.2 }
+      - { t: 0.6, yaw: 70, pitch: 20, explode: 1.0, zoom: 1.25 }
+      - { t: 0.85, yaw: 118, pitch: 15, explode: 0, zoom: 1.55 }
+      - { t: 1.0, yaw: 138, pitch: 11, explode: 0, zoom: 1.75 }
+    steps:
+      - intro: true
+        kicker: Fischer & Vale
+        title: Thirty-two pieces. <em>One opening move.</em>
+        body: Every set is turned, carved and blown by hand in our workshop, then played before it leaves.
+        hint: Scroll to lift the pieces
+      - { kicker: Walnut and maple, title: The board comes <em>first.</em>, length: 1.3,
+          body: "Sixty-four squares cut from a single board of each wood, so the grain runs unbroken from rank to rank." }
+      - { kicker: Blown glass, title: Pieces you can <em>see through.</em>, length: 1.4,
+          body: Each piece is gathered from the furnace and shaped by eye. No two kings are quite the same height., fact: "Lead-free crystal, annealed for 14 hours." }
+      - { kicker: Weighted and felted, title: Set down <em>without a sound.</em>, length: 1.4,
+          body: "Brass weights under green baize: every piece sits square and stays there, even in a blitz." }
+  - type: intro
+    id: craft
+    nav_label: Craft
+    kicker: The workshop
+    title: Made slowly, <em>played for generations.</em>
+    body: Four makers, one bench, about forty sets a year. Each one is signed and numbered under the board.
+    button: { label: Visit the workshop, href: "#commission" }
+  - type: features
+    items:
+      - { tag: Classic, title: Walnut & Maple, body: "Board 50 cm, king 9.5 cm. Hand-turned wooden pieces." }
+      - { tag: Signature, title: Glass & Walnut, body: Blown-glass pieces on a walnut and maple board. The set shown above. }
+      - { tag: Bespoke, title: Your commission, body: "Your woods, your glass colours, an engraving under every king." }
+  - type: stats
+    items:
+      - { value: "40", label: Sets a year }
+      - { value: "14", unit: hrs, label: Annealing per piece }
+      - { value: "64", label: Squares from one board }
+      - { value: "1", label: Maker signs every set }
+  - type: cta
+    id: commission
+    kicker: Commissions open
+    title: Your move.
+    button: { label: Commission a set, href: "#" }
+    background: scene:set
+footer: { left: "© Fischer & Vale. A concept site." }

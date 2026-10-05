@@ -58,7 +58,8 @@ const factory: PlayerFactory = async (cfg, ctx) => {
       const k = fit(cw / im.naturalWidth, ch / im.naturalHeight);
       const w = im.naturalWidth * k, h = im.naturalHeight * k;
       g.clearRect(0, 0, cw, ch);
-      g.drawImage(im, (cw - w) / 2, (ch - h) / 2, w, h);
+      const shift = isMobile() ? 0 : (cfg.shift || 0) * cw;
+      g.drawImage(im, (cw - w) / 2 + shift, (ch - h) / 2, w, h);
       drawn = frames[i] ? i : -1;
       dirty = false;
     },

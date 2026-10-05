@@ -26,7 +26,7 @@ class Link(Model):
 
 class ImageInput(Model):
     """An image the engine uses as input: a file in the project's inputs/, or one generated locally."""
-    file: Optional[str] = Field(None, description="Path relative to the project folder, e.g. inputs/photo.jpg")
+    file: Optional[str] = Field(None, description="Path relative to the project folder (inputs/photo.jpg) or an https URL")
     generate: Optional[str] = Field(None, description="Prompt for a local text-to-image model (Z-Image Turbo)")
     size: tuple[int, int] = Field((1920, 1088), description="Generated size (multiples of 16)")
     seed: int = 7
@@ -117,12 +117,15 @@ class Scene3DScene(SceneBase):
     background: Optional[str] = None
     bloom: tuple[float, float, float] = (0.5, 0.45, 0.12)
     final: Optional[str] = Field(None, description="Extra beat on the last level, e.g. 'dock' for molecule docking")
+    dust: str = Field("#8fb8d8", description="Colour of the background dust particles")
+    seed: int = Field(7, description="Seed for the procedural presets")
 
 
 class SequenceScene(SceneBase):
     """A 3D model rendered to an image sequence (turntable, explode, assemble) and scrubbed by scroll."""
     type: Literal["sequence"] = "sequence"
-    model: str = Field(..., description="glTF/GLB (or OBJ/FBX) file in the project")
+    model: str = Field(..., description="glTF/GLB, OBJ, FBX or STL: a project file or an https URL (downloaded once)")
+    credit: Optional[str] = Field(None, description="Attribution shown in the footer (e.g. for CC-BY models)")
     frames: int = 120
     size: tuple[int, int] = (1920, 1080)
     samples: int = 96

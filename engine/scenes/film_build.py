@@ -33,9 +33,9 @@ def stage_blockout(shot, out):
     w, h = shot["preview_res"]
     bl = shot.get("blockout", {})
     if bl.get("file"):   # user scene: its camera animation drives the shot
-        cmd = [BLENDER, "-b", bl["file"], "--python", os.path.join(SCRIPTS, "file_blockout.py"), "--"]
+        cmd = [BLENDER, "-b", bl["file"], "--python-exit-code", "1", "--python", os.path.join(SCRIPTS, "file_blockout.py"), "--"]
     else:
-        cmd = [BLENDER, "-b", "--factory-startup", "-P", os.path.join(SCRIPTS, "presets", bl.get("preset", "rocket_launch").replace("-", "_") + ".py"), "--"]
+        cmd = [BLENDER, "-b", "--factory-startup", "--python-exit-code", "1", "-P", os.path.join(SCRIPTS, "presets", bl.get("preset", "rocket_launch").replace("-", "_") + ".py"), "--"]
     sh(cmd + ["--out", bdir, "--fps", shot["fps"], "--duration", shot["duration"], "--res", f"{w}x{h}"])
     frames = sorted(glob.glob(os.path.join(bdir, "frames", "*.png")))
     ff("-framerate", str(shot["fps"]), "-i", os.path.join(bdir, "frames", "%04d.png"),

@@ -47,7 +47,7 @@ const LADDERS: string[][] = [["nm", "µm", "mm", "m", "km"], ["km", "AU", "ly", 
 export function parseScale(label: string): { v: number; unit: string } | null {
   const m = label.trim().match(/^([\d.,]+)\s*([^\d\s]+)$/);
   if (!m || !(m[2] in UNITS)) return null;
-  return { v: parseFloat(m[1].replace(",", "")) * UNITS[m[2]], unit: m[2] };
+  return { v: parseFloat(m[1].replace(/,/g, "")) * UNITS[m[2]], unit: m[2] };
 }
 
 export function formatScale(metres: number, near: string[]): string {
@@ -55,7 +55,8 @@ export function formatScale(metres: number, near: string[]): string {
   let unit = ladder[0];
   for (const u of ladder) if (metres >= UNITS[u] * 0.999) unit = u;
   const v = metres / UNITS[unit];
-  return (v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(0) : v.toFixed(1)).replace(/\.0$/, "") + " " + unit;
+  const txt = v >= 10 ? Math.round(v).toLocaleString("en-US") : v.toFixed(1).replace(/\.0$/, "");
+  return txt + " " + unit;
 }
 
 export function scaleAt(labels: string[], z: number): string {

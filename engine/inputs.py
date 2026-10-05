@@ -11,6 +11,29 @@ from .project import BuildError, Project
 from .spec import ImageInput, ImageRef
 
 
+def resolve_path(project: Project, ref: str, log=print) -> Path:
+    """A project file, or an http(s) URL downloaded once into .build/_downloads (cached by URL)."""
+    if ref.startswith(("http://", "https://")):
+        import requests
+        name = hashlib.sha1(ref.encode()).hexdigest()[:12] + "_" + ref.split("?")[0].rsplit("/", 1)[-1][-60:]
+        out = project.build / "_downloads" / name
+        if not out.exists():
+            out.parent.mkdir(parents=True, exist_ok=True)
+            log(f"  downloading {ref}")
+            with requests.get(ref, stream=True, timeout=60) as r:
+                r.raise_for_status()
+                tmp = out.with_suffix(out.suffix + ".part")
+                with open(tmp, "wb") as f:
+                    for chunk in r.iter_content(1 << 20):
+                        f.write(chunk)
+                tmp.replace(out)
+        return out
+    p = project.path(ref)
+    if not p.exists():
+        raise BuildError(f"input not found: {ref}")
+    return p
+
+
 def image_key(ref: ImageRef) -> dict:
     if isinstance(ref, str):
         return {"file": ref}
@@ -21,10 +44,7 @@ def resolve_image(project: Project, ref: ImageRef, log=print) -> Path:
     if isinstance(ref, str):
         ref = ImageInput(file=ref)
     if ref.file:
-        p = project.path(ref.file)
-        if not p.exists():
-            raise BuildError(f"input not found: {ref.file}")
-        return p
+        return resolve_path(project, ref.file, log)
     if not ref.generate:
         raise BuildError("an image input needs `file` or `generate`")
     w, h = (int(v) // 16 * 16 for v in ref.size)

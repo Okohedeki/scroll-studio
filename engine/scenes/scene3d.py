@@ -20,4 +20,4 @@ def build(sec: Scene3DScene, ctx: BuildContext, theme: dict) -> dict:
             params["url"] = ctx.url(dst)
         levels.append({"preset": lv.preset, "params": params})
     return {"style": sec.style, "levels": levels, "zoom": sec.zoom, "background": sec.background,
-            "bloom": list(sec.bloom), "final": sec.final}
+            "bloom": list(sec.bloom), "final": sec.final, "dust": sec.dust, "seed": sec.seed}

@@ -205,15 +205,20 @@ const galaxy: Preset = (p, k) => {
     const r = Math.pow(k.rnd(), 1.6) * R, a = (i % arms) / arms * Math.PI * 2 + r * 0.42 + k.rnd(-0.35, 0.35) * (1.2 - r / R);
     const spread = 0.25 + 0.9 * (1 - r / R);
     return new THREE.Vector3(Math.cos(a) * r + k.rnd(-spread, spread), k.rnd(-0.35, 0.35) * (1 - r / R * 0.7), Math.sin(a) * r + k.rnd(-spread, spread));
-  }, 0xffffff, 0.09, 0.9, () => {
+  }, 0xffffff, p.starSize ?? 0.12, 1.0, () => {
     const u = k.rnd();
     return tmp.copy(core).lerp(arm, Math.min(1, u * 1.4)).lerp(hot, k.rnd() < 0.08 ? 0.8 : 0).clone();
   }));
-  body.add(k.points(5000, () => k.inSphere(1).multiply(new THREE.Vector3(2.6, 0.9, 2.6)), col(p.core, "#ffd29a"), 0.16, 0.9));
-  body.add(k.sprite(col(p.core, "#ffcf8a"), 9, 0.55));
+  body.add(k.points(4000, () => k.inSphere(1).multiply(new THREE.Vector3(2.2, 0.7, 2.2)), col(p.core, "#ffd29a"), 0.09, 0.45));
+  body.add(k.sprite(col(p.core, "#ffcf8a"), 4.5, 0.28));
+  // dust lanes: dark-ish violet haze along the arms adds depth without washing out the core
+  body.add(k.points(9000, (i) => {
+    const r = R * (0.25 + 0.75 * k.rnd()), a = (i % arms) / arms * Math.PI * 2 + r * 0.42 + 0.18;
+    return new THREE.Vector3(Math.cos(a) * r + k.rnd(-0.5, 0.5), k.rnd(-0.12, 0.12), Math.sin(a) * r + k.rnd(-0.5, 0.5));
+  }, col(p.haze, "#6d5cff"), 0.35, 0.05));
   body.position.copy(target).multiplyScalar(-1);
   g.add(body);
-  g.add(k.sprite(col(p.target, "#fff1c9"), 1.4, 1));
+  g.add(k.sprite(col(p.target, "#fff1c9"), 1.0, 1), k.sprite(col(p.target, "#ffd9a0"), 2.6, 0.35));
   g.rotation.set(p.tilt ?? 0.9, 0, 0.25);
   return { group: g, update: (t) => { g.rotation.y = Math.sin(t * 0.05) * 0.08; } };
 };
@@ -270,12 +275,12 @@ float fbm(vec3 p){float f=0.,a=.5;for(int i=0;i<6;i++){f+=a*snoise(p);p*=2.03;a*
 
 const planet: Preset = (p, k) => {
   const g = new THREE.Group(), R = p.radius ?? 6;
-  const light = new THREE.Vector3(...((p.light ?? [-1, 0.35, 0.8]) as [number, number, number])).normalize();
+  const light = new THREE.Vector3(...((p.light ?? [-1, 0.25, 0.35]) as [number, number, number])).normalize();
   const uniforms = {
     t: { value: 0 }, light: { value: light }, opacity: { value: 1 }, seed: { value: p.seed ?? 3.7 },
     ocean: { value: new THREE.Color(p.ocean ?? "#0b2a5b") }, land: { value: new THREE.Color(p.land ?? "#5c7a3a") },
     desert: { value: new THREE.Color(p.desert ?? "#b89a64") }, ice: { value: new THREE.Color("#eef4ff") },
-    city: { value: new THREE.Color(p.city ?? "#ffb35c") }, seaLevel: { value: p.sea ?? 0.02 },
+    city: { value: new THREE.Color(p.city ?? "#ffb35c") }, seaLevel: { value: p.sea ?? 0.0 },
   };
   const surf = new THREE.ShaderMaterial({
     uniforms, transparent: true,
@@ -284,20 +289,37 @@ const planet: Preset = (p, k) => {
     fragmentShader: NOISE + `
       uniform vec3 light, ocean, land, desert, ice, city; uniform float t, opacity, seed, seaLevel;
       varying vec3 vP; varying vec3 vN; varying vec3 vW;
+      float warped(vec3 p){ vec3 q = vec3(fbm(p + seed), fbm(p + vec3(5.2, 1.3, 2.8) + seed), fbm(p + vec3(1.7, 9.2, 4.1) + seed)); return fbm(p + 1.6 * q); }
       void main(){
         vec3 n = normalize(vP);
-        float h = fbm(n * 1.8 + seed);
+        float h = warped(n * 1.25);                       // continents
+        float detail = fbm(n * 9.0 + seed * 3.);          // mountains, coastlines
         float lat = abs(n.y);
-        vec3 c = mix(ocean * (0.7 + 0.6 * smoothstep(-0.4, seaLevel, h)), mix(land, desert, smoothstep(0.1, 0.45, fbm(n * 3.1 + seed * 2.))), step(seaLevel, h));
-        c = mix(c, ice, smoothstep(0.78, 0.9, lat + h * 0.15));
-        float clouds = smoothstep(0.1, 0.6, fbm(n * 2.6 + vec3(t * 0.01, 0., t * 0.006) + 9.));
-        float diff = max(dot(normalize(vN), light), 0.);
-        vec3 lit = c * (0.04 + 1.1 * diff);
-        float lights = step(seaLevel + 0.02, h) * smoothstep(0.35, 0.75, snoise(n * 40. + seed)) * smoothstep(0.15, 0.0, diff) * (1. - lat);
-        lit += city * lights * 0.9;
-        lit = mix(lit, vec3(1.) * (0.06 + diff), clouds * 0.85);
-        float spec = pow(max(dot(reflect(-light, normalize(vN)), normalize(cameraPosition - vW)), 0.), 40.) * (1. - step(seaLevel, h)) * diff;
-        gl_FragColor = vec4(lit + spec * 0.5, opacity);
+        float landMask = smoothstep(seaLevel - 0.01, seaLevel + 0.02, h + detail * 0.06);
+        float depth = clamp((seaLevel - h) * 3.0, 0., 1.);
+        vec3 sea = mix(ocean * 1.6 + vec3(0.0, 0.08, 0.1), ocean * 0.55, depth);
+        float dry = smoothstep(-0.1, 0.35, fbm(n * 2.2 + seed * 2.) + (0.35 - lat) * 0.6);
+        vec3 ground = mix(land * (0.7 + 0.5 * detail), desert * (0.85 + 0.3 * detail), dry);
+        ground = mix(ground, vec3(0.42, 0.38, 0.34), smoothstep(0.35, 0.6, h + detail * 0.3) * 0.6);   // highlands
+        vec3 c = mix(sea, ground, landMask);
+        c = mix(c, ice, smoothstep(0.74, 0.86, lat + detail * 0.08));
+        // clouds: two warped layers drifting at different speeds
+        vec3 cn = n * 2.3 + vec3(t * 0.004, 0., t * 0.002);
+        float clouds = smoothstep(0.05, 0.55, warped(cn + 11.) * 0.9 + fbm(n * 7. + t * 0.003) * 0.25);
+        vec3 N = normalize(vN);
+        float ndl = dot(N, light);
+        float diff = smoothstep(-0.08, 1.0, ndl);
+        vec3 lit = c * (0.015 + 1.15 * diff);
+        float night = smoothstep(0.05, -0.25, ndl);
+        float lights = landMask * smoothstep(0.55, 0.9, snoise(n * 55. + seed)) * smoothstep(0.3, 0.6, fbm(n * 6. + seed)) * (1. - lat);
+        lit += city * lights * night * (1. - clouds) * 1.4;
+        vec3 V = normalize(cameraPosition - vW);
+        float spec = pow(max(dot(reflect(-light, N), V), 0.), 60.) * (1. - landMask) * diff;
+        lit += vec3(1., 0.95, 0.85) * spec * 0.7;
+        lit = mix(lit, vec3(1.) * (0.02 + 1.05 * diff), clouds * 0.9);
+        float rim = pow(1. - max(dot(N, V), 0.), 3.);
+        lit += vec3(0.35, 0.6, 1.0) * rim * diff * 0.6;   // atmospheric scattering at the limb
+        gl_FragColor = vec4(lit, opacity);
       }`,
   });
   g.add(new THREE.Mesh(new THREE.SphereGeometry(R, 128, 96), surf));

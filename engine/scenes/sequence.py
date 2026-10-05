@@ -12,7 +12,7 @@ from ..project import BuildContext, BuildError, file_key
 from ..spec import SequenceScene
 
 SCRIPT = Path(__file__).resolve().parent.parent / "backends" / "blender_scripts" / "turntable.py"
-VERSION = 2
+VERSION = 4
 
 
 def _hex(h: str) -> tuple[int, int, int]:
@@ -21,9 +21,8 @@ def _hex(h: str) -> tuple[int, int, int]:
 
 
 def build(sec: SequenceScene, ctx: BuildContext, theme: dict) -> dict:
-    model = ctx.project.path(sec.model)
-    if not model.exists():
-        raise BuildError(f"sequence '{sec.id}': model not found: {sec.model}")
+    from ..inputs import resolve_path
+    model = resolve_path(ctx.project, sec.model, ctx.log)
     raw = ctx.work / "render"
     frames = [raw / "frames" / f"{i:04d}.png" for i in range(1, sec.frames + 1)]
     draft = bool(ctx.options.get("draft"))
@@ -33,7 +32,7 @@ def build(sec: SequenceScene, ctx: BuildContext, theme: dict) -> dict:
            "keys": sec.keys, "hdri": sec.hdri}
 
     def render():
-        cmd = [settings()["blender"], "-b", "--factory-startup", "-P", str(SCRIPT), "--", "--model", str(model),
+        cmd = [settings()["blender"], "-b", "--factory-startup", "--python-exit-code", "1", "-P", str(SCRIPT), "--", "--model", str(model),
                "--out", str(raw), "--frames", str(sec.frames), "--size", f"{size[0]}x{size[1]}", "--samples", str(samples),
                "--keys", json.dumps(sec.keys), "--hdri", sec.hdri]
         ctx.log("  $ blender turntable.py " + sec.model)
@@ -67,7 +66,9 @@ def build(sec: SequenceScene, ctx: BuildContext, theme: dict) -> dict:
     ctx.stage("encode", {"r": key, "bg": bg}, [desk / f"{sec.frames:04d}.webp", ctx.web / "end.jpg"], encode)
     return {
         "count": sec.frames, "background": bg, "fit": "contain",
+        "shift": (0.13 if sec.side == "right" else -0.13) if sec.layout == "cards" else 0,
         "desktop": {"base": ctx.url(desk) + "/", "ext": "webp"},
         "mobile": {"base": ctx.url(mob) + "/", "ext": "webp"},
         "poster": ctx.url(ctx.web / "poster.jpg"), "end": ctx.url(ctx.web / "end.jpg"),
+        "credits": [sec.credit] if sec.credit else [],
     }
