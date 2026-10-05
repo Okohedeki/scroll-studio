@@ -30,6 +30,7 @@ class ImageInput(Model):
     generate: Optional[str] = Field(None, description="Prompt for a local text-to-image model (Z-Image Turbo)")
     size: tuple[int, int] = Field((1920, 1088), description="Generated size (multiples of 16)")
     seed: int = 7
+    crop: Optional[tuple[float, float, float, float]] = Field(None, description="Crop [x0, y0, x1, y1] in 0-1 image coordinates")
     credit: Optional[str] = Field(None, description="Attribution shown in the footer")
 
 
@@ -47,6 +48,8 @@ class Step(Model):
     intro: bool = Field(False, description="Render as the section's opening headline (h1)")
     hint: Optional[str] = Field(None, description="Small 'scroll to begin' line under an intro step")
     image: Optional[ImageRef] = Field(None, description="parallax: this step's photo")
+    state: dict[str, Any] = Field(default_factory=dict,
+        description="Scene-specific state for this step. chart: {show, focus, x, y, reveal, marks}; map: {center, zoom, pitch, bearing, route, marker}")
 
 
 class Hud(Model):
@@ -150,6 +153,40 @@ class ParallaxScene(SceneBase):
     width: int = Field(2560, description="Max photo width served to desktop browsers")
 
 
+class VectorScene(SceneBase):
+    """A logo or line drawing whose strokes draw themselves, then fill. From an SVG, or a raster image vectorised
+    with vtracer (engravings, illustrations, logos)."""
+    type: Literal["vector"] = "vector"
+    layout: Literal["overlay", "split", "cards"] = "split"
+    svg: Optional[str] = Field(None, description="SVG file (project path or https URL)")
+    image: Optional[ImageRef] = Field(None, description="Raster image to vectorise when there is no SVG")
+    order: Literal["center", "left", "top", "document"] = Field("center", description="Which strokes draw first")
+    colors: Literal["original", "ink", "accent"] = Field("original", description="Fill colours: as traced, theme ink, or theme accent")
+    detail: float = Field(1.0, description="Vectorising detail: higher keeps smaller specks (more paths, heavier page)")
+    threshold: int = Field(140, description="Raster images: grey level below which a pixel counts as ink (0-255)")
+    max_width: int = Field(2000, description="Raster images are traced at this width")
+    background: Optional[str] = Field(None, description="Canvas colour behind the drawing (defaults to the theme)")
+
+
+class ChartScene(SceneBase):
+    """A data story: a chart that draws, zooms, highlights and annotates itself as the steps scroll past.
+    Each step's `state` says what to show: {show: [series], focus: [series], x: [x0, x1], y: [y0, y1],
+    reveal: true (draw the lines across this step), marks: [{series, x, label}]}."""
+    type: Literal["chart"] = "chart"
+    layout: Literal["overlay", "split", "cards"] = "split"
+    data: str = Field(..., description="CSV file (project path or https URL), long format: one row per (series, x, y)")
+    x: str = Field(..., description="Column for the x axis (numbers or years)")
+    y: str = Field(..., description="Column for the y axis")
+    series: Optional[str] = Field(None, description="Column that names each line")
+    include: list[str] = Field(default_factory=list, description="Series to load (empty = all, capped at 12)")
+    kind: Literal["line", "area"] = "line"
+    y_scale: Literal["linear", "log"] = "linear"
+    y_label: Optional[str] = None
+    unit: str = Field("", description="Unit after values, e.g. ' GW'")
+    source: Optional[str] = Field(None, description="Data credit shown under the chart and in the footer")
+    colors: list[str] = Field(default_factory=list, description="Series colours in `include` order (defaults to the theme)")
+
+
 class TypeScene(SceneBase):
     """Kinetic typography driven by scroll."""
     type: Literal["type"] = "type"
@@ -244,11 +281,11 @@ class GalleryBlock(BlockBase):
 
 
 Section = Annotated[Union[
-    FilmScene, ArtworkScene, Scene3DScene, SequenceScene, ParallaxScene, TypeScene,
+    FilmScene, ArtworkScene, Scene3DScene, SequenceScene, ParallaxScene, TypeScene, VectorScene, ChartScene,
     IntroBlock, FeaturesBlock, StatsBlock, TimelineBlock, QuoteBlock, CtaBlock, GalleryBlock,
 ], Field(discriminator="type")]
 
-SCENE_TYPES = ("film", "artwork", "scene3d", "sequence", "parallax", "type")
+SCENE_TYPES = ("film", "artwork", "scene3d", "sequence", "parallax", "type", "vector", "chart")
 
 
 # ---------------------------------------------------------------- site

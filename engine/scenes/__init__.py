@@ -11,6 +11,8 @@ MODULES = {
     "sequence": "sequence",
     "parallax": "parallax",
     "type": "type",
+    "vector": "vector",
+    "chart": "chart",
 }
 
 

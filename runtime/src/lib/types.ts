@@ -1,6 +1,6 @@
 export interface Step {
   kicker?: string; title: string; body?: string; fact?: string;
-  at?: [number, number]; length: number; intro?: boolean; hint?: string;
+  at?: [number, number]; length: number; intro?: boolean; hint?: string; state?: any;
 }
 
 export interface Hud {

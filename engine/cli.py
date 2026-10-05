@@ -88,12 +88,12 @@ def preview(name: str, port: int = 5173):
 
 @app.command()
 def record(name: str, section: Optional[str] = None, seconds: float = 12.0, out: Optional[Path] = None,
-           gif: bool = False, width: int = 1920, height: int = 1080):
+           gif: bool = False, width: int = 1920, height: int = 1080, out_width: Optional[int] = None):
     """Record a scroll-through to MP4 (for README, social posts, Reddit)."""
     from .record import record as rec
     root = resolve(name)
     out = out or root / "recordings" / f"{section or 'page'}.mp4"
-    rec(root / "dist", out, section=section, size=(width, height), seconds=seconds, gif=gif)
+    rec(root / "dist", out, section=section, size=(width, height), seconds=seconds, gif=gif, out_width=out_width)
 
 
 @app.command()

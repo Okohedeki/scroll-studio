@@ -1,0 +1,68 @@
+# Wunderkammer: a natural history museum. Scene type `vector`: Albrecht Duerer's Rhinoceros (1515, public domain)
+# is vectorised with vtracer, then every line of the woodcut draws itself and fills in as you scroll.
+name: Wunderkammer
+description: A museum of natural history and the curious objects that explained the world before science could.
+theme:
+  preset: paper
+  colors: { bg: "#ece4d3", bg2: "#e2d8c4", accent: "#8a2d1b", accent2: "#a8452c" }
+  fonts: { display: "Cormorant Garamond", body: "Figtree" }
+nav:
+  cta: { label: Plan a visit, href: "#visit" }
+sections:
+  - id: rhino
+    type: vector
+    nav_label: The rhinoceros
+    layout: split
+    side: right
+    image:
+      file: https://upload.wikimedia.org/wikipedia/commons/3/3f/D%C3%BCrer%27s_Rhinoceros%2C_1515.jpg
+      crop: [0.0, 0.15, 1.0, 1.0]
+      credit: "The Rhinoceros, Albrecht Dürer, 1515. Public domain (National Gallery of Art)."
+    threshold: 120
+    detail: 1.0
+    order: center
+    colors: ink
+    hud: { kind: progress, scales: [A blank block] }
+    steps:
+      - intro: true
+        kicker: In the collection
+        title: A rhinoceros <em>no one had seen.</em>
+        body: In 1515 a rhinoceros arrived in Lisbon, the first in Europe for twelve hundred years. Dürer never saw it. He drew it from a letter and a sketch, and this woodcut became the rhinoceros for the next three centuries.
+        hint: Scroll to cut the block
+      - kicker: 01 · The line
+        title: Cut by hand, <em>line by line.</em>
+        body: Every line here was left standing by a woodcutter's knife; everything else was cut away. Watch them return in the order your eye finds them.
+        fact: Pear wood block, about 21 × 30 cm. Printed in thousands of copies.
+        length: 2.2
+      - kicker: 02 · The ink
+        title: Armour that <em>wasn't there.</em>
+        body: Dürer gave it plates like a suit of armour, a scaly hide and a small extra horn on its back. None of them are real, and almost everyone believed them anyway.
+        fact: Even school textbooks used Dürer's rhinoceros until the 1930s.
+        length: 1.6
+      - kicker: 03 · The legacy
+        title: The most copied <em>animal in art.</em>
+        body: It is in the museum in the original printing, alongside the letters that described the animal to him.
+        length: 1.2
+  - type: intro
+    id: collection
+    nav_label: Collection
+    kicker: The collection
+    title: Objects that explained the world <em>before science could.</em>
+    body: Narwhal tusks sold as unicorn horn, mermaids stitched from fish and monkeys, and maps of countries that never existed. Four rooms, four hundred objects, and the stories people told about them.
+  - type: features
+    items:
+      - { tag: Room I, title: Unicorns & Dragons, body: "Horns, bones and teeth, and the beasts they were taken for." }
+      - { tag: Room II, title: Imagined Animals, body: "Dürer's rhinoceros and the other creatures drawn from rumour." }
+      - { tag: Room III, title: Edges of the Map, body: "Sea serpents, phantom islands and the cartographers who drew them." }
+  - type: stats
+    items:
+      - { value: "400", label: Objects on show }
+      - { value: "1515", label: The oldest print }
+      - { value: "4", label: Rooms }
+      - { value: "0", unit: "€", label: "Entry, every Sunday" }
+  - type: cta
+    id: visit
+    kicker: Open Tuesday to Sunday
+    title: Come and see <em>the original.</em>
+    button: { label: Plan a visit, href: "#" }
+footer: { left: "© Wunderkammer. A concept site." }

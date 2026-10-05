@@ -20,7 +20,8 @@ def resolve_path(project: Project, ref: str, log=print) -> Path:
         if not out.exists():
             out.parent.mkdir(parents=True, exist_ok=True)
             log(f"  downloading {ref}")
-            with requests.get(ref, stream=True, timeout=60) as r:
+            ua = {"User-Agent": "ScrollStudio/0.1 (+https://github.com/Okohedeki/scroll-studio)"}
+            with requests.get(ref, stream=True, timeout=60, headers=ua) as r:
                 r.raise_for_status()
                 tmp = out.with_suffix(out.suffix + ".part")
                 with open(tmp, "wb") as f:
@@ -43,6 +44,17 @@ def image_key(ref: ImageRef) -> dict:
 def resolve_image(project: Project, ref: ImageRef, log=print) -> Path:
     if isinstance(ref, str):
         ref = ImageInput(file=ref)
+    if ref.crop:
+        src = resolve_image(project, ref.model_copy(update={"crop": None}), log)
+        digest = hashlib.sha1(json.dumps([str(src), src.stat().st_size, list(ref.crop)]).encode()).hexdigest()[:12]
+        out = project.build / "_generated" / f"crop_{digest}.png"
+        if not out.exists():
+            from PIL import Image
+            im = Image.open(src)
+            x0, y0, x1, y1 = ref.crop
+            out.parent.mkdir(parents=True, exist_ok=True)
+            im.crop((round(x0 * im.width), round(y0 * im.height), round(x1 * im.width), round(y1 * im.height))).save(out)
+        return out
     if ref.file:
         return resolve_path(project, ref.file, log)
     if not ref.generate:

@@ -1,0 +1,75 @@
+# Daybreak Institute: an energy research non-profit. Scene type `chart`: real data (IRENA via Our World in Data,
+# CC BY 4.0) drawn with D3; each step's `state` decides which series show, the axis range, and the annotations.
+name: Daybreak Institute
+description: Independent research on the energy transition, in numbers you can check.
+theme:
+  preset: studio
+  colors: { accent: "#e07b00", accent2: "#f59e0b", accent_ink: "#1d1203" }
+nav:
+  cta: { label: Read the report, href: "#report" }
+sections:
+  - id: solar
+    type: chart
+    nav_label: The data
+    layout: split
+    side: right
+    data: "https://ourworldindata.org/grapher/installed-solar-pv-capacity.csv?v=1&csvType=full&useColumnShortNames=true"
+    x: year
+    y: solar__total_gw
+    series: entity
+    include: [World, China, Europe, United States, India]
+    colors: ["#e07b00", "#c0392b", "#2563eb", "#0f766e", "#7c3aed"]
+    kind: area
+    y_label: Installed solar capacity
+    unit: " GW"
+    source: "IRENA (2026), processed by Our World in Data, CC BY 4.0"
+    steps:
+      - intro: true
+        kicker: Daybreak Institute · 2026 report
+        title: The fastest energy build-out <em>in history.</em>
+        body: Solar power went from a rounding error to the largest source of new electricity on Earth in fifteen years. Scroll through the numbers.
+        hint: Scroll through the numbers
+        state: { show: [World], x: [2000, 2025], y: [0, 2600] }
+      - kicker: 2000 – 2010
+        title: A slow start.
+        body: For a decade solar was expensive and small. By 2010 the whole world had 41 gigawatts installed, less than 2% of what it has today.
+        length: 1.3
+        state: { show: [World], x: [2000, 2012], y: [0, 110], marks: [{ series: World, x: 2010, label: "41 GW in 2010" }] }
+      - kicker: 2010 – 2025
+        title: Then it went <em>vertical.</em>
+        body: By 2025 the world had 2,397 GW, almost sixty times as much. The world added 514 GW in 2025 alone, more than its entire total at the end of 2018.
+        length: 1.3
+        state: { show: [World], x: [2000, 2025], y: [0, 2600], marks: [{ series: World, x: 2025, label: "2,397 GW in 2025" }] }
+      - kicker: Who built it
+        title: Europe <em>went first.</em>
+        body: In 2010 Europe had three-quarters of the world's solar. German feed-in tariffs paid for the factories that brought prices down for everyone.
+        length: 1.3
+        state: { show: [Europe, China, United States, India], focus: [Europe], x: [2005, 2015], y: auto, marks: [{ series: Europe, x: 2010, label: "31 of the world's 41 GW" }] }
+      - kicker: The turn
+        title: Then China built <em>half of it.</em>
+        body: China went from 1 GW in 2010 to 1,202 GW in 2025, half of all the solar on the planet, and makes most of the panels everyone else installs.
+        length: 1.4
+        state: { show: [Europe, China, United States, India], focus: [China], x: [2010, 2025], y: auto, marks: [{ series: China, x: 2025, label: "1,202 GW" }] }
+      - kicker: What's next
+        title: India is the one <em>to watch.</em>
+        body: India passed 135 GW in 2025, up from under 6 GW in 2015. In 2025 it added more solar than the United States did.
+        length: 1.4
+        state: { show: [United States, India], focus: [India], x: [2012, 2025], y: auto, marks: [{ series: India, x: 2025, label: "136 GW" }] }
+  - type: stats
+    items:
+      - { value: "2397", unit: GW, label: Solar installed worldwide in 2025 }
+      - { value: "58", unit: "×", label: Growth since 2010 }
+      - { value: "50", unit: "%", label: Of it in China }
+      - { value: "15", unit: yrs, label: From niche to mainstream }
+  - type: intro
+    id: report
+    nav_label: Report
+    kicker: The 2026 report
+    title: Every chart, <em>every source.</em>
+    body: Our annual report tracks installations, prices and grids in 40 countries. All the data is open and every chart links to where it came from.
+    button: { label: Read the report, href: "#" }
+  - type: cta
+    kicker: Independent and open
+    title: Numbers you <em>can check.</em>
+    button: { label: Get the data, href: "#" }
+footer: { left: "© Daybreak Institute. A concept site; the data is real." }
