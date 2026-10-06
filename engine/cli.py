@@ -157,7 +157,10 @@ def publish(names: list[str], out: Path = typer.Option(..., help="Folder to depl
         if not (r / "dist" / "index.html").exists():
             raise typer.BadParameter(f"{r.name} is not built: run studio build first")
     out.mkdir(parents=True, exist_ok=True)
-    pattern = _re.compile(r"\.\./(" + "|".join(_re.escape(r.name) for r in roots) + r")/dist/")
+    # Any sibling project, not just the ones in this call: republishing one site must not break its links
+    # to sites published earlier.
+    pattern = _re.compile(r"\.\./([A-Za-z0-9_.-]+)/dist/")
+    linked: set[str] = set()
     for r in roots:
         dst = out / r.name
         if dst.exists():
@@ -165,10 +168,14 @@ def publish(names: list[str], out: Path = typer.Option(..., help="Folder to depl
         shutil.copytree(r / "dist", dst)
         for html in dst.rglob("*.html"):
             text = html.read_text(encoding="utf-8")
+            linked.update(m.group(1) for m in pattern.finditer(text))
             new = pattern.sub(lambda m: f"../{m.group(1)}/", text)
             if new != text:
                 html.write_text(new, encoding="utf-8")
         typer.echo(f"  {r.name}/")
+    for name in sorted(linked):
+        if not (out / name / "index.html").exists():
+            typer.echo(f"  warning: pages link to {name}/, which is not in {out}: publish it too")
     (out / ".nojekyll").write_text("")
     if home:
         # The folder's root serves the home page itself (not a redirect), so visitors, link previews and
