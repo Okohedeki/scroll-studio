@@ -1,8 +1,20 @@
 # Scroll Studio
 
-An open-source engine for scroll-driven websites. Give it a brief, a photo, a painting, a 3D model or a film idea;
-it builds a static site where scrolling plays the visuals. It runs entirely on your machine (no API keys), and
-Claude can drive it end to end.
+**Scroll-driven websites from one YAML file. Runs on your own machine with no API keys, and Claude can drive it
+through MCP.**
+
+[![Lodestar Orbital: a rocket launch that plays as you scroll](docs/media/lodestar.gif)](https://okohedeki.github.io/scroll-studio-showcase/)
+
+**[See all eleven example sites live →](https://okohedeki.github.io/scroll-studio-showcase/)**
+
+Give it a brief, a photo, a painting, a 3D model, a CSV or a film idea. It builds a static site where scrolling
+plays the visuals: generated video, a painting drawn stroke by stroke, a live 3D zoom, a data story, a map flight.
+The output is plain HTML, CSS and JS you can host anywhere.
+
+**What you need:** 6 of the 9 scene types (`scene3d`, `chart`, `map`, `type`, `vector`, and `artwork` from your own
+images) need no GPU at all, just Python and a browser. `parallax` and `sequence` run on the CPU but are much
+faster on a GPU. `film` generates video locally with LTX-2.3 and needs Blender, ComfyUI and a 24 GB card (RTX
+4090 class). Details in [docs/INSTALL.md](docs/INSTALL.md).
 
 ```
 site.yaml ──► studio build ──► dist/  (plain static files: host anywhere)
@@ -22,9 +34,7 @@ site.yaml ──► studio build ──► dist/  (plain static files: host anyw
 
 **Live samples: https://okohedeki.github.io/scroll-studio-showcase/**
 
-[![Lodestar Orbital preview](examples/showcase/previews/lodestar-orbital.jpg)](examples/showcase/previews/lodestar-orbital.mp4)
-
-*Lodestar Orbital: click for the scroll-through video.* Make previews for any project with
+Make previews for any project with
 `studio previews <project> ... --out <folder>` (a video and a poster each), or a single poster at a chosen
 moment with `studio poster <project> --at <scene>:<progress> --out poster.jpg`. Previews stay out of git. To put several built sites online together (GitHub Pages or any static host):
 `studio publish <project> ... --out <folder> --home showcase`.
@@ -109,4 +119,6 @@ gives it the workflow. Any MCP client can use `python -m engine.mcp_server`.
 
 ## Licence
 
-MIT. Model weights keep their own licences (see `engine/models.yaml`); some are non-commercial.
+MIT. Model weights keep their own licences (see `engine/models.yaml`). Two are non-commercial: Depth Anything V2
+Base/Large (CC-BY-NC-4.0; the default Small model is Apache-2.0) and the optional MusicGen. LTX-2.3 and Gemma ship
+under their own community terms. Check them before commercial use.

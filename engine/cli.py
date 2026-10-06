@@ -171,10 +171,14 @@ def publish(names: list[str], out: Path = typer.Option(..., help="Folder to depl
         typer.echo(f"  {r.name}/")
     (out / ".nojekyll").write_text("")
     if home:
-        (out / "index.html").write_text(
-            f'<!doctype html><meta charset="utf-8"><title>Scroll Studio</title>'
-            f'<meta http-equiv="refresh" content="0; url={home}/"><link rel="canonical" href="{home}/">'
-            f'<a href="{home}/">Scroll Studio showcase</a>', encoding="utf-8")
+        # The folder's root serves the home page itself (not a redirect), so visitors, link previews and
+        # text-only readers all get the real content. <base> makes its relative links and assets resolve
+        # inside the home project's folder.
+        if not (out / home / "index.html").exists():
+            raise typer.BadParameter(f"--home {home} is not in {out}: publish it too")
+        page = (out / home / "index.html").read_text(encoding="utf-8")
+        page = _re.sub(r"<head>", f'<head>\n<base href="{home}/">', page, count=1)
+        (out / "index.html").write_text(page, encoding="utf-8")
     typer.echo(f"published {len(roots)} site(s) to {out}")
 
 

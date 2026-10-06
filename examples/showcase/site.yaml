@@ -31,6 +31,7 @@ sections:
       - { title: Wunderkammer, kicker: "vector · museum", href: ../wunderkammer/dist/index.html, image: previews/wunderkammer.jpg, video: previews/wunderkammer.mp4, body: "Dürer's Rhinoceros, re-cut line by line." }
       - { title: Meridian, kicker: "film · private aviation", href: ../meridian/dist/index.html, image: previews/meridian.jpg, video: previews/meridian.mp4, body: "A jet descends through cloud over London." }
       - { title: FORM/26, kicker: "type · events", href: ../form-conference/dist/index.html, image: previews/form-conference.jpg, video: previews/form-conference.mp4, body: "A conference site told in kinetic type." }
+      - { title: Casa Alta, kicker: "parallax · hospitality", href: ../casa-alta/dist/index.html, image: previews/casa-alta.jpg, video: previews/casa-alta.mp4, body: "A cliff hotel's photos, given depth and a slow camera move." }
   - type: features
     kicker: How it works
     title: One spec in, <em>one static site out.</em>
@@ -45,7 +46,7 @@ sections:
       - { value: "9", label: Theme presets }
       - { value: "0", label: API keys }
   - type: cta
-    kicker: MIT licensed
+    kicker: MIT licensed · 6 of 9 scene types need no GPU
     title: Build one <em>tonight.</em>
     button: { label: Get Scroll Studio, href: "https://github.com/Okohedeki/scroll-studio" }
 footer: { left: "Scroll Studio · MIT", right: "Every example on this page is a concept site." }
