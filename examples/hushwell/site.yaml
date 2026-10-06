@@ -1,0 +1,135 @@
+# Hushwell: a consumer health service told in stacked panels. `layout: stack` makes every section a
+# full-screen panel with rounded top corners that slides up over the one before it; the covered panel
+# shrinks slightly and dims. Uses the content blocks made for this style: hero, product (with an HTML phone),
+# strip, orbit and faq. Photos are generated locally with Z-Image Turbo; swap any for `file: inputs/...`.
+name: Hushwell
+description: Personal sleep care, with a plan that changes as you do. A concept site.
+theme: { preset: clinic }
+layout: stack
+nav:
+  logo: "M4 15c2.5 0 4-1.6 4-4s1.5-4 4-4 4 1.6 4 4 1.5 4 4 4M4 19h16"
+  cta: { label: Start your plan, href: "#start" }
+sections:
+  - type: hero
+    badge: Sleep consults now open in six states
+    title: Sleep care, built around you.
+    body: A sleep clinician, a plan for your nights, and support that changes as you do.
+    buttons:
+      - { label: Start your plan, href: "#start" }
+      - { label: How it works, href: "#plan" }
+    image:
+      generate: Photograph of a calm bedroom at dawn, soft pale window light through linen curtains, an unmade bed with white and oatmeal linen, a person asleep seen from across the room, warm muted tones, quiet and minimal Scandinavian interior, cinematic, photorealistic, 35mm
+      size: [1920, 1088]
+      seed: 12
+
+  - type: product
+    id: plan
+    nav_label: The plan
+    kicker: Hushwell Sleep
+    title: A plan for your nights.
+    body: Tell us how you sleep. A clinician builds a plan around your evenings, your mornings and anything that keeps you up, then adjusts it every week.
+    tags: [Trouble falling asleep, Waking at night, Snoring, Jet lag, Shift work, Early waking]
+    buttons:
+      - { label: Explore the plan, href: "#start" }
+      - { label: Get the app, href: "#start" }
+    note: From $12 a month · concept pricing
+    image:
+      generate: Studio product photograph on a plain pure white seamless background, a minimalist sleep kit floating at angles, a soft light grey sleep mask, a small matte white ring sleep tracker, two amber glass bottles with plain off-white labels, a linen pouch, soft natural shadows, high-end skincare advertising style, photorealistic
+      size: [1600, 1280]
+      seed: 5
+    device:
+      app: Hushwell
+      title: Tonight's plan
+      time: "21:48"
+      label: Wind-down
+      options:
+        - { title: Lights low at 10:15, body: Warm light only from here, selected: true }
+        - { title: Screens away by 10:40 }
+        - { title: Bedroom at 18 °C, body: A cooler room helps you fall asleep }
+      button: Start wind-down
+
+  - type: strip
+    kicker: In practice
+    title: Small changes, every night.
+    body: What a plan looks like once it is part of your week.
+    items:
+      - image: { generate: "Photograph of a warm reading lamp on a wooden bedside table at night, an open paperback book, soft amber light, cosy minimal bedroom, photorealistic", size: [1024, 1280], seed: 3 }
+        caption: Read on paper, not a screen.
+      - image: { generate: "Photograph of a ceramic cup of herbal tea steaming on a kitchen counter in the evening, warm low light, chamomile flowers, calm, photorealistic", size: [1024, 1280], seed: 8 }
+        caption: Caffeine stops at two.
+      - image: { generate: "Photograph of a person walking a dog through a park in soft early morning light, mist, trees, seen from behind, peaceful, photorealistic", size: [1024, 1280], seed: 21 }
+        caption: Morning light, ten minutes.
+      - image: { generate: "Photograph of a bedroom window with blackout curtains partly open, blue hour outside, tidy bed, cool tones, minimal interior, photorealistic", size: [1024, 1280], seed: 14 }
+        caption: Dark, cool and quiet.
+      - image: { generate: "Photograph of a hand writing in a small paper notebook on a bed with linen sheets, evening lamp light, close up, photorealistic", size: [1024, 1280], seed: 30 }
+        caption: Park the worries on paper.
+      - image: { generate: "Photograph of a person stretching gently on a yoga mat in a calm living room in the evening, warm lamp light, plants, photorealistic", size: [1024, 1280], seed: 9 }
+        caption: Wind down, don't work out.
+
+  - type: product
+    surface: accent
+    side: right
+    kicker: Hushwell Shift
+    title: Sleep when the world is awake.
+    body: Nights, earlies and rotating rosters each need a different plan. Shift builds one around your schedule and moves it when your roster does.
+    tags: [Night shifts, Rotating rosters, On-call, Long-haul crews]
+    buttons:
+      - { label: Join the waitlist, href: "#start" }
+    note: Coming soon
+    device:
+      app: Hushwell Shift
+      title: Your week
+      time: "06:12"
+      label: Next shift · Thu 22:00
+      note: Sleep in two blocks today so you start the night rested.
+      options:
+        - { title: "Core sleep · 08:30 to 13:30", selected: true }
+        - { title: "Nap · 18:30 to 19:20", body: Set a light alarm }
+        - { title: "Light at 21:30", body: Bright light before you leave }
+      button: Save my week
+
+  - type: hero
+    surface: dark
+    badge: Sleep assistant
+    title: Ask anything, even at 3 a.m.
+    body: A private assistant for the questions that come up at night, with a clinician one message away when it matters.
+    buttons:
+      - { label: Try the assistant, href: "#start" }
+    image:
+      generate: Photograph of a dim bedroom at night lit only by the warm glow of a phone screen on the pillow, city lights through the window, deep shadows, moody, cinematic, photorealistic
+      size: [1920, 1088]
+      seed: 44
+
+  - type: orbit
+    kicker: End-to-end care
+    title: From the first bad night to rested.
+    body: Start with a consult and a plan. As Hushwell grows, the rest of your sleep care joins it in one place.
+    center: Hushwell
+    items:
+      - { label: Sleep consults, status: Live }
+      - { label: Prescriptions, status: Live }
+      - { label: Home sleep tests, status: Developing }
+      - { label: CBT-I coaching, status: Developing }
+      - { label: Wearables, status: Roadmap }
+      - { label: Partner care, status: Roadmap }
+      - { label: Bloodwork, status: Roadmap }
+
+  - type: faq
+    kicker: Questions
+    title: Before you start.
+    items:
+      - { q: "Who builds my plan?", a: "A licensed sleep clinician reviews your answers and builds the plan. The app helps you follow it; it never diagnoses on its own." }
+      - { q: "Do I need a wearable?", a: "No. A sleep diary in the app is enough to start. If you already have a tracker, you can connect it." }
+      - { q: "Can I cancel any time?", a: "Yes. Plans are monthly and you can cancel in the app." }
+      - { q: "Is this a replacement for a doctor?", a: "No. If something needs in-person care, your clinician will tell you and help you find it." }
+
+  - type: cta
+    id: start
+    surface: dark
+    kicker: Start tonight
+    title: Rest is a plan.
+    button: { label: Start your plan, href: "#" }
+
+footer:
+  left: "© Hushwell. A concept site: the company, services, prices and people are fictional."
+  right: Photographs generated locally with Z-Image Turbo

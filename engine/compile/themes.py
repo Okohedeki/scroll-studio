@@ -140,7 +140,50 @@ def css_vars(t: dict, log=lambda m: None) -> str:
         "--radius": t["radius"],
         "color-scheme": t["mode"],
     }
-    return ":root {\n" + "\n".join(f"  {k}: {v};" for k, v in tokens.items()) + "\n}"
+    out = ":root {\n" + "\n".join(f"  {k}: {v};" for k, v in tokens.items()) + "\n}"
+    return out + "\n" + surface_css(c, t["mode"])
+
+
+def _surface_tokens(bg, bg2, ink, accent, accent2) -> dict:
+    """Text tiers, accent text and <em> colour for one surface, all checked against its own background."""
+    bgs = [bg, bg2]
+    a3 = _min_alpha(ink, bgs, SMALL_TEXT, 0.44)
+    a2 = max(_min_alpha(ink, bgs, SMALL_TEXT, 0.68), min(1.0, round(a3 + 0.14, 2)))
+    ink_s = ", ".join(str(round(v)) for v in ink)
+    em = max((accent, accent2), key=lambda col: min(contrast(col, b) for b in bgs))
+    btn = accent if contrast(accent, bg) >= 3 else ink               # primary buttons must stand off the panel
+    btn_ink = max((bg, ink, (255, 255, 255), (0, 0, 0)), key=lambda col: contrast(col, btn))
+    return {
+        "--btn-bg": _css_rgb(btn), "--btn-ink": _css_rgb(btn_ink),
+        "--bg": _css_rgb(bg), "--bg-2": _css_rgb(bg2), "--ink": _css_rgb(ink),
+        "--ink-rgb": ink_s, "--bg-rgb": ", ".join(str(round(v)) for v in bg),
+        "--ink-2": f"rgba({ink_s}, {a2})", "--ink-3": f"rgba({ink_s}, {a3})", "--line": f"rgba({ink_s}, .14)",
+        "--accent-text": _css_rgb(_readable_accent(accent, ink, bgs, SMALL_TEXT)),
+        "--em-color": _css_rgb(em if min(contrast(em, b) for b in bgs) >= 3 else ink),
+    }
+
+
+def surface_css(c: dict, mode: str) -> str:
+    """Per-section colour schemes (`surface:` in the spec) derived from the theme, so a dark panel on a light
+    theme gets the same contrast guarantees as the page itself."""
+    bg, bg2, ink = _rgb(c["bg"]), _rgb(c["bg2"]), _rgb(c["ink"])
+    acc, acc2 = _rgb(c["accent"]), _rgb(c["accent2"])
+    if mode == "light":
+        dark = (ink, _mix(bg, ink, 0.08), bg)                  # the theme's ink becomes the background
+        light = (bg2, bg, ink)
+    else:
+        dark = (_mix(bg, (0, 0, 0), 0.4), bg, ink)
+        light = (ink, _mix(bg, ink, 0.9), bg)                  # inverted: a pale panel on a dark site
+    soft = _mix(acc2, (255, 255, 255), 0.55) if mode == "light" else _mix(acc2, bg, 0.25)
+    accent_ink = max((ink, bg), key=lambda col: contrast(col, soft))
+    accent = (soft, _mix(soft, accent_ink, 0.06), accent_ink)
+    css = []
+    for name, (s_bg, s_bg2, s_ink) in (("dark", dark), ("light", light), ("accent", accent)):
+        tok = _surface_tokens(s_bg, s_bg2, s_ink, acc, acc2)
+        body = " ".join(f"{k}: {v};" for k, v in tok.items())
+        scheme = "dark" if _lum(s_bg) < 0.2 else "light"
+        css.append(f".ss-surface-{name} {{ {body} color-scheme: {scheme}; background: var(--bg); color: var(--ink); }}")
+    return "\n".join(css)
 
 
 def font_links(t: dict) -> list[str]:

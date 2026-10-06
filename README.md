@@ -5,7 +5,7 @@ through MCP.**
 
 [![Lodestar Orbital: a rocket launch that plays as you scroll](docs/media/lodestar.gif)](https://okohedeki.github.io/scroll-studio-showcase/)
 
-**[See all eleven example sites live →](https://okohedeki.github.io/scroll-studio-showcase/)**
+**[See all twelve example sites live →](https://okohedeki.github.io/scroll-studio-showcase/)**
 
 Give it a brief, a photo, a painting, a 3D model, a CSV or a film idea. It builds a static site where scrolling
 plays the visuals: generated video, a painting drawn stroke by stroke, a live 3D zoom, a data story, a map flight.
@@ -56,6 +56,7 @@ Every example is a `site.yaml` in [`examples/`](examples/) and rebuilds with `st
 | [Daybreak Institute](examples/daybreak-institute/site.yaml) | Research | `chart` | Real solar data (IRENA) told as a scrolling data story |
 | [Tidewater Lines](examples/tidewater-lines/site.yaml) | Logistics | `map` | Shanghai to Rotterdam, port by port, on a live map |
 | [Casa Alta](examples/casa-alta/site.yaml) | Hospitality | `parallax` | Generated photos of a cliff hotel in 2.5D (needs ComfyUI to build) |
+| [Hushwell](examples/hushwell/site.yaml) | Healthcare | `stack` layout | Panels slide over each other: hero, product with phone, photo strip, orbit, FAQ |
 | [Hale & Rowe](examples/hale-rowe/site.yaml) | Architecture | `artwork` | A house drawn from construction lines to finished photo (needs ComfyUI) |
 
 ## Quick start
@@ -81,8 +82,10 @@ studio snapshot harbour-hotel --at top --at studio:0.5   # screenshots + contact
 studio build harbour-hotel && studio record harbour-hotel   # final build + an MP4 scroll-through
 ```
 
-A spec is a theme, a nav and a list of sections. Scenes are the scroll-driven visuals; blocks (`intro`,
-`features`, `stats`, `timeline`, `quote`, `cta`, `gallery`) are the content between them:
+A spec is a theme, a nav and a list of sections. Scenes are the scroll-driven visuals; blocks (`hero`, `intro`,
+`product`, `features`, `stats`, `timeline`, `strip`, `orbit`, `quote`, `faq`, `cta`, `gallery`) are the content between them.
+Set `layout: stack` and every section becomes a full-screen panel that slides up over the one before it (see
+[Hushwell](examples/hushwell/site.yaml)); `surface: dark | light | accent` recolours a single section:
 
 ```yaml
 name: Harbour Hotel

@@ -5,6 +5,7 @@
 import Lenis from "lenis";
 import "./styles.css";
 import { clamp, debugP, follow, params, reducedMotion, scaleAt } from "./lib/util";
+import { makeBlocks } from "./lib/blocks";
 import type { FrameState, Player, PlayerFactory, SectionData } from "./lib/types";
 
 document.documentElement.classList.add("js");
@@ -195,10 +196,12 @@ class Scene {
 const scenes = [...document.querySelectorAll<HTMLElement>("[data-scene]")].map((el) => new Scene(el));
 
 const nav = document.getElementById("ss-nav");
+const updateBlocks = makeBlocks();
 function frame() {
   const t = (performance.now() - t0) / 1000;
   for (const s of scenes) s.tick(t);
   updateReveals();
+  updateBlocks();
   nav?.classList.toggle("ss-solid", scrollY > 40);
   requestAnimationFrame(frame);
 }

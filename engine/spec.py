@@ -226,6 +226,9 @@ class BlockBase(Model):
     id: Optional[str] = None
     nav_label: Optional[str] = None
     band: bool = Field(False, description="Alternate background band")
+    surface: Optional[Literal["light", "dark", "accent"]] = Field(
+        None, description="Colour scheme for this section: dark inverts the theme, accent uses its soft accent colour. "
+                          "In the stack layout each section is a panel, so this sets the panel's colour.")
 
 
 class IntroBlock(BlockBase):
@@ -304,9 +307,99 @@ class GalleryBlock(BlockBase):
     items: list[GalleryItem]
 
 
+class HeroBlock(BlockBase):
+    """A full-screen opening: headline over a photo or looping video, with an optional badge and buttons."""
+    type: Literal["hero"] = "hero"
+    badge: Optional[str] = Field(None, description="Small pill above the headline (e.g. 'Now open in Lisbon')")
+    title: str
+    body: Optional[str] = None
+    buttons: list[Link] = Field(default_factory=list, description="The first is the primary button")
+    image: Optional[ImageRef] = Field(None, description="Background photo (file, URL or generate:)")
+    video: Optional[str] = Field(None, description="Background video file (muted, looping); image is its poster")
+    align: Literal["center", "left"] = "center"
+
+
+class DeviceOption(Model):
+    title: str
+    body: Optional[str] = None
+    selected: bool = Field(False, description="Shown as the chosen option")
+
+
+class Device(Model):
+    """A phone showing a simple app screen, drawn in HTML so the text stays sharp at any size."""
+    app: Optional[str] = Field(None, description="App name in the screen's header")
+    title: Optional[str] = Field(None, description="Screen title")
+    label: Optional[str] = Field(None, description="Small label above the options")
+    note: Optional[str] = Field(None, description="Paragraph under the label")
+    options: list[DeviceOption] = Field(default_factory=list)
+    button: Optional[str] = Field(None, description="Button at the bottom of the screen")
+    image: Optional[ImageRef] = Field(None, description="Use a screenshot instead of the drawn screen")
+    time: str = "9:41"
+
+
+class ProductBlock(BlockBase):
+    """Product or service panel: a large image and/or a phone on one side, copy, tags and buttons on the other."""
+    type: Literal["product"] = "product"
+    kicker: Optional[str] = None
+    title: str
+    body: Optional[str] = None
+    tags: list[str] = Field(default_factory=list, description="Small pills under the body")
+    buttons: list[Link] = Field(default_factory=list, description="The first is the primary button")
+    note: Optional[str] = Field(None, description="Small print under the buttons (e.g. a price)")
+    image: Optional[ImageRef] = Field(None, description="Product shot. On light surfaces a white background disappears "
+                                                        "(multiply blend), so generate it 'on a plain white background'")
+    knockout: bool = Field(True, description="Whiten the shot's light studio background (sampled from its edges) so "
+                                             "the product floats on the panel instead of sitting in a grey box")
+    device: Optional[Device] = None
+    side: Literal["left", "right"] = Field("left", description="Which side the image goes on")
+
+
+class StripItem(Model):
+    image: ImageRef
+    caption: Optional[str] = None
+
+
+class StripBlock(BlockBase):
+    """A row of photos that slides sideways as you scroll."""
+    type: Literal["strip"] = "strip"
+    kicker: Optional[str] = None
+    title: Optional[str] = None
+    body: Optional[str] = None
+    items: list[StripItem]
+
+
+class OrbitItem(Model):
+    label: str
+    status: Optional[str] = Field(None, description="e.g. Live, Developing, Roadmap; the first status used is highlighted")
+
+
+class OrbitBlock(BlockBase):
+    """Services arranged around a centre on rings that turn as you scroll, each with a status."""
+    type: Literal["orbit"] = "orbit"
+    kicker: Optional[str] = None
+    title: str
+    body: Optional[str] = None
+    center: str = Field(..., description="Label in the middle (usually the brand)")
+    items: list[OrbitItem]
+
+
+class FaqItem(Model):
+    q: str
+    a: str
+
+
+class FaqBlock(BlockBase):
+    """Questions and answers as an accordion (works without JavaScript)."""
+    type: Literal["faq"] = "faq"
+    kicker: Optional[str] = None
+    title: str = "Questions"
+    items: list[FaqItem]
+
+
 Section = Annotated[Union[
     FilmScene, ArtworkScene, Scene3DScene, SequenceScene, ParallaxScene, TypeScene, VectorScene, ChartScene, MapScene,
     IntroBlock, FeaturesBlock, StatsBlock, TimelineBlock, QuoteBlock, CtaBlock, GalleryBlock,
+    HeroBlock, ProductBlock, StripBlock, OrbitBlock, FaqBlock,
 ], Field(discriminator="type")]
 
 SCENE_TYPES = ("film", "artwork", "scene3d", "sequence", "parallax", "type", "vector", "chart", "map")
@@ -315,7 +408,7 @@ SCENE_TYPES = ("film", "artwork", "scene3d", "sequence", "parallax", "type", "ve
 # ---------------------------------------------------------------- site
 
 class Theme(Model):
-    preset: str = Field("night", description="night, paper, lab, brass, studio, ink, dusk (see engine/themes.yaml)")
+    preset: str = Field("night", description="night, brass, paper, lab, cosmos, studio, dusk, ink, blueprint, clinic (see engine/themes.yaml)")
     colors: dict[str, str] = Field(default_factory=dict, description="Override tokens: bg, bg2, ink, accent, accent2")
     fonts: dict[str, str] = Field(default_factory=dict, description="Google Fonts families: display, body, mono")
     display_weight: Optional[int] = None
@@ -348,6 +441,9 @@ class Site(Model):
     description: str = ""
     lang: str = "en"
     theme: Theme = Field(default_factory=Theme)
+    layout: Literal["flow", "stack"] = Field(
+        "flow", description="flow: sections follow one another. stack: every section is a full-screen panel with "
+                            "rounded top corners that slides up over the one before it.")
     nav: Nav = Field(default_factory=Nav)
     loader: Loader = Field(default_factory=Loader)
     sections: list[Section]

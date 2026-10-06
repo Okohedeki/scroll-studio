@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ site.lang }}" class="mode-{{ theme.mode }}">
+<html lang="{{ site.lang }}" class="mode-{{ theme.mode }} layout-{{ site.layout }}{% if sections and sections[0].s.type == 'hero' and (sections[0].img or sections[0].video) %} hero-media{% endif %}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -57,8 +57,11 @@
 </div></header>
 
 <main>
+{% set stack = site.layout == "stack" %}
 {% for e in sections %}
+{% if stack %}<div class="ss-panel{% if e.s.surface %} ss-surface-{{ e.s.surface }}{% endif %}{% if e.s.type == 'hero' %} ss-panel--hero{% endif %}">{% endif %}
 {% if e.scene %}{{ scene.render(e.s, e.config, e.sdata) }}{% else %}{{ blocks.render(e.s, e) }}{% endif %}
+{% if stack %}</div>{% endif %}
 {% endfor %}
 </main>
 

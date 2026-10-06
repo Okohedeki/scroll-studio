@@ -1,6 +1,7 @@
 """Site compiler: spec + built scene assets + runtime bundle -> dist/ (plain static files)."""
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import shutil
@@ -11,6 +12,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from markupsafe import Markup
 
 from ..config import STATIC
+from ..inputs import credit as image_credit, resolve_image
 from ..project import BuildContext, BuildError, Project
 from ..spec import Site, is_scene
 from . import fonts, themes
@@ -32,6 +34,29 @@ def _env() -> Environment:
     env.filters["vh"] = lambda v: f"{float(v) * 100:.0f}vh"
     env.filters["countable"] = lambda v: bool(re.fullmatch(r"\d+(\.\d+)?", str(v).replace(",", "")))
     return env
+
+
+def _knockout(im):
+    """Push a light studio background to pure white so a multiply blend makes it vanish into the panel.
+
+    The background colour is sampled from the image's edges; every channel is scaled so it maps to 255, then
+    pixels that end up near-white are eased the rest of the way. Shadows and the product keep their shading.
+    """
+    import numpy as np
+    from PIL import Image
+    a = np.asarray(im).astype(np.float32)
+    h, w = a.shape[:2]
+    b = max(4, min(h, w) // 30)
+    edge = np.concatenate([a[:b].reshape(-1, 3), a[-b:].reshape(-1, 3), a[:, :b].reshape(-1, 3), a[:, -b:].reshape(-1, 3)])
+    bg = np.percentile(edge, 75, axis=0)
+    if bg.mean() < 170:   # not a light studio background: leave the image alone
+        return im
+    a = np.clip(a * (255.0 / np.maximum(bg, 1)), 0, 255)
+    lum = a @ np.array([0.2126, 0.7152, 0.0722], dtype=np.float32)
+    t = np.clip((lum - 232) / 16, 0, 1)[..., None]
+    t = t * t * (3 - 2 * t)
+    a = a * (1 - t) + 255 * t
+    return Image.fromarray(a.astype(np.uint8))
 
 
 def runtime_ready() -> bool:
@@ -102,6 +127,38 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         if e["s"].type == "gallery":
             e["s"] = e["s"].model_copy(update={"items": [it.model_copy(update={"image": publish(it.image), "video": publish(it.video)})
                                                          for it in e["s"].items]})
+
+    # Images inside blocks (hero, product, strip) can be files, URLs or generated; each is resized once to the
+    # width it is shown at and written as WebP.
+    def block_image(ref, width: int, knockout: bool = False) -> Optional[str]:
+        if ref is None:
+            return None
+        src = resolve_image(project, ref, log)
+        st = src.stat()
+        digest = hashlib.sha1(json.dumps([str(src), st.st_size, int(st.st_mtime), width, knockout, 1]).encode()).hexdigest()[:12]
+        out = media / f"{digest}.webp"
+        if not out.exists():
+            from PIL import Image
+            media.mkdir(parents=True, exist_ok=True)
+            im = Image.open(src).convert("RGB")
+            if im.width > width:
+                im = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
+            if knockout:
+                im = _knockout(im)
+            im.save(out, "WEBP", quality=86, method=6)
+        if image_credit(ref):
+            credits.append(image_credit(ref))
+        return f"assets/_media/{out.name}"
+    for i, e in enumerate(sections):
+        s = e["s"]
+        e["first"] = i == 0   # only the opening section gets the page's h1
+        if s.type == "hero":
+            e["img"], e["video"] = block_image(s.image, 2400), publish(s.video)
+        elif s.type == "product":
+            e["img"] = block_image(s.image, 1600, knockout=s.knockout and s.surface != "dark")
+            e["screen"] = block_image(s.device.image, 800) if s.device and s.device.image else None
+        elif s.type == "strip":
+            e["imgs"] = [block_image(it.image, 900) for it in s.items]
 
     # CTA backgrounds can borrow a scene's final frame
     finals = {e["s"].id: (e["config"] or {}).get("end") for e in sections if e["scene"]}

@@ -73,3 +73,11 @@ blueprint:    # cool light: architecture, engineering, construction
   display_weight: 400
   em_italic: true
   radius: 3px
+
+clinic:       # light, warm, calm: healthcare, wellness, consumer services (pairs well with layout: stack)
+  mode: light
+  colors: { bg: "#edece9", bg2: "#e3e1dc", ink: "#241b14", accent: "#2b1f16", accent2: "#e9b8b0", accent_ink: "#ffffff" }
+  fonts: { display: "Inter Tight", body: "Inter", mono: "Inter Tight" }
+  display_weight: 600
+  em_italic: false
+  radius: 999px

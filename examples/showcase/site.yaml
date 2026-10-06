@@ -32,6 +32,7 @@ sections:
       - { title: Meridian, kicker: "film · private aviation", href: ../meridian/dist/index.html, image: previews/meridian.jpg, video: previews/meridian.mp4, body: "A jet descends through cloud over London." }
       - { title: FORM/26, kicker: "type · events", href: ../form-conference/dist/index.html, image: previews/form-conference.jpg, video: previews/form-conference.mp4, body: "A conference site told in kinetic type." }
       - { title: Casa Alta, kicker: "parallax · hospitality", href: ../casa-alta/dist/index.html, image: previews/casa-alta.jpg, video: previews/casa-alta.mp4, body: "A cliff hotel's photos, given depth and a slow camera move." }
+      - { title: Hushwell, kicker: "stack layout · healthcare", href: ../hushwell/dist/index.html, image: previews/hushwell.jpg, video: previews/hushwell.mp4, body: "Full-screen panels that slide over each other, with a phone, a photo strip and an orbit." }
   - type: features
     kicker: How it works
     title: One spec in, <em>one static site out.</em>
