@@ -31,16 +31,21 @@ em { font-style: var(--em-style); color: var(--accent-2); }
 .ss-btn:hover .ss-arrow { transform: translateX(3px); }
 
 /* ---------------------------------------------------------------- type */
-.ss-kicker, .ss-num, .ss-eyebrow, .ss-tag, .ss-when { font-family: var(--font-mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; }
-.ss-kicker { color: var(--accent); display: block; margin-bottom: 22px; }
+/* Small mono labels: 13px with moderate tracking reads at a glance; accent-coloured ones use --accent-text,
+   which the theme compiler guarantees clears 4.5:1 */
+.ss-kicker, .ss-num, .ss-eyebrow, .ss-tag, .ss-when { font-family: var(--font-mono); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; }
+.ss-kicker { color: var(--accent-text); display: block; margin-bottom: 22px; }
 .ss-display { font-family: var(--font-display); font-weight: var(--display-weight); font-size: clamp(40px, 5.4vw, 86px); line-height: 1.02; letter-spacing: -.03em; text-wrap: balance; }
 .ss-h1 { font-family: var(--font-display); font-weight: var(--display-weight); font-size: clamp(50px, 6.2vw, 108px); line-height: .96; letter-spacing: -.035em; margin: 20px 0 24px; text-wrap: balance; }
 .ss-h2 { font-family: var(--font-display); font-weight: var(--display-weight); font-size: clamp(38px, 4.4vw, 74px); line-height: 1.0; letter-spacing: -.03em; margin: 18px 0 20px; text-wrap: balance; }
 .ss-lede { font-size: clamp(17px, 1.25vw, 19px); line-height: 1.65; color: var(--ink-2); max-width: 52ch; }
 .ss-body { color: var(--ink-2); line-height: 1.7; font-size: 17px; max-width: 46ch; }
+/* no one-word last lines in running text; quotes hang their opening mark in the margin */
+.ss-body, .ss-lede, .ss-fact, .ss-block p { text-wrap: pretty; }
+blockquote { hanging-punctuation: first last; }
 .ss-fact { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); font-family: var(--font-mono); font-size: 13px; line-height: 1.6; color: var(--ink-3); }
-.ss-hint { margin-top: 34px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-3); }
-.ss-num { color: var(--accent); display: flex; gap: 14px; align-items: center; }
+.ss-hint { margin-top: 34px; font-family: var(--font-mono); font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+.ss-num { color: var(--accent-text); display: flex; gap: 14px; align-items: center; }
 .ss-num::after { content: ""; width: 48px; height: 1px; background: currentColor; opacity: .5; }
 
 /* ---------------------------------------------------------------- scenes: shared */
@@ -61,7 +66,7 @@ em { font-style: var(--em-style); color: var(--accent-2); }
 .ss-shade-none .ss-shade, .ss-type-type .ss-shade { background: none; }
 .ss-captions { position: absolute; left: var(--gutter); top: 50%; transform: translateY(-50%); width: min(680px, 82vw); height: 340px; }
 .ss-caption { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 100%; pointer-events: none; }
-.ss-eyebrow { color: var(--accent); display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.ss-eyebrow { color: var(--accent-text); display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .ss-eyebrow i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); opacity: 0; transition: opacity .6s; }
 .ss-eyebrow span, .ss-caption .ss-body { opacity: 0; transition: opacity .6s var(--ease) .1s; }
 .ss-caption .ss-body { margin-top: 18px; }
@@ -73,15 +78,15 @@ em { font-style: var(--em-style); color: var(--accent-2); }
 .ss-caption.ss-on .ss-eyebrow span, .ss-caption.ss-on .ss-eyebrow i, .ss-caption.ss-on .ss-body { opacity: 1; }
 .ss-caption.ss-off .ss-w > span { transform: translateY(-110%); transition-duration: .5s; transition-delay: 0s !important; }
 .ss-caption.ss-off .ss-eyebrow span, .ss-caption.ss-off .ss-eyebrow i, .ss-caption.ss-off .ss-body { opacity: 0; transition-delay: 0s; }
-.ss-cue { position: absolute; left: 50%; bottom: 12vh; transform: translateX(-50%); font-family: var(--font-mono); font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--ink-2); }
+.ss-cue { position: absolute; left: 50%; bottom: 12vh; transform: translateX(-50%); font-family: var(--font-mono); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-2); }
 .ss-outro { position: absolute; inset: 0; background: var(--bg); opacity: 0; pointer-events: none; }
 
 /* HUDs */
-.ss-hud { position: absolute; z-index: 3; font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+.ss-hud { position: absolute; z-index: 3; font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
 .ss-telemetry { right: var(--gutter); top: 50%; transform: translateY(-50%); width: 230px; }
 .ss-row { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 0; border-bottom: 1px solid var(--line); }
 .ss-row b { font-family: var(--font-display); font-weight: 400; font-size: 22px; letter-spacing: -.01em; color: var(--ink); font-variant-numeric: tabular-nums; text-transform: none; }
-.ss-row small { font-family: var(--font-mono); font-size: 10px; color: var(--ink-3); margin-left: 4px; }
+.ss-row small { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); margin-left: 4px; }
 .ss-events { margin-top: 18px; display: grid; gap: 10px; list-style: none; }
 .ss-events li { display: flex; align-items: center; gap: 10px; color: var(--ink-3); transition: color .4s; }
 .ss-events li::before { content: ""; width: 7px; height: 7px; border: 1px solid currentColor; border-radius: 50%; transition: background .4s, box-shadow .4s; }
@@ -115,7 +120,7 @@ em { font-style: var(--em-style); color: var(--accent-2); }
 .ss-split .ss-pin { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 66px; gap: 18px; }
 .ss-split .ss-visual { position: relative; inset: auto; width: 100%; flex: 0 1 auto; height: min(calc(100svh - 170px), 1320px); }
 .ss-progress { width: 100%; max-width: 560px; display: flex; justify-content: space-between; align-items: center; gap: 16px;
-  font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+  font-family: var(--font-mono); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
 .ss-progress b { color: var(--ink); font-weight: 400; }
 .ss-track-bar { flex: 1; height: 2px; background: var(--line); position: relative; overflow: hidden; }
 .ss-track-bar i { position: absolute; inset: 0; background: var(--accent); transform-origin: left; transform: scaleX(0); }
@@ -153,19 +158,19 @@ em { font-style: var(--em-style); color: var(--accent-2); }
 .ss-stats--3 { grid-template-columns: repeat(3, 1fr); }
 .ss-stats--2 { grid-template-columns: repeat(2, 1fr); }
 .ss-v { font-family: var(--font-display); font-weight: var(--display-weight); font-size: clamp(50px, 6vw, 96px); letter-spacing: -.04em; line-height: 1; font-variant-numeric: tabular-nums; }
-.ss-v sup { font-size: .3em; color: var(--accent); vertical-align: top; margin-left: 4px; font-family: var(--font-mono); letter-spacing: .05em; }
+.ss-v sup { font-size: .3em; color: var(--accent-text); vertical-align: top; margin-left: 4px; font-family: var(--font-mono); letter-spacing: .05em; }
 .ss-l { margin-top: 14px; color: var(--ink-3); font-size: 14px; }
 .ss-timeline { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); }
 .ss-timeline--3 { grid-template-columns: repeat(3, 1fr); } .ss-timeline--4 { grid-template-columns: repeat(4, 1fr); }
 .ss-tl { padding: 28px 24px 0 0; position: relative; }
 .ss-tl::before { content: ""; position: absolute; top: -5px; left: 0; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 14px var(--accent); }
 .ss-when { color: var(--accent-2); }
-.mode-light .ss-when { color: var(--accent); }
+.mode-light .ss-when { color: var(--accent-text); }
 .ss-tl h4 { font-weight: 500; font-size: 20px; margin: 12px 0 8px; }
 .ss-tl p { color: var(--ink-2); font-size: 14px; line-height: 1.55; max-width: 26ch; }
 .ss-quote { max-width: 1100px; }
 .ss-quote blockquote { font-family: var(--font-display); font-weight: var(--display-weight); font-size: clamp(30px, 3.6vw, 56px); line-height: 1.15; letter-spacing: -.02em; text-wrap: balance; }
-.ss-quote cite { display: block; margin-top: 28px; font-style: normal; font-family: var(--font-mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }
+.ss-quote cite { display: block; margin-top: 28px; font-style: normal; font-family: var(--font-mono); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
 .ss-cta { text-align: center; overflow: hidden; min-height: 80vh; display: grid; place-items: center; }
 .ss-cta__bg { position: absolute; inset: 0; background-size: cover; background-position: center 40%; opacity: .5; }
 .ss-cta__bg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 60% at 50% 50%, rgba(var(--bg-rgb), .25), var(--bg) 88%); }
@@ -198,15 +203,21 @@ em { font-style: var(--em-style); color: var(--accent-2); }
   .ss-captions { top: 26%; }
   .ss-overlay .ss-shade { background: linear-gradient(to bottom, rgba(var(--bg-rgb), .75), transparent 55%), linear-gradient(to top, rgba(var(--bg-rgb), .7), transparent 30%); }
   .ss-split-grid { grid-template-columns: 1fr; }
-  .ss-split .ss-pin { order: -1; height: 60svh; padding-top: 60px; gap: 8px; z-index: 5; background: linear-gradient(var(--bg) 88%, rgba(var(--bg-rgb), 0)); }
+  .ss-split .ss-pin { order: -1; height: 60svh; padding-top: 60px; gap: 8px; z-index: 5; background: linear-gradient(var(--bg) 96%, rgba(var(--bg-rgb), 0)); }   /* opaque under the chart's source line */
   .ss-split .ss-visual { height: calc(60svh - 96px); }
   .ss-split .ss-step { min-height: calc(var(--h, 120vh) * .7); }
   .ss-split .ss-step .ss-card { top: 62svh; background: rgba(var(--bg-rgb), .94); padding: 14px 0 18px; }
   .ss-cards .ss-shade, .ss-cards.ss-side-left .ss-shade { background: linear-gradient(0deg, rgba(var(--bg-rgb), .9) 0%, rgba(var(--bg-rgb), .3) 50%, rgba(var(--bg-rgb), 0) 70%); }
-  .ss-steps--over .ss-step .ss-card { top: auto; bottom: 0; margin-top: 50vh; }
+  /* cards over a live visual get their own backing so text never sits directly on a bright render */
+  .ss-steps--over .ss-step .ss-card { top: auto; bottom: 0; margin-top: 50vh; margin-inline: -16px; padding: 18px 16px 22px;
+    background: rgba(var(--bg-rgb), .82); border-radius: 14px; }
+  .ss-steps--over .ss-step.ss-intro .ss-card { background: none; margin-inline: 0; padding-inline: 0; }
   .ss-cards.ss-side-left .ss-steps--over { align-items: stretch; }
-  .ss-scalehud { top: 76px; bottom: auto; }
-  .ss-h2 { font-size: 38px; } .ss-h1 { font-size: 46px; }
+  .ss-scalehud { top: 92px; bottom: auto; }   /* clear of the nav bar */
+  .ss-visual .maplibregl-ctrl-bottom-right { top: 84px; bottom: auto; }   /* map credit stays visible, above the text cards */
+  /* fluid down to the smallest phones, with a little more leading so descenders and ascenders never touch */
+  .ss-h1 { font-size: clamp(36px, 11.5vw, 56px); line-height: 1.02; }
+  .ss-h2 { font-size: clamp(30px, 8.8vw, 44px); line-height: 1.05; }
 }
 @media (prefers-reduced-motion: reduce) {
   .js .ss-reveal { opacity: 1; transform: none; }

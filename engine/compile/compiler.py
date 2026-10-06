@@ -13,7 +13,7 @@ from markupsafe import Markup
 from ..config import STATIC
 from ..project import BuildContext, BuildError, Project
 from ..spec import Site, is_scene
-from . import themes
+from . import fonts, themes
 
 TEMPLATES = Path(__file__).resolve().parent / "templates"
 
@@ -115,9 +115,11 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         shutil.rmtree(rt)
     shutil.copytree(STATIC / "runtime", rt)
 
+    links = themes.font_links(theme)
+    font_css = fonts.vendor(links, dist, log)
     html = _env().get_template("site.html.j2").render(
-        site=site, sections=sections, theme=theme, css_vars=themes.css_vars(theme),
-        font_links=themes.font_links(theme), nav_links=nav_links(site), credits=credits,
+        site=site, sections=sections, theme=theme, css_vars=themes.css_vars(theme, log),
+        font_css=font_css, font_links=[] if font_css else links, nav_links=nav_links(site), credits=credits,
         configs={e["s"].id: e["config"] for e in sections if e["scene"]},
     )
     (dist / "index.html").write_text(html, encoding="utf-8")

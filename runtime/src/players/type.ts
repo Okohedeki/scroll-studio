@@ -23,13 +23,14 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   .ss-type { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 var(--gutter); }
   .ss-type__text { font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: -.035em; line-height: 1.02; max-width: 1500px; }
   .ss-type--reveal .ss-type__text { font-size: clamp(36px, 5.2vw, 92px); text-wrap: balance; }
-  .ss-type--reveal span { opacity: .14; transition: opacity .25s linear; }
+  .ss-type--reveal span { opacity: .34; transition: opacity .25s linear; }   /* readable before it lights up: the first screen never looks empty */
   .ss-type--reveal span.on { opacity: 1; }
   .ss-type--stack .ss-type__text { font-size: clamp(44px, 8.4vw, 160px); line-height: .92; text-transform: uppercase; }
   .ss-type--stack .ln { display: block; will-change: transform, opacity; }
   .ss-type--swap .ss-type__text { font-size: clamp(44px, 7vw, 132px); text-align: center; }
   .ss-type--swap .roll { display: inline-block; position: relative; overflow: hidden; vertical-align: bottom; height: 1.06em; color: var(--accent); }
-  .ss-type--swap .roll i { display: block; height: 1.06em; line-height: 1.06em; font-style: normal; will-change: transform; }
+  .ss-type--swap .roll i { display: block; height: 1.06em; line-height: 1.06em; font-style: normal; white-space: nowrap; will-change: transform; }
+  @media (max-width: 600px) { .ss-type--swap .roll { display: block; margin: 0 auto; } }   /* the rolling word gets its own line on phones */
   .ss-type--scale .ss-type__text { font-size: clamp(60px, 12vw, 240px); white-space: nowrap; text-transform: uppercase; }
   .ss-type--scale .ch { display: inline-block; will-change: transform, opacity; }
   `;

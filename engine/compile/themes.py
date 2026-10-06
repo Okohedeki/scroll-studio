@@ -65,15 +65,72 @@ def resolve(theme: Theme) -> dict:
     }
 
 
-def css_vars(t: dict) -> str:
+# ---------------------------------------------------------------- contrast (WCAG 2.x)
+SMALL_TEXT = 4.5   # AA for body-size text; ink-2, ink-3 and accent-coloured kickers must all clear it
+
+
+def _rgb(h: str) -> tuple[float, float, float]:
+    return tuple(float(v) for v in _hex_rgb(h).split(", "))
+
+
+def _lum(rgb) -> float:
+    def ch(v):
+        v /= 255
+        return v / 12.92 if v <= 0.04045 else ((v + 0.055) / 1.055) ** 2.4
+    r, g, b = (ch(v) for v in rgb)
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def _mix(fg, bg, a: float):
+    return tuple(a * x + (1 - a) * y for x, y in zip(fg, bg))
+
+
+def contrast(fg, bg) -> float:
+    la, lb = _lum(fg), _lum(bg)
+    return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
+
+
+def _min_alpha(ink, bgs, target: float, floor: float) -> float:
+    """Smallest opacity of ink (>= floor) that reaches target contrast on every background."""
+    a = floor
+    while a < 1 and any(contrast(_mix(ink, b, a), b) < target for b in bgs):
+        a = round(a + 0.01, 2)
+    return min(a, 1.0)
+
+
+def _readable_accent(accent, ink, bgs, target: float) -> tuple:
+    """The accent, moved toward the ink colour only as far as small text needs."""
+    k = 0.0
+    col = accent
+    while k < 1 and any(contrast(col, b) < target for b in bgs):
+        k = round(k + 0.02, 2)
+        col = _mix(ink, accent, k)
+    return col
+
+
+def _css_rgb(rgb) -> str:
+    return "#" + "".join(f"{round(v):02x}" for v in rgb)
+
+
+def css_vars(t: dict, log=lambda m: None) -> str:
     c, f = t["colors"], t["fonts"]
     ink = _hex_rgb(c["ink"])
+    ink_rgb, bgs = _rgb(c["ink"]), [_rgb(c["bg"]), _rgb(c["bg2"])]
+    # Secondary text tiers are derived per theme so small labels always stay readable: a fixed opacity
+    # passes on dark backgrounds but fails on light ones.
+    a3 = _min_alpha(ink_rgb, bgs, SMALL_TEXT, 0.44)
+    a2 = max(_min_alpha(ink_rgb, bgs, SMALL_TEXT, 0.68), min(1.0, round(a3 + 0.14, 2)))   # keep the tiers apart
+    for key in ("ink2", "ink3"):
+        if key in c and c[key].startswith("#") and any(contrast(_rgb(c[key]), b) < SMALL_TEXT for b in bgs):
+            log(f"  warning: theme colour {key} {c[key]} is below {SMALL_TEXT}:1 contrast; small text will be hard to read")
+    accent_text = c.get("accent_text") or _css_rgb(_readable_accent(_rgb(c["accent"]), ink_rgb, bgs, SMALL_TEXT))
     tokens = {
         "--bg": c["bg"], "--bg-2": c["bg2"], "--ink": c["ink"],
         "--ink-rgb": ink, "--bg-rgb": _hex_rgb(c["bg"]),
-        "--ink-2": c.get("ink2", f"rgba({ink}, .68)"), "--ink-3": c.get("ink3", f"rgba({ink}, .44)"),
+        "--ink-2": c.get("ink2", f"rgba({ink}, {a2})"), "--ink-3": c.get("ink3", f"rgba({ink}, {a3})"),
         "--line": c.get("line", f"rgba({ink}, .13)"),
         "--accent": c["accent"], "--accent-2": c["accent2"], "--accent-ink": c["accent_ink"],
+        "--accent-text": accent_text,
         "--accent-rgb": _hex_rgb(c["accent"]),
         "--font-display": f'"{f["display"]}", {"Georgia, serif" if f["display"] in SERIFS else FALLBACK["display"]}',
         "--font-body": f'"{f["body"]}", {"Georgia, serif" if f["body"] in SERIFS else FALLBACK["body"]}',
