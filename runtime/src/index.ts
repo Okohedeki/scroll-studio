@@ -132,6 +132,8 @@ class Scene {
         if (Math.abs(target - this.stepVals[i]) < 5e-4) this.stepVals[i] = target;
         const on = target > 0 && target < 1;
         s.classList.toggle("ss-active", on);
+        // card emphasis is a function of scroll position, not a timed fade, so it never trails a fast scroll
+        s.style.setProperty("--on", (clamp((target + 0.1) / 0.1) * clamp((1.1 - target) / 0.1)).toFixed(3));
         if (on) active = i;
         const h = this.data.steps[i]?.length || 1;
         total += h; done += this.stepVals[i] * h;
@@ -196,12 +198,17 @@ const nav = document.getElementById("ss-nav");
 function frame() {
   const t = (performance.now() - t0) / 1000;
   for (const s of scenes) s.tick(t);
+  updateReveals();
   nav?.classList.toggle("ss-solid", scrollY > 40);
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
 
-addEventListener("resize", () => scenes.forEach((s) => s.player?.resize?.()));
+// Resizing a canvas clears it; redraw in the same task so a blank frame is never painted
+addEventListener("resize", () => {
+  const t = (performance.now() - t0) / 1000;
+  scenes.forEach((s) => { if (s.player?.resize) { s.player.resize(); s.tick(t); } });
+});
 
 // Smooth scrolling (off for reduced motion and for ?p= captures); started once loading finishes
 let lenis: Lenis | null = null;
@@ -281,26 +288,36 @@ if (debugP !== null) {
 }
 
 // ---------------------------------------------------------------- reveals + count-ups
-const io = new IntersectionObserver((entries) => entries.forEach((e) => {
-  if (!e.isIntersecting) return;
-  const el = e.target as HTMLElement;
-  el.classList.add("ss-in");
-  el.querySelectorAll<HTMLElement>("[data-count]").forEach((v) => {
-    const end = parseFloat(v.dataset.count!), sup = v.querySelector("sup")?.outerHTML || "";
-    const dec = (v.dataset.count!.split(".")[1] || "").length, start = performance.now();
-    const step = (now: number) => {
-      const k = clamp((now - start) / 1400), eased = 1 - Math.pow(1 - k, 3);
-      v.innerHTML = (end * eased).toFixed(dec) + sup;
-      if (k < 1) requestAnimationFrame(step);
-    };
-    if (!reducedMotion) requestAnimationFrame(step);
-  });
-  io.unobserve(el);
-}), { threshold: 0.15 });
-document.querySelectorAll<HTMLElement>(".ss-reveal").forEach((el, i) => {
-  el.style.transitionDelay = ((i % 4) * 0.07).toFixed(2) + "s";
-  io.observe(el);
-});
+// Driven by scroll position, not timers: text is fully in by the time it is a fifth of the way up the
+// viewport, however fast the page is scrolled, and count-ups finish before the number reaches mid-screen.
+const reveals = [...document.querySelectorAll<HTMLElement>(".ss-reveal")].map((el, i) => ({
+  el, lag: (i % 4) * 0.25, k: -1,
+  counts: [...el.querySelectorAll<HTMLElement>("[data-count]")].map((v) => ({
+    v, end: parseFloat(v.dataset.count!), sup: v.querySelector("sup")?.outerHTML || "",
+    dec: (v.dataset.count!.split(".")[1] || "").length, k: -1,
+  })),
+}));
+let revealY = NaN, revealH = NaN;
+function updateReveals() {
+  if (scrollY === revealY && innerHeight === revealH) return;
+  revealY = scrollY; revealH = innerHeight;
+  for (const r of reveals) {
+    const top = r.el.getBoundingClientRect().top;
+    const k = reducedMotion ? 1 : clamp((innerHeight * 0.98 - top) / (innerHeight * 0.2) - r.lag);
+    if (k !== r.k) {
+      r.k = k;
+      r.el.style.opacity = k.toFixed(3);
+      r.el.style.transform = k < 1 ? `translateY(${((1 - k) * 22).toFixed(1)}px)` : "";
+    }
+    for (const c of r.counts) {
+      const kc = reducedMotion ? 1 : clamp((innerHeight * 0.95 - top) / (innerHeight * 0.4));
+      if (kc === c.k) continue;
+      c.k = kc;
+      c.v.innerHTML = (c.end * (1 - Math.pow(1 - kc, 3))).toFixed(c.dec) + c.sup;
+    }
+  }
+}
+reveals.forEach((r) => r.el.classList.add("ss-in"));
 document.querySelectorAll<HTMLVideoElement>(".ss-tile video").forEach((v) => {
   const tile = v.closest(".ss-tile")!;
   tile.addEventListener("mouseenter", () => v.play().catch(() => {}));
