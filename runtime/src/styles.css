@@ -14,16 +14,15 @@ em { font-style: var(--em-style); color: var(--accent-2); }
 
 /* ---------------------------------------------------------------- nav */
 .ss-nav { position: fixed; inset: 0 0 auto 0; z-index: 50; padding-top: env(safe-area-inset-top, 0px);
-  border-bottom: 1px solid transparent; transition: background .5s var(--ease), border-color .5s; }
+  border-bottom: 1px solid transparent; transition: background .5s var(--ease), border-color .5s, backdrop-filter .5s; }
 .ss-nav__in { max-width: var(--max); margin: 0 auto; padding: 18px var(--gutter); display: flex; justify-content: space-between; align-items: center; gap: 24px; }
-/* no backdrop-filter: switching one on over a WebGL canvas flashes the region black for a frame in Chrome */
-.ss-nav.ss-solid { background: rgba(var(--bg-rgb), .92); border-color: var(--line); }
+.ss-nav.ss-solid { background: rgba(var(--bg-rgb), .76); backdrop-filter: blur(16px) saturate(1.2); border-color: var(--line); }
 .ss-wordmark { display: flex; gap: 11px; align-items: center; font-family: var(--font-display); font-weight: 500; font-size: 18px; letter-spacing: -.01em; }
 .ss-wordmark svg, .ss-wordmark img { width: 24px; height: 24px; }
 .ss-nav__links { display: flex; gap: 32px; font-size: 14px; color: var(--ink-2); }
 .ss-nav__links a:hover { color: var(--ink); }
 .ss-btn { display: inline-flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; padding: 12px 21px; border-radius: var(--radius);
-  border: 1px solid rgba(var(--ink-rgb), .28); background: rgba(var(--ink-rgb), .05);
+  border: 1px solid rgba(var(--ink-rgb), .28); background: rgba(var(--ink-rgb), .05); backdrop-filter: blur(10px);
   transition: background .3s, color .3s, border-color .3s; white-space: nowrap; font-family: var(--font-body); }
 .ss-btn:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
 .ss-btn--hot { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }

@@ -45,8 +45,11 @@ export function makeKit(cfg: any, rnd: Rnd) {
         uniform vec3 color; uniform float power, base, intensity, opacity;
         varying vec3 vN; varying vec3 vV;
         void main(){
-          float f = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), power);
+          // abs(dot) of unit vectors can round to just over 1; pow() of the negative base is NaN on many GPUs,
+          // and the bloom blur spreads one NaN pixel into a black square. Clamp, and drop any NaN that remains.
+          float f = pow(clamp(1.0 - abs(dot(normalize(vN), normalize(vV))), 0.0, 1.0), power);
           float a = (f * intensity + base) * opacity;
+          if (!(a >= 0.0)) a = 0.0;
           gl_FragColor = vec4(color * a, a);
         }`,
       transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
@@ -327,7 +330,7 @@ const planet: Preset = (p, k) => {
     uniforms: { light: { value: light }, color: { value: new THREE.Color(p.atmosphere ?? "#5fb6ff") }, opacity: { value: 1 } },
     vertexShader: `varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix * vec4(position,1.); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }`,
     fragmentShader: `uniform vec3 color; uniform float opacity; varying vec3 vN; varying vec3 vV;
-      void main(){ float f = pow(1. - abs(dot(vN, vV)), 2.6); gl_FragColor = vec4(color * f * 1.6, f * opacity); }`,
+      void main(){ float f = pow(clamp(1. - abs(dot(vN, vV)), 0., 1.), 2.6); if (!(f >= 0.)) f = 0.; gl_FragColor = vec4(color * f * 1.6, f * opacity); }`,
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.BackSide,
   });
   const shell = new THREE.Mesh(new THREE.SphereGeometry(R * 1.06, 96, 64), atmo);
