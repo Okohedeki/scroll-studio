@@ -445,6 +445,9 @@ class Theme(Model):
     fonts: dict[str, str] = Field(default_factory=dict, description="Google Fonts families: display, body, mono")
     display_weight: Optional[int] = None
     display_italic_em: Optional[bool] = Field(None, description="Render <em> accent words in italic")
+    display_optical_size: Optional[int] = Field(
+        None, description="Pin the display face's optical size (variable fonts such as Fraunces or Newsreader grow "
+                          "more expressive at large sizes; 36-48 keeps headlines calm)")
     radius: Optional[str] = None
 
 

@@ -26,6 +26,11 @@
   .ss-surface-dark .ss-type--swap .roll { color: var(--em-color); }
   /* A phone can play a clip instead of showing a screenshot. */
   .ss-phone__screen > video { width: 100%; height: 100%; object-fit: cover; display: block; }
+{% if theme.display_opsz %}
+  /* The display face at a pinned optical size: calmer letterforms than a variable font picks for huge text. */
+  .ss-h1, .ss-h2, .ss-display, .ss-type__text, .ss-loader__name { font-variation-settings: "opsz" {{ theme.display_opsz }}; }
+{% endif %}
+  .ss-h1, .ss-display { text-wrap: balance; }
 </style>
 {% if site.loader.enabled %}
 <style>

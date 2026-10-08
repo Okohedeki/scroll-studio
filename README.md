@@ -103,7 +103,9 @@ sections:
 ```
 
 `studio schema` prints every field. Inputs can be project files or https URLs; images can be generated locally
-from a prompt (`generate:`). Builds are cached per stage, so editing copy never re-renders a film.
+from a prompt (`generate:`). Builds are cached per stage, so editing copy never re-renders a film. A theme can
+pin the display face's optical size (`display_optical_size: 40`): variable serifs like Fraunces grow more
+expressive at huge sizes, and a pinned size keeps headlines calm.
 
 A site can carry plain pages beside the scroll page, for the privacy policy, support or press: Markdown files set
 in the site's theme, served at `/<slug>/` and linked from the footer (`nav: true` adds them to the nav too).

@@ -34,6 +34,9 @@
   .ss-prose th, .ss-prose td { text-align: left; padding: .5em .6em; border-bottom: 1px solid var(--line, rgba(128,128,128,.3)); vertical-align: top; }
   .ss-prose blockquote { margin: 1.5em 0; padding-left: 1.2em; border-left: 2px solid var(--accent); color: var(--ink-2, var(--ink)); }
   .ss-prose code { font-family: var(--font-mono); font-size: .92em; }
+{% if theme.display_opsz %}
+  .ss-prose > h1, .ss-prose h2 { font-variation-settings: "opsz" {{ theme.display_opsz }}; }
+{% endif %}
 </style>
 </head>
 <body>
