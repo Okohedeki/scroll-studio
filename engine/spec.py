@@ -384,6 +384,13 @@ class ProductBlock(BlockBase):
                                              "the product floats on the panel instead of sitting in a grey box")
     device: Optional[Device] = None
     side: Literal["left", "right"] = Field("left", description="Which side the image goes on")
+    pose: Literal["beside", "rise", "close", "lean", "pair"] = Field("beside", description=(
+        "How the phone sits, so a run of product panels doesn't repeat one composition. beside: next to the copy. "
+        "rise: centred under centred copy, cut off by the panel's bottom edge. close: larger, top-aligned beside the "
+        "copy and cut off below. lean: tilted out of the lower corner on `side`, running off the edges. "
+        "pair: in front of a second phone showing `behind`"))
+    behind: Optional[ImageRef] = Field(None, description="pair: the screenshot on the second phone")
+    stats: list[Stat] = Field(default_factory=list, description="Big figures under the body, shown instead of the tags")
 
 
 class StripItem(Model):

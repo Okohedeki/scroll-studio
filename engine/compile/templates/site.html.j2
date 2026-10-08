@@ -26,6 +26,42 @@
   .ss-surface-dark .ss-type--swap .roll { color: var(--em-color); }
   /* A phone can play a clip instead of showing a screenshot. */
   .ss-phone__screen > video { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* Poses: how a product section's phone sits (ProductBlock.pose). The panel clips at its edges (overflow: clip), so a
+     phone pushed past them is cut off there. Each pose is a different composition, so a run of product panels reads
+     as different screens rather than one screen seven times. */
+  .ss-pose--rise.ss-product { align-items: flex-start; padding-top: clamp(100px, 13vh, 130px); padding-bottom: 0; }
+  .ss-pose--rise .ss-product__in { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 0; }
+  .ss-pose--rise .ss-product__copy { order: 1; max-width: 820px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .ss-pose--rise .ss-lede { max-width: 58ch; }
+  .ss-pose--rise .ss-pills, .ss-pose--rise .ss-btns { justify-content: center; }
+  .ss-pose--rise .ss-product__media { order: 2; width: 100%; min-height: 0; height: max(30svh, 290px); margin-top: 28px; place-items: start center; }
+  .ss-pose--rise .ss-phone { position: absolute; top: 0; left: 50%; width: clamp(230px, 21vw, 330px); transform: translate(-50%, calc(var(--float, 0) * -22px)); }
+  .ss-pose--close .ss-product__media { min-height: 0; height: min(62svh, 640px); place-items: start center; }
+  .ss-pose--close .ss-phone { position: absolute; top: 0; left: 50%; width: clamp(300px, 30vw, 440px); transform: translate(-50%, calc(var(--float, 0) * -26px)); }
+  .ss-pose--lean .ss-product__media { min-height: 0; height: min(60svh, 620px); }
+  .ss-pose--lean .ss-phone { position: absolute; bottom: calc(-1 * clamp(90px, 14vh, 160px) - 30%); width: clamp(260px, 24vw, 360px); transform-origin: 50% 100%; }
+  .ss-pose--lean.ss-product--left .ss-phone { left: calc(-1 * var(--gutter) - 2%); transform: rotate(9deg) translateY(calc(var(--float, 0) * -20px)); }
+  .ss-pose--lean.ss-product--right .ss-phone { right: calc(-1 * var(--gutter) - 2%); transform: rotate(-9deg) translateY(calc(var(--float, 0) * -20px)); }
+  .ss-pose--pair .ss-product__media { min-height: min(70vh, 720px); }
+  .ss-pose--pair .ss-product__media > .ss-phone { position: relative; z-index: 2; transform: translate(-14%, calc(var(--float, 0) * -18px)); }
+  .ss-pose--pair .ss-phone-behind { position: absolute; left: 50%; top: 50%; z-index: 1; transform: translate(-22%, -56%) rotate(9deg); opacity: .94; }
+  .ss-pose--pair .ss-phone-behind .ss-phone { width: clamp(180px, 17vw, 250px); box-shadow: 0 40px 70px -30px rgba(0, 0, 0, .45), inset 0 0 0 2px #2c2c2c; }
+  .ss-product__stats { display: flex; flex-wrap: wrap; gap: 18px 44px; margin: 30px 0 10px; }
+  .ss-product__stats .ss-v { font-size: clamp(40px, 4.2vw, 72px); }
+  .ss-product__stats .ss-l { margin-top: 4px; }
+  @media (max-width: 900px) {
+    .ss-pose--rise.ss-product { padding-top: 100px; }
+    .ss-pose--rise .ss-product__media { height: max(34svh, 250px); }
+    .ss-pose--rise .ss-phone { width: min(64vw, 300px); }
+    .ss-pose--close .ss-product__media, .ss-pose--lean .ss-product__media { order: 2; height: 44svh; }
+    .ss-pose--close .ss-phone { width: min(76vw, 340px); }
+    .ss-pose--lean .ss-phone { width: min(66vw, 320px); }
+    .ss-pose--lean.ss-product--left .ss-phone, .ss-pose--lean.ss-product--right .ss-phone { top: 24px; bottom: auto; left: 50%; right: auto; transform: translateX(-50%) rotate(-7deg); transform-origin: 50% 0; }
+    .ss-pose--pair .ss-product__media { min-height: 0; }
+    .ss-pose--pair .ss-product__media > .ss-phone { width: min(50vw, 230px); }
+    .ss-pose--pair .ss-phone-behind .ss-phone { width: min(44vw, 200px); }
+    .ss-product__stats { gap: 12px 28px; }
+  }
 {% if theme.display_opsz %}
   /* The display face at a pinned optical size: calmer letterforms than a variable font picks for huge text. */
   .ss-h1, .ss-h2, .ss-display, .ss-type__text, .ss-loader__name { font-variation-settings: "opsz" {{ theme.display_opsz }}; }
