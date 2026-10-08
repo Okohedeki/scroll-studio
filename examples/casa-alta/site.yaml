@@ -11,7 +11,6 @@ sections:
     type: parallax
     nav_label: The house
     layout: cards
-    depth_model: large
     moves: [dolly, pan, rise, orbit]
     steps:
       - intro: true
