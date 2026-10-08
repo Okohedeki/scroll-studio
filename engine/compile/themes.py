@@ -30,6 +30,10 @@ FONT_AXES = {
     "Figtree": "ital,wght@0,300..900;1,300..900",
     "Archivo": "ital,wght@0,100..900;1,100..900",
     "Space Mono": "ital,wght@0,400;0,700;1,400",
+    "Plus Jakarta Sans": "ital,wght@0,200..800;1,200..800",
+    "DM Sans": "ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000",
+    "Instrument Sans": "ital,wdth,wght@0,75..100,400..700;1,75..100,400..700",
+    "Outfit": "wght@100..900",
     "Newsreader": "ital,opsz,wght@0,6..72,200..800;1,6..72,200..800",
 }
 FALLBACK = {"display": "system-ui, sans-serif", "body": "system-ui, sans-serif", "mono": "ui-monospace, monospace"}
