@@ -24,10 +24,30 @@ class Link(Model):
     href: str = "#"
 
 
+class Glow(Model):
+    """A soft radial light laid over a gradient."""
+    x: float = Field(0.5, description="Centre, 0-1 across the image")
+    y: float = Field(0.5, description="Centre, 0-1 down the image")
+    color: str = Field(..., description="Hex colour")
+    radius: float = Field(0.4, description="Softness, as a fraction of the longer side")
+    strength: float = Field(0.8, description="0-1: how far the centre goes to the glow's colour")
+
+
+class Gradient(Model):
+    """A backdrop rendered locally with no model at all: a colour sweep, optional glows, stars and film grain.
+    For colour cards, dusk skies and night seas behind type."""
+    colors: list[str] = Field(..., min_length=2, description="Hex colours along the sweep, first to last")
+    angle: float = Field(180, description="Sweep direction in degrees, as in CSS: 180 is top to bottom, 90 left to right")
+    glows: list[Glow] = Field(default_factory=list)
+    grain: float = Field(0.035, description="Film grain, 0 to 0.2")
+    stars: int = Field(0, description="Faint stars scattered over the upper part, for night skies")
+
+
 class ImageInput(Model):
-    """An image the engine uses as input: a file in the project's inputs/, or one generated locally."""
+    """An image the engine uses as input: a file in the project's inputs/, one generated locally, or a gradient."""
     file: Optional[str] = Field(None, description="Path relative to the project folder (inputs/photo.jpg) or an https URL")
     generate: Optional[str] = Field(None, description="Prompt for a local text-to-image model (Z-Image Turbo)")
+    gradient: Optional[Gradient] = Field(None, description="Render a gradient backdrop (no model needed) at `size`")
     size: tuple[int, int] = Field((1920, 1088), description="Generated size (multiples of 16)")
     seed: int = 7
     crop: Optional[tuple[float, float, float, float]] = Field(None, description="Crop [x0, y0, x1, y1] in 0-1 image coordinates")
@@ -75,6 +95,11 @@ class SceneBase(Model):
     hud: Hud = Field(default_factory=Hud)
     cue: Optional[str] = Field(None, description="'Scroll to …' hint shown at the start")
     shade: Literal["auto", "none", "strong"] = "auto"
+    surface: Optional[Literal["light", "dark", "accent"]] = Field(
+        None, description="Colour scheme for the scene's panel in the stack layout (see blocks); sets the text colour over a backdrop")
+    backdrop: Optional[ImageRef] = Field(
+        None, description="Full-bleed image behind the whole section: a file, URL, generate: or gradient:. In the stack "
+                          "layout it is the panel's own backdrop. Pair with `surface` for legible text.")
 
 
 # ---------------------------------------------------------------- scene types
@@ -218,6 +243,8 @@ class TypeScene(SceneBase):
     text: str = Field("", description="reveal/scale: the passage; swap: the fixed part")
     words: list[str] = Field(default_factory=list, description="swap: the words that cycle")
     length: float = 3.0
+    size: Literal["passage", "display"] = Field(
+        "passage", description="passage: reading size, left-aligned. display: a headline, bigger and centred")
 
 
 # ---------------------------------------------------------------- content blocks
@@ -229,6 +256,9 @@ class BlockBase(Model):
     surface: Optional[Literal["light", "dark", "accent"]] = Field(
         None, description="Colour scheme for this section: dark inverts the theme, accent uses its soft accent colour. "
                           "In the stack layout each section is a panel, so this sets the panel's colour.")
+    backdrop: Optional[ImageRef] = Field(
+        None, description="Full-bleed image behind the whole section: a file, URL, generate: or gradient:. In the stack "
+                          "layout it is the panel's own backdrop. Pair with `surface` for legible text.")
 
 
 class IntroBlock(BlockBase):

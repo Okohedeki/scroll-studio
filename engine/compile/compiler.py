@@ -152,6 +152,7 @@ def build_site(project: Project, log: Callable[[str], None] = print,
     for i, e in enumerate(sections):
         s = e["s"]
         e["first"] = i == 0   # only the opening section gets the page's h1
+        e["backdrop"] = block_image(getattr(s, "backdrop", None), 2400)
         if s.type == "hero":
             e["img"], e["video"] = block_image(s.image, 2400), publish(s.video)
         elif s.type == "product":

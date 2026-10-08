@@ -114,6 +114,21 @@ pages:
   - { slug: support, title: Support, source: pages/support.md, nav: true }
 ```
 
+Any section can sit on a full-bleed `backdrop:` (in the stack layout, the panel's own), with `surface:` picking the
+text colour. A backdrop can be a file, a URL, a `generate:` prompt, or a `gradient:` rendered on the spot with no
+model: colour stops, glows, stars and grain, enough for colour cards, dusk skies and night seas behind type.
+
+```yaml
+  - type: hero
+    surface: dark
+    backdrop:
+      gradient:
+        colors: ["#2A1B2E", "#8A4B5A", "#D98C7A"]
+        glows: [{ x: 0.5, y: 0.95, color: "#F2B48C", radius: 0.5, strength: 0.6 }]
+        stars: 120
+    title: Your words stay <em>on your phone.</em>
+```
+
 ## With Claude
 
 Open the repo in Claude Code and ask for a site. The `scroll-studio` MCP server (`.mcp.json`) gives Claude tools

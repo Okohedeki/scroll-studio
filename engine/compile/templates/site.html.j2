@@ -15,6 +15,14 @@
 {{ css_vars | safe }}
 </style>
 <link rel="stylesheet" href="runtime/studio.css">
+<style>
+  /* A section's backdrop: the image fills the panel (or a wrapper in the flow layout); the section itself goes clear,
+     whatever surface it has. */
+  .ss-backdrop { background-size: cover; background-position: center; }
+  .ss-backdrop > section, .ss-backdrop > section[class*=ss-surface-], .ss-backdrop .ss-stage, .ss-backdrop .ss-band { background: transparent; }
+  /* A type scene set as a display line (size: display) rather than a passage: bigger, centred, balanced. */
+  .ss-scene.ss-type--display .ss-type__text { font-size: clamp(46px, 8.2vw, 150px); text-align: center; letter-spacing: -.04em; line-height: 1; max-width: 12em; }
+</style>
 {% if site.loader.enabled %}
 <style>
   html.ss-loading, html.ss-loading body { overflow: hidden; height: 100%; }
@@ -59,9 +67,11 @@
 <main>
 {% set stack = site.layout == "stack" %}
 {% for e in sections %}
-{% if stack %}<div class="ss-panel{% if e.s.surface %} ss-surface-{{ e.s.surface }}{% endif %}{% if e.s.type == 'hero' %} ss-panel--hero{% endif %}">{% endif %}
+{% set surface = (" ss-surface-" ~ e.s.surface) if e.s.surface else "" %}
+{% if stack %}<div class="ss-panel{{ surface }}{% if e.s.type == 'hero' %} ss-panel--hero{% endif %}{% if e.backdrop %} ss-backdrop{% endif %}"{% if e.backdrop %} style="background-image: url({{ e.backdrop }})"{% endif %}>
+{% elif e.backdrop %}<div class="ss-backdrop{{ surface }}" style="background-image: url({{ e.backdrop }})">{% endif %}
 {% if e.scene %}{{ scene.render(e.s, e.config, e.sdata) }}{% else %}{{ blocks.render(e.s, e) }}{% endif %}
-{% if stack %}</div>{% endif %}
+{% if stack or e.backdrop %}</div>{% endif %}
 {% endfor %}
 </main>
 

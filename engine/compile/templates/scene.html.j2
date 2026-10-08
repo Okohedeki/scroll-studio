@@ -28,7 +28,7 @@
 {% endmacro %}
 
 {% macro render(s, cfg, sdata) %}
-<section class="ss-scene ss-{{ s.layout }} ss-side-{{ s.side }} ss-type-{{ s.type }} ss-shade-{{ s.shade }}" id="{{ s.id }}" data-scene="{{ s.type }}">
+<section class="ss-scene ss-{{ s.layout }} ss-side-{{ s.side }} ss-type-{{ s.type }} ss-shade-{{ s.shade }}{% if s.type == "type" and s.size == "display" %} ss-type--display{% endif %}" id="{{ s.id }}" data-scene="{{ s.type }}">
 {% if s.layout == "overlay" %}
   <div class="ss-track" style="height: {{ s.length | vh }}">
     <div class="ss-stage">
