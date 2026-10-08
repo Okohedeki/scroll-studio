@@ -159,6 +159,7 @@
   <span>{% for l in page_links %}<a href="{{ l.href }}">{{ l.label }}</a> · {% endfor %}{{ (site.footer.right or "") | rich }}{% for c in credits %}{% if loop.first and site.footer.right %} · {% endif %}{{ c }}{% if not loop.last %} · {% endif %}{% endfor %}</span>
 </div></footer>
 
+<script>window.__ssScroll = { speed: {{ site.scroll.speed }} };</script>
 <script type="module" src="runtime/index.js"></script>
 <script>
   // Clips in phones play while their panel is on screen and rest while it isn't: browsers may hold a muted

@@ -483,6 +483,11 @@ class Footer(Model):
     right: Optional[str] = None
 
 
+class Scroll(Model):
+    speed: float = Field(1.0, description="Pace of the smooth scroll, anchor scrolls and scroll-driven reveals: "
+                                          "1.2 is a fifth faster, 0.8 a fifth slower")
+
+
 class Page(Model):
     """A plain page beside the site (privacy policy, support, press): Markdown set in the site's theme, served
     at /<slug>/ and linked from the footer."""
@@ -503,6 +508,7 @@ class Site(Model):
                             "rounded top corners that slides up over the one before it.")
     nav: Nav = Field(default_factory=Nav)
     loader: Loader = Field(default_factory=Loader)
+    scroll: Scroll = Field(default_factory=Scroll)
     sections: list[Section]
     footer: Footer = Field(default_factory=Footer)
     pages: list[Page] = Field(default_factory=list, description="Plain Markdown pages beside the site (privacy, support)")

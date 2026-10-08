@@ -213,11 +213,14 @@ addEventListener("resize", () => {
   scenes.forEach((s) => { if (s.player?.resize) { s.player.resize(); s.tick(t); } });
 });
 
-// Smooth scrolling (off for reduced motion and for ?p= captures); started once loading finishes
+// Smooth scrolling (off for reduced motion and for ?p= captures); started once loading finishes.
+// `scroll.speed` in the spec (window.__ssScroll) paces it: the smoothing catches up that much faster, anchor
+// scrolls take that much less time, and the scroll-driven reveals finish over that much less travel.
+const pace = Math.max(0.25, Number((window as any).__ssScroll?.speed) || 1);
 let lenis: Lenis | null = null;
 function startSmoothScroll() {
   if (reducedMotion || debugP !== null || lenis) return;
-  lenis = new Lenis({ lerp: 0.1 });
+  lenis = new Lenis({ lerp: Math.min(0.5, 0.1 * pace) });
   const raf = (time: number) => { lenis!.raf(time); requestAnimationFrame(raf); };
   requestAnimationFrame(raf);
 }
@@ -262,7 +265,7 @@ document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]').forEach((a) => a.ad
   const target = document.querySelector(id);
   if (!target) return;
   e.preventDefault();
-  if (lenis) lenis.scrollTo(target as HTMLElement, { duration: 1.4 });
+  if (lenis) lenis.scrollTo(target as HTMLElement, { duration: 1.4 / pace });
   else target.scrollIntoView();
 }));
 
@@ -306,14 +309,14 @@ function updateReveals() {
   revealY = scrollY; revealH = innerHeight;
   for (const r of reveals) {
     const top = r.el.getBoundingClientRect().top;
-    const k = reducedMotion ? 1 : clamp((innerHeight * 0.98 - top) / (innerHeight * 0.2) - r.lag);
+    const k = reducedMotion ? 1 : clamp((innerHeight * 0.98 - top) / (innerHeight * 0.2 / pace) - r.lag);
     if (k !== r.k) {
       r.k = k;
       r.el.style.opacity = k.toFixed(3);
       r.el.style.transform = k < 1 ? `translateY(${((1 - k) * 22).toFixed(1)}px)` : "";
     }
     for (const c of r.counts) {
-      const kc = reducedMotion ? 1 : clamp((innerHeight * 0.95 - top) / (innerHeight * 0.4));
+      const kc = reducedMotion ? 1 : clamp((innerHeight * 0.95 - top) / (innerHeight * 0.4 / pace));
       if (kc === c.k) continue;
       c.k = kc;
       c.v.innerHTML = (c.end * (1 - Math.pow(1 - kc, 3))).toFixed(c.dec) + c.sup;
