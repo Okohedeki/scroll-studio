@@ -2,10 +2,11 @@
 
 {% macro buttons(list) %}{% if list %}<div class="ss-btns">{% for l in list %}<a class="ss-btn{% if loop.first %} ss-btn--hot{% endif %}" href="{{ l.href }}">{{ l.label }}{% if loop.first %} <span class="ss-arrow">→</span>{% endif %}</a>{% endfor %}</div>{% endif %}{% endmacro %}
 
-{% macro phone(d, screen) %}
+{% macro phone(d, screen, clip=None) %}
 <div class="ss-phone" aria-hidden="true"><div class="ss-phone__screen">
   <div class="ss-phone__bar"><span>{{ d.time }}</span><i></i></div>
-  {% if screen %}<img src="{{ screen }}" alt="">
+  {% if clip %}<video src="{{ clip }}"{% if screen %} poster="{{ screen }}"{% endif %} autoplay muted loop playsinline preload="metadata"></video>
+  {% elif screen %}<img src="{{ screen }}" alt="">
   {% else %}<div class="ss-app">
     {% if d.app %}<div class="ss-app__name">{{ d.app }}</div>{% endif %}
     {% if d.title %}<div class="ss-app__title">{{ d.title }}</div>{% endif %}
@@ -102,7 +103,7 @@
 <section class="ss-block ss-product ss-product--{{ b.side }}{{ band }}"{% if b.id %} id="{{ b.id }}"{% endif %}><div class="ss-wrap ss-product__in">
   <div class="ss-product__media{% if e.img and b.device %} ss-product__media--both{% endif %}" data-float>
     {% if e.img %}<img class="ss-product__img" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
-    {% if b.device %}{{ phone(b.device, e.screen) }}{% endif %}
+    {% if b.device %}{{ phone(b.device, e.screen, e.clip) }}{% endif %}
   </div>
   <div class="ss-product__copy ss-reveal">
     {% if b.kicker %}<span class="ss-kicker">{{ b.kicker }}</span>{% endif %}

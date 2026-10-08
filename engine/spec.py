@@ -364,6 +364,8 @@ class Device(Model):
     options: list[DeviceOption] = Field(default_factory=list)
     button: Optional[str] = Field(None, description="Button at the bottom of the screen")
     image: Optional[ImageRef] = Field(None, description="Use a screenshot instead of the drawn screen")
+    video: Optional[str] = Field(None, description="Play a screen recording (a project file or URL; muted, looping) "
+                                                  "instead of the drawn screen; `image` is then its poster")
     time: str = "9:41"
 
 

@@ -158,6 +158,7 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         elif s.type == "product":
             e["img"] = block_image(s.image, 1600, knockout=s.knockout and s.surface != "dark")
             e["screen"] = block_image(s.device.image, 800) if s.device and s.device.image else None
+            e["clip"] = publish(s.device.video) if s.device and s.device.video else None
         elif s.type == "strip":
             e["imgs"] = [block_image(it.image, 900) for it in s.items]
 
