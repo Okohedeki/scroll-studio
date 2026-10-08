@@ -172,14 +172,48 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         shutil.rmtree(rt)
     shutil.copytree(STATIC / "runtime", rt)
 
+    # A nav logo given as an image file is copied in like any other media; SVG path data passes through.
+    logo = site.nav.logo
+    if logo and not logo.startswith("M"):
+        logo = publish(logo)
+
     links = themes.font_links(theme)
     font_css = fonts.vendor(links, dist, log)
-    html = _env().get_template("site.html.j2").render(
-        site=site, sections=sections, theme=theme, css_vars=themes.css_vars(theme, log),
-        font_css=font_css, font_links=[] if font_css else links, nav_links=nav_links(site), credits=credits,
+    env = _env()
+    css_vars = themes.css_vars(theme, log)
+    page_links = [{"label": p.title, "href": f"{p.slug}/"} for p in site.pages]
+    nav = nav_links(site) + [l for l, p in zip(page_links, site.pages) if p.nav]
+    html = env.get_template("site.html.j2").render(
+        site=site, sections=sections, theme=theme, css_vars=css_vars, logo=logo,
+        font_css=font_css, font_links=[] if font_css else links, nav_links=nav, page_links=page_links, credits=credits,
         configs={e["s"].id: e["config"] for e in sections if e["scene"]},
     )
     (dist / "index.html").write_text(html, encoding="utf-8")
+
+    # Plain pages (privacy policy, support): Markdown set in the site's theme at /<slug>/. They live one
+    # level down, so every site-relative link gets the `base` prefix.
+    if site.pages:
+        import markdown
+        base = "../"
+        def rebase(href: str) -> str:
+            return href if href.startswith(("http://", "https://", "mailto:", "tel:")) else base + href
+        for p in site.pages:
+            src = project.path(p.source)
+            if not src.exists():
+                raise BuildError(f"page '{p.slug}': {p.source} not found")
+            body = markdown.markdown(src.read_text(encoding="utf-8"), extensions=["sane_lists", "smarty", "tables"])
+            page_html = env.get_template("page.html.j2").render(
+                site=site, page=p, body=Markup(body), theme=theme, css_vars=css_vars, base=base,
+                logo=rebase(logo) if logo and not logo.startswith("M") else logo,
+                font_css=rebase(font_css) if font_css else None, font_links=[] if font_css else links,
+                nav_links=[{"label": l["label"], "href": rebase(l["href"])} for l in nav],
+                page_links=[{"label": l["label"], "href": rebase(l["href"])} for l in page_links],
+            )
+            out = dist / p.slug
+            out.mkdir(parents=True, exist_ok=True)
+            (out / "index.html").write_text(page_html, encoding="utf-8")
+            log(f"page -> {out / 'index.html'}")
+
     progress(1.0, "done")
     log(f"site -> {dist / 'index.html'}")
     return dist / "index.html"

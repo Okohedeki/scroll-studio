@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="{{ site.lang }}" class="mode-{{ theme.mode }} ss-page-html">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{ page.title }} · {{ site.name }}</title>
+{% if page.summary or site.description %}<meta name="description" content="{{ page.summary or site.description }}">{% endif %}
+<meta name="generator" content="Scroll Studio">
+{% if font_css %}<link rel="stylesheet" href="{{ font_css }}">
+{% else %}<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+{% for href in font_links %}<link rel="stylesheet" href="{{ href }}">
+{% endfor %}{% endif %}
+<style>
+{{ css_vars | safe }}
+</style>
+<link rel="stylesheet" href="{{ base }}runtime/studio.css">
+<style>
+  /* A reading page: one measure of prose in the site's type, under the same nav and footer. */
+  .ss-page-html, .ss-page-html body { background: var(--bg); color: var(--ink); }
+  .ss-page { padding: clamp(120px, 18vh, 180px) 0 clamp(72px, 10vh, 120px); min-height: 70vh; }
+  .ss-prose { max-width: 66ch; margin: 0 auto; padding: 0 24px; font-family: var(--font-body); font-size: 17px; line-height: 1.65; }
+  .ss-prose > h1 { font-family: var(--font-display); font-weight: var(--display-weight); font-size: clamp(38px, 5.2vw, 60px); line-height: 1.02; letter-spacing: -.02em; margin: 0 0 .35em; }
+  .ss-prose h2 { font-family: var(--font-display); font-weight: var(--display-weight); font-size: clamp(24px, 3vw, 32px); line-height: 1.15; letter-spacing: -.01em; margin: 2em 0 .55em; }
+  .ss-prose h3 { font-family: var(--font-body); font-weight: 600; font-size: 17px; margin: 1.6em 0 .4em; }
+  .ss-prose p, .ss-prose li { margin: 0 0 1em; color: var(--ink-2, var(--ink)); }
+  .ss-prose li { margin-bottom: .4em; }
+  .ss-prose p > em:only-child, .ss-prose > p:first-of-type > em { font-family: var(--font-mono); font-style: normal; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-3, var(--ink-2, var(--ink))); }
+  .ss-prose strong { color: var(--ink); font-weight: 600; }
+  .ss-prose a { color: var(--accent); text-decoration: underline; text-underline-offset: .18em; text-decoration-thickness: 1px; }
+  .ss-prose a:hover { text-decoration-thickness: 2px; }
+  .ss-prose hr { border: 0; border-top: 1px solid var(--line, rgba(128,128,128,.3)); margin: 2.5em 0; }
+  .ss-prose table { border-collapse: collapse; width: 100%; margin: 1em 0 1.5em; font-size: 15px; }
+  .ss-prose th, .ss-prose td { text-align: left; padding: .5em .6em; border-bottom: 1px solid var(--line, rgba(128,128,128,.3)); vertical-align: top; }
+  .ss-prose blockquote { margin: 1.5em 0; padding-left: 1.2em; border-left: 2px solid var(--accent); color: var(--ink-2, var(--ink)); }
+  .ss-prose code { font-family: var(--font-mono); font-size: .92em; }
+</style>
+</head>
+<body>
+<header class="ss-nav ss-nav--solid" id="ss-nav"><div class="ss-nav__in">
+  <a class="ss-wordmark" href="{{ base }}">
+    {% if logo and logo.startswith("M") %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="{{ logo }}"/></svg>{% elif logo %}<img src="{{ logo }}" alt="">{% endif %}
+    <span>{{ site.name }}</span>
+  </a>
+  <nav class="ss-nav__links">{% for l in nav_links %}<a href="{{ l.href }}">{{ l.label }}</a>{% endfor %}</nav>
+  {% if site.nav.cta %}<a class="ss-btn" href="{{ site.nav.cta.href if site.nav.cta.href.startswith(('http://', 'https://', 'mailto:')) else base ~ site.nav.cta.href }}">{{ site.nav.cta.label }} <span class="ss-arrow">→</span></a>{% else %}<span></span>{% endif %}
+</div></header>
+
+<main class="ss-page">
+  <article class="ss-prose">
+{{ body }}
+  </article>
+</main>
+
+<footer class="ss-footer"><div class="ss-wrap ss-footer__in">
+  <span>{{ (site.footer.left or ("© " ~ site.name)) | rich }}</span>
+  <span>{% for l in page_links %}<a href="{{ l.href }}">{{ l.label }}</a> · {% endfor %}{{ (site.footer.right or "") | rich }}</span>
+</div></footer>
+</body>
+</html>

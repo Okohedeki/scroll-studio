@@ -105,6 +105,15 @@ sections:
 `studio schema` prints every field. Inputs can be project files or https URLs; images can be generated locally
 from a prompt (`generate:`). Builds are cached per stage, so editing copy never re-renders a film.
 
+A site can carry plain pages beside the scroll page, for the privacy policy, support or press: Markdown files set
+in the site's theme, served at `/<slug>/` and linked from the footer (`nav: true` adds them to the nav too).
+
+```yaml
+pages:
+  - { slug: privacy, title: Privacy, source: pages/privacy.md }
+  - { slug: support, title: Support, source: pages/support.md, nav: true }
+```
+
 ## With Claude
 
 Open the repo in Claude Code and ask for a site. The `scroll-studio` MCP server (`.mcp.json`) gives Claude tools

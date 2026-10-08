@@ -436,6 +436,16 @@ class Footer(Model):
     right: Optional[str] = None
 
 
+class Page(Model):
+    """A plain page beside the site (privacy policy, support, press): Markdown set in the site's theme, served
+    at /<slug>/ and linked from the footer."""
+    slug: str = Field(..., description="URL path: 'privacy' is served at /privacy/")
+    title: str
+    source: str = Field(..., description="Markdown file relative to the project folder (pages/privacy.md)")
+    summary: Optional[str] = Field(None, description="Meta description for the page")
+    nav: bool = Field(False, description="Also link it from the nav, after the section links")
+
+
 class Site(Model):
     name: str
     description: str = ""
@@ -448,6 +458,7 @@ class Site(Model):
     loader: Loader = Field(default_factory=Loader)
     sections: list[Section]
     footer: Footer = Field(default_factory=Footer)
+    pages: list[Page] = Field(default_factory=list, description="Plain Markdown pages beside the site (privacy, support)")
 
 
 def is_scene(section) -> bool:

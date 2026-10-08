@@ -49,7 +49,7 @@
 
 <header class="ss-nav" id="ss-nav"><div class="ss-nav__in">
   <a class="ss-wordmark" href="#">
-    {% if site.nav.logo and site.nav.logo.startswith("M") %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="{{ site.nav.logo }}"/></svg>{% elif site.nav.logo %}<img src="{{ site.nav.logo }}" alt="">{% endif %}
+    {% if logo and logo.startswith("M") %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="{{ logo }}"/></svg>{% elif logo %}<img src="{{ logo }}" alt="">{% endif %}
     <span>{{ site.name }}</span>
   </a>
   <nav class="ss-nav__links">{% for l in nav_links %}<a href="{{ l.href }}">{{ l.label }}</a>{% endfor %}</nav>
@@ -67,7 +67,7 @@
 
 <footer class="ss-footer"><div class="ss-wrap ss-footer__in">
   <span>{{ (site.footer.left or ("© " ~ site.name)) | rich }}</span>
-  <span>{{ (site.footer.right or "") | rich }}{% for c in credits %}{% if loop.first and site.footer.right %} · {% endif %}{{ c }}{% if not loop.last %} · {% endif %}{% endfor %}</span>
+  <span>{% for l in page_links %}<a href="{{ l.href }}">{{ l.label }}</a> · {% endfor %}{{ (site.footer.right or "") | rich }}{% for c in credits %}{% if loop.first and site.footer.right %} · {% endif %}{{ c }}{% if not loop.last %} · {% endif %}{% endfor %}</span>
 </div></footer>
 
 <script type="module" src="runtime/index.js"></script>
