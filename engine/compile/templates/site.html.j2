@@ -42,11 +42,37 @@
   .ss-pose--lean .ss-phone { position: absolute; bottom: calc(-1 * clamp(90px, 14vh, 160px) - 30%); width: clamp(260px, 24vw, 360px); transform-origin: 50% 100%; }
   .ss-pose--lean.ss-product--left .ss-phone { left: calc(-1 * var(--gutter) - 2%); transform: rotate(9deg) translateY(calc(var(--float, 0) * -20px)); }
   .ss-pose--lean.ss-product--right .ss-phone { right: calc(-1 * var(--gutter) - 2%); transform: rotate(-9deg) translateY(calc(var(--float, 0) * -20px)); }
+  .ss-pose--turn .ss-product__media { perspective: 1400px; }
+  .ss-pose--turn .ss-phone { width: clamp(220px, 21vw, 310px); }
+  .ss-pose--turn.ss-product--left .ss-phone { transform: rotateY(-16deg) rotateX(4deg) rotateZ(-3deg) translateY(calc(var(--float, 0) * -24px)); box-shadow: 34px 60px 90px -30px rgba(0, 0, 0, .5), inset 0 0 0 2px #2c2c2c; }
+  .ss-pose--turn.ss-product--right .ss-phone { transform: rotateY(16deg) rotateX(4deg) rotateZ(3deg) translateY(calc(var(--float, 0) * -24px)); box-shadow: -34px 60px 90px -30px rgba(0, 0, 0, .5), inset 0 0 0 2px #2c2c2c; }
+  /* pair: the two phones swap places on a loop, each playing its own clip, the one coming forward lifting over the one
+     going back. Without motion they hold the front and back positions. */
   .ss-pose--pair .ss-product__media { min-height: min(70vh, 720px); }
-  .ss-pose--pair .ss-product__media > .ss-phone { position: relative; z-index: 2; transform: translate(-14%, calc(var(--float, 0) * -18px)); }
-  .ss-pose--pair .ss-phone-behind { position: absolute; left: 50%; top: 50%; z-index: 1; transform: translate(-22%, -56%) rotate(9deg); opacity: .94; }
-  .ss-pose--pair .ss-phone-behind .ss-phone { width: clamp(180px, 17vw, 250px); box-shadow: 0 40px 70px -30px rgba(0, 0, 0, .45), inset 0 0 0 2px #2c2c2c; }
+  .ss-pose--pair .ss-product__media > .ss-phone, .ss-pose--pair .ss-phone-behind { position: absolute; left: 50%; top: 50%; animation: 16s cubic-bezier(.45, 0, .25, 1) infinite; }
+  .ss-pose--pair .ss-product__media > .ss-phone { z-index: 2; transform: translate(-64%, -50%); animation-name: ss-pair-a; }
+  .ss-pose--pair .ss-phone-behind { z-index: 1; transform: translate(-22%, -56%) rotate(9deg) scale(.9); animation-name: ss-pair-b; }
+  @keyframes ss-pair-a {
+    0%, 42% { transform: translate(-64%, -50%) rotate(0deg) scale(1); z-index: 2; }
+    46% { transform: translate(-43%, -40%) rotate(4deg) scale(.94); }
+    50%, 92% { transform: translate(-22%, -56%) rotate(9deg) scale(.9); z-index: 1; }
+    96% { transform: translate(-43%, -66%) rotate(4deg) scale(.96); }
+    100% { transform: translate(-64%, -50%) rotate(0deg) scale(1); z-index: 2; }
+  }
+  @keyframes ss-pair-b {
+    0%, 42% { transform: translate(-22%, -56%) rotate(9deg) scale(.9); z-index: 1; }
+    46% { transform: translate(-43%, -66%) rotate(4deg) scale(.96); }
+    50%, 92% { transform: translate(-64%, -50%) rotate(0deg) scale(1); z-index: 2; }
+    96% { transform: translate(-43%, -40%) rotate(4deg) scale(.94); }
+    100% { transform: translate(-22%, -56%) rotate(9deg) scale(.9); z-index: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) { .ss-pose--pair .ss-product__media > .ss-phone, .ss-pose--pair .ss-phone-behind { animation: none; } }
   .ss-product__stats { display: flex; flex-wrap: wrap; gap: 18px 44px; margin: 30px 0 10px; }
+  /* A hero can hold the app too: the phone rises from the bottom edge under the copy and sinks as the hero is left. */
+  .ss-hero--device { flex-direction: column; justify-content: flex-start; padding-top: clamp(110px, 14vh, 150px); padding-bottom: 0; gap: clamp(24px, 4vh, 44px); }
+  .ss-hero--device .ss-hero__in { flex: none; }
+  .ss-hero__phone { position: relative; width: 100%; height: max(26svh, 230px); flex: none; }
+  .ss-hero__phone .ss-phone { position: absolute; top: 0; left: 50%; width: clamp(230px, 22vw, 340px); transform: translate(-50%, calc(var(--hero-p, 0) * 40px)); }
   .ss-product__stats .ss-v { font-size: clamp(40px, 4.2vw, 72px); }
   .ss-product__stats .ss-l { margin-top: 4px; }
   @media (max-width: 900px) {
@@ -57,14 +83,22 @@
     .ss-pose--close .ss-phone { width: min(76vw, 340px); }
     .ss-pose--lean .ss-phone { width: min(66vw, 320px); }
     .ss-pose--lean.ss-product--left .ss-phone, .ss-pose--lean.ss-product--right .ss-phone { top: 24px; bottom: auto; left: 50%; right: auto; transform: translateX(-50%) rotate(-7deg); transform-origin: 50% 0; }
-    .ss-pose--pair .ss-product__media { min-height: 0; }
-    .ss-pose--pair .ss-product__media > .ss-phone { width: min(50vw, 230px); }
-    .ss-pose--pair .ss-phone-behind .ss-phone { width: min(44vw, 200px); }
+    .ss-pose--pair .ss-product__media { min-height: 0; height: clamp(420px, 66svh, 600px); }
+    .ss-pose--pair .ss-product__media > .ss-phone, .ss-pose--pair .ss-phone-behind .ss-phone { width: min(50vw, 230px); }
+    .ss-pose--turn .ss-phone { width: min(60vw, 280px); }
     .ss-product__stats { gap: 12px 28px; }
+    .ss-hero--device { padding-top: 100px; gap: 22px; }
+    .ss-hero__phone { height: max(22svh, 190px); }
+    .ss-hero__phone .ss-phone { width: min(60vw, 280px); }
   }
 {% if theme.display_opsz %}
   /* The display face at a pinned optical size: calmer letterforms than a variable font picks for huge text. */
   .ss-h1, .ss-h2, .ss-display, .ss-type__text, .ss-loader__name { font-variation-settings: "opsz" {{ theme.display_opsz }}; }
+{% endif %}
+{% if theme.em == "bold" %}
+  /* Emphasis as bold italics in the text's own colour (theme.display_em: bold): a headline reads as one face. */
+  em, .mode-light em, [class*="ss-surface-"] em { color: inherit; font-style: italic; font-weight: 650; }
+  .ss-surface-dark .ss-type--swap .roll { color: inherit; }
 {% endif %}
   .ss-h1, .ss-display { text-wrap: balance; }
 </style>

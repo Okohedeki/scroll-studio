@@ -347,6 +347,7 @@ class HeroBlock(BlockBase):
     image: Optional[ImageRef] = Field(None, description="Background photo (file, URL or generate:)")
     video: Optional[str] = Field(None, description="Background video file (muted, looping); image is its poster")
     align: Literal["center", "left"] = "center"
+    device: Optional["Device"] = Field(None, description="A phone rising from the bottom edge under the copy")
 
 
 class DeviceOption(Model):
@@ -384,12 +385,13 @@ class ProductBlock(BlockBase):
                                              "the product floats on the panel instead of sitting in a grey box")
     device: Optional[Device] = None
     side: Literal["left", "right"] = Field("left", description="Which side the image goes on")
-    pose: Literal["beside", "rise", "close", "lean", "pair"] = Field("beside", description=(
+    pose: Literal["beside", "rise", "close", "lean", "pair", "turn"] = Field("beside", description=(
         "How the phone sits, so a run of product panels doesn't repeat one composition. beside: next to the copy. "
         "rise: centred under centred copy, cut off by the panel's bottom edge. close: larger, top-aligned beside the "
         "copy and cut off below. lean: tilted out of the lower corner on `side`, running off the edges. "
-        "pair: in front of a second phone showing `behind`"))
-    behind: Optional[ImageRef] = Field(None, description="pair: the screenshot on the second phone")
+        "pair: with a second phone (`behind`), the two swapping places on a loop. turn: turned in perspective "
+        "towards the copy"))
+    behind: Optional[Device] = Field(None, description="pair: the second phone (its own image or video)")
     stats: list[Stat] = Field(default_factory=list, description="Big figures under the body, shown instead of the tags")
 
 
@@ -452,6 +454,9 @@ class Theme(Model):
     fonts: dict[str, str] = Field(default_factory=dict, description="Google Fonts families: display, body, mono")
     display_weight: Optional[int] = None
     display_italic_em: Optional[bool] = Field(None, description="Render <em> accent words in italic")
+    display_em: Optional[Literal["accent", "bold"]] = Field(
+        None, description="How <em> words are set: accent (the accent colour, italic when display_italic_em) or "
+                          "bold (bold italics in the text's own colour, so a headline reads as one face)")
     display_optical_size: Optional[int] = Field(
         None, description="Pin the display face's optical size (variable fonts such as Fraunces or Newsreader grow "
                           "more expressive at large sizes; 36-48 keeps headlines calm)")

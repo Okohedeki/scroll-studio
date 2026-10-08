@@ -61,6 +61,7 @@ def resolve(theme: Theme) -> dict:
         "fonts": fonts,
         "display_weight": theme.display_weight or base.get("display_weight", 500),
         "em_italic": base.get("em_italic", False) if theme.display_italic_em is None else theme.display_italic_em,
+        "em": theme.display_em or base.get("display_em", "accent"),
         "display_opsz": theme.display_optical_size or base.get("display_optical_size"),
         "radius": theme.radius or base.get("radius", "4px"),
     }
@@ -137,7 +138,7 @@ def css_vars(t: dict, log=lambda m: None) -> str:
         "--font-body": f'"{f["body"]}", {"Georgia, serif" if f["body"] in SERIFS else FALLBACK["body"]}',
         "--font-mono": f'"{f["mono"]}", {FALLBACK["mono"]}',
         "--display-weight": str(t["display_weight"]),
-        "--em-style": "italic" if t["em_italic"] else "normal",
+        "--em-style": "italic" if t["em_italic"] or t["em"] == "bold" else "normal",
         "--radius": t["radius"],
         "color-scheme": t["mode"],
     }

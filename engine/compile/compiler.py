@@ -155,11 +155,14 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         e["backdrop"] = block_image(getattr(s, "backdrop", None), 2400)
         if s.type == "hero":
             e["img"], e["video"] = block_image(s.image, 2400), publish(s.video)
+            e["screen"] = block_image(s.device.image, 800) if s.device and s.device.image else None
+            e["clip"] = publish(s.device.video) if s.device and s.device.video else None
         elif s.type == "product":
             e["img"] = block_image(s.image, 1600, knockout=s.knockout and s.surface != "dark")
             e["screen"] = block_image(s.device.image, 800) if s.device and s.device.image else None
             e["clip"] = publish(s.device.video) if s.device and s.device.video else None
-            e["behind"] = block_image(s.behind, 800) if s.behind else None
+            e["behind"] = block_image(s.behind.image, 800) if s.behind and s.behind.image else None
+            e["behind_clip"] = publish(s.behind.video) if s.behind and s.behind.video else None
         elif s.type == "strip":
             e["imgs"] = [block_image(it.image, 900) for it in s.items]
 
