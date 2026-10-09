@@ -207,7 +207,8 @@ def build_site(project: Project, log: Callable[[str], None] = print,
             src = project.path(p.source)
             if not src.exists():
                 raise BuildError(f"page '{p.slug}': {p.source} not found")
-            body = markdown.markdown(src.read_text(encoding="utf-8"), extensions=["sane_lists", "smarty", "tables"])
+            body = markdown.markdown(src.read_text(encoding="utf-8"), extensions=["sane_lists", "smarty", "tables", "fenced_code", "toc"],
+                                     extension_configs={"toc": {"permalink": False}})
             page_html = env.get_template("page.html.j2").render(
                 site=site, page=p, body=Markup(body), theme=theme, css_vars=css_vars, base=base,
                 logo=rebase(logo) if logo and not logo.startswith("M") else logo,

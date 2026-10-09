@@ -34,6 +34,10 @@
   .ss-prose th, .ss-prose td { text-align: left; padding: .5em .6em; border-bottom: 1px solid var(--line, rgba(128,128,128,.3)); vertical-align: top; }
   .ss-prose blockquote { margin: 1.5em 0; padding-left: 1.2em; border-left: 2px solid var(--accent); color: var(--ink-2, var(--ink)); }
   .ss-prose code { font-family: var(--font-mono); font-size: .92em; }
+  /* A fenced block (a published prompt, a config): wrapped, in a true monospace whatever the theme's mono is. */
+  .ss-prose pre { margin: 1.4em 0; padding: 18px 20px; border-radius: 14px; background: rgba(var(--ink-rgb), .05); border: 1px solid var(--line); overflow-x: auto; }
+  .ss-prose pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13.5px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+  .ss-prose h2[id], .ss-prose h3[id] { scroll-margin-top: 90px; }
 {% if theme.display_opsz %}
   .ss-prose > h1, .ss-prose h2 { font-variation-settings: "opsz" {{ theme.display_opsz }}; }
 {% endif %}
