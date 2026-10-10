@@ -253,10 +253,11 @@ export default function start(): void {
 
     // fitted lines: inflate arriving, condense leaving
     const now = performance.now();
+    const toEnd = clamp(1 - (document.documentElement.scrollHeight - vh - scrollY) / (vh * 0.4));   // the last lines can't rise far: the end of the page inflates them
     for (const F of fills) {
       const r = F.el.getBoundingClientRect();
       if (r.bottom < -40 || r.top > vh + 40) continue;
-      const enter = reduced ? 1 : clamp((vh - r.top) / (vh * 0.65));
+      const enter = reduced ? 1 : Math.max(toEnd, clamp((vh - r.top) / (vh * 0.65)));
       const leave = reduced ? 0 : clamp(-r.top / Math.max(1, r.height + vh * 0.25));
       F.lines.forEach((L, i) => {
         let k = Math.min(enter, 1 - leave);
@@ -294,7 +295,11 @@ export default function start(): void {
       const p = reduced ? 1 : smooth((vh - r.top) / (vh * 0.7));
       if (Math.abs(p - o.last) < 0.0005) continue;
       o.last = p;
-      o.digits.forEach((d) => { d.strip.style.transform = `translateY(${(-d.target * p).toFixed(3)}em)`; });
+      // odometer cadence: each wheel rests on a whole digit and flicks quickly to the next
+      o.digits.forEach((d) => {
+        const x = d.target * p, n = Math.floor(x), f = clamp((x - n - 0.74) / 0.26);
+        d.strip.style.transform = `translateY(${(-(n + f * f * (3 - 2 * f))).toFixed(3)}em)`;
+      });
     }
 
     // the lens: weight and width peak on the words crossing the middle of the screen

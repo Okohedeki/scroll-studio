@@ -28,7 +28,7 @@ html.style-kinetic-type {
 
 /* ---------------------------------------------------------------- type */
 .kt-label { font: 500 12px/1.4 var(--kt-mono); letter-spacing: .08em; text-transform: uppercase; }
-.kt-label__n { opacity: .55; margin-right: .4em; }
+.kt-label__n { opacity: .7; margin-right: .4em; }
 .kt-body { max-width: 36ch; font: 400 clamp(16px, 1.15vw, 19px)/1.5 var(--kt-type); font-variation-settings: "wdth" 100; }
 .kt-giant { font: 800 clamp(58px, 14vw, 270px)/.84 var(--kt-type); text-transform: uppercase; letter-spacing: -.04em; font-variation-settings: "wdth" 100; }
 .kt-display { font: 800 clamp(40px, 6.2vw, 118px)/.9 var(--kt-type); text-transform: uppercase; letter-spacing: -.03em; font-variation-settings: "wdth" 78; text-wrap: balance; }
@@ -82,7 +82,7 @@ html.style-kinetic-type {
 /* ---------------------------------------------------------------- hero */
 .kt-hero { display: grid; grid-template-rows: auto 1fr auto; gap: 3vh; }
 .kt-hero__top { display: flex; justify-content: space-between; gap: 20px; }
-.kt-hint { opacity: .55; }
+.kt-hint { opacity: .72; }
 .kt-hero__title { align-self: center; margin: 0 calc(-.01 * 100vw); font-size: clamp(60px, min(16vw, 21vh), 330px); }
 .kt-hero__foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px 40px; flex-wrap: wrap; }
 .kt-hero__device { position: absolute; right: var(--kt-g); top: 18vh; width: clamp(150px, 14vw, 230px); transform: rotate(6deg); }
@@ -202,7 +202,8 @@ html.kt-js .kt-q[open] .kt-q__a p { animation: kt-rise .7s cubic-bezier(.16, 1, 
 @keyframes kt-rise { from { transform: translateY(110%); } to { transform: none; } }
 
 /* ---------------------------------------------------------------- CTA: the call is a giant marquee */
-.kt-cta { display: grid; grid-template-rows: auto 1fr auto; align-items: center; gap: 4vh; }
+.kt-cta { display: flex; flex-direction: column; justify-content: center; gap: 5vh; }
+.kt-cta > .kt-label { position: absolute; top: clamp(84px, 11vh, 120px); left: var(--kt-g); }
 .kt-marquee--cta { font: 900 clamp(70px, 15vw, 290px)/.86 var(--kt-type); text-transform: uppercase; letter-spacing: -.045em; font-variation-settings: "wdth" 70; cursor: pointer;
   transition: background-color .2s, color .2s; padding: 2vh 0; }
 .kt-marquee--cta:hover { background: var(--kt-ink); color: var(--kt-acid); }
@@ -217,7 +218,7 @@ html.kt-js .kt-q[open] .kt-q__a p { animation: kt-rise .7s cubic-bezier(.16, 1, 
 .kt-foot__row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; padding-bottom: 4vh; border-bottom: 1px solid rgba(242, 239, 232, .2); }
 .kt-foot__row a { text-decoration: none; }
 .kt-foot__row .kt-label a { text-decoration: underline; }
-.kt-foot__mark { font: 900 clamp(80px, 24vw, 520px)/.76 var(--kt-type); text-transform: uppercase; letter-spacing: -.05em; color: var(--kt-acid); font-variation-settings: "wdth" 110;
+.kt-foot__mark { font: 900 clamp(80px, 24vw, 520px)/.76 var(--kt-type); text-transform: uppercase; letter-spacing: -.03em; color: var(--kt-acid); font-variation-settings: "wdth" 110;
   white-space: nowrap; margin: 3vh calc(-.01 * 100vw) -.12em; }
 
 /* ---------------------------------------------------------------- blocks without a kinetic template */
@@ -246,3 +247,4 @@ html.kt-js .kt-q[open] .kt-q__a p { animation: kt-rise .7s cubic-bezier(.16, 1, 
 /* giant nowrap lines must never widen their own grid track */
 .kt-hero, .kt-intro__in, .kt-cta, .kt-product__in, .kt-steps__row { grid-template-columns: minmax(0, 1fr); }
 .kt-stat__v { padding-right: .06em; }
+.kt-cta .kt-go { align-self: center; }

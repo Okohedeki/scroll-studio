@@ -182,8 +182,10 @@ export default function start(): void {
 
   // ---------------------------------------------------------------- HUD: song section, staff credit, cut number, timecode
   const hud = { song: $("[data-song]"), credit: $("[data-credit]"), cut: $("[data-cut]"), tc: $("[data-tc]") };
-  const roles = ["Original concept", "Series composition", "Storyboard", "Animation director", "Key animation", "Colour design", "Theme song", "Director"];
-  const names = [siteName, ...$$(".ai-menu a").map((a) => (a.childNodes[a.childNodes.length - 1]?.textContent || "").trim()).filter(Boolean), "Scroll Studio"];
+  // staff credits in the corner, one per cut (a pastiche of OP credits, built from the site itself)
+  const song = ($(".ai-titlecard")?.textContent || siteName).replace(/\s+/g, " ").trim();
+  const credits: [string, string][] = [["Original concept", siteName], ["Storyboard & direction", "Scroll Studio"], ["Theme song", `“${song}”`],
+    ["Key animation", "Scroll Studio"], ["Colour design", siteName], ["Production", `${siteName} Production Committee`]];
 
   function onCut(shot: Shot) {
     live = shot;
@@ -192,8 +194,12 @@ export default function start(): void {
     shot.hit = false;
     if (hud.song) hud.song.textContent = shot.song;
     if (hud.cut) hud.cut.textContent = `C-${String(shot.index + 1).padStart(3, "0")}`;
-    if (hud.credit) hud.credit.innerHTML = `<b>${roles[shot.index % roles.length]}</b><span></span>`;
-    hud.credit?.querySelector("span")?.append(names[shot.index % names.length]);
+    if (hud.credit) {
+      const [role, name] = credits[shot.index % credits.length];
+      hud.credit.textContent = "";
+      const b = document.createElement("b"), sp = document.createElement("span");
+      b.textContent = role; sp.textContent = name; hud.credit.append(b, sp);
+    }
     if (shot.impact) impact(shot.impact, undefined, shot.fx.includes("debris"));
     if (shot.kind === "power") countUp(shot.el);
   }

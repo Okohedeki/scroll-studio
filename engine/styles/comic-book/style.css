@@ -365,3 +365,5 @@ html.cb-strip .cb-sheet > .cb-panel + .cb-panel::before { content: ""; position:
   .cb-page--quote .cb-fig { grid-column: 1; grid-row: 3; width: 46%; }
   .cb-page--quote .cb-cap--br { grid-column: 1; grid-row: 2; margin: 0 -16px 16px 0; }
 }
+@media (max-width: 760px) { .cb-sfx--slam { top: 10px; right: 10px; font-size: 50px; } .cb-feature .cb-cap--name { max-width: 66%; } }
+html.cb-strip .cb-sfx--slam { top: 10px; right: 10px; }

@@ -381,3 +381,9 @@ html.ai-op .ai-shot.is-on { display: block; }
   .ai-shot--power .ai-ja--v { top: 12cqh; transform: none; font-size: 12cqw; }
   .ai-power { font-size: 30cqw; }
 }
+.ai-noart .ai-cam { grid-template-columns: minmax(0, 1fr); }
+.ai-noart .ai-sakuga__copy { max-width: 70cqw; }
+.ai-noart .ai-cardtitle--sm { font-size: 9cqmin; }
+.ai-power--long { font-size: 22cqmin; }
+.ai-shot--power .ai-cam { padding-left: 16cqw; padding-right: 10cqw; }
+@container (max-aspect-ratio: 1 / 1) { .ai-power--long { font-size: 19cqw; } .ai-shot--power .ai-cam { padding-left: 6cqw; padding-right: 6cqw; } }

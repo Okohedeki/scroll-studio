@@ -94,7 +94,7 @@
 {% elif b.type == "product" %}
 {# ---------------------------------------------------------------- the chorus: one long scrubbed sakuga shot of the product #}
 <section class="ai-sec ai-sec--sakuga"{% if b.id %} id="{{ b.id }}"{% endif %}>
-  {% call shot("sakuga", 3.0, "Chorus", "speed", "ai-side-" ~ b.side, 'data-dir="-1" data-impact-at="0.7"') %}
+  {% call shot("sakuga", 3.0 if (b.device or e.img) else 1.4, "Chorus", "speed", "ai-side-" ~ b.side ~ ("" if (b.device or e.img) else " ai-noart"), 'data-dir="-1" data-impact-at="0.7"') %}
     <div class="ai-sakuga__copy">
       {{ ja("実演", b.kicker or "Demonstration", "ai-ja--v ai-ja--red") }}
       {{ head(e, "ai-cardtitle ai-cardtitle--sm", b.title) }}
@@ -104,10 +104,10 @@
       {{ buttons(b.buttons) }}
       {% if b.note %}<p class="ai-note">{{ b.note | rich }}</p>{% endif %}
     </div>
-    <div class="ai-sakuga__art">
+    {% if b.device or e.img %}<div class="ai-sakuga__art">
       {% if b.device %}{{ base.phone(b.device, e.screen, e.clip) }}
-      {% elif e.img %}<img class="ai-cel" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
-    </div>
+      {% else %}<img class="ai-cel" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+    </div>{% endif %}
   {% endcall %}
 </section>
 
@@ -117,7 +117,7 @@
   {% for st in b.items %}
   {% call shot("power", 0.9, "Chorus", "focus", "ai-tone-" ~ (loop.index0 % 4), 'data-impact="5" data-focus="' ~ ("0.62" if loop.index0 % 2 else "0.38") ~ ',0.5"') %}
     {{ ja("戦闘力", "Power level", "ai-ja--v ai-ja--big") }}
-    <p class="ai-power"><span class="ai-power__v">{{ st.value }}</span>{% if st.unit %}<span class="ai-power__u">{{ st.unit }}</span>{% endif %}</p>
+    <p class="ai-power{% if (st.value ~ (st.unit or "")) | length > 4 %} ai-power--long{% endif %}"><span class="ai-power__v">{{ st.value }}</span>{% if st.unit %}<span class="ai-power__u">{{ st.unit }}</span>{% endif %}</p>
     <p class="ai-power__l">{{ st.label }}</p>
   {% endcall %}
   {% endfor %}

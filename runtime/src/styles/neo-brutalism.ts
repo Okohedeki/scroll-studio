@@ -168,6 +168,18 @@ export default function start(): void {
   document.fonts?.ready.then(layoutPath);
   addEventListener("load", layoutPath);
 
+  // ---------------------------------------------------------------- the footer wordmark spans the viewport, whatever the name
+  const mark = $<HTMLElement>(".nb-foot__mark");
+  const fitMark = () => {
+    if (!mark) return;
+    mark.style.fontSize = "";
+    const w = mark.scrollWidth, room = mark.clientWidth;
+    if (w > room) mark.style.fontSize = `${(parseFloat(getComputedStyle(mark).fontSize) * room / w * 0.98).toFixed(1)}px`;
+  };
+  fitMark();
+  addEventListener("resize", fitMark);
+  document.fonts?.ready.then(fitMark);
+
   // ---------------------------------------------------------------- marquee bands on scroll velocity
   const bands = $$<HTMLElement>("[data-nb-band]").map((band) => {
     const row = $<HTMLElement>(".nb-band__row", band)!;
