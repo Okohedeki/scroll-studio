@@ -1,0 +1,164 @@
+{# Split-flap blocks: every section is an "information desk" notice under the departures board. The board carries
+   the headline (in flaps); the desk carries the full text in normal type, plus the flap furniture of each type:
+   timetable rows for features, digit drums for stats, a CALLING AT list for steps, a message board for quotes, a
+   queries board for questions and the NOW BOARDING row for the call to action. Text inside .sf-flap is real text;
+   the runtime turns it into flap cells and keeps the words for assistive technology. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+
+{% macro up(t) %}{{ (t or "") | striptags | replace("&amp;", "&") | upper | trim }}{% endmacro %}
+
+{% macro keys(list, cls="") %}{% if list %}<div class="sf-keys">{% for l in list %}<a class="sf-key{% if loop.first %} sf-key--go{% endif %}{{ cls }}" href="{{ l.href }}"><span>{{ l.label }}{% if loop.first %} <b aria-hidden="true">→</b>{% endif %}</span></a>{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro status(tag) %}{% set t = (tag or "") | upper | trim %}{% if t in ["NEW", "LIVE", "BETA", "SOON", "PRO", "FREE", "BOARDING", "DELAYED", "CANCELLED"] %}{{ t }}{% else %}ON TIME{% endif %}{% endmacro %}
+{% macro tone(s) %}{% set s = s | trim %}{% if s in ["NEW", "PRO", "FREE"] %}info{% elif s in ["BETA", "SOON", "BOARDING", "DELAYED"] %}board{% elif s == "CANCELLED" %}stop{% else %}ok{% endif %}{% endmacro %}
+
+{% macro meta(b, e, loop, label) %}
+{% set gaps = [5, 4, 7, 5, 6, 3, 8, 5, 4, 6, 7, 5] %}
+{% set ns = namespace(t=535) %}{% for i in range(loop.index0 + 1) %}{% set ns.t = ns.t + gaps[i % 12] %}{% endfor %}
+<div class="sf-desk__meta">
+  <span class="sf-desk__info" aria-hidden="true"><i>i</i> Information</span>
+  <span class="sf-desk__dep"><span>{{ "%02d:%02d" | format(ns.t // 60, ns.t % 60) }}</span><span>Gate {% if b.type == "cta" %}1{% else %}{{ loop.index + 1 }}{% endif %}</span></span>
+  {% if label %}<span class="sf-desk__kicker">{{ label }}</span>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set h = "h1" if e.first else "h2" %}
+{% set surf = (" ss-surface-" ~ b.surface) if b.surface else "" %}
+<section class="sf-desk sf-desk--{{ b.type }}{{ surf }}" data-sf="{{ loop.index0 }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+<div class="sf-desk__in">
+
+{% if b.type == "hero" %}
+  {{ meta(b, e, loop, b.badge) }}
+  <div class="sf-desk__main">
+    <{{ h }} class="sf-h sf-h--hero">{{ b.title | rich }}</{{ h }}>
+    {% if b.body %}<p class="sf-lede">{{ b.body | rich }}</p>{% endif %}
+    {{ keys(b.buttons) }}
+    {% if not loop.last %}<p class="sf-cue" aria-hidden="true"><b>↓</b> Scroll to advance the clock · next departure below</p>{% endif %}
+    {% if b.device %}<div class="sf-bezel sf-bezel--hero">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+  </div>
+
+{% elif b.type == "intro" %}
+  {{ meta(b, e, loop, b.kicker) }}
+  <div class="sf-desk__main">
+    <{{ h }} class="sf-h">{{ b.title | rich }}</{{ h }}>
+    {% if b.body %}<p class="sf-lede">{{ b.body | rich }}</p>{% endif %}
+    {% if b.button %}{{ keys([b.button]) }}{% endif %}
+  </div>
+
+{% elif b.type == "features" %}
+  {{ meta(b, e, loop, b.kicker) }}
+  <div class="sf-desk__main">
+    {% if b.title %}<{{ h }} class="sf-h">{{ b.title | rich }}</{{ h }}>{% endif %}
+    <div class="sf-panel">
+      <div class="sf-tt__head" aria-hidden="true"><span>No.</span><span>Service</span><span>Status</span></div>
+      <ol class="sf-tt">
+        {% for f in b.items %}{% set st = status(f.tag) %}
+        <li class="sf-tt__row" tabindex="0">
+          <span class="sf-tt__no"><span class="sf-flap" data-cols="2">{% if f.tag and status(f.tag) == "ON TIME" %}{{ up(f.tag)[:2] }}{% else %}{{ "%02d" | format(loop.index) }}{% endif %}</span></span>
+          <h3 class="sf-tt__dest"><span class="sf-flap">{{ up(f.title) }}</span></h3>
+          <span class="sf-tt__st"><span class="sf-flap sf-tone--{{ tone(st) }}" data-cols="8">{{ st }}</span></span>
+          {% if f.body %}<p class="sf-tt__via">{{ f.body | rich }}</p>{% endif %}
+          {% if f.meter is not none %}<span class="sf-tt__load" aria-label="{{ (f.meter * 100) | round | int }}%"><i style="width: {{ (f.meter * 100) | round }}%"></i></span>{% endif %}
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+
+{% elif b.type == "product" %}
+  {{ meta(b, e, loop, b.kicker) }}
+  <div class="sf-desk__main sf-desk__main--split sf-side--{{ b.side }}">
+    <div class="sf-copy">
+      <{{ h }} class="sf-h">{{ b.title | rich }}</{{ h }}>
+      {% if b.body %}<p class="sf-lede">{{ b.body | rich }}</p>{% endif %}
+      {% if b.stats %}<dl class="sf-drums sf-drums--small">{% for st in b.stats %}<div class="sf-drum"><dd class="sf-drum__v"><span class="sf-digits">{{ st.value }}</span>{% if st.unit %}<span class="sf-flap sf-drum__u">{{ up(st.unit) }}</span>{% endif %}</dd><dt class="sf-drum__l">{{ st.label }}</dt></div>{% endfor %}</dl>
+      {% elif b.tags %}<ul class="sf-words">{% for t in b.tags %}<li class="sf-word">{{ up(t) }}</li>{% endfor %}</ul>{% endif %}
+      {{ keys(b.buttons) }}
+      {% if b.note %}<p class="sf-note">{{ b.note | rich }}</p>{% endif %}
+    </div>
+    {% if b.device or e.img %}
+    <div class="sf-bezel" data-strips>
+      {% if e.img %}<img class="sf-shot" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+      {% if b.behind %}<div class="sf-behind">{{ base.phone(b.behind, e.behind, e.behind_clip) }}</div>{% endif %}
+      {% if b.device %}{{ base.phone(b.device, e.screen, e.clip) }}{% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+{% elif b.type == "stats" %}
+  {{ meta(b, e, loop, "By numbers") }}
+  <div class="sf-desk__main">
+    <dl class="sf-drums sf-drums--{{ b.items | length }}">
+      {% for st in b.items %}
+      <div class="sf-drum">
+        <dd class="sf-drum__v"><span class="sf-digits">{{ st.value }}</span>{% if st.unit %}<span class="sf-flap sf-drum__u">{{ up(st.unit) }}</span>{% endif %}</dd>
+        <dt class="sf-drum__l">{{ st.label }}</dt>
+      </div>
+      {% endfor %}
+    </dl>
+  </div>
+
+{% elif b.type == "timeline" %}
+  {{ meta(b, e, loop, b.kicker) }}
+  <div class="sf-desk__main">
+    {% if b.title %}<{{ h }} class="sf-h">{{ b.title | rich }}</{{ h }}>{% endif %}
+    <div class="sf-calling">
+      <div class="sf-calling__head" aria-hidden="true">Calling at</div>
+      <ol class="sf-calling__list">
+        {% for t in b.items %}
+        <li class="sf-stop">
+          <span class="sf-stop__dot" aria-hidden="true"></span>
+          <span class="sf-stop__when"><span class="sf-flap">{{ up(t.when) }}</span></span>
+          <div class="sf-stop__txt"><h3>{{ t.title | rich }}</h3>{% if t.body %}<p>{{ t.body | rich }}</p>{% endif %}</div>
+          <span class="sf-stop__st"><span class="sf-flap sf-tone--later" data-cols="8">LATER</span></span>
+        </li>
+        {% endfor %}
+      </ol>
+      <i class="sf-calling__train" aria-hidden="true"></i>
+    </div>
+  </div>
+
+{% elif b.type == "quote" %}
+  {{ meta(b, e, loop, "Passenger notice") }}
+  <div class="sf-desk__main">
+    <figure class="sf-msg">
+      <blockquote class="sf-msg__board"><p class="sf-msg__text">{{ b.text | rich }}</p></blockquote>
+      {% if b.who %}<figcaption class="sf-msg__who"><span class="sf-flap">{{ up(b.who) }}</span></figcaption>{% endif %}
+    </figure>
+  </div>
+
+{% elif b.type == "faq" %}
+  {{ meta(b, e, loop, b.kicker or "Queries") }}
+  <div class="sf-desk__main">
+    <{{ h }} class="sf-h">{{ b.title | rich }}</{{ h }}>
+    <div class="sf-queries">
+      <dl class="sf-qa">
+        {% for it in b.items %}
+        <div class="sf-qa__item">
+          <dt class="sf-qa__q"><span class="sf-qa__n" aria-hidden="true">Q{{ loop.index }}</span><span class="sf-qa__qt">{{ it.q | rich }}</span></dt>
+          <dd class="sf-qa__a">{{ it.a | rich }}</dd>
+        </div>
+        {% endfor %}
+      </dl>
+    </div>
+  </div>
+
+{% elif b.type == "cta" %}
+  {{ meta(b, e, loop, b.kicker) }}
+  <div class="sf-desk__main sf-desk__main--cta">
+    <div class="sf-final" aria-hidden="true">
+      <span class="sf-lamp"></span>
+      <span class="sf-final__a"><span class="sf-flap" data-cols="12">NOW BOARDING</span></span>
+      <span class="sf-final__g"><span class="sf-flap" data-cols="6">GATE 1</span></span>
+      <span class="sf-final__s"><span class="sf-flap sf-tone--board" data-cols="9">BOARDING</span></span>
+    </div>
+    <{{ h }} class="sf-h">{{ b.title | rich }}</{{ h }}>
+    {% if b.button %}<div class="sf-keys"><a class="sf-key sf-key--go sf-key--board" href="{{ b.button.href }}"><span>{{ b.button.label }} <b aria-hidden="true">→</b></span></a></div>{% endif %}
+    <p class="sf-confirm" role="status" aria-live="polite"></p>
+  </div>
+{% endif %}
+
+</div>
+</section>
+{% endmacro %}

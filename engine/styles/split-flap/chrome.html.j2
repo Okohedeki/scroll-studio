@@ -1,0 +1,55 @@
+{# Split-flap chrome: the departures board (fixed at the top of the hall) and the footer ticker.
+   Without JavaScript the board is a plain timetable: one row per section, linked to it. The runtime
+   (runtime/src/styles/split-flap.ts) reads these rows and drives the flap display from them. #}
+
+{% macro clean(t) %}{{ (t or "") | striptags | replace("&amp;", "&") | upper | trim }}{% endmacro %}
+
+{% macro dest(e, site) %}{% set b = e.s %}{% if b.nav_label %}{{ clean(b.nav_label) }}{% elif b.type == "hero" %}{{ clean(site.name) }}{% elif b.type == "quote" %}{{ clean((b.who or "Passenger").split(",")[0]) }}{% elif b.type == "stats" %}BY NUMBERS{% elif b.kicker %}{{ clean(b.kicker) }}{% elif b.title %}{{ clean(b.title) }}{% elif b.steps %}{{ clean(b.steps[0].title) }}{% else %}{{ clean(b.id or b.type) }}{% endif %}{% endmacro %}
+
+{% macro headline(e, site) %}{% set b = e.s %}{% if b.type == "quote" %}MESSAGE FROM {{ clean((b.who or "a passenger").split(",")[0]) }}{% elif b.type == "stats" %}{% for st in b.items[:1] %}{{ clean(st.value) }}{{ clean(st.unit) }} {{ clean(st.label) }}{% endfor %}{% elif b.title %}{{ clean(b.title) }}{% elif b.steps %}{{ clean(b.steps[0].title) }}{% else %}{{ dest(e, site) }}{% endif %}{% endmacro %}
+
+{% macro sub(e, site) %}{% set b = e.s %}{% if b.type == "hero" %}{{ clean(b.badge) }}{% elif b.type == "quote" %}{{ clean(b.who) }}{% elif b.kicker %}{{ clean(b.kicker) }}{% endif %}{% endmacro %}
+
+{% macro top(site, sections, nav_links) %}
+{% set gaps = [5, 4, 7, 5, 6, 3, 8, 5, 4, 6, 7, 5] %}
+{% set ns = namespace(t=535) %}
+<header class="sf-board" id="sf-board">
+  <div class="sf-head">
+    <a class="sf-station" href="#">{% if site.nav.logo and site.nav.logo.startswith("M") %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="{{ site.nav.logo }}"/></svg>{% endif %}<span>{{ site.name }}</span></a>
+    <span class="sf-title" aria-hidden="true"><b>Departures</b> <i>Partenze</i></span>
+    {% if nav_links %}<nav class="sf-nav" aria-label="Sections">{% for l in nav_links %}<a href="{{ l.href }}">{{ l.label }}</a>{% endfor %}</nav>{% endif %}
+    <span class="sf-spacer"></span>
+    <button class="sf-sound" type="button" aria-pressed="false" hidden><span class="sf-sound__i" aria-hidden="true"></span><span class="sf-sound__l">Sound off</span></button>
+    <span class="sf-clock" aria-hidden="true">{{ "%02d:%02d" | format(ns.t // 60, ns.t % 60) }}</span>
+    {% if site.nav.cta %}<a class="sf-key sf-key--ticket" href="{{ site.nav.cta.href }}"><span>{{ site.nav.cta.label }}</span></a>{% endif %}
+  </div>
+  <div class="sf-display" aria-hidden="true"></div>
+  <table class="sf-table">
+    <caption class="sf-sr">Departures: the sections of this page</caption>
+    <thead><tr><th scope="col">Time</th><th scope="col">Destination</th><th scope="col" class="sf-c-via">Via</th><th scope="col" class="sf-c-gate">Gate</th><th scope="col">Status</th></tr></thead>
+    <tbody>
+    {% for e in sections %}
+      {% set ns.t = ns.t + gaps[loop.index0 % (gaps | length)] %}
+      {% set is_cta = e.s.type == "cta" %}
+      <tr data-time="{{ "%02d:%02d" | format(ns.t // 60, ns.t % 60) }}" data-dest="{{ dest(e, site) }}" data-head="{{ headline(e, site) }}" data-sub="{{ sub(e, site) }}" data-gate="{% if is_cta %}1{% else %}{{ "%d" | format(loop.index + 1) }}{% endif %}" data-type="{{ e.s.type }}"{% if e.scene %} data-scene="1"{% endif %}>
+        <td>{{ "%02d:%02d" | format(ns.t // 60, ns.t % 60) }}</td>
+        <td>{% if e.s.id %}<a href="#{{ e.s.id }}">{{ dest(e, site) }}</a>{% else %}{{ dest(e, site) }}{% endif %}</td>
+        <td class="sf-c-via">{{ headline(e, site) }}</td>
+        <td class="sf-c-gate">{% if is_cta %}1{% else %}{{ loop.index + 1 }}{% endif %}</td>
+        <td><span class="sf-status sf-status--{{ 'board' if loop.first else ('final' if is_cta else 'ok') }}">{{ "Boarding" if loop.first else ("Gate open" if is_cta else "On time") }}</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="sf-rows" aria-hidden="true"></div>
+</header>
+{% endmacro %}
+
+{% macro bottom(site, sections) -%}
+{# The message row: a one-line flap ticker of announcements; the default footer below it keeps the legal line,
+   page links and media credits (restyled as the hall's plain legal strip). #}
+<div class="sf-foot" aria-hidden="true">
+  <span class="sf-foot__label">Notices</span>
+  <div class="sf-ticker" data-msgs="{{ [site.description, site.footer.left, site.footer.right] | select | map('striptags') | join('|') | upper }}"></div>
+</div>
+{% endmacro %}

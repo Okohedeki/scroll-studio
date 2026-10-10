@@ -1,19 +1,23 @@
-# Split-flap: tokens and fonts for theme.style: split-flap. See README.md in this folder for the UX contract.
+# Split-flap: tokens and fonts for theme.style: split-flap. The page is a station hall: a fixed Solari departures board
+# where every section is a departure, over an information desk that holds each section's full text.
 label: Split-flap
-about: A departures board, where numbers and headlines clatter through the alphabet before they settle.
-mode: dark
+about: A station departures board. Scrolling advances the station clock; at each section the whole timetable clatters up one row, flap by flap, and the boarding row opens its detail at the information desk below.
+mode: light
 colors:
-  bg: '#111214'
-  bg2: '#18191c'
-  ink: '#f2f2ee'
-  accent: '#ffcc00'
-  accent2: '#ffe066'
-  accent_ink: '#1a1500'
+  bg: '#e9e4d8'
+  bg2: '#ddd7c9'
+  ink: '#151515'
+  accent: '#f2a900'
+  accent2: '#1e9e5a'
+  accent_ink: '#151000'
+  accent_text: '#7a5200'
 fonts:
-  display: Oswald
-  body: Inter
-  mono: Space Mono
-display_weight: 500
-radius: 4px
-fx:
-  text: flap
+  display: Barlow Condensed
+  body: IBM Plex Sans
+  mono: IBM Plex Mono
+font_axes:
+  Barlow Condensed: "wght@400;500;600;700"
+  IBM Plex Sans: "ital,wght@0,100..700;1,100..700"
+  IBM Plex Mono: "wght@400;500;600"
+display_weight: 600
+radius: 3px
