@@ -6,7 +6,7 @@ through MCP.**
 [![Lodestar Orbital: a rocket launch that plays as you scroll](docs/media/lodestar.gif)](https://okohedeki.github.io/scroll-studio-showcase/)
 
 **[See every example site live →](https://okohedeki.github.io/scroll-studio-showcase/)** ·
-**[One page in twenty styles →](https://okohedeki.github.io/scroll-studio-showcase/halcyon/looks/)**
+**[One page, twenty-one experiences →](https://okohedeki.github.io/scroll-studio-showcase/halcyon/looks/)**
 
 Give it a brief, a photo, a painting, a 3D model, a CSV or a film idea. It builds a static site where scrolling
 plays the visuals: generated video, a painting drawn stroke by stroke, a live 3D zoom, a data story, a map flight.
@@ -43,9 +43,11 @@ site.yaml ──► studio build ──► dist/  (plain static files: host anyw
   compressed to SPZ at build time and walked through on scroll. ([Hollis House](examples/hollis-house/site.yaml))
 - **Numbers you can check** (`chart` callouts, `stats` bound to data): headline figures and chart notes are read
   from the source CSV when the site is built, so the copy can't drift from the data. ([Pelorus](examples/pelorus/site.yaml))
-- **Twenty styles** (`theme: { style: … }`): a whole look in one word, from neo-brutalism and split-flap to
-  holographic foil and a wireframe landscape. `studio looks` builds a site in every style with a switcher.
-  ([Halcyon](examples/halcyon/site.yaml))
+- **Twenty-one styles that change the experience, not just the paint** (`theme: { style: … }`). Each style has its
+  own scroll mechanic, layout, transitions and components, built from in-depth research
+  ([docs/styles](docs/styles/)): split-flap is a departures board that updates as the clock advances, comic-book is
+  read panel by panel, anime-intro cuts like an anime opening, ASCII is a terminal session, blueprint is a drawing
+  that drafts itself. `studio looks` builds a site in every style. ([Halcyon](examples/halcyon/site.yaml))
 - **Client work**: `studio copy export` gives the client a Markdown copy deck; `studio copy import` applies their
   edits back into site.yaml (comments kept, invalid edits refused). `studio brand --logo` draws a contrast-checked
   theme from their logo.
@@ -81,7 +83,7 @@ Every example is a `site.yaml` in [`examples/`](examples/) and rebuilds with `st
 | [Stillwater](examples/one-take/site.yaml) | Consumer product | `film` + `take` | One take from a mountain ridge down to a bottle on a lakeside table; the bottle is the real 3D model |
 | [Hollis House](examples/hollis-house/site.yaml) | Real estate | `splat` | A walk through a scanned house, room by room |
 | [Pelorus](examples/pelorus/site.yaml) | Research | `chart` (bar) | The renewables share of electricity, every figure read from Our World in Data |
-| [Halcyon](examples/halcyon/site.yaml) | Software | blocks | One product page built in twenty styles (`studio looks`) |
+| [Halcyon](examples/halcyon/site.yaml) | Software | blocks | One product page as twenty-one experiences (`studio looks`) |
 
 ## Quick start
 
@@ -159,17 +161,43 @@ model: colour stops, glows, stars and grain, enough for colour cards, dusk skies
 
 ## Styles
 
-`theme: { style: <name> }` sets a whole look: colours, fonts, corner radius, a stylesheet and, where the look moves,
-a runtime effect. `theme.colors` and `theme.fonts` still win, so a brand's palette can wear any style.
+`theme: { style: <name> }` changes how a site is experienced: what scrolling does, how content is laid out and
+arrives, how sections hand over, what the pointer does and what the call to action is. The same `site.yaml` reads
+as a departures board, a comic, a terminal session, a game level or an anime opening. `theme.colors` and
+`theme.fonts` still win, so a brand's palette can wear any style.
 
-`particles` · `liquid-morph` · `holographic` · `neon-glow` · `wireframe-3d` · `glassmorphism` · `kinetic-type` ·
-`isometric` · `clay-3d` · `ascii-art` · `gradient-mesh` · `comic-book` · `split-flap` · `retro-vhs` · `halftone` ·
-`bauhaus` · `pixel-art` · `blueprint` · `art-deco` · `neo-brutalism`
+| Style | What scrolling is |
+|---|---|
+| `particles` | One swarm of points re-forming into each section's subject |
+| `liquid-morph` | One body that morphs; nothing cuts, everything becomes |
+| `holographic` | Rotating holographic plates; the information is in the angle |
+| `neon-glow` | A night street where signs ignite as you arrive |
+| `wireframe-3d` | Flying a camera through a world drawn in lines |
+| `glassmorphism` | Windows over a living world moving behind them |
+| `kinetic-type` | An instrument made of letters, played by scroll speed |
+| `isometric` | A fixed-angle drone over a model world that builds itself |
+| `clay-3d` | Soft toys on a table: mass, squash and wobble |
+| `ascii-art` | A terminal session that types and prints |
+| `gradient-mesh` | Weather: one breathing colour field that shifts with each chapter |
+| `comic-book` | Reading a comic page panel by panel |
+| `split-flap` | A departures board updating as the clock advances |
+| `retro-vhs` | Operating a VCR: play, search, rewind |
+| `halftone` | Reading a freshly printed newspaper |
+| `bauhaus` | Composing a poster from shapes that persist and change role |
+| `pixel-art` | Playing a side-scrolling game |
+| `blueprint` | A technical drawing that drafts itself |
+| `art-deco` | An opening night: doors, sunbursts, marquees |
+| `neo-brutalism` | A desk you fill up and can mess with |
+| `anime-intro` | Scrubbing the playhead of an anime opening, cut by cut |
 
 ```bash
 studio looks examples/halcyon            # dist/looks/<style>/ for every style, plus a gallery at dist/looks/
-studio looks my-site --styles split-flap,bauhaus,art-deco
+studio looks my-site --styles split-flap,comic-book,anime-intro
 ```
+
+A style is a folder (`engine/styles/<name>/`: tokens, stylesheet, its own block markup and page chrome) plus a
+runtime module (`runtime/src/styles/<name>.ts`) with its scroll controller; the contract is in
+[engine/styles/README.md](engine/styles/README.md) and the research behind each one in [docs/styles](docs/styles/).
 
 ## One Take, places and data
 

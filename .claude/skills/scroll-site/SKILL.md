@@ -27,8 +27,9 @@ Mix them: a `film` hero, then `features`/`stats`, then an `artwork` section, the
 - Start from the closest example: `list_projects`, then `create_project(name, example=...)`, then edit with `get_spec`/`set_spec`.
 - `spec_schema('<type>')` gives every field with descriptions. Pick a theme preset that fits the domain
   (night, brass, paper, lab, cosmos, studio, dusk, ink, blueprint) and override colours only if the brand needs it.
-- A look in one word: `theme: { style: <name> }` (neo-brutalism, split-flap, holographic, art-deco, ... see
-  `engine/styles.yaml`). Offer two or three that fit and show them with `studio looks <project> --styles a,b,c`.
+- An experience in one word: `theme: { style: <name> }` changes how the site scrolls and reads (split-flap board,
+  comic pages, terminal session, game level, anime opening, ... the table in README.md). Pick by the brand's
+  character, offer two or three, and show them with `studio looks <project> --styles a,b,c`.
 - Brand: `studio brand <project> --logo inputs/logo.png` sets contrast-checked colours from the client's logo.
 - Copy: short, specific, written for the reader. `<em>…</em>` marks the accent words in a title.
 - Steps: the first step can be `intro: true` (the section's opening headline). For `artwork`, `scene3d`, `parallax`,

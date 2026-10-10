@@ -112,9 +112,9 @@ def looks(name: str, styles: Optional[str] = typer.Option(None, help="Comma-sepa
         f'<span class="d">{_html.escape(all_styles[n].get("about", ""))}</span></a>' for n in names)
     (root / "index.html").write_text(f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{_html.escape(site.name)}: {len(names)} looks</title>
-<meta name="description" content="One site spec built in {len(names)} styles with Scroll Studio.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23f2f2f2'/%3E%3Ctext x='16' y='22.5' text-anchor='middle' font-family='system-ui' font-size='18' font-weight='700' fill='%230c0c0e'%3E20%3C/text%3E%3C/svg%3E">
+<title>{_html.escape(site.name)}: {len(names)} experiences</title>
+<meta name="description" content="One site spec built as {len(names)} different experiences with Scroll Studio.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23f2f2f2'/%3E%3Ctext x='16' y='22.5' text-anchor='middle' font-family='system-ui' font-size='18' font-weight='700' fill='%230c0c0e'%3E21%3C/text%3E%3C/svg%3E">
 <style>
   :root {{ color-scheme: dark; --bg: #0c0c0e; --ink: #f2f2f2; --dim: rgba(242, 242, 242, .68); --line: rgba(242, 242, 242, .14); }}
   * {{ box-sizing: border-box; margin: 0; }}
@@ -134,9 +134,9 @@ def looks(name: str, styles: Optional[str] = typer.Option(None, help="Comma-sepa
   footer {{ max-width: 1500px; margin: 48px auto 0; color: var(--dim); font-size: 14px; }}
   a {{ color: inherit; }}
 </style></head><body>
-<header><h1>One spec, {len(names)} looks.</h1>
+<header><h1>One spec, {len(names)} experiences.</h1>
 <p>Every page below is the same <code>site.yaml</code> ({_html.escape(site.name)}), built by Scroll Studio with a different
-<code>theme: {{ style: ... }}</code>. Open one, then use the arrows at the bottom (or your arrow keys) to flip through them all.</p></header>
+<code>theme: {{ style: ... }}</code>. Each style is its own experience: a different scroll mechanic, layout and set of transitions, not a recolour. Open one, then use the arrows at the bottom (or your arrow keys) to flip through them all.</p></header>
 <main class="grid">
 {cards}
 </main>

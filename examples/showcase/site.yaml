@@ -24,7 +24,7 @@ sections:
       - { title: Stillwater, kicker: "film + take · consumer product", href: ../one-take/dist/index.html, image: previews/one-take.jpg, video: previews/one-take.mp4, body: "One unbroken take from a mountain ridge to a lakeside table. The bottle is its real 3D model, never generated." }
       - { title: Hollis House, kicker: "splat · real estate", href: ../hollis-house/dist/index.html, image: previews/hollis-house.jpg, video: previews/hollis-house.mp4, body: "A walk through a real house, rebuilt as a Gaussian splat." }
       - { title: Pelorus, kicker: "chart · research", href: ../pelorus/dist/index.html, image: previews/pelorus.jpg, video: previews/pelorus.mp4, body: "The renewables story with every figure read from the source data at build time." }
-      - { title: Halcyon in twenty styles, kicker: "theme.style · software", href: ../halcyon/dist/looks/index.html, image: previews/halcyon.jpg, video: previews/halcyon.mp4, body: "One product page, twenty looks: split-flap, neo-brutalism, holographic, art deco and sixteen more." }
+      - { title: "Halcyon, twenty-one ways", kicker: "theme.style · software", href: ../halcyon/dist/looks/index.html, image: previews/halcyon.jpg, video: previews/halcyon.mp4, body: "One product page as a departures board, a comic, a terminal, a game level, an anime opening and sixteen more experiences." }
       - { title: Lodestar Orbital, kicker: "film · aerospace", href: ../lodestar-orbital/dist/index.html, image: previews/lodestar-orbital.jpg, video: previews/lodestar-orbital.mp4, body: "A rocket launch to orbit, generated locally with LTX-2.3." }
       - { title: Fischer & Vale, kicker: "sequence · luxury goods", href: ../fischer-vale/dist/index.html, image: previews/fischer-vale.jpg, video: previews/fischer-vale.mp4, body: "A glass chess set rendered in Blender lifts off its board." }
       - { title: Atelier Sfumato, kicker: "artwork · education", href: ../atelier-sfumato/dist/index.html, image: previews/atelier-sfumato.jpg, video: previews/atelier-sfumato.mp4, body: "The Mona Lisa, drawn and painted in five lessons." }
@@ -46,7 +46,7 @@ sections:
       - { tag: One Take, title: The product never warps, body: "A generated world in one continuous camera move, with your product rendered from its 3D model through the same camera." }
       - { tag: Places, title: Walk a real room, body: "A Gaussian-splat scan, trimmed and compressed at build time, walked through as you scroll." }
       - { tag: Data, title: Figures you can check, body: "Chart callouts and headline stats are read from the CSV when the site is built, so the copy can't drift from the data." }
-      - { tag: Styles, title: Twenty looks, body: "theme: { style: split-flap } and the whole site changes: fonts, colours, effects. studio looks shows them all." }
+      - { tag: Styles, title: Twenty-one experiences, body: "theme: { style: split-flap } and the site becomes a departures board: its own scroll mechanic, layout and transitions, not a new coat of paint." }
       - { tag: Clients, title: A copy deck and a brand, body: "Send the client a Markdown copy deck and import their edits; draw the palette from their logo." }
       - { tag: Claude, title: Directed by Claude, body: "Every feature is an MCP tool, so Claude can write the spec, build, look at snapshots and fix." }
   - type: features
