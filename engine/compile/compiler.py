@@ -166,6 +166,32 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         elif s.type == "strip":
             e["imgs"] = [block_image(it.image, 900) for it in s.items]
 
+    # Stats bound to chart data: the number comes from the same file the chart draws
+    charts = {e["s"].id: e for e in sections if e["scene"] and e["s"].type == "chart"}
+    for e in sections:
+        if e["s"].type != "stats" or not any(st.data for st in e["s"].items):
+            continue
+        items = []
+        for st in e["s"].items:
+            if st.data:
+                ch = charts.get(st.data.section)
+                if not ch:
+                    raise BuildError(f"stat '{st.label}': no chart section with id '{st.data.section}'")
+                series = json.loads((project.build / ch["s"].id / "web" / "data.json").read_text())["series"]
+                pts = series.get(st.data.series)
+                if not pts:
+                    raise BuildError(f"stat '{st.label}': series '{st.data.series}' is not in chart '{st.data.section}'")
+                at = st.data.at
+                pt = {"max": lambda: max(pts, key=lambda q: q[1]), "min": lambda: min(pts, key=lambda q: q[1]),
+                      "first": lambda: pts[0], "last": lambda: pts[-1]}.get(at, lambda: next((q for q in pts if q[0] == float(at)), None))()
+                if pt is None:
+                    raise BuildError(f"stat '{st.label}': {st.data.series} has no point at {at}")
+                v = pt[1] * st.data.scale
+                st = st.model_copy(update={"value": f"{v:.{st.data.decimals}f}"})
+                log(f"  stat '{st.label}' = {st.value} (from {st.data.section}/{st.data.series} {at})")
+            items.append(st)
+        e["s"] = e["s"].model_copy(update={"items": items})
+
     # CTA backgrounds can borrow a scene's final frame
     finals = {e["s"].id: (e["config"] or {}).get("end") for e in sections if e["scene"]}
     for e in sections:

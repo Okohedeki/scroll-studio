@@ -1,0 +1,269 @@
+"""A take: the world blockout and the product pass, rendered through one and the same camera.
+
+  blender -b --factory-startup -P take.py -- --take take.json --pass world   --out DIR --res 1280x720
+  blender -b --factory-startup -P take.py -- --take take.json --pass product --out DIR --res 1920x1080 --samples 64
+
+take.json is the spec's `take` mapping (see engine/spec.py Take) plus "product_file", the resolved model path.
+
+world:    Workbench beauty frames + the depth guide for the video model (depth/####.png), camera.json. The product
+          mesh is in this pass too, so the guide tells the model something solid stands there.
+product:  Cycles, transparent film: only the product, lit by a studio HDRI and a sun along the take's light
+          direction, with its shadow caught on an invisible ground at its base. frames/####.png, RGBA.
+
+Both passes build the camera from the same keys with the same fps, so frame i of one pass is frame i of the other.
+"""
+import argparse
+import json
+import math
+import os
+import random
+import sys
+
+import bpy
+from mathutils import Matrix, Vector
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from blockout_lib import blob, box, camera_rig, cone, cylinder, plane, render, reset_scene  # noqa: E402
+
+argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+ap = argparse.ArgumentParser()
+ap.add_argument("--take", required=True)
+ap.add_argument("--pass", dest="which", choices=["world", "product"], required=True)
+ap.add_argument("--out", required=True)
+ap.add_argument("--res", default="1280x720")
+ap.add_argument("--samples", type=int, default=64)
+ap.add_argument("--only", type=int, nargs="*", help="product: render just these frame numbers")
+a = ap.parse_args(argv)
+with open(a.take, encoding="utf-8") as f:
+    T = json.load(f)
+a.out = os.path.abspath(a.out)
+a.fps = int(T.get("fps", 24))
+a.duration = float(T["duration"])
+a.width, a.height = (int(v) for v in a.res.split("x"))
+a.frames = int(round(a.fps * a.duration))
+a.no_render = False
+a.stills = None
+
+
+def hexrgb(h):
+    h = h.lstrip("#")
+    return tuple(int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
+
+
+def rad(deg):
+    return tuple(math.radians(v) for v in deg)
+
+
+# ---------------------------------------------------------------- world shapes
+def build_world():
+    g = T.get("ground") or {"kind": "plane", "at": [0, 0, 0], "size": [400, 400, 1], "color": "#55604a"}
+    plane("Ground", tuple(g["at"]), (g["size"][0], g["size"][1]), hexrgb(g["color"]))
+    for i, o in enumerate(T.get("objects", [])):
+        name = o.get("name") or f"{o['kind']}{i}"
+        at, col = tuple(o["at"]), hexrgb(o["color"])
+        rot = rad(o.get("rotation", (0, 0, 0)))
+        if o["kind"] == "box":
+            box(name, at, tuple(o["size"]), col).rotation_euler = rot
+        elif o["kind"] == "plane":
+            plane(name, at, (o["size"][0], o["size"][1]), col).rotation_euler = rot
+        elif o["kind"] == "cylinder":
+            cylinder(name, at, o["radius"], o["depth"], col, rotation=rot)
+        elif o["kind"] == "cone":
+            cone(name, at, o["radius"], o["depth"], col, vertices=32).rotation_euler = rot
+        elif o["kind"] == "blob":
+            blob(name, at, tuple(o["size"]), col, soft=o.get("soft", False))
+        elif o["kind"] == "scatter":
+            rng = random.Random(o.get("seed", 1))
+            x0, y0, x1, y1 = o["area"]
+            h0, h1 = o["height"]
+            f0, f1 = o["footprint"]
+            clear = o.get("clear")
+            for j in range(o.get("count", 40)):
+                x, y = rng.uniform(x0, x1), rng.uniform(y0, y1)
+                if clear and math.hypot(x - clear[0], y - clear[1]) < clear[2]:
+                    continue
+                h, w, d = rng.uniform(h0, h1), rng.uniform(f0, f1), rng.uniform(f0, f1)
+                shade = rng.uniform(0.8, 1.1)
+                box(f"{name}_{j}", (x, y, at[2] + h / 2), (w, d, h), tuple(min(1, c * shade) for c in col))
+
+
+# ---------------------------------------------------------------- the product
+def import_model(path):
+    ext = os.path.splitext(path)[1].lower()
+    before = set(bpy.data.objects)
+    if ext in (".glb", ".gltf"):
+        bpy.ops.import_scene.gltf(filepath=path)
+    elif ext == ".obj":
+        bpy.ops.wm.obj_import(filepath=path)
+    elif ext == ".fbx":
+        bpy.ops.import_scene.fbx(filepath=path)
+    elif ext == ".stl":
+        bpy.ops.wm.stl_import(filepath=path)
+    elif ext == ".ply":
+        bpy.ops.wm.ply_import(filepath=path)
+    else:
+        raise SystemExit(f"unsupported product model {ext} (glb, gltf, obj, fbx, stl, ply)")
+    new = [o for o in bpy.data.objects if o not in before]
+    meshes = [o for o in new if o.type == "MESH"]
+    if not meshes:
+        raise SystemExit("the product model has no meshes")
+    if ext == ".ply":
+        # vertex-coloured meshes (e.g. TRELLIS.2 output) get a material that shows the colours
+        for o in meshes:
+            mat = bpy.data.materials.new("VertexColour")
+            mat.use_nodes = True
+            nt = mat.node_tree
+            attr = nt.nodes.new("ShaderNodeVertexColor")
+            attr.layer_name = o.data.color_attributes[0].name if o.data.color_attributes else "Col"
+            bsdf = nt.nodes["Principled BSDF"]
+            bsdf.inputs["Roughness"].default_value = 0.6
+            nt.links.new(attr.outputs["Color"], bsdf.inputs["Base Color"])
+            o.data.materials.clear()
+            o.data.materials.append(mat)
+    return new, meshes
+
+
+def place_product(p):
+    """Import, scale to `height`, stand the base centre on `at`, apply rotation and the slow spin."""
+    new, meshes = import_model(T["product_file"])
+    bpy.context.view_layer.update()
+    pts = [o.matrix_world @ Vector(c) for o in meshes for c in o.bound_box]
+    lo = Vector((min(q.x for q in pts), min(q.y for q in pts), min(q.z for q in pts)))
+    hi = Vector((max(q.x for q in pts), max(q.y for q in pts), max(q.z for q in pts)))
+    scale = p["height"] / max(hi.z - lo.z, 1e-6)
+    root = bpy.data.objects.new("Product", None)
+    bpy.context.scene.collection.objects.link(root)
+    for o in new:
+        if o.parent is None:
+            o.parent = root
+    # inner pivot: centre the base on the origin, then scale; the root carries placement and spin
+    pivot = Matrix.Scale(scale, 4) @ Matrix.Translation(-Vector(((lo.x + hi.x) / 2, (lo.y + hi.y) / 2, lo.z)))
+    for o in new:
+        if o.parent is root:
+            o.matrix_parent_inverse = pivot
+    root.location = Vector(p["at"])
+    rx, ry, rz = rad(p.get("rotation", (0, 0, 0)))
+    scene = bpy.context.scene
+    root.rotation_euler = (rx, ry, rz)
+    root.keyframe_insert("rotation_euler", frame=1)
+    root.rotation_euler = (rx, ry, rz + math.radians(p.get("spin", 0)))
+    root.keyframe_insert("rotation_euler", frame=a.frames)
+    for fc in root.animation_data.action.fcurves:
+        for kp in fc.keyframe_points:
+            kp.interpolation = "LINEAR"
+    return root, meshes
+
+
+# ---------------------------------------------------------------- passes
+P = T.get("product")
+if a.which == "world":
+    reset_scene(a, sky=hexrgb(T.get("sky", "#8fb4d8")))
+    bpy.context.scene.display.light_direction = tuple(T.get("light", (0.4, -0.3, 0.85)))
+    build_world()
+    if P and T.get("product_in_guide"):
+        _, meshes = place_product(P)
+        for o in meshes:
+            o.color = (0.62, 0.62, 0.6, 1.0)
+    keys = [(k["t"], tuple(k["at"]), tuple(k["look"])) for k in T["camera"]]
+    cam, target = camera_rig(keys, lens=T.get("lens", 32))
+    render(a, cam, target, depth_far=float(T.get("depth_far", 400)))
+    print(f"WORLD {a.frames} frames -> {a.out}", flush=True)
+    raise SystemExit(0)
+
+# product pass
+if not P:
+    raise SystemExit("this take has no product")
+bpy.ops.wm.read_factory_settings(use_empty=True)
+scene = bpy.context.scene
+scene.render.fps = a.fps
+scene.frame_start, scene.frame_end = 1, a.frames
+scene.render.resolution_x, scene.render.resolution_y = a.width, a.height
+scene.render.resolution_percentage = 100
+scene.render.engine = "CYCLES"
+prefs = bpy.context.preferences.addons["cycles"].preferences
+for dev_type in ("OPTIX", "CUDA", "HIP", "METAL", "ONEAPI"):
+    try:
+        prefs.compute_device_type = dev_type
+        prefs.get_devices()
+        if any(d.type == dev_type for d in prefs.devices):
+            for d in prefs.devices:
+                d.use = d.type == dev_type
+            scene.cycles.device = "GPU"
+            break
+    except TypeError:
+        continue
+scene.cycles.samples = a.samples
+scene.cycles.use_denoising = True
+scene.cycles.use_adaptive_sampling = True
+scene.render.use_persistent_data = True   # keep the scene on the GPU between frames
+scene.render.film_transparent = True
+scene.view_settings.view_transform = "AgX"
+scene.view_settings.look = "AgX - Medium High Contrast"
+scene.render.image_settings.file_format = "PNG"
+scene.render.image_settings.color_mode = "RGBA"
+
+root, meshes = place_product(P)
+
+world = bpy.data.worlds.new("World")
+scene.world = world
+world.use_nodes = True
+nt = world.node_tree
+env = nt.nodes.new("ShaderNodeTexEnvironment")
+hdri = next((q for q in (os.path.join(bpy.utils.resource_path(k), "datafiles", "studiolights", "world", f"{P.get('hdri', 'sunrise')}.exr")
+                        for k in ("LOCAL", "SYSTEM", "USER")) if os.path.exists(q)), None)
+if hdri is None:
+    raise SystemExit(f"studio light '{P.get('hdri')}' not found in Blender's datafiles")
+env.image = bpy.data.images.load(hdri)
+nt.links.new(env.outputs["Color"], nt.nodes["Background"].inputs["Color"])
+nt.nodes["Background"].inputs["Strength"].default_value = 1.0
+if P.get("sun_strength", 3.0) > 0:
+    sun_data = bpy.data.lights.new("Sun", "SUN")
+    sun_data.energy = float(P["sun_strength"])
+    sun_data.angle = math.radians(2.5)
+    sun = bpy.data.objects.new("Sun", sun_data)
+    scene.collection.objects.link(sun)
+    d = Vector(T.get("light", (0.4, -0.3, 0.85))).normalized()
+    sun.rotation_euler = (-d).to_track_quat("-Z", "Y").to_euler()   # a sun lamp points along its -Z
+
+if P.get("shadow", True):
+    bpy.ops.mesh.primitive_plane_add(size=max(40.0, P["height"] * 40), location=(P["at"][0], P["at"][1], P["at"][2]))
+    floor = bpy.context.active_object
+    floor.is_shadow_catcher = True
+
+keys = [(k["t"], tuple(k["at"]), tuple(k["look"])) for k in T["camera"]]
+cam, target = camera_rig(keys, lens=T.get("lens", 32))
+
+from bpy_extras.object_utils import world_to_camera_view  # noqa: E402
+
+def on_screen_px():
+    """Projected size of the product in pixels (0 when it is behind the camera or off-frame)."""
+    deps = bpy.context.evaluated_depsgraph_get()
+    pts = []
+    for o in meshes:
+        ev = o.evaluated_get(deps)
+        pts += [world_to_camera_view(scene, cam, ev.matrix_world @ Vector(c)) for c in ev.bound_box]
+    if all(p.z <= 0 for p in pts):
+        return 0
+    xs, ys = [p.x for p in pts if p.z > 0], [p.y for p in pts if p.z > 0]
+    if max(xs) < 0 or min(xs) > 1 or max(ys) < 0 or min(ys) > 1:
+        return 0
+    return max(max(xs) - min(xs), max(ys) - min(ys)) * max(a.width, a.height)
+
+os.makedirs(os.path.join(a.out, "frames"), exist_ok=True)
+blank = None
+frames = a.only or range(1, a.frames + 1)
+for fi in frames:
+    scene.frame_set(fi)
+    path = os.path.join(a.out, "frames", f"{fi:04d}.png")
+    if on_screen_px() < 3:   # too small or off-screen: an empty frame, no render
+        if blank is None:
+            blank = bpy.data.images.new("blank", a.width, a.height, alpha=True)
+            blank.pixels[:] = [0.0] * (a.width * a.height * 4)
+            blank.file_format = "PNG"
+        blank.filepath_raw = path
+        blank.save()
+        print(f"FRAME {fi}/{a.frames} skipped", flush=True)
+        continue
+    scene.render.filepath = path
+    bpy.ops.render.render(write_still=True)
+    print(f"FRAME {fi}/{a.frames}", flush=True)

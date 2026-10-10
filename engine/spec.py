@@ -104,12 +104,79 @@ class SceneBase(Model):
 
 # ---------------------------------------------------------------- scene types
 
+class WorldObject(Model):
+    """One rough shape in a take's world. Only layout, scale and depth matter: the video model paints the detail."""
+    kind: Literal["box", "cylinder", "cone", "blob", "plane", "scatter"]
+    name: Optional[str] = None
+    at: tuple[float, float, float] = Field((0, 0, 0), description="Centre (x, y, z); z is up")
+    size: tuple[float, float, float] = Field((1, 1, 1), description="box/plane: full width, depth, height; blob: radii")
+    radius: float = Field(1.0, description="cylinder/cone radius")
+    depth: float = Field(1.0, description="cylinder/cone height")
+    rotation: tuple[float, float, float] = Field((0, 0, 0), description="Euler degrees")
+    color: str = "#9a9a9a"
+    soft: bool = Field(False, description="blob: visible in the preview but left out of the depth guide (clouds, haze)")
+    count: int = Field(40, description="scatter: how many boxes")
+    seed: int = Field(1, description="scatter: random seed")
+    area: tuple[float, float, float, float] = Field((-50, -50, 50, 50), description="scatter: x0, y0, x1, y1")
+    height: tuple[float, float] = Field((2, 10), description="scatter: min and max box height")
+    footprint: tuple[float, float] = Field((3, 6), description="scatter: min and max box width/depth")
+    clear: Optional[tuple[float, float, float]] = Field(None, description="scatter: keep (x, y, radius) empty")
+
+
+class CameraKey(Model):
+    t: float = Field(..., description="Seconds")
+    at: tuple[float, float, float] = Field(..., description="Camera position")
+    look: tuple[float, float, float] = Field(..., description="Point the camera looks at")
+
+
+class ProductLayer(Model):
+    """The real thing in a take: rendered from its own 3D model through the take's camera and composited over the
+    generated world, so it never warps. One of `model` or `from_photo`."""
+    model: Optional[str] = Field(None, description="GLB/glTF, OBJ, FBX, STL or PLY: a project file or an https URL")
+    from_photo: Optional[str] = Field(None, description="A cut-out PNG (transparent background) turned into a 3D model "
+                                                         "with TRELLIS.2 (needs `trellis_python`/`trellis_script` in studio.toml)")
+    credit: Optional[str] = Field(None, description="Attribution shown in the footer")
+    at: tuple[float, float, float] = Field((0, 0, 0), description="Where the base centre of the product sits in the world")
+    height: float = Field(1.0, description="Height of the product in world units")
+    rotation: tuple[float, float, float] = Field((0, 0, 0), description="Euler degrees")
+    spin: float = Field(0.0, description="Extra yaw, in degrees, turned evenly over the whole take")
+    hdri: str = Field("sunrise", description="Blender studio light for the product: studio, forest, city, courtyard, night, interior, sunrise, sunset")
+    sun_strength: float = Field(3.0, description="A sun lamp along the take's light direction; 0 to turn it off")
+    samples: int = Field(32, description="Cycles samples per frame (denoised)")
+    shadow: bool = Field(True, description="Cast the product's shadow onto the generated ground")
+    res: tuple[int, int] = Field((1920, 1080), description="Render size of the product pass (also the final film size)")
+
+
+class Take(Model):
+    """One continuous camera move through a generated world, with a real product locked to the same camera.
+
+    The world is a rough blockout (shapes + camera keys) rendered by Blender into a depth guide; LTX-2.3 paints the
+    world along that guide in chained segments; the product is rendered by Cycles through the identical camera and
+    composited over every frame; the result is encoded for scrubbing."""
+    duration: float = Field(..., description="Seconds")
+    fps: int = 24
+    sky: str = "#8fb4d8"
+    light: tuple[float, float, float] = Field((0.4, -0.3, 0.85), description="Light direction for the preview and the product's sun")
+    ground: Optional[WorldObject] = Field(None, description="A plane under everything (defaults to a 400 x 400 plane at z = 0)")
+    objects: list[WorldObject] = Field(default_factory=list)
+    camera: list[CameraKey] = Field(..., min_length=2)
+    lens: float = Field(32.0, description="Focal length in mm")
+    product: Optional[ProductLayer] = None
+    product_in_guide: bool = Field(False, description="Put the product's shape in the depth guide. Off by default: the video model then paints its own version of the product, which shows around the edges of the real one. Leave the product out of the prompts too and describe the empty spot ('an empty table').")
+    preview_res: tuple[int, int] = Field((1280, 720), description="Blockout render size; same aspect as product.res")
+    depth_far: float = Field(400.0, description="Depth guide far plane")
+    keyframes: Optional[dict[str, Any]] = Field(None, description="Z-Image stills pinned at times, as in shot.keyframes")
+    ltx: dict[str, Any] = Field(..., description="LTX-2.3 settings, as in shot.ltx: res, segments [{id, range, prompt}], seed, guide_strength ...")
+    upscale: Optional[dict[str, Any]] = Field(None, description="Optional upscale stage, as in shot.upscale")
+
+
 class FilmScene(SceneBase):
     """AI film scrubbed by scroll. Blender blockout -> Z-Image keyframes -> LTX-2.3 -> encode."""
     type: Literal["film"] = "film"
     video: Optional[str] = Field(None, description="Use an existing film instead of generating one")
     shot: dict[str, Any] = Field(default_factory=dict,
         description="Generation settings: fps, duration, preview_res, blockout {preset|file}, keyframes, ltx, upscale")
+    take: Optional[Take] = Field(None, description="A one-take film described in the spec (world, camera, product) instead of `shot`")
     gop: int = 6
 
 
@@ -204,12 +271,18 @@ class ChartScene(SceneBase):
     y: str = Field(..., description="Column for the y axis")
     series: Optional[str] = Field(None, description="Column that names each line")
     include: list[str] = Field(default_factory=list, description="Series to load (empty = all, capped at 12)")
-    kind: Literal["line", "area"] = "line"
+    kind: Literal["line", "area", "bar", "scatter"] = Field("line", description="bar: grouped bars per x; scatter: dots")
     y_scale: Literal["linear", "log"] = "linear"
     y_label: Optional[str] = None
-    unit: str = Field("", description="Unit after values, e.g. ' GW'")
+    unit: str = Field("", description="Unit after values, e.g. ' GW' or '%'")
+    format: Literal["auto", "compact", "percent", "integer"] = Field(
+        "auto", description="Number style: compact (1.2k, 3.4M), percent (adds %), integer, or auto")
     source: Optional[str] = Field(None, description="Data credit shown under the chart and in the footer")
     colors: list[str] = Field(default_factory=list, description="Series colours in `include` order (defaults to the theme)")
+    callouts: list[dict[str, Any]] = Field(default_factory=list,
+        description="Marks computed from the data at build time, so numbers in the story are the data's: "
+                    "[{series, at: max | min | first | last | <x value>, label: 'text with {y} and {x}', step: <index>}]. "
+                    "Each becomes a mark on that step (default: the last step).")
 
 
 class Route(Model):
@@ -234,6 +307,30 @@ class MapScene(SceneBase):
     dark: bool = Field(False, description="Darken and desaturate the base map to sit under a dark theme")
     routes: list[Route] = Field(default_factory=list)
     markers: list[Marker] = Field(default_factory=list)
+
+
+class SplatKey(Model):
+    t: float = Field(..., description="Scene progress 0-1")
+    at: tuple[float, float, float] = Field(..., description="Camera position, in the scan's own coordinates")
+    look: tuple[float, float, float] = Field(..., description="Point the camera looks at")
+
+
+class SplatScene(SceneBase):
+    """A real place, scanned: a Gaussian splat the camera flies through as you scroll. Bring a scan from any
+    phone app or trainer as .ply (3D Gaussian Splatting layout), .spz, or a gsplat .pt checkpoint; the build trims
+    it and writes a small .spz the page streams. `studio build` logs the scan's bounds to place the camera keys."""
+    type: Literal["splat"] = "splat"
+    source: str = Field(..., description="Scan file: project path or https URL (.ply, .spz, .pt)")
+    credit: Optional[str] = Field(None, description="Attribution shown in the footer")
+    max_splats: int = Field(600_000, description="Keep the N most opaque splats (page weight ~16 bytes each)")
+    min_opacity: float = Field(0.04, description="Drop splats fainter than this")
+    max_scale: float = Field(0.0, description="Drop splats longer than this (scene units) on any axis: the smears scans leave in the air; 0 keeps all")
+    crop: Optional[tuple[float, float, float, float, float, float]] = Field(None, description="Keep only x0 y0 z0 x1 y1 z1")
+    sh: int = Field(1, ge=0, le=3, description="Spherical-harmonic degree to keep (view-dependent colour); 0 is smallest")
+    up: tuple[float, float, float] = Field((0, 0, 1), description="Which way is up in the scan")
+    fov: float = Field(60.0, description="Vertical field of view in degrees")
+    keys: list[SplatKey] = Field(..., min_length=2, description="Camera path over scene progress")
+    background: Optional[str] = Field(None, description="Colour behind the splats (defaults to the theme background)")
 
 
 class TypeScene(SceneBase):
@@ -283,10 +380,20 @@ class FeaturesBlock(BlockBase):
     items: list[Feature]
 
 
+class StatData(Model):
+    section: str = Field(..., description="id of a chart section on this page")
+    series: str
+    at: Union[Literal["max", "min", "first", "last"], float] = "last"
+    decimals: int = 0
+    scale: float = Field(1.0, description="Multiply the value (e.g. 0.001 to show thousands)")
+
+
 class Stat(Model):
-    value: str = Field(..., description="Shown as-is; a plain number counts up")
+    value: str = Field("", description="Shown as-is; a plain number counts up. Leave empty when `data` fills it")
     unit: Optional[str] = None
     label: str
+    data: Optional[StatData] = Field(None, description="Read the value from a chart's data at build time, so headline "
+                                                       "numbers can never drift from the source")
 
 
 class StatsBlock(BlockBase):
@@ -439,11 +546,12 @@ class FaqBlock(BlockBase):
 
 Section = Annotated[Union[
     FilmScene, ArtworkScene, Scene3DScene, SequenceScene, ParallaxScene, TypeScene, VectorScene, ChartScene, MapScene,
+    SplatScene,
     IntroBlock, FeaturesBlock, StatsBlock, TimelineBlock, QuoteBlock, CtaBlock, GalleryBlock,
     HeroBlock, ProductBlock, StripBlock, OrbitBlock, FaqBlock,
 ], Field(discriminator="type")]
 
-SCENE_TYPES = ("film", "artwork", "scene3d", "sequence", "parallax", "type", "vector", "chart", "map")
+SCENE_TYPES = ("film", "artwork", "scene3d", "sequence", "parallax", "type", "vector", "chart", "map", "splat")
 
 
 # ---------------------------------------------------------------- site

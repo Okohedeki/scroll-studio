@@ -1,0 +1,67 @@
+# Hollis House: a real place, scanned. Scene type `splat`: a Gaussian splat of a real kitchen and living room,
+# captured on a phone and trained locally (gsplat), that the camera walks through as you scroll.
+# inputs/house.spz is the trimmed scan (530k splats, 9 MB), written by `studio build` from the trainer's checkpoint;
+# point `source:` at your own .ply, .spz or gsplat .pt and set `keys` in the scan's coordinates
+# (`studio build` prints the scan's bounds).
+name: Hollis House
+description: A house on a quiet lane, open plan from the garden to the kitchen. Walk through it before you visit.
+theme: { preset: studio }
+layout: stack
+nav:
+  cta: { label: Book a viewing, href: "#viewing" }
+sections:
+  - type: hero
+    title: Walk through it <em>before you visit.</em>
+    body: Every room on this page is the real room, scanned with a phone. Scroll to walk from the hall into the living room.
+    buttons:
+      - { label: Start the walk, href: "#walk" }
+      - { label: Book a viewing, href: "#viewing" }
+  - id: walk
+    type: splat
+    nav_label: The walk
+    layout: overlay
+    length: 5
+    cue: Scroll to walk
+    source: inputs/house.spz
+    max_splats: 10000000
+    up: [0, 0, 1]
+    fov: 62
+    credit: "Scanned with a phone and reconstructed locally with gsplat"
+    keys:
+      - { t: 0.0,  at: [2.0, -0.6, 0.25],  look: [-2.0, -0.6, 0.1] }
+      - { t: 0.4,  at: [0.2, -0.6, 0.25],  look: [-3.0, -0.3, 0.1] }
+      - { t: 0.75, at: [-0.3, -0.8, 0.25], look: [-0.5, 2.5, 0.1] }
+      - { t: 1.0,  at: [-0.6, -0.2, 0.28], look: [-3.5, 0.6, 0.15] }
+    steps:
+      - kicker: Hollis House
+        title: The hall, <em>as it is.</em>
+        at: [0.02, 0.25]
+        intro: true
+      - kicker: Open plan
+        title: One room, <em>windows on two sides.</em>
+        at: [0.38, 0.62]
+      - kicker: The light
+        title: Dinner for ten, <em>light till late.</em>
+        at: [0.74, 0.98]
+  - type: features
+    kicker: The house
+    title: Four bedrooms, <em>one long room.</em>
+    items:
+      - { tag: Ground floor, title: Kitchen and living, body: "One open room running the full depth of the house, with the garden on three sides." }
+      - { tag: First floor, title: Four bedrooms, body: "Two with garden views, one with a study nook, all with built-in storage." }
+      - { tag: Outside, title: Garden and terrace, body: "A south-facing terrace off the kitchen and a lawn beyond it." }
+  - type: stats
+    items:
+      - { value: "4", label: Bedrooms }
+      - { value: "182", unit: "m²", label: Floor area }
+      - { value: "1", label: "Scan, no renders" }
+      - { value: "0", label: API keys }
+  - type: cta
+    id: viewing
+    surface: dark
+    kicker: Viewings
+    title: See it <em>in person.</em>
+    button: { label: Book a viewing, href: "#" }
+footer:
+  left: "© Hollis House. A concept site; the house details are fictional, the rooms are a real scan."
+  right: Reconstructed locally, nothing uploaded

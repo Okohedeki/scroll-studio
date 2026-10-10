@@ -11,7 +11,7 @@ type Pt = [number, number];
 interface State { show: string[]; focus: string[]; x: [number, number]; y: [number, number]; reveal: boolean; marks: any[] }
 
 const factory: PlayerFactory = async (cfg, ctx) => {
-  const { series } = await (await fetch(cfg.data)).json() as { series: Record<string, Pt[]> };
+  const { series, callouts = [] } = await (await fetch(cfg.data)).json() as { series: Record<string, Pt[]>; callouts?: any[] };
   const names = Object.keys(series);
   const all = names.flatMap((n) => series[n]);
   const ext = (i: 0 | 1): [number, number] => [Math.min(...all.map((p) => p[i])), Math.max(...all.map((p) => p[i]))];
@@ -34,6 +34,11 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     states.push(cur);
     prev = cur;
   });
+  // callouts were resolved from the data at build time; each lands on its step (default: the last)
+  for (const c of callouts) {
+    const st = states[c.step ?? states.length - 1];
+    if (st) st.marks = [...st.marks, { series: c.series, x: c.x, label: c.label }];
+  }
   function autoY(show: string[], xr: [number, number]): [number, number] {
     const vals = show.flatMap((n) => (series[n] || []).filter((p) => p[0] >= xr[0] && p[0] <= xr[1]).map((p) => p[1]));
     return vals.length ? [yMin, Math.max(...vals) * 1.08] : [yMin, y1];
@@ -62,6 +67,8 @@ const factory: PlayerFactory = async (cfg, ctx) => {
 
   const svg = select(svgEl);
   const gGrid = svg.append("g").attr("class", "grid"), gX = svg.append("g"), gY = svg.append("g"), gLines = svg.append("g"), gMarks = svg.append("g");
+  const gBars = gLines.append("g");
+  const discrete = cfg.kind === "bar" || cfg.kind === "scatter";
   const clipId = "clip-" + Math.random().toString(36).slice(2, 8);
   const clipRect = svg.append("defs").append("clipPath").attr("id", clipId).append("rect");
   gLines.attr("clip-path", `url(#${clipId})`);
@@ -71,8 +78,13 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     line: gLines.append("path").attr("fill", "none").attr("stroke", color(n)).attr("stroke-width", 2.5).attr("stroke-linejoin", "round"),
     label: svg.append("text").attr("class", "lbl").attr("fill", color(n)).text(n),
   }));
-  const fmt = format(",.0f"), fmtSmall = format(",.1f");
-  const nice = (v: number) => (Math.abs(v) >= 10 ? fmt(v) : fmtSmall(v)) + (cfg.unit || "");
+  const fmt = format(",.0f"), fmtSmall = format(",.1f"), fmtSI = format(".3~s");
+  const nice = (v: number) => {
+    if (cfg.format === "percent") return (Math.abs(v) >= 10 ? fmt(v) : fmtSmall(v)) + "%";
+    if (cfg.format === "compact") return fmtSI(v).replace("G", "B") + (cfg.unit || "");
+    if (cfg.format === "integer") return fmt(v) + (cfg.unit || "");
+    return (Math.abs(v) >= 10 ? fmt(v) : fmtSmall(v)) + (cfg.unit || "");
+  };
 
   let W = 800, H = 500;
   const M = { l: 56, r: 120, t: 12, b: 28 };
@@ -90,14 +102,36 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     clipRect.attr("x", M.l).attr("y", 0).attr("width", Math.max(0, xs(revealX) - M.l)).attr("height", H);
     const ln = d3line<Pt>().x((p) => xs(p[0])).y((p) => ys(Math.max(p[1], cfg.yScale === "log" ? yMin : -Infinity)));
     const ar = d3area<Pt>().x((p) => xs(p[0])).y0(ys(ys.domain()[0])).y1((p) => ys(Math.max(p[1], cfg.yScale === "log" ? yMin : -Infinity)));
+    if (discrete) {
+      const on = names.filter((n) => (opacity[n] ?? 0) > 0.01);
+      const xsVisible = Array.from(new Set(on.flatMap((n) => series[n].map((q) => q[0])))).filter((x) => x >= st.x[0] && x <= st.x[1]);
+      const step = xsVisible.length > 1 ? (xs(Math.max(...xsVisible)) - xs(Math.min(...xsVisible))) / (xsVisible.length - 1) : 40;
+      const bw = Math.max(1, (step * 0.78) / Math.max(on.length, 1));
+      const items = on.flatMap((n, si) => series[n].filter((q) => q[0] >= st.x[0] && q[0] <= st.x[1]).map((q) => ({ n, si, q })));
+      const y0 = ys(ys.domain()[0]);
+      const sel = gBars.selectAll<SVGElement, any>(cfg.kind === "bar" ? "rect" : "circle").data(items, (d: any) => `${d.n}-${d.q[0]}`);
+      sel.exit().remove();
+      const ent = sel.enter().append(cfg.kind === "bar" ? "rect" : "circle");
+      ent.merge(sel as any).each(function (d: any) {
+        const el = select(this), o = opacity[d.n] ?? 0, c = color(d.n);
+        const yv = ys(Math.max(d.q[1], cfg.yScale === "log" ? yMin : -Infinity));
+        if (cfg.kind === "bar") {
+          const x = xs(d.q[0]) - (on.length * bw) / 2 + d.si * bw;
+          el.attr("x", x).attr("width", bw * 0.9).attr("y", Math.min(yv, y0)).attr("height", Math.abs(y0 - yv)).attr("fill", c).attr("opacity", o);
+        } else {
+          el.attr("cx", xs(d.q[0])).attr("cy", yv).attr("r", 4).attr("fill", c).attr("opacity", o);
+        }
+      });
+    } else gBars.selectAll("*").remove();
     for (const p of paths) {
-      const o = opacity[p.n] ?? 0;
+      const o = discrete ? 0 : opacity[p.n] ?? 0;
       const d = series[p.n];
       p.line.attr("d", ln(d)).attr("opacity", o);
       p.area.attr("d", cfg.kind === "area" ? ar(d) : null).attr("opacity", o * 0.12);
       const visible = d.filter((q) => q[0] <= Math.min(revealX, st.x[1]) && q[0] >= st.x[0]);
       const last = visible[visible.length - 1];
-      if (last && o > 0.05) p.label.attr("x", xs(last[0]) + 8).attr("y", ys(Math.max(last[1], yMin)) + 4).attr("opacity", o).text(`${p.n} ${nice(last[1])}`);
+      const lo = discrete ? opacity[p.n] ?? 0 : o;
+      if (last && lo > 0.05) p.label.attr("x", xs(last[0]) + 8).attr("y", ys(Math.max(last[1], yMin)) + 4).attr("opacity", lo).text(`${p.n} ${nice(last[1])}`);
       else p.label.attr("opacity", 0);
     }
     const marks = gMarks.selectAll<SVGGElement, any>("g.mark").data(st.marks, (m: any) => `${m.series}-${m.x}`);

@@ -1,0 +1,67 @@
+# Pelorus: a data story from a public dataset, read straight from the source at build time.
+# Scene type `chart` with `kind: bar`, callouts computed from the data (max, last, a given year), compact and
+# percent number styles, and a live-updating stats block. The CSV is Our World in Data's "share of electricity
+# from renewables" (Ember / Energy Institute), CC BY 4.0, downloaded once into .build/_downloads.
+name: Pelorus
+description: Numbers you can check. A research desk that tells the energy transition with the source data.
+theme: { preset: blueprint }
+nav:
+  cta: { label: Read the brief, href: "#brief" }
+sections:
+  - id: share
+    type: chart
+    nav_label: The story
+    layout: split
+    side: right
+    kind: bar
+    data: https://ourworldindata.org/grapher/share-electricity-renewables.csv?v=1&csvType=full&useColumnShortNames=true
+    x: year
+    y: renewable_share_of_electricity__pct
+    series: entity
+    include: [World, China, United States, Denmark]
+    format: percent
+    y_label: Share of electricity from renewables
+    source: "Ember (2026); Energy Institute (2025), via Our World in Data, CC BY 4.0"
+    callouts:
+      - { series: Denmark, at: last, label: "Denmark {y} in {x}", step: 3 }
+      - { series: World, at: last, label: "World {y}", step: 1 }
+      - { series: China, at: 2010, label: "China {y} in {x}", step: 2 }
+      - { series: China, at: last, label: "{y} in {x}", step: 2 }
+    steps:
+      - intro: true
+        kicker: Pelorus · Energy desk
+        title: A third of the world's power <em>is now renewable.</em>
+        body: Every number on this page is read from the source file when the page is built, not typed in.
+        hint: Scroll to read
+        state: { show: [World], x: [2000, 2025] }
+      - kicker: 2000 to 2025
+        title: Slowly, <em>then all at once.</em>
+        body: Renewables held about a fifth of the world's electricity for a decade, then wind and solar changed the slope.
+        state: { show: [World], x: [2000, 2025], reveal: true }
+      - kicker: China
+        title: The biggest grid <em>moved fastest.</em>
+        body: China built more wind and solar in the last five years than any country has built of anything.
+        state: { show: [World, China], focus: [China], x: [2005, 2025] }
+      - kicker: Denmark
+        title: What <em>all the way</em> looks like.
+        body: Denmark runs most of its grid on wind. The rest of the world is following the same curve, a decade or two behind.
+        state: { show: [World, China, United States, Denmark], focus: [Denmark], x: [2000, 2025] }
+  - type: intro
+    id: brief
+    nav_label: Brief
+    kicker: The brief
+    title: The transition, <em>in the data's own words.</em>
+    body: Pelorus writes research briefs with the charts built from the published data, so every figure can be traced back to its source.
+  - type: stats
+    items:
+      - { unit: "%", label: "World renewables share, 2025", data: { section: share, series: World, at: last } }
+      - { unit: "%", label: "Denmark, 2025", data: { section: share, series: Denmark, at: last } }
+      - { value: "1", label: "Source file, read at build" }
+      - { value: "0", label: Figures typed by hand }
+  - type: cta
+    kicker: Research desk
+    title: Ask for <em>the next brief.</em>
+    button: { label: Subscribe, href: "#" }
+footer:
+  left: "© Pelorus. A concept site; the desk is fictional, the data is real."
+  right: Data by Ember and the Energy Institute, via Our World in Data (CC BY 4.0)

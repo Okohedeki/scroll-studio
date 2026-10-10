@@ -25,9 +25,39 @@ def _args(ctx: BuildContext, **kw):
                            source=None, **kw)
 
 
+def take_shot(sec: FilmScene, ctx: BuildContext) -> dict:
+    """Turn a spec `take` into the `shot` mapping the film stages run on, writing take.json for Blender."""
+    import json
+    from ..inputs import resolve_path
+    t = sec.take.model_dump(mode="json")
+    p = t.get("product")
+    if p:
+        if p.get("model"):
+            t["product_file"] = str(resolve_path(ctx.project, p["model"], ctx.log))
+        elif p.get("from_photo"):
+            from ..backends.trellis import image_to_mesh
+            photo = resolve_path(ctx.project, p["from_photo"], ctx.log)
+            t["product_file"] = str(image_to_mesh(photo, ctx.work / "trellis", ctx.log))
+        else:
+            raise BuildError(f"film section '{sec.id}': take.product needs `model` or `from_photo`")
+        pw, ph = p["res"]
+        bw, bh = t["preview_res"]
+        if abs(pw / ph - bw / bh) > 0.01:
+            raise BuildError(f"take.product.res {pw}x{ph} and take.preview_res {bw}x{bh} must have the same aspect ratio")
+    ctx.work.mkdir(parents=True, exist_ok=True)
+    (ctx.work / "take.json").write_text(json.dumps(t, indent=1), encoding="utf-8")
+    shot = {"fps": t["fps"], "duration": t["duration"], "preview_res": t["preview_res"], "ltx": t["ltx"],
+            "blockout": {"world": str(ctx.work / "take.json"), "world_key": {k: v for k, v in t.items() if k not in ("ltx", "keyframes", "upscale")}}}
+    if t.get("keyframes"):
+        shot["keyframes"] = t["keyframes"]
+    if t.get("upscale"):
+        shot["upscale"] = t["upscale"]
+    return shot
+
+
 def generate(sec: FilmScene, ctx: BuildContext) -> Path:
     from . import film_build as fb
-    shot = dict(sec.shot, id=sec.id)
+    shot = dict(take_shot(sec, ctx) if sec.take else sec.shot, id=sec.id)
     for k in ("fps", "duration", "preview_res", "ltx"):
         if k not in shot:
             raise BuildError(f"film section '{sec.id}': shot.{k} is required to generate a film (or set `video:`)")
@@ -37,8 +67,9 @@ def generate(sec: FilmScene, ctx: BuildContext) -> Path:
         bl["file"] = str(ctx.project.path(bl["file"]))
         shot["blockout"] = bl
     bdir, gdir = ctx.work / "blockout", ctx.work / "gen"
-    bkey = {"blockout": bl, "fps": shot["fps"], "duration": shot["duration"], "res": shot["preview_res"],
-            "file": file_key(Path(bl["file"])) if bl.get("file") else None}
+    bkey = {"blockout": {k: v for k, v in bl.items() if k != "world"}, "fps": shot["fps"], "duration": shot["duration"],
+            "res": shot["preview_res"], "file": file_key(Path(bl["file"])) if bl.get("file") else None,
+            "model": file_key(Path(json_product_file(ctx))) if bl.get("world") and sec.take.product else None}
     ctx.stage("blockout", bkey, [bdir / "depth.mp4", bdir / "first.png"], lambda: fb.stage_blockout(shot, out))
     if shot.get("keyframes", {}).get("frames"):
         names = [f["name"] for f in shot["keyframes"]["frames"]]
@@ -52,7 +83,23 @@ def generate(sec: FilmScene, ctx: BuildContext) -> Path:
         dst = gdir / ("gen_sr.mp4" if up["method"] == "seedvr2" else "gen_up.mp4")
         ctx.stage("upscale", {"g": gkey, "u": up}, [dst], lambda: fb.stage_upscale(shot, out, _args(ctx)))
         film = dst
+    if sec.take and sec.take.product:
+        # The real product, rendered through the identical camera, over the generated world.
+        p = sec.take.product
+        pdir = ctx.work / "product"
+        n = int(round(shot["fps"] * shot["duration"]))
+        # world_key carries the camera, duration, fps and product placement; the model file adds its content
+        pkey = {"world": shot["blockout"]["world_key"], "model": file_key(Path(json_product_file(ctx)))}
+        ctx.stage("product", pkey, [pdir / "frames" / f"{n:04d}.png"], lambda: fb.stage_product(shot, out, p.res, p.samples, ctx))
+        comp = gdir / "take.mp4"
+        ctx.stage("composite", {"film": file_key(film), "p": pkey}, [comp], lambda: fb.stage_composite(film, pdir, comp, shot["fps"], p.res))
+        film = comp
     return film
+
+
+def json_product_file(ctx: BuildContext) -> str:
+    import json
+    return json.loads((ctx.work / "take.json").read_text(encoding="utf-8"))["product_file"]
 
 
 def encode(src: Path, ctx: BuildContext, gop: int) -> dict:

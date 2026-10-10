@@ -1,0 +1,125 @@
+# One Take: a single unbroken camera move through a generated world, with a real product in it.
+# Scene type `film` with `take:`: the world is rough shapes + camera keys (Blender renders the depth guide),
+# LTX-2.3 paints the world along that guide in chained segments, and the product is rendered by Cycles from its
+# own 3D model through the identical camera and composited over every frame, so it never warps.
+# Needs ComfyUI with the LTX-2.3 and Z-Image models, Blender, and a 24 GB GPU; about an hour on an RTX 4090.
+# The stand-in product is the Khronos "Water Bottle" sample (CC0); put your own GLB in inputs/ and point `model:` at it.
+name: Stillwater
+description: A bottle that keeps the morning cold. One take, from the ridge to the table.
+theme: { preset: dusk, colors: { accent: "#8fc8e8", accent2: "#c2e5f5", accent_ink: "#07141c" } }
+nav:
+  cta: { label: Pre-order, href: "#order" }
+sections:
+  - id: take
+    type: film
+    layout: overlay
+    length: 6
+    cue: Scroll to begin
+    gop: 6
+    take:
+      duration: 15
+      fps: 24
+      sky: "#9ec3df"
+      light: [0.35, -0.45, 0.82]
+      ground: { kind: plane, at: [0, 0, 0], size: [600, 600, 1], color: "#5b6b50" }
+      objects:
+        # a lake in front of the terrace, low hills behind it, a few pines
+        - { kind: plane, name: Lake, at: [0, 60, 0.05], size: [220, 160, 1], color: "#3a5c74" }
+        - { kind: blob, name: HillL, at: [-90, 150, 0], size: [70, 50, 26], color: "#4d5e44" }
+        - { kind: blob, name: HillR, at: [70, 170, 0], size: [90, 60, 32], color: "#4a5a42" }
+        - { kind: blob, name: Ridge, at: [-10, 230, 0], size: [160, 60, 48], color: "#55604d" }
+        - { kind: scatter, name: Pines, count: 60, seed: 4, area: [-120, 40, -30, 140], height: [6, 14], footprint: [3, 5], color: "#3f5538" }
+        - { kind: scatter, name: PinesR, count: 50, seed: 9, area: [30, 50, 120, 140], height: [6, 14], footprint: [3, 5], color: "#3f5538" }
+        # the wooden terrace and its table, the product stands on the table
+        - { kind: box, name: Terrace, at: [0, -6, 0.2], size: [18, 14, 0.4], color: "#8a6f4e" }
+        - { kind: box, name: Rail, at: [0, 0.8, 0.9], size: [18, 0.15, 1.0], color: "#7a6246" }
+        - { kind: box, name: Table, at: [0, -5, 0.75], size: [1.6, 0.9, 0.06], color: "#9a7b56" }
+        - { kind: cylinder, name: TableLeg, at: [0, -5, 0.4], radius: 0.06, depth: 0.7, color: "#6d5a40" }
+        - { kind: box, name: ChairL, at: [-1.3, -5.4, 0.5], size: [0.5, 0.5, 0.45], color: "#7a6246" }
+        - { kind: box, name: ChairR, at: [1.3, -5.4, 0.5], size: [0.5, 0.5, 0.45], color: "#7a6246" }
+        - { kind: blob, name: Mist, at: [0, 90, 3], size: [120, 60, 4], color: "#dfe8ef", soft: true }
+      camera:
+        - { t: 0,  at: [-70, 190, 70], look: [0, 40, 6] }
+        - { t: 5,  at: [-22, 60, 22], look: [0, -2, 2] }
+        - { t: 10, at: [-3.2, -1.2, 2.4], look: [0, -5, 0.95] }
+        - { t: 15, at: [1.6, -3.4, 1.3], look: [0, -5, 0.95] }
+      lens: 30
+      product:
+        model: https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/WaterBottle/glTF-Binary/WaterBottle.glb
+        credit: "Water Bottle by Microsoft, Khronos glTF sample assets, CC0"
+        at: [0, -5, 0.78]
+        height: 0.27
+        rotation: [0, 0, 20]
+        spin: 40
+        hdri: sunrise
+        sun_strength: 2.5
+        samples: 32
+        res: [1920, 1080]
+      preview_res: [1280, 720]
+      keyframes:
+        control_strength: 0.75
+        res: [1536, 864]
+        seed: 3
+        frames:
+          - name: ridge
+            t: 0
+            strength: 1.0
+            prompt: Aerial photograph at dawn over a still mountain lake, pine forests on both shores, soft mist lying on the water, low warm sunlight on wooded hills, a small wooden lakeside terrace far below, photoreal, drone footage, crisp detail, natural colour.
+          - name: table
+            t: 10
+            strength: 0.8
+            prompt: Photograph of an empty wooden terrace table beside a still mountain lake at dawn, warm low sunlight, soft mist over the water, pine trees across the lake, nothing on the table, shallow depth of field, photoreal, cinematic, crisp detail.
+      ltx:
+        res: [1024, 576]
+        seed: 21
+        guide_strength: 1.0
+        guide_blur: 1.5
+        sampler: euler_cfg_pp
+        negative_prompt: cuts, jump cuts, flicker, warped shapes, text, watermark, blur
+        segments:
+          - id: descent
+            range: [0, 5]
+            prompt: One continuous smooth aerial shot descending at dawn over a still mountain lake, pine forest on the shores, mist on the water, warm low sun, a wooden terrace on the near shore coming closer, photoreal drone footage, steady, no cuts.
+          - id: approach
+            range: [5, 10]
+            prompt: One continuous smooth shot gliding down toward a wooden lakeside terrace at dawn, an empty table and two chairs on the deck, mist on the lake behind, warm sunlight, photoreal, steady, no cuts.
+          - id: orbit
+            range: [10, 15]
+            prompt: One continuous slow close shot circling an empty wooden table on a lakeside terrace at dawn, warm low sun across the bare tabletop, the still lake and pines soft behind, shallow depth of field, photoreal, steady, no cuts.
+    steps:
+      - kicker: Stillwater
+        title: Cold from <em>the source.</em>
+        at: [0.02, 0.22]
+        intro: true
+      - kicker: Dawn on the lake
+        title: Down to <em>the water.</em>
+        at: [0.3, 0.55]
+      - kicker: The bottle
+        title: Still cold <em>at noon.</em>
+        at: [0.68, 0.98]
+  - type: product
+    id: order
+    kicker: Stillwater 750
+    title: Twenty-four hours <em>cold.</em>
+    body: Double-walled steel, a silicone base that never scratches a table, and a lid you can open with one hand. The one in the film is the one you get.
+    tags: [750 ml, 24 h cold, 12 h hot, Dishwasher safe]
+    buttons:
+      - { label: Pre-order, href: "#" }
+    note: A concept site; the product and prices are fictional.
+    image:
+      generate: Studio product photograph on a plain pure white seamless background of a brushed steel water bottle with a dark cap, soft natural shadow, photoreal, high-end product advertising
+      size: [1280, 1280]
+      seed: 8
+  - type: stats
+    items:
+      - { value: "24", unit: h, label: Cold }
+      - { value: "750", unit: ml, label: Capacity }
+      - { value: "1", label: "Take, no cuts" }
+      - { value: "0", label: API keys }
+  - type: cta
+    kicker: Pre-orders open
+    title: Yours <em>this spring.</em>
+    button: { label: Pre-order, href: "#" }
+footer:
+  left: "© Stillwater. A concept site; the company and product are fictional."
+  right: World generated locally with LTX-2.3; the bottle is rendered from its 3D model

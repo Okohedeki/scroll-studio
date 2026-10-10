@@ -53,4 +53,7 @@ def settings() -> dict:
         "model_dir": get("STUDIO_MODELS", "model_dir", str(Path.home() / ".scroll-studio" / "models")),
         "chrome": get("CHROME", "chrome", None),
         "projects": get("STUDIO_PROJECTS", "projects", str(ROOT / "projects")),
+        # image -> 3D for product takes (engine/backends/trellis.py); optional
+        "trellis_python": get("TRELLIS_PYTHON", "trellis_python", None),
+        "trellis_script": get("TRELLIS_SCRIPT", "trellis_script", None),
     }

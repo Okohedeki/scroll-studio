@@ -26,8 +26,7 @@ def sh(cmd):
     if p.stdout.strip():
         print(p.stdout[-4000:], flush=True)
     if p.returncode != 0:
-        raise RuntimeError(f"{os.path.basename(str(cmd[0]))} failed ({p.returncode}):
-{(p.stderr or p.stdout)[-3000:]}")
+        raise RuntimeError(f"{os.path.basename(str(cmd[0]))} failed ({p.returncode}):\n{(p.stderr or p.stdout)[-3000:]}")
 
 
 def ff(*args):
@@ -40,9 +39,14 @@ def stage_blockout(shot, out):
     bl = shot.get("blockout", {})
     if bl.get("file"):   # user scene: its camera animation drives the shot
         cmd = [BLENDER, "-b", bl["file"], "--python-exit-code", "1", "--python", os.path.join(SCRIPTS, "file_blockout.py"), "--"]
+    elif bl.get("world"):   # a take: world described in the spec (take.json), rendered with its product in place
+        sh([BLENDER, "-b", "--factory-startup", "--python-exit-code", "1", "-P", os.path.join(SCRIPTS, "take.py"), "--",
+            "--take", bl["world"], "--pass", "world", "--out", bdir, "--res", f"{w}x{h}"])
+        cmd = None
     else:
         cmd = [BLENDER, "-b", "--factory-startup", "--python-exit-code", "1", "-P", os.path.join(SCRIPTS, "presets", bl.get("preset", "rocket_launch").replace("-", "_") + ".py"), "--"]
-    sh(cmd + ["--out", bdir, "--fps", shot["fps"], "--duration", shot["duration"], "--res", f"{w}x{h}"])
+    if cmd:
+        sh(cmd + ["--out", bdir, "--fps", shot["fps"], "--duration", shot["duration"], "--res", f"{w}x{h}"])
     frames = sorted(glob.glob(os.path.join(bdir, "frames", "*.png")))
     ff("-framerate", str(shot["fps"]), "-i", os.path.join(bdir, "frames", "%04d.png"),
        "-c:v", "libx264", "-crf", "16", "-pix_fmt", "yuv420p", "-movflags", "+faststart",
@@ -74,7 +78,7 @@ def stage_keyframes(shot, out, args):
     """
     if not args.dry_run:
         ltx_comfy.free()
-    kcfg = shot["keyframes"]
+    kcfg = dict(ltx_comfy.ZIMAGE, **shot["keyframes"])   # model files default to engine/models.yaml's names
     w, h = kcfg.get("res", [1536, 864])
     bdir = os.path.join(out, "blockout")
     kdir = os.path.join(out, "keyframes")
@@ -117,7 +121,7 @@ def stage_generate(shot, out, args):
     """
     if not args.dry_run:
         ltx_comfy.free()
-    base = dict(shot["ltx"])
+    base = dict(ltx_comfy.LTX, **shot["ltx"])            # model files default to engine/models.yaml's names
     if args.res:
         base["res"] = [int(v) for v in args.res.split("x")]
     if args.upscale is not None:
@@ -257,6 +261,35 @@ def stage_generate(shot, out, args):
     print(f"  gen.mp4: {n} frames from {len(segments)} segment(s)")
 
 
+def stage_product(shot, out, res, samples, ctx):
+    """Cycles renders the product alone, RGBA with its shadow, through the take's camera (take.py --pass product)."""
+    pdir = os.path.join(out, "product")
+    shutil.rmtree(os.path.join(pdir, "frames"), ignore_errors=True)
+    cmd = [BLENDER, "-b", "--factory-startup", "--python-exit-code", "1", "-P", os.path.join(SCRIPTS, "take.py"), "--",
+           "--take", os.path.join(out, "take.json"), "--pass", "product", "--out", pdir,
+           "--res", f"{res[0]}x{res[1]}", "--samples", str(samples)]
+    print("  $ blender take.py --pass product", flush=True)
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="replace")
+    tail = []
+    for line in p.stdout:
+        tail = (tail + [line])[-40:]
+        if line.startswith("FRAME "):
+            n, total = line.split()[1].split("/")
+            ctx.progress(int(n) / int(total) * 0.9, f"product frame {n}/{total}")
+    if p.wait() != 0:
+        raise RuntimeError("Blender product pass failed:\n" + "".join(tail))
+
+
+def stage_composite(film, pdir, dst, fps, res):
+    """The product frames (straight alpha, with shadow) over the generated world, scaled to the product's size."""
+    w, h = res
+    n = len(glob.glob(os.path.join(pdir, "frames", "*.png")))
+    ff("-i", film, "-framerate", str(fps), "-i", os.path.join(pdir, "frames", "%04d.png"),
+       "-filter_complex", f"[0:v]scale={w}:{h}:flags=lanczos,fps={fps}[bg];[bg][1:v]overlay=0:0:format=auto:shortest=1[v]",
+       "-map", "[v]", "-c:v", "libx264", "-crf", "12", "-pix_fmt", "yuv420p", "-movflags", "+faststart", dst)
+    print(f"  take.mp4: world + product ({n} product frames) at {w}x{h}", flush=True)
+
+
 def stage_upscale(shot, out, args):
     """Upscale the finished film in overlapping, cross-faded chunks.
 
@@ -267,7 +300,7 @@ def stage_upscale(shot, out, args):
     """
     import numpy as np
     from PIL import Image
-    ucfg = dict(shot["ltx"], **shot.get("upscale", {}))
+    ucfg = dict(ltx_comfy.LTX, **shot["ltx"], **shot.get("upscale", {}))
     ucfg.pop("segments", None)
     method = ucfg.get("method", "seedvr2")
     fps = shot["fps"]

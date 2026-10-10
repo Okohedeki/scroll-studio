@@ -26,3 +26,5 @@ ui/dist/
 examples/showcase/previews/*
 !examples/showcase/previews/lodestar-orbital.mp4
 !examples/showcase/previews/lodestar-orbital.jpg
+
+examples/_assets/kitchen_test/
