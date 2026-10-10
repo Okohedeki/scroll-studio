@@ -560,6 +560,12 @@ SCENE_TYPES = ("film", "artwork", "scene3d", "sequence", "parallax", "type", "ve
 
 class Theme(Model):
     preset: str = Field("night", description="night, brass, paper, lab, cosmos, studio, dusk, ink, blueprint, clinic (see engine/themes.yaml)")
+    style: Optional[str] = Field(
+        None, description="A whole look in one word, over the preset: particles, liquid-morph, holographic, neon-glow, wireframe-3d, "
+                          "glassmorphism, kinetic-type, isometric, clay-3d, ascii-art, gradient-mesh, comic-book, split-flap, "
+                          "retro-vhs, halftone, bauhaus, pixel-art, blueprint, art-deco, neo-brutalism (see engine/styles.yaml). "
+                          "It sets colours, fonts and radius (colors/fonts here still win), adds its stylesheet and effects")
+    mode: Optional[Literal["light", "dark"]] = Field(None, description="Override the preset's light/dark mode (set it when colors flip it)")
     colors: dict[str, str] = Field(default_factory=dict, description="Override tokens: bg, bg2, ink, accent, accent2")
     fonts: dict[str, str] = Field(default_factory=dict, description="Google Fonts families: display, body, mono")
     display_weight: Optional[int] = None

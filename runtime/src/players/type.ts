@@ -40,6 +40,7 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   box.appendChild(text);
 
   let update: (p: number) => void = () => {};
+  let measure = () => {};
   if (cfg.mode === "reveal") {
     text.innerHTML = words(cfg.text).map((w) => `<span>${w}</span>`).join(" ");
     const spans = [...text.querySelectorAll("span")];
@@ -57,8 +58,15 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     const list: string[] = cfg.words.length ? cfg.words : ["—"];
     text.innerHTML = `${cfg.text} <span class="roll">${list.map((w) => `<i>${w}</i>`).join("")}</span>`;
     const roll = text.querySelector<HTMLElement>(".roll")!, items = [...roll.querySelectorAll<HTMLElement>("i")];
-    const width = Math.max(...items.map((i) => i.getBoundingClientRect().width));
-    roll.style.width = width + "px";
+    // the roll is as wide as its longest word; measured again once the web fonts are in (the fallback face is
+    // narrower, and a width taken from it cuts the end off the word) and on every resize
+    measure = () => {
+      const r = document.createRange();
+      const w = Math.max(...items.map((i) => { r.selectNodeContents(i); return r.getBoundingClientRect().width; }));
+      roll.style.width = Math.ceil(w + 2) + "px";
+    };
+    measure();
+    document.fonts?.ready.then(measure);
     update = (p) => {
       const f = clamp(p * 1.1) * (list.length - 1);
       const i = Math.floor(f), t = easeInOut(clamp((f - i - 0.6) / 0.4));
@@ -78,6 +86,6 @@ const factory: PlayerFactory = async (cfg, ctx) => {
       });
     };
   }
-  return { update: (s) => update(s.p) };
+  return { update: (s) => update(s.p), resize: () => measure() };
 };
 export default factory;

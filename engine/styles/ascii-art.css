@@ -1,0 +1,19 @@
+/* ASCII art: a drifting character field behind hero, intro and CTA (fx bg); headlines decode letter by letter (fx text) */
+html.style-ascii-art .ss-h1, html.style-ascii-art .ss-h2, html.style-ascii-art .ss-display { letter-spacing: -.04em; }
+html.style-ascii-art .ss-h1::before { content: "> "; color: var(--accent); }
+html.style-ascii-art em { font-style: normal; color: var(--bg); background: var(--accent); padding: 0 .12em; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+html.style-ascii-art .ss-features { gap: 0; background: none; border: 0; font-size: 15px; }
+html.style-ascii-art .ss-feature { background: transparent; border: 1px dashed rgba(var(--ink-rgb), .35); margin: -1px 0 0 -1px; }
+html.style-ascii-art .ss-feature h3::before { content: "# "; color: var(--accent); }
+html.style-ascii-art .ss-btn { border: 1px solid var(--ink); background: transparent; font-family: var(--font-mono); }
+html.style-ascii-art .ss-btn::before { content: "["; } html.style-ascii-art .ss-btn::after { content: "]"; }
+html.style-ascii-art .ss-btn--hot { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+html.style-ascii-art .ss-btn:hover { background: var(--ink); color: var(--bg); }
+html.style-ascii-art .ss-v::after { content: "_"; color: var(--accent); animation: ss-caret 1s steps(1) infinite; }
+@keyframes ss-caret { 50% { opacity: 0; } }
+html.style-ascii-art .ss-tl::before { content: "*"; background: none; box-shadow: none; color: var(--accent); width: auto; height: auto; top: -12px; font-size: 18px; }
+html.style-ascii-art .ss-tile { border-style: dashed; border-radius: 0; }
+html.style-ascii-art .ss-faq__list summary::after { content: "[+]"; font-size: 15px; }
+html.style-ascii-art .ss-faq__list details[open] summary::after { content: "[-]"; transform: none; }
+html.style-ascii-art .ss-quote blockquote::before { content: "/* "; color: var(--ink-3); } html.style-ascii-art .ss-quote blockquote::after { content: " */"; color: var(--ink-3); }
+@media (prefers-reduced-motion: reduce) { html.style-ascii-art .ss-v::after { animation: none; } }

@@ -77,6 +77,116 @@ def build(name: str, section: Optional[str] = typer.Option(None, help="Rebuild o
 
 
 @app.command()
+def looks(name: str, styles: Optional[str] = typer.Option(None, help="Comma-separated styles (default: all of engine/styles.yaml)"),
+          thumbs: bool = typer.Option(True, help="Screenshot each look for the gallery page")):
+    """Build the site once in every style: dist/looks/<style>/ with a look switcher, and a gallery at dist/looks/."""
+    import html as _html
+    import tempfile
+    from .compile import themes
+    from .compile.compiler import build_site
+    from .project import Project, ffmpeg
+    project = Project(resolve(name))
+    if not (project.dist / "runtime" / "index.js").exists():
+        build_site(project)   # the looks share the main build's runtime
+    all_styles = themes.styles()
+    names = [s.strip() for s in styles.split(",")] if styles else list(all_styles)
+    for n in names:
+        if n not in all_styles:
+            raise typer.BadParameter(f"unknown style {n} (have: {', '.join(all_styles)})")
+    root = project.dist / "looks"
+    items = [{"name": n, "label": all_styles[n]["label"], "href": f"../{n}/"} for n in names]
+    for i, n in enumerate(names):
+        typer.echo(f"look {i + 1}/{len(names)}: {n}")
+        build_site(project, style=n, out=root / n, runtime_href="../../runtime/",
+                   looks={"index": i, "items": items, "home": "../"}, log=lambda m: None)
+    if thumbs:
+        from .snapshot import snapshot as snap
+        with tempfile.TemporaryDirectory() as tmp:
+            for n in names:
+                shot = snap(project.dist, ["top"], Path(tmp) / n, size=(1440, 900), log=lambda m: None, page=f"looks/{n}/index.html")[0]
+                ffmpeg("-i", shot, "-vf", "scale=720:-2:flags=lanczos", "-q:v", "4", root / n / "thumb.jpg")
+    site = project.load()
+    cards = "\n".join(
+        f'<a class="card" href="{n}/"><img src="{n}/thumb.jpg" alt="" loading="lazy" width="720" height="450">'
+        f'<span class="t"><b>{_html.escape(all_styles[n]["label"])}</b><small>theme: {{ style: {n} }}</small></span>'
+        f'<span class="d">{_html.escape(all_styles[n].get("about", ""))}</span></a>' for n in names)
+    (root / "index.html").write_text(f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{_html.escape(site.name)}: {len(names)} looks</title>
+<meta name="description" content="One site spec built in {len(names)} styles with Scroll Studio.">
+<style>
+  :root {{ color-scheme: dark; --bg: #0c0c0e; --ink: #f2f2f2; --dim: rgba(242, 242, 242, .68); --line: rgba(242, 242, 242, .14); }}
+  * {{ box-sizing: border-box; margin: 0; }}
+  body {{ background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; padding: clamp(28px, 5vw, 72px) clamp(16px, 4vw, 64px); }}
+  header {{ max-width: 1500px; margin: 0 auto 44px; }}
+  h1 {{ font-size: clamp(34px, 5vw, 64px); line-height: 1.02; letter-spacing: -.03em; font-weight: 650; }}
+  header p {{ color: var(--dim); max-width: 62ch; margin-top: 14px; font-size: 18px; }}
+  code {{ font: 14px ui-monospace, monospace; background: rgba(255, 255, 255, .08); padding: 2px 6px; border-radius: 5px; }}
+  .grid {{ max-width: 1500px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(330px, 100%), 1fr)); gap: 22px; }}
+  .card {{ display: flex; flex-direction: column; color: inherit; text-decoration: none; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #141417; transition: transform .3s, border-color .3s; }}
+  .card:hover {{ transform: translateY(-4px); border-color: rgba(242, 242, 242, .4); }}
+  .card img {{ width: 100%; height: auto; aspect-ratio: 16 / 10; object-fit: cover; display: block; background: #000; }}
+  .t {{ display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 16px 18px 4px; }}
+  .t b {{ font-size: 19px; font-weight: 600; }}
+  .t small {{ font: 12px ui-monospace, monospace; color: var(--dim); white-space: nowrap; }}
+  .d {{ padding: 0 18px 18px; color: var(--dim); font-size: 14.5px; }}
+  footer {{ max-width: 1500px; margin: 48px auto 0; color: var(--dim); font-size: 14px; }}
+  a {{ color: inherit; }}
+</style></head><body>
+<header><h1>One spec, {len(names)} looks.</h1>
+<p>Every page below is the same <code>site.yaml</code> ({_html.escape(site.name)}), built by Scroll Studio with a different
+<code>theme: {{ style: ... }}</code>. Open one, then use the arrows at the bottom (or your arrow keys) to flip through them all.</p></header>
+<main class="grid">
+{cards}
+</main>
+<footer><a href="../">Back to {_html.escape(site.name)}</a> · Made with <a href="https://github.com/Okohedeki/scroll-studio">Scroll Studio</a></footer>
+</body></html>
+""", encoding="utf-8")
+    typer.echo(f"looks -> {root / 'index.html'}")
+
+
+copy_app = typer.Typer(help="A copy deck for clients: export every piece of text to Markdown, import their edits.")
+app.add_typer(copy_app, name="copy")
+
+
+@copy_app.command("export")
+def copy_export(name: str, out: Optional[Path] = typer.Option(None, help="Default: <project>/copy.md")):
+    """Write the site's text to a Markdown copy deck."""
+    from .brand import export_deck
+    from .project import Project
+    project = Project(resolve(name))
+    out = out or project.root / "copy.md"
+    out.write_text(export_deck(project), encoding="utf-8")
+    typer.echo(f"copy deck -> {out}")
+
+
+@copy_app.command("import")
+def copy_import(name: str, deck: Path, dry_run: bool = typer.Option(False, help="Show the changes without writing")):
+    """Apply an edited copy deck to site.yaml (comments kept; an invalid result is refused)."""
+    from .brand import import_deck
+    from .project import Project
+    changes = import_deck(Project(resolve(name)), deck.read_text(encoding="utf-8"), dry_run=dry_run)
+    for k, old, new in changes:
+        typer.echo(f"  {k}\n    - {old}\n    + {new}")
+    typer.echo(f"{len(changes)} field(s) changed" + (" (dry run, nothing written)" if dry_run else "; run studio build to update the site"))
+
+
+@app.command()
+def brand(name: str, logo: str = typer.Option(..., help="Logo file inside the project (png, svg rendered as png, jpg)"),
+          mode: str = typer.Option("light", help="light or dark"), dry_run: bool = False):
+    """Set the theme's colours from a logo (contrast-checked) and use it as the nav logo."""
+    from .brand import apply_brand
+    from .project import Project
+    if mode not in ("light", "dark"):
+        raise typer.BadParameter("mode is light or dark")
+    r = apply_brand(Project(resolve(name)), logo, mode=mode, dry_run=dry_run)
+    typer.echo("logo palette: " + " ".join(r["palette"]))
+    for k, v in r["colors"].items():
+        typer.echo(f"  {k}: {v}")
+    typer.echo("written to theme.colors" + (" (dry run)" if dry_run else ""))
+
+
+@app.command()
 def preview(name: str, port: int = 5173):
     """Serve a built project locally."""
     from .serve import serve

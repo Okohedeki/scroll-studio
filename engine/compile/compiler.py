@@ -71,15 +71,22 @@ def nav_links(site: Site) -> list[dict]:
 
 def build_site(project: Project, log: Callable[[str], None] = print,
                progress: Callable[[float, str], None] = lambda f, m="": None,
-               only: Optional[str] = None, force: bool = False, options: Optional[dict] = None) -> Path:
+               only: Optional[str] = None, force: bool = False, options: Optional[dict] = None,
+               style: Optional[str] = None, out: Optional[Path] = None, runtime_href: Optional[str] = None,
+               looks: Optional[dict] = None) -> Path:
+    """style: build in this look instead of the spec's; out: write the site here instead of dist/;
+    runtime_href: link a runtime published elsewhere (e.g. ../../runtime/) instead of copying it in;
+    looks: {"current", "items": [{name, label, href}], "home"} adds the look switcher bar."""
     from ..scenes import builder_for
 
     site = project.load()
+    if style is not None:
+        site = site.model_copy(update={"theme": site.theme.model_copy(update={"style": style or None})})
     if not runtime_ready():
         raise BuildError("the browser runtime is not built. Run `npm install && npm run build` in the repo root "
                          "(or `studio setup`).")
     theme = themes.resolve(site.theme)
-    dist = project.dist
+    dist = out or project.dist
     dist.mkdir(parents=True, exist_ok=True)
     (dist / "assets").mkdir(exist_ok=True)
 
@@ -199,10 +206,11 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         if e["s"].type == "cta" and bg:
             e["bg"] = finals.get(bg[6:]) if bg.startswith("scene:") else publish(bg)
 
-    rt = dist / "runtime"
-    if rt.exists():
-        shutil.rmtree(rt)
-    shutil.copytree(STATIC / "runtime", rt)
+    if runtime_href is None:
+        rt = dist / "runtime"
+        if rt.exists():
+            shutil.rmtree(rt)
+        shutil.copytree(STATIC / "runtime", rt)
 
     # A nav logo given as an image file is copied in like any other media; SVG path data passes through.
     logo = site.nav.logo
@@ -219,6 +227,8 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         site=site, sections=sections, theme=theme, css_vars=css_vars, logo=logo,
         font_css=font_css, font_links=[] if font_css else links, nav_links=nav, page_links=page_links, credits=credits,
         configs={e["s"].id: e["config"] for e in sections if e["scene"]},
+        style_css=themes.style_css(theme["style"]) if theme["style"] else "", fx=json.dumps(theme["fx"]),
+        runtime=runtime_href or "runtime/", looks=looks,
     )
     (dist / "index.html").write_text(html, encoding="utf-8")
 

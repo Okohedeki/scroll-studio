@@ -1,0 +1,36 @@
+/* neo-brutalism: flat loud colour, thick black borders, hard offset shadows, buttons that press in */
+html.style-neo-brutalism { --b: 3px solid #000; --hard: 6px 6px 0 #000; --pink: #ff8ad8; --cyan: #00d1ff; --yellow: #ffe14d; --lime: #7bff5c; --violet: #b69cff; }
+html.style-neo-brutalism .ss-h1, html.style-neo-brutalism .ss-h2, html.style-neo-brutalism .ss-display { letter-spacing: -.02em; line-height: .95; text-transform: uppercase; }
+html.style-neo-brutalism em { font-style: normal; color: #000; background: var(--lime); padding: 0 .14em; border: var(--b); box-shadow: 4px 4px 0 #000; display: inline-block; transform: rotate(-2deg); line-height: 1.05; }
+html.style-neo-brutalism .ss-kicker { display: inline-block; color: #000; background: #fff; border: var(--b); box-shadow: 3px 3px 0 #000; padding: 6px 12px; font-weight: 700; }
+html.style-neo-brutalism .ss-band { background: var(--yellow); border-block: var(--b); }
+html.style-neo-brutalism .ss-features { gap: 22px; background: none; border: 0; }
+html.style-neo-brutalism .ss-feature, html.style-neo-brutalism .ss-tile, html.style-neo-brutalism .ss-stats > div, html.style-neo-brutalism .ss-quote, html.style-neo-brutalism .ss-faq__list details, html.style-neo-brutalism .ss-tl {
+  background: #fff; border: var(--b); border-radius: var(--radius); box-shadow: var(--hard); transition: transform .15s, box-shadow .15s; }
+html.style-neo-brutalism .ss-feature:nth-child(4n+1) { background: var(--cyan); }
+html.style-neo-brutalism .ss-feature:nth-child(4n+2) { background: var(--yellow); }
+html.style-neo-brutalism .ss-feature:nth-child(4n+3) { background: var(--lime); }
+html.style-neo-brutalism .ss-feature:nth-child(4n) { background: var(--violet); }
+html.style-neo-brutalism .ss-feature p, html.style-neo-brutalism .ss-feature .ss-tag { color: #000; }
+html.style-neo-brutalism .ss-feature:hover, html.style-neo-brutalism .ss-tile:hover { transform: translate(-3px, -3px); box-shadow: 9px 9px 0 #000; }
+html.style-neo-brutalism .ss-feature h3 { font-family: var(--font-display); text-transform: uppercase; font-size: 26px; }
+html.style-neo-brutalism .ss-stats > div { padding: 24px; }
+html.style-neo-brutalism .ss-stats > div:nth-child(2n) { background: var(--pink); }
+html.style-neo-brutalism .ss-timeline { border: 0; gap: 18px; }
+html.style-neo-brutalism .ss-tl { padding: 26px 20px 22px; }
+html.style-neo-brutalism .ss-tl::before { display: none; }
+html.style-neo-brutalism .ss-quote { padding: clamp(28px, 4vw, 56px); background: var(--cyan); }
+html.style-neo-brutalism .ss-faq__list details { padding: 18px 22px; margin-bottom: 14px; }
+html.style-neo-brutalism .ss-faq__list details:last-child { border-bottom: var(--b); }
+html.style-neo-brutalism .ss-btn { border: var(--b); border-radius: var(--radius); background: #fff; color: #000; box-shadow: 4px 4px 0 #000; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; backdrop-filter: none; transition: transform .1s, box-shadow .1s; }
+html.style-neo-brutalism .ss-btn--hot { background: var(--lime); color: #000; border-color: #000; }
+html.style-neo-brutalism .ss-btn:hover { transform: translate(4px, 4px); box-shadow: 0 0 0 #000; background: var(--yellow); color: #000; border-color: #000; }
+html.style-neo-brutalism .ss-pills li, html.style-neo-brutalism .ss-badge { background: #fff; border: 2px solid #000; color: #000; border-radius: 6px; box-shadow: 2px 2px 0 #000; }
+html.style-neo-brutalism .ss-nav.ss-solid { background: #fff; border-bottom: var(--b); backdrop-filter: none; }
+html.style-neo-brutalism .ss-phone { border: var(--b); box-shadow: 10px 10px 0 #000; }
+html.style-neo-brutalism .ss-cta { background: var(--violet); border-top: var(--b); }
+html.style-neo-brutalism .ss-cta .ss-display { -webkit-text-stroke: 0; text-shadow: 6px 6px 0 #fff; }
+html.style-neo-brutalism .ss-step .ss-card { background: #fff; border: var(--b); box-shadow: var(--hard); padding: 26px; border-radius: var(--radius); }
+html.style-neo-brutalism .ss-step.ss-intro .ss-card { background: none; border: 0; box-shadow: none; padding-left: 0; }
+html.style-neo-brutalism .ss-footer { background: #000; color: #fff; }
+html.style-neo-brutalism .ss-footer__in { color: rgba(255, 255, 255, .8); }

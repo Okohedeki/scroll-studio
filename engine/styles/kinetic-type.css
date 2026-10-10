@@ -1,0 +1,18 @@
+/* kinetic type: huge condensed headlines; letters rise one by one (fx text: kinetic) and lean into a fast scroll (--sv) */
+html.style-kinetic-type .ss-h1 { font-size: clamp(64px, 11vw, 200px); line-height: .86; letter-spacing: -.01em; text-transform: uppercase; }
+html.style-kinetic-type .ss-h2, html.style-kinetic-type .ss-display { font-size: clamp(48px, 7.4vw, 132px); line-height: .9; letter-spacing: -.005em; text-transform: uppercase; }
+html.style-kinetic-type .ss-cta .ss-display { font-size: clamp(64px, 12vw, 220px); }
+html.style-kinetic-type .ss-h1, html.style-kinetic-type .ss-h2, html.style-kinetic-type .ss-display { transform: skewX(calc(var(--sv, 0) * -12deg)); transform-origin: 0 100%; }
+html.style-kinetic-type em { font-style: normal; color: var(--accent); }
+html.style-kinetic-type .fx-ch { display: inline-block; transform: translateY(105%) rotate(6deg); opacity: 0; transition: transform .8s cubic-bezier(.2, .9, .2, 1), opacity .4s; transition-delay: calc(var(--i) * 28ms); }
+html.style-kinetic-type .fx-word { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .04em; }
+html.style-kinetic-type .fx-seen .fx-ch { transform: none; opacity: 1; }
+html.style-kinetic-type .ss-features { background: var(--ink); border-color: var(--ink); gap: 2px; }
+html.style-kinetic-type .ss-feature h3 { font-family: var(--font-display); text-transform: uppercase; font-size: 38px; letter-spacing: 0; }
+html.style-kinetic-type .ss-v { font-size: clamp(72px, 9vw, 160px); }
+html.style-kinetic-type .ss-btn { border: 2px solid var(--ink); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+html.style-kinetic-type .ss-btn--hot { border-color: var(--accent); }
+html.style-kinetic-type .ss-quote blockquote { font-size: clamp(36px, 5vw, 84px); text-transform: uppercase; line-height: .95; }
+html.style-kinetic-type .ss-kicker { color: var(--ink); font-weight: 600; }
+html.style-kinetic-type .ss-kicker::before { content: "→ "; color: var(--accent); }
+@media (prefers-reduced-motion: reduce) { html.style-kinetic-type .fx-ch { transform: none; opacity: 1; transition: none; } html.style-kinetic-type .ss-h1, html.style-kinetic-type .ss-h2, html.style-kinetic-type .ss-display { transform: none; } }

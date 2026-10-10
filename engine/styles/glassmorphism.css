@@ -1,0 +1,28 @@
+/* glassmorphism: frosted, translucent panels floating over bright colour fields */
+html.style-glassmorphism body { background:
+  radial-gradient(40% 50% at 12% 18%, #ff5fa2 0%, transparent 70%),
+  radial-gradient(45% 55% at 88% 30%, #4f7bff 0%, transparent 70%),
+  radial-gradient(50% 50% at 50% 95%, #2ee6c5 0%, transparent 70%),
+  var(--bg) fixed; background-attachment: fixed; }
+/* blocks go clear so the colour fields show through; their content sits on glass */
+html.style-glassmorphism .ss-block, html.style-glassmorphism .ss-hero:not(.ss-hero--media), html.style-glassmorphism .ss-band,
+html.style-glassmorphism .ss-panel, html.style-glassmorphism .ss-panel > section, html.style-glassmorphism .ss-footer { background: transparent; }
+html.style-glassmorphism .ss-band { border-color: rgba(255, 255, 255, .12); }
+html.style-glassmorphism .ss-features { gap: 18px; background: none; border: 0; }
+html.style-glassmorphism .ss-feature, html.style-glassmorphism .ss-tile, html.style-glassmorphism .ss-faq__list details, html.style-glassmorphism .ss-stats > div, html.style-glassmorphism .ss-tl {
+  background: rgba(255, 255, 255, .09); border: 1px solid rgba(255, 255, 255, .22); border-radius: var(--radius);
+  backdrop-filter: blur(22px) saturate(1.5); -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  box-shadow: 0 20px 50px -20px rgba(0, 0, 0, .45), inset 0 1px 0 rgba(255, 255, 255, .3); }
+html.style-glassmorphism .ss-stats > div { padding: 28px 24px; }
+html.style-glassmorphism .ss-timeline { gap: 14px; border: 0; }
+html.style-glassmorphism .ss-tl { padding: 28px 22px 24px; }
+html.style-glassmorphism .ss-tl::before { top: 18px; left: auto; right: 18px; }
+html.style-glassmorphism .ss-faq__list details { padding: 18px 22px; margin-bottom: 10px; }
+html.style-glassmorphism .ss-faq__list details:last-child { border-bottom: 1px solid rgba(255, 255, 255, .22); }
+html.style-glassmorphism .ss-btn { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .35); }
+html.style-glassmorphism .ss-btn--hot { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+html.style-glassmorphism .ss-btn:hover { background: #fff; color: #10123a; border-color: #fff; }
+html.style-glassmorphism .ss-nav.ss-solid { background: rgba(255, 255, 255, .08); }
+html.style-glassmorphism .ss-quote { padding: clamp(28px, 4vw, 56px); border-radius: 28px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .2); backdrop-filter: blur(22px); }
+html.style-glassmorphism .ss-step .ss-card { padding: 28px; border-radius: var(--radius); background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .18); backdrop-filter: blur(18px); }
+html.style-glassmorphism .ss-step.ss-intro .ss-card { background: none; border: 0; backdrop-filter: none; padding-left: 0; }

@@ -1,0 +1,90 @@
+# Halcyon: one spec, twenty looks. A plain product page (no generated media, builds in seconds) used to show the
+# styles: `theme: { style: <name> }` changes the whole look, fonts and colours included. Build every look with
+#   studio looks examples/halcyon
+# which writes dist/looks/<style>/ for each style, a switcher bar on every page, and a gallery at dist/looks/.
+name: Halcyon
+description: The calendar that guards your mornings. One page, built in twenty styles by Scroll Studio.
+theme: { preset: night, style: neo-brutalism }
+nav:
+  cta: { label: Get Halcyon, href: "#get" }
+sections:
+  - type: hero
+    badge: New · Halcyon 2.0
+    title: Your mornings, <em>back.</em>
+    body: Halcyon is a calendar that keeps your best hours free. It books meetings around your focus, not into it.
+    buttons:
+      - { label: Try it free, href: "#get" }
+      - { label: See the looks, href: "looks/" }
+  - type: intro
+    id: why
+    nav_label: Why
+    kicker: The problem
+    title: Calendars fill up <em>from the top.</em>
+    body: Every invite lands in the first free slot, and the first free slot is usually the hour you meant to think in. Halcyon moves the line.
+  - type: features
+    id: features
+    nav_label: Features
+    kicker: What it does
+    title: Three rules, <em>kept for you.</em>
+    items:
+      - { tag: "01", title: Focus first, body: "Your deep-work blocks go in before anyone else's meetings, every week." }
+      - { tag: "02", title: Smart batching, body: "Calls are grouped into afternoons, so the day isn't cut into twenty-minute scraps." }
+      - { tag: "03", title: Polite no, body: "Halcyon suggests a better slot instead of declining, and the other side picks with one tap." }
+  - type: type
+    id: words
+    length: 2.6
+    mode: swap
+    size: display
+    text: "Halcyon keeps your"
+    words: [mornings, Fridays, evenings, weekends]
+  - type: product
+    id: app
+    kicker: The app
+    title: Pick a slot, <em>keep the morning.</em>
+    body: When someone asks for your time, Halcyon offers the hours that cost you least. You approve, it books.
+    tags: [iPhone, Android, Web, Google and Outlook]
+    side: right
+    device:
+      app: Halcyon
+      title: Coffee with Sam
+      label: Best times
+      note: Your 8-11 focus block stays free.
+      options:
+        - { title: "Tue 2:30 pm", body: "Next to your other calls", selected: true }
+        - { title: "Wed 4:00 pm", body: "End of day" }
+        - { title: "Thu 1:00 pm", body: "After lunch" }
+      button: Send these times
+  - type: stats
+    band: true
+    items:
+      - { value: "11", unit: h, label: Focus hours kept per week }
+      - { value: "38", unit: "%", label: Fewer meeting fragments }
+      - { value: "2", unit: min, label: To set up }
+      - { value: "0", label: Calendars replaced }
+  - type: timeline
+    id: how
+    nav_label: How
+    kicker: How it works
+    title: Set it up <em>over coffee.</em>
+    items:
+      - { when: Minute 1, title: Connect, body: "Sign in with Google or Outlook; nothing moves yet." }
+      - { when: Minute 2, title: Mark your hours, body: "Paint the blocks you want protected." }
+      - { when: Day 1, title: It starts, body: "New invites are steered around your focus." }
+      - { when: Week 1, title: You notice, body: "A free morning, then another one." }
+  - type: quote
+    text: "I got my mornings back in a week. I didn't change a single habit; the calendar did."
+    who: "Priya N., product designer"
+  - type: faq
+    title: Questions
+    items:
+      - { q: "Does it replace my calendar?", a: "No. Halcyon sits on top of Google Calendar or Outlook and only decides where new things go." }
+      - { q: "What do the people I meet see?", a: "A short list of times that work for both of you. No new app to install." }
+      - { q: "Can I override it?", a: "Always. Drag anything anywhere; Halcyon learns from what you move." }
+  - type: cta
+    id: get
+    kicker: Free for 30 days
+    title: Keep <em>tomorrow morning.</em>
+    button: { label: Get Halcyon, href: "#" }
+footer:
+  left: "© Halcyon. A concept site; the product is fictional."
+  right: Built with Scroll Studio

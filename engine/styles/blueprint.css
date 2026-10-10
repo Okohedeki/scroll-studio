@@ -1,0 +1,28 @@
+/* blueprint: white line on cyanotype blue, a drafting grid, and dimension marks around the headlines */
+html.style-blueprint body { background-color: var(--bg);
+  background-image: linear-gradient(rgba(255, 255, 255, .14) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .14) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, .06) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .06) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px; background-attachment: fixed; }
+html.style-blueprint .ss-block, html.style-blueprint .ss-hero:not(.ss-hero--media), html.style-blueprint .ss-panel, html.style-blueprint .ss-panel > section, html.style-blueprint .ss-footer { background: transparent; }
+html.style-blueprint .ss-band { background: rgba(9, 44, 92, .55); border-color: rgba(255, 255, 255, .35); }
+/* dimension line above a headline: |<-------->| */
+html.style-blueprint .ss-h1, html.style-blueprint .ss-h2, html.style-blueprint .ss-display { position: relative; font-weight: 400; letter-spacing: -.02em; }
+html.style-blueprint .ss-h1::before, html.style-blueprint .ss-h2::before { content: ""; position: absolute; left: 0; right: 0; top: -18px; height: 9px;
+  border-left: 1px solid rgba(255, 255, 255, .7); border-right: 1px solid rgba(255, 255, 255, .7);
+  background: linear-gradient(rgba(255, 255, 255, .7), rgba(255, 255, 255, .7)) center / 100% 1px no-repeat; }
+html.style-blueprint .ss-hero .ss-h1::before { left: 50%; right: auto; width: min(100%, 9em); transform: translateX(-50%); }
+html.style-blueprint em { font-style: italic; color: var(--accent-2); }
+html.style-blueprint .ss-kicker { color: var(--ink); }
+html.style-blueprint .ss-kicker::before { content: "REF. "; opacity: .6; }
+html.style-blueprint .ss-features { gap: 0; background: none; border: 0; }
+html.style-blueprint .ss-feature { background: transparent; border: 1px solid rgba(255, 255, 255, .55); margin: -1px 0 0 -1px; position: relative; }
+html.style-blueprint .ss-feature::before { content: "A-" counter(fig); counter-increment: fig; position: absolute; right: 12px; top: 10px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; opacity: .7; }
+html.style-blueprint .ss-features { counter-reset: fig; }
+html.style-blueprint .ss-btn { border: 1px solid #fff; background: transparent; color: #fff; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .12em; font-size: 12px; }
+html.style-blueprint .ss-btn--hot { background: #fff; color: var(--bg); }
+html.style-blueprint .ss-btn:hover { background: var(--accent-2); color: var(--bg); }
+html.style-blueprint .ss-v { font-weight: 300; }
+html.style-blueprint .ss-stats > div { border-left: 1px dashed rgba(255, 255, 255, .5); padding-left: 18px; }
+html.style-blueprint .ss-tl::before { background: transparent; border: 1px solid #fff; box-shadow: none; }
+html.style-blueprint .ss-tile { background: transparent; border-color: rgba(255, 255, 255, .55); border-radius: 0; }
+html.style-blueprint .ss-phone { background: transparent; box-shadow: inset 0 0 0 1.5px #fff, 0 0 0 0 transparent; }

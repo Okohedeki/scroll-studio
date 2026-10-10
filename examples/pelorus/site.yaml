@@ -30,7 +30,7 @@ sections:
     steps:
       - intro: true
         kicker: Pelorus · Energy desk
-        title: A third of the world's power <em>is now renewable.</em>
+        title: A third of the world's electricity <em>is now renewable.</em>
         body: Every number on this page is read from the source file when the page is built, not typed in.
         hint: Scroll to read
         state: { show: [World], x: [2000, 2025] }
@@ -40,11 +40,11 @@ sections:
         state: { show: [World], x: [2000, 2025], reveal: true }
       - kicker: China
         title: The biggest grid <em>moved fastest.</em>
-        body: China built more wind and solar in the last five years than any country has built of anything.
+        body: China's renewable share doubled between 2010 and 2025, on the largest grid in the world.
         state: { show: [World, China], focus: [China], x: [2005, 2025] }
       - kicker: Denmark
         title: What <em>all the way</em> looks like.
-        body: Denmark runs most of its grid on wind. The rest of the world is following the same curve, a decade or two behind.
+        body: Denmark now gets nine-tenths of its electricity from renewables, most of it wind. The world is on the same curve, just later.
         state: { show: [World, China, United States, Denmark], focus: [Denmark], x: [2000, 2025] }
   - type: intro
     id: brief

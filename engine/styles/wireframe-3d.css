@@ -1,0 +1,15 @@
+/* wireframe 3D: a wireframe terrain rolls under hero, intro and CTA (fx bg); thin vector lines and corner ticks */
+html.style-wireframe-3d .ss-h1, html.style-wireframe-3d .ss-display { text-transform: uppercase; letter-spacing: -.02em; }
+html.style-wireframe-3d .ss-h1 em, html.style-wireframe-3d .ss-display em, html.style-wireframe-3d .ss-h2 em { font-style: normal; color: transparent; -webkit-text-stroke: 1.5px var(--accent); }
+html.style-wireframe-3d .ss-features { gap: 0; background: none; border: 0; }
+html.style-wireframe-3d .ss-feature { position: relative; background: transparent; border: 1px solid rgba(var(--accent-rgb), .35); margin: -1px 0 0 -1px; }
+html.style-wireframe-3d .ss-feature::before, html.style-wireframe-3d .ss-feature::after { content: ""; position: absolute; width: 14px; height: 14px; border: 2px solid var(--accent); }
+html.style-wireframe-3d .ss-feature::before { left: -2px; top: -2px; border-right: 0; border-bottom: 0; }
+html.style-wireframe-3d .ss-feature::after { right: -2px; bottom: -2px; border-left: 0; border-top: 0; }
+html.style-wireframe-3d .ss-btn { border-color: rgba(var(--accent-rgb), .6); background: transparent; color: var(--accent); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .1em; font-size: 12px; }
+html.style-wireframe-3d .ss-btn--hot { background: var(--accent); color: var(--accent-ink); }
+html.style-wireframe-3d .ss-v { color: transparent; -webkit-text-stroke: 1.5px var(--ink); }
+html.style-wireframe-3d .ss-tile { border-color: rgba(var(--accent-rgb), .4); background: transparent; }
+html.style-wireframe-3d .ss-kicker::before { content: "[ "; }
+html.style-wireframe-3d .ss-kicker::after { content: " ]"; }
+html.style-wireframe-3d .ss-tl::before { border-radius: 0; transform: rotate(45deg); background: transparent; border: 1.5px solid var(--accent); }

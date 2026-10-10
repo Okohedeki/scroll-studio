@@ -1,0 +1,35 @@
+/* pixel art: chunky pixel type, stepped (notched) borders, 8-bit buttons and a twinkling pixel sky */
+@keyframes ss-twinkle { 50% { opacity: .35; } }
+html.style-pixel-art { --px: 4px; image-rendering: pixelated; }
+html.style-pixel-art body { background-color: var(--bg);
+  background-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0), linear-gradient(var(--accent) 0 0), linear-gradient(#fff 0 0), linear-gradient(var(--accent-2) 0 0);
+  background-size: 4px 4px; background-repeat: no-repeat; background-position: 12% 18%, 78% 9%, 40% 70%, 88% 56%, 22% 92%; background-attachment: fixed; }
+html.style-pixel-art .ss-block, html.style-pixel-art .ss-hero:not(.ss-hero--media), html.style-pixel-art .ss-panel, html.style-pixel-art .ss-panel > section { background: transparent; }
+html.style-pixel-art .ss-band { background: var(--bg-2); border: 0; box-shadow: 0 -4px 0 #000, 0 4px 0 #000; }
+html.style-pixel-art .ss-h1, html.style-pixel-art .ss-h2, html.style-pixel-art .ss-display { letter-spacing: 0; line-height: 1.25; text-shadow: 4px 4px 0 #000; }
+html.style-pixel-art .ss-h1 { font-size: clamp(30px, 4.6vw, 72px); }
+html.style-pixel-art .ss-h2, html.style-pixel-art .ss-display { font-size: clamp(24px, 3.2vw, 52px); }
+html.style-pixel-art .ss-cta .ss-display { font-size: clamp(30px, 4.8vw, 78px); }
+html.style-pixel-art .ss-v { font-size: clamp(30px, 4vw, 64px); letter-spacing: 0; color: var(--accent); text-shadow: 4px 4px 0 #000; }
+html.style-pixel-art em { font-style: normal; color: var(--accent); }
+html.style-pixel-art .ss-lede, html.style-pixel-art .ss-body { font-size: 20px; }
+html.style-pixel-art .ss-kicker { font-family: var(--font-display); font-size: 11px; letter-spacing: .05em; color: var(--accent-2); }
+/* notched pixel frame: a box-shadow ring with the corners left out */
+html.style-pixel-art .ss-feature, html.style-pixel-art .ss-tile, html.style-pixel-art .ss-stats > div, html.style-pixel-art .ss-quote, html.style-pixel-art .ss-faq__list details {
+  border: 0; border-radius: 0; background: #2d1d5c; box-shadow: 0 -4px 0 #fff8e7, 0 4px 0 #fff8e7, -4px 0 0 #fff8e7, 4px 0 0 #fff8e7, 8px 8px 0 #000; margin: 4px; }
+html.style-pixel-art .ss-features { gap: 22px; background: none; border: 0; }
+html.style-pixel-art .ss-feature h3 { font-family: var(--font-display); font-size: 15px; line-height: 1.5; letter-spacing: 0; }
+html.style-pixel-art .ss-feature p { font-size: 18px; }
+html.style-pixel-art .ss-stats > div { padding: 22px; }
+html.style-pixel-art .ss-quote { padding: 32px; }
+html.style-pixel-art .ss-faq__list details { padding: 16px 20px; margin-bottom: 18px; }
+html.style-pixel-art .ss-btn { border: 0; border-radius: 0; background: #fff8e7; color: #1b1035; font-family: var(--font-display); font-size: 12px; padding: 14px 20px;
+  box-shadow: 0 -4px 0 #000, 0 4px 0 #000, -4px 0 0 #000, 4px 0 0 #000, inset -4px -4px 0 rgba(0, 0, 0, .25); }
+html.style-pixel-art .ss-btn--hot { background: var(--accent); color: #1b1035; }
+html.style-pixel-art .ss-btn:hover { background: var(--accent-2); color: #1b1035; transform: translateY(2px); box-shadow: 0 -4px 0 #000, 0 4px 0 #000, -4px 0 0 #000, 4px 0 0 #000, inset 4px 4px 0 rgba(0, 0, 0, .25); }
+html.style-pixel-art .ss-tl::before { border-radius: 0; width: 12px; height: 12px; top: -6px; background: var(--accent); box-shadow: 4px 4px 0 #000; }
+html.style-pixel-art .ss-pills li, html.style-pixel-art .ss-badge { border-radius: 0; border: 0; background: #2d1d5c; box-shadow: 0 -2px 0 #fff8e7, 0 2px 0 #fff8e7, -2px 0 0 #fff8e7, 2px 0 0 #fff8e7; }
+html.style-pixel-art .ss-phone { border-radius: 0; box-shadow: 0 -8px 0 #000, 0 8px 0 #000, -8px 0 0 #000, 8px 0 0 #000, 16px 16px 0 rgba(0, 0, 0, .4); }
+html.style-pixel-art .ss-phone__screen { border-radius: 0; }
+html.style-pixel-art .ss-nav.ss-solid { background: var(--bg); box-shadow: 0 4px 0 #000; backdrop-filter: none; }
+@media (max-width: 900px) { html.style-pixel-art .ss-h1 { font-size: clamp(22px, 7vw, 36px); } html.style-pixel-art .ss-h2 { font-size: clamp(20px, 6vw, 30px); } }

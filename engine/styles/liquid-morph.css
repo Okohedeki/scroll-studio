@@ -1,0 +1,23 @@
+/* liquid morph: gooey colour blobs melt behind hero and CTA; blobby buttons and cards */
+@keyframes ss-blob {
+  0%, 100% { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; transform: translate(0, 0) rotate(0deg) scale(1); }
+  33% { border-radius: 63% 37% 39% 61% / 55% 62% 38% 45%; transform: translate(8%, -6%) rotate(60deg) scale(1.08); }
+  66% { border-radius: 36% 64% 52% 48% / 62% 38% 62% 38%; transform: translate(-6%, 5%) rotate(-40deg) scale(.94); }
+}
+@keyframes ss-wobble { 0%, 100% { border-radius: 999px; } 30% { border-radius: 44% 56% 48% 52% / 60% 40% 60% 40%; } 60% { border-radius: 56% 44% 60% 40% / 42% 58% 42% 58%; } }
+html.style-liquid-morph .ss-hero, html.style-liquid-morph .ss-cta { isolation: isolate; }
+html.style-liquid-morph .ss-hero:not(.ss-hero--media)::before, html.style-liquid-morph .ss-cta::before,
+html.style-liquid-morph .ss-hero:not(.ss-hero--media)::after, html.style-liquid-morph .ss-cta::after {
+  content: ""; position: absolute; z-index: -1; width: min(60vw, 720px); aspect-ratio: 1; filter: blur(50px); opacity: .7; pointer-events: none;
+  animation: ss-blob 18s ease-in-out infinite; }
+html.style-liquid-morph .ss-hero:not(.ss-hero--media)::before, html.style-liquid-morph .ss-cta::before { left: -10%; top: 5%; background: radial-gradient(circle at 30% 30%, var(--accent), #7b2cff 70%); }
+html.style-liquid-morph .ss-hero:not(.ss-hero--media)::after, html.style-liquid-morph .ss-cta::after { right: -12%; bottom: -10%; background: radial-gradient(circle at 60% 40%, #2cd6ff, #3b1d8f 70%); animation-duration: 23s; animation-direction: reverse; }
+html.style-liquid-morph .ss-btn:hover { animation: ss-wobble 1.2s ease-in-out infinite; }
+html.style-liquid-morph .ss-features { gap: 18px; background: none; border: 0; }
+html.style-liquid-morph .ss-feature { border-radius: 40px 40px 40px 12px; background: rgba(var(--ink-rgb), .04); border: 1px solid var(--line); }
+html.style-liquid-morph .ss-feature:nth-child(2n) { border-radius: 40px 12px 40px 40px; }
+html.style-liquid-morph .ss-feature:hover { background: rgba(var(--accent-rgb), .08); border-color: rgba(var(--accent-rgb), .4); }
+html.style-liquid-morph .ss-h1, html.style-liquid-morph .ss-display { letter-spacing: -.045em; }
+html.style-liquid-morph .ss-tile { border-radius: 36px; }
+html.style-liquid-morph .ss-tl::before { border-radius: 40% 60% 55% 45%; width: 14px; height: 12px; }
+@media (prefers-reduced-motion: reduce) { html.style-liquid-morph *::before, html.style-liquid-morph *::after, html.style-liquid-morph .ss-btn:hover { animation: none !important; } }

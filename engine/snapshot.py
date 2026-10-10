@@ -19,8 +19,8 @@ from .serve import serve
 
 
 def snapshot(dist: Path, shots: list[str], out_dir: Path, size=(1600, 900), wait: float = 2.0,
-             log: Callable[[str], None] = print) -> list[Path]:
-    """shots: 'scene:progress' (e.g. 'hero:0.4'), 'top', 'bottom', or 'y:<pixels>'."""
+             log: Callable[[str], None] = print, page: str = "index.html") -> list[Path]:
+    """shots: 'scene:progress' (e.g. 'hero:0.4'), 'top', 'bottom', or 'y:<pixels>'. page: which page under dist."""
     import requests
     W, H = size
     port, dbg = _free_port(), _free_port()
@@ -45,7 +45,7 @@ def snapshot(dist: Path, shots: list[str], out_dir: Path, size=(1600, 900), wait
         cdp.call("Emulation.setDeviceMetricsOverride", width=W, height=H, deviceScaleFactor=1, mobile=False)
         cdp.call("Page.enable")
         for i, shot in enumerate(shots):
-            base = f"http://127.0.0.1:{port}/index.html"
+            base = f"http://127.0.0.1:{port}/{page}"
             if ":" in shot and not shot.startswith("y:"):
                 sid, p = shot.split(":", 1)
                 url = f"{base}?p={float(p)}&s={sid}"

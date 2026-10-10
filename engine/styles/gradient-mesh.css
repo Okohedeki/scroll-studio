@@ -1,0 +1,22 @@
+/* gradient mesh: slow, breathing fields of colour behind serif headlines */
+@keyframes ss-mesh {
+  0%, 100% { background-position: 0% 0%, 100% 0%, 100% 100%, 0% 100%; }
+  50% { background-position: 30% 20%, 70% 30%, 80% 70%, 20% 80%; }
+}
+html.style-gradient-mesh .ss-hero:not(.ss-hero--media), html.style-gradient-mesh .ss-cta, html.style-gradient-mesh .ss-band {
+  background-color: var(--bg);
+  background-image: radial-gradient(45% 55% at 20% 20%, rgba(255, 159, 122, .75), transparent 70%), radial-gradient(40% 50% at 85% 15%, rgba(255, 204, 112, .7), transparent 70%),
+    radial-gradient(50% 60% at 80% 85%, rgba(176, 140, 255, .65), transparent 70%), radial-gradient(45% 55% at 15% 85%, rgba(120, 214, 255, .6), transparent 70%);
+  background-size: 160% 160%; background-repeat: no-repeat; animation: ss-mesh 22s ease-in-out infinite; }
+html.style-gradient-mesh .ss-h1, html.style-gradient-mesh .ss-display { font-size: clamp(56px, 8vw, 150px); letter-spacing: -.035em; line-height: .92; }
+html.style-gradient-mesh .ss-h2 { font-size: clamp(44px, 5.6vw, 96px); letter-spacing: -.03em; }
+html.style-gradient-mesh .ss-features { gap: 16px; background: none; border: 0; }
+html.style-gradient-mesh .ss-feature { border-radius: 28px; background: rgba(255, 255, 255, .55); border: 1px solid rgba(var(--ink-rgb), .08); backdrop-filter: blur(12px); }
+html.style-gradient-mesh .ss-band .ss-feature { background: rgba(255, 255, 255, .5); }
+html.style-gradient-mesh .ss-feature h3 { font-size: 34px; letter-spacing: -.02em; }
+html.style-gradient-mesh .ss-btn { background: rgba(255, 255, 255, .6); border-color: rgba(var(--ink-rgb), .15); }
+html.style-gradient-mesh .ss-btn--hot { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+html.style-gradient-mesh .ss-btn--hot:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+html.style-gradient-mesh .ss-tile { border-radius: 28px; }
+html.style-gradient-mesh .ss-kicker { font-family: var(--font-body); letter-spacing: .02em; text-transform: none; font-size: 15px; font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { html.style-gradient-mesh .ss-hero, html.style-gradient-mesh .ss-cta, html.style-gradient-mesh .ss-band { animation: none; } }

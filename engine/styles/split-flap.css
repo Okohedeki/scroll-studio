@@ -1,0 +1,23 @@
+/* split-flap: a departures board. Numbers, kickers and headlines clatter through the alphabet before they settle
+   (fx text: flap wraps each character in .fx-flap) */
+html.style-split-flap .ss-h1, html.style-split-flap .ss-h2, html.style-split-flap .ss-display { text-transform: uppercase; letter-spacing: .01em; }
+html.style-split-flap em { font-style: normal; color: var(--accent); }
+html.style-split-flap .fx-flap { display: inline-block; position: relative; min-width: .62em; text-align: center; margin: 0 .03em; padding: 0 .04em;
+  background: linear-gradient(180deg, #232427 0 49%, #0c0d0e 49% 51%, #1b1c1f 51% 100%); border-radius: .06em; box-shadow: 0 .04em 0 rgba(0, 0, 0, .6); color: inherit; }
+html.style-split-flap .fx-flap.fx-flip { animation: ss-flip .09s linear; }
+html.style-split-flap .fx-word { display: inline-block; white-space: nowrap; }
+@keyframes ss-flip { 0% { transform: rotateX(0); } 50% { transform: rotateX(80deg); } 100% { transform: rotateX(0); } }
+html.style-split-flap .ss-v .fx-flap { min-width: .66em; }
+html.style-split-flap .ss-kicker { display: inline-block; background: var(--accent); color: var(--accent-ink); padding: 6px 10px; border-radius: 3px; font-weight: 700; }
+html.style-split-flap .ss-features { gap: 10px; background: none; border: 0; }
+html.style-split-flap .ss-feature { background: #1b1c1f; border-radius: 6px; border-top: 1px solid #2a2b2f; box-shadow: inset 0 -1px 0 #000; }
+html.style-split-flap .ss-feature h3 { text-transform: uppercase; font-family: var(--font-display); letter-spacing: .02em; }
+html.style-split-flap .ss-timeline { border-top: 0; gap: 10px; }
+html.style-split-flap .ss-tl { background: #1b1c1f; border-radius: 6px; padding: 22px 20px 24px; }
+html.style-split-flap .ss-tl::before { display: none; }
+html.style-split-flap .ss-when { color: var(--accent); font-size: 15px; }
+html.style-split-flap .ss-btn { border: 0; background: #232427; color: var(--ink); text-transform: uppercase; font-family: var(--font-mono); letter-spacing: .1em; font-size: 13px; box-shadow: inset 0 -2px 0 #000; }
+html.style-split-flap .ss-btn--hot { background: var(--accent); color: var(--accent-ink); }
+html.style-split-flap .ss-btn:hover { background: var(--ink); color: var(--bg); }
+html.style-split-flap .ss-faq__list summary { font-family: var(--font-display); text-transform: uppercase; letter-spacing: .02em; font-weight: 500; }
+@media (prefers-reduced-motion: reduce) { html.style-split-flap .fx-flap.fx-flip { animation: none; } }

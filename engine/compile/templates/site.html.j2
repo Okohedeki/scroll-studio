@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ site.lang }}" class="mode-{{ theme.mode }} layout-{{ site.layout }}{% if sections and sections[0].s.type == 'hero' and (sections[0].img or sections[0].video) %} hero-media{% endif %}">
+<html lang="{{ site.lang }}"{% if theme.style %} data-fx='{{ fx }}'{% endif %} class="mode-{{ theme.mode }} layout-{{ site.layout }}{% if theme.style %} style-{{ theme.style }}{% endif %}{% if sections and sections[0].s.type == 'hero' and (sections[0].img or sections[0].video) %} hero-media{% endif %}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,7 +14,10 @@
 <style>
 {{ css_vars | safe }}
 </style>
-<link rel="stylesheet" href="runtime/studio.css">
+<link rel="stylesheet" href="{{ runtime }}studio.css">
+{% if style_css %}<style id="ss-style">
+{{ style_css | safe }}
+</style>{% endif %}
 <style>
   /* A section's backdrop: the image fills the panel (or a wrapper in the flow layout); the section itself goes clear,
      whatever surface it has. */
@@ -160,7 +163,32 @@
 </div></footer>
 
 <script>window.__ssScroll = { speed: {{ site.scroll.speed }} };</script>
-<script type="module" src="runtime/index.js"></script>
+<script type="module" src="{{ runtime }}index.js"></script>
+{% if looks %}
+<nav class="ss-looks" aria-label="Looks">
+  {% set i = looks["index"] %}{% set n = looks["items"] | length %}
+  <a href="{{ looks['items'][(i - 1) % n]['href'] }}" aria-label="Previous look">←</a>
+  <a class="ss-looks__name" href="{{ looks['home'] }}">{{ looks['items'][i]['label'] }} <small>{{ i + 1 }}/{{ n }}</small></a>
+  <a href="{{ looks['items'][(i + 1) % n]['href'] }}" aria-label="Next look">→</a>
+</nav>
+<style>
+  .ss-looks { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 990; display: flex; align-items: center; gap: 4px; padding: 5px;
+    background: rgba(12, 12, 14, .88); color: #fff; border-radius: 999px; font: 500 14px/1 system-ui, sans-serif; box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); text-transform: none; letter-spacing: 0; }
+  .ss-looks a { color: #fff; padding: 10px 14px; border-radius: 999px; }
+  .ss-looks a:hover { background: rgba(255, 255, 255, .14); }
+  .ss-looks__name { min-width: 170px; text-align: center; }
+  .ss-looks small { opacity: .6; margin-left: 6px; font-size: 12px; }
+</style>
+<script>
+  addEventListener("keydown", function (e) {
+    if (e.target.closest && e.target.closest("input, textarea")) return;
+    var a = document.querySelectorAll(".ss-looks a");
+    if (e.key === "ArrowLeft") location.href = a[0].href;
+    if (e.key === "ArrowRight") location.href = a[2].href;
+  });
+</script>
+{% endif %}
 <script>
   // Clips in phones play while their panel is on screen and rest while it isn't: browsers may hold a muted
   // autoplay until the element is seen, and a stack of looping videos is wasted work off screen.

@@ -54,7 +54,8 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     .ss-chart .domain, .ss-chart .tick line { stroke: var(--line); }
     .ss-chart .grid line { stroke: var(--line); stroke-dasharray: 2 4; }
     .ss-chart .lbl { font-family: var(--font-body); font-size: 13px; font-weight: 600; }
-    .ss-chart .mark text { font-family: var(--font-body); font-size: 13px; fill: var(--ink); }
+    .ss-chart .mark text { font-family: var(--font-body); font-size: 13px; fill: var(--ink); paint-order: stroke; stroke: var(--bg); stroke-width: 5px; stroke-linejoin: round; }
+    .ss-chart .lbl { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
     .ss-chart-src { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); margin-top: 10px; letter-spacing: .04em; }
     .ss-chart-y { font-family: var(--font-mono); font-size: 11px; color: var(--ink-3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }`;
   box.appendChild(style);
@@ -80,6 +81,7 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   }));
   const fmt = format(",.0f"), fmtSmall = format(",.1f"), fmtSI = format(".3~s");
   const nice = (v: number) => {
+    if (v === 0) return "0" + (cfg.format === "percent" ? "%" : cfg.unit || "");
     if (cfg.format === "percent") return (Math.abs(v) >= 10 ? fmt(v) : fmtSmall(v)) + "%";
     if (cfg.format === "compact") return fmtSI(v).replace("G", "B") + (cfg.unit || "");
     if (cfg.format === "integer") return fmt(v) + (cfg.unit || "");
@@ -131,7 +133,9 @@ const factory: PlayerFactory = async (cfg, ctx) => {
       const visible = d.filter((q) => q[0] <= Math.min(revealX, st.x[1]) && q[0] >= st.x[0]);
       const last = visible[visible.length - 1];
       const lo = discrete ? opacity[p.n] ?? 0 : o;
-      if (last && lo > 0.05) p.label.attr("x", xs(last[0]) + 8).attr("y", ys(Math.max(last[1], yMin)) + 4).attr("opacity", lo).text(`${p.n} ${nice(last[1])}`);
+      // a callout on the series' last point says the same thing: the end label gives way to it
+      const called = last && st.marks.some((m) => m.series === p.n && m.x === last[0]) ? markK : 0;
+      if (last && lo * (1 - called) > 0.05) p.label.attr("x", xs(last[0]) + 8).attr("y", ys(Math.max(last[1], yMin)) + 4).attr("opacity", lo * (1 - called)).text(`${p.n} ${nice(last[1])}`);
       else p.label.attr("opacity", 0);
     }
     const marks = gMarks.selectAll<SVGGElement, any>("g.mark").data(st.marks, (m: any) => `${m.series}-${m.x}`);

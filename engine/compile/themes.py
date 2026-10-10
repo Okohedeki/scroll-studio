@@ -10,6 +10,8 @@ import yaml
 from ..spec import Theme
 
 THEMES_FILE = Path(__file__).resolve().parent.parent / "themes.yaml"
+STYLES_FILE = Path(__file__).resolve().parent.parent / "styles.yaml"
+STYLES_DIR = Path(__file__).resolve().parent.parent / "styles"
 
 # Google Fonts css2 axis specs (verified). Unknown families fall back to regular + bold.
 FONT_AXES = {
@@ -35,6 +37,21 @@ FONT_AXES = {
     "Instrument Sans": "ital,wdth,wght@0,75..100,400..700;1,75..100,400..700",
     "Outfit": "wght@100..900",
     "Newsreader": "ital,opsz,wght@0,6..72,200..800;1,6..72,200..800",
+    # faces used by the styles (engine/styles.yaml); "" = a single-style family, no axis spec
+    "Syne": "wght@400..800",
+    "Tilt Neon": "",
+    "Anton": "",
+    "Fredoka": "wght@300..700",
+    "Nunito": "ital,wght@0,200..1000;1,200..1000",
+    "Bangers": "",
+    "Comic Neue": "ital,wght@0,300;0,400;0,700;1,400",
+    "Oswald": "wght@200..700",
+    "VT323": "",
+    "Archivo Black": "",
+    "Josefin Sans": "ital,wght@0,100..700;1,100..700",
+    "Press Start 2P": "",
+    "Pixelify Sans": "wght@400..700",
+    "Limelight": "",
 }
 FALLBACK = {"display": "system-ui, sans-serif", "body": "system-ui, sans-serif", "mono": "ui-monospace, monospace"}
 SERIFS = {"Instrument Serif", "Fraunces", "Cormorant Garamond", "Newsreader"}
@@ -44,6 +61,16 @@ SERIFS = {"Instrument Serif", "Fraunces", "Cormorant Garamond", "Newsreader"}
 def presets() -> dict:
     with open(THEMES_FILE, encoding="utf-8") as f:
         return yaml.safe_load(f)
+
+
+@lru_cache(maxsize=1)
+def styles() -> dict:
+    with open(STYLES_FILE, encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def style_css(name: str) -> str:
+    return (STYLES_DIR / f"{name}.css").read_text(encoding="utf-8")
 
 
 def _hex_rgb(h: str) -> str:
@@ -57,10 +84,20 @@ def resolve(theme: Theme) -> dict:
     base = presets().get(theme.preset)
     if base is None:
         raise ValueError(f"unknown theme preset '{theme.preset}' (have: {', '.join(presets())})")
+    st = {}
+    if theme.style:
+        st = styles().get(theme.style)
+        if st is None:
+            raise ValueError(f"unknown style '{theme.style}' (have: {', '.join(styles())})")
+        # the style's look goes over the preset; anything site.yaml sets still wins
+        base = dict(base, **{k: v for k, v in st.items() if k in ("mode", "radius", "display_weight", "em_italic", "display_em")},
+                    colors=dict(base["colors"], **st.get("colors", {})), fonts=dict(base["fonts"], **st.get("fonts", {})))
     colors = dict(base["colors"], **theme.colors)
     fonts = dict(base["fonts"], **theme.fonts)
     return {
-        "mode": base.get("mode", "dark"),
+        "style": theme.style,
+        "fx": st.get("fx", {}),
+        "mode": theme.mode or base.get("mode", "dark"),
         "colors": colors,
         "fonts": fonts,
         "display_weight": theme.display_weight or base.get("display_weight", 500),
@@ -199,5 +236,5 @@ def font_links(t: dict) -> list[str]:
             continue
         seen.add(fam)
         axes = FONT_AXES.get(fam, "wght@400;700")
-        links.append(f"https://fonts.googleapis.com/css2?family={quote_plus(fam)}:{axes}&display=swap")
+        links.append(f"https://fonts.googleapis.com/css2?family={quote_plus(fam)}{':' + axes if axes else ''}&display=swap")
     return links

@@ -1,0 +1,20 @@
+/* neon glow: tubes of light on a dark wall; headlines buzz on the first time they are seen (.fx-seen from the runtime) */
+@keyframes ss-neon-on { 0% { opacity: .15; } 8% { opacity: 1; } 10% { opacity: .3; } 14% { opacity: 1; } 22% { opacity: .5; } 26%, 100% { opacity: 1; } }
+@keyframes ss-neon-hum { 0%, 100% { opacity: 1; } 50% { opacity: .9; } }
+html.style-neon-glow body { background: radial-gradient(120% 80% at 50% 0%, #1a0b2e 0%, var(--bg) 60%) fixed; }
+html.style-neon-glow .ss-h1, html.style-neon-glow .ss-h2, html.style-neon-glow .ss-display, html.style-neon-glow .ss-v {
+  color: #fff; text-shadow: 0 0 4px #fff, 0 0 12px var(--accent), 0 0 28px var(--accent), 0 0 60px rgba(var(--accent-rgb), .6); }
+html.style-neon-glow .ss-h1 em, html.style-neon-glow .ss-h2 em, html.style-neon-glow .ss-display em {
+  color: #e9feff; font-style: normal; text-shadow: 0 0 4px #fff, 0 0 12px var(--accent-2), 0 0 30px var(--accent-2), 0 0 64px var(--accent-2); }
+html.style-neon-glow .fx-seen.ss-h1, html.style-neon-glow .fx-seen.ss-h2, html.style-neon-glow .fx-seen.ss-display { animation: ss-neon-on 1.4s steps(1, end) both, ss-neon-hum 3s 1.4s ease-in-out infinite; }
+html.style-neon-glow .ss-kicker { color: var(--accent-2); text-shadow: 0 0 10px var(--accent-2); }
+html.style-neon-glow .ss-btn { border: 1.5px solid var(--accent-2); color: #e9feff; background: transparent; box-shadow: 0 0 10px rgba(61, 245, 255, .5), inset 0 0 10px rgba(61, 245, 255, .35); text-shadow: 0 0 8px var(--accent-2); }
+html.style-neon-glow .ss-btn--hot { border-color: var(--accent); color: #fff; box-shadow: 0 0 12px var(--accent), inset 0 0 12px rgba(var(--accent-rgb), .5); text-shadow: 0 0 8px var(--accent); background: rgba(var(--accent-rgb), .12); }
+html.style-neon-glow .ss-btn:hover { background: rgba(var(--accent-rgb), .25); color: #fff; }
+html.style-neon-glow .ss-features { gap: 18px; background: none; border: 0; }
+html.style-neon-glow .ss-feature { border: 1.5px solid rgba(61, 245, 255, .55); border-radius: 18px; background: rgba(10, 4, 20, .6); box-shadow: 0 0 18px -4px rgba(61, 245, 255, .45), inset 0 0 22px -8px rgba(61, 245, 255, .35); }
+html.style-neon-glow .ss-feature:nth-child(2n) { border-color: rgba(var(--accent-rgb), .6); box-shadow: 0 0 18px -4px rgba(var(--accent-rgb), .5), inset 0 0 22px -8px rgba(var(--accent-rgb), .35); }
+html.style-neon-glow .ss-tl::before { background: var(--accent-2); box-shadow: 0 0 12px var(--accent-2), 0 0 24px var(--accent-2); }
+html.style-neon-glow .ss-tile { border-color: rgba(var(--accent-rgb), .45); box-shadow: 0 0 22px -8px var(--accent); }
+html.style-neon-glow .ss-band { background: rgba(255, 255, 255, .02); border-color: rgba(var(--accent-rgb), .3); }
+@media (prefers-reduced-motion: reduce) { html.style-neon-glow .fx-seen { animation: none !important; } }

@@ -1,0 +1,19 @@
+/* holographic: iridescent foil, a conic gradient whose angle follows the scroll and the pointer
+   (--sp, --mx, --my are written on <html> by the fx runtime) */
+html.style-holographic { --foil: conic-gradient(from calc(var(--sp, 0) * 540deg + var(--mx, 0) * 120deg) at 50% 50%, #ff9ad5, #a58bff, #7ff0e0, #fdf59a, #ff9ad5); }
+html.style-holographic .ss-h1, html.style-holographic .ss-display, html.style-holographic .ss-v {
+  background: var(--foil); background-size: 160% 160%; background-position: calc(50% + var(--mx, 0) * 30%) calc(50% + var(--my, 0) * 30%);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+html.style-holographic .ss-h1 em, html.style-holographic .ss-display em { -webkit-text-fill-color: transparent; font-style: italic; }
+html.style-holographic .ss-h2 em { background: var(--foil); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+html.style-holographic .ss-btn--hot { background: var(--foil); border-color: transparent; color: #120c24; }
+html.style-holographic .ss-btn--hot:hover { filter: brightness(1.08) saturate(1.2); background: var(--foil); color: #120c24; }
+html.style-holographic .ss-features { gap: 16px; background: none; border: 0; }
+html.style-holographic .ss-feature, html.style-holographic .ss-tile { position: relative; border-radius: var(--radius); background: linear-gradient(160deg, rgba(255, 255, 255, .06), rgba(255, 255, 255, .015)); border: 0; overflow: hidden; }
+html.style-holographic .ss-feature::before, html.style-holographic .ss-tile::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; background: var(--foil);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: .75; pointer-events: none; z-index: 1; }
+html.style-holographic .ss-feature::after { content: ""; position: absolute; inset: -40%; background: var(--foil); opacity: 0; mix-blend-mode: overlay; transition: opacity .5s; pointer-events: none; }
+html.style-holographic .ss-feature:hover::after { opacity: .35; }
+html.style-holographic .ss-pills li, html.style-holographic .ss-badge { background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .18); }
+html.style-holographic .ss-tl::before { background: var(--foil); box-shadow: none; }
+html.style-holographic .ss-phone { box-shadow: 0 50px 90px -30px rgba(0, 0, 0, .6), 0 0 0 2px rgba(255, 255, 255, .15), 0 0 60px -10px rgba(165, 139, 255, .5); }

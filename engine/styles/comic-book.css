@@ -1,0 +1,28 @@
+/* comic book: inked outlines, halftone dots, speech-bubble kickers, hard offset shadows and a POW on hover */
+html.style-comic-book { --ink-line: 3px solid #111; --pop: 6px 6px 0 #111; }
+html.style-comic-book body { background-color: var(--bg); background-image: radial-gradient(rgba(232, 32, 42, .14) 22%, transparent 24%); background-size: 14px 14px; }
+html.style-comic-book .ss-block, html.style-comic-book .ss-hero:not(.ss-hero--media), html.style-comic-book .ss-panel, html.style-comic-book .ss-panel > section { background: transparent; }
+html.style-comic-book .ss-band { background: rgba(255, 233, 168, .85); border-block: var(--ink-line); }
+html.style-comic-book .ss-h1, html.style-comic-book .ss-h2, html.style-comic-book .ss-display {
+  letter-spacing: .02em; line-height: .95; color: #fff; -webkit-text-stroke: 2px #111; paint-order: stroke fill; text-shadow: 5px 5px 0 #111; transform: rotate(-1.5deg); }
+html.style-comic-book .ss-h1 { font-size: clamp(64px, 9vw, 168px); }
+html.style-comic-book .ss-h1 em, html.style-comic-book .ss-h2 em, html.style-comic-book .ss-display em { color: #ffd400; font-style: normal; }
+html.style-comic-book .ss-kicker { display: inline-block; position: relative; background: #fff; color: #111; border: var(--ink-line); border-radius: 18px; padding: 8px 16px; font-family: var(--font-body); font-weight: 700; letter-spacing: .04em; }
+html.style-comic-book .ss-kicker::after { content: ""; position: absolute; left: 22px; bottom: -14px; width: 18px; height: 14px; background: #fff; border-right: var(--ink-line); border-bottom: var(--ink-line); transform: skewX(-30deg); }
+html.style-comic-book .ss-features { gap: 18px; background: none; border: 0; }
+html.style-comic-book .ss-feature, html.style-comic-book .ss-tile, html.style-comic-book .ss-stats > div, html.style-comic-book .ss-quote {
+  background: #fff; border: var(--ink-line); border-radius: 4px; box-shadow: var(--pop); }
+html.style-comic-book .ss-feature:nth-child(3n+2) { transform: rotate(.8deg); background: #e9f2ff; }
+html.style-comic-book .ss-feature:nth-child(3n) { transform: rotate(-.6deg); }
+html.style-comic-book .ss-feature h3 { font-family: var(--font-display); font-weight: 400; letter-spacing: .03em; font-size: 34px; }
+html.style-comic-book .ss-stats > div { padding: 24px; }
+html.style-comic-book .ss-quote { padding: clamp(28px, 4vw, 56px); }
+html.style-comic-book .ss-v { color: var(--accent); -webkit-text-stroke: 2px #111; paint-order: stroke fill; text-shadow: 4px 4px 0 #111; }
+html.style-comic-book .ss-btn { position: relative; border: var(--ink-line); background: #fff; color: #111; box-shadow: 4px 4px 0 #111; font-weight: 700; text-transform: uppercase; transition: transform .1s, box-shadow .1s; }
+html.style-comic-book .ss-btn--hot { background: var(--accent); color: #fff; }
+html.style-comic-book .ss-btn:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #111; background: #ffd400; color: #111; }
+html.style-comic-book .ss-btn--hot:hover::after { content: "POW!"; position: absolute; right: -34px; top: -30px; padding: 10px 8px; font-family: var(--font-display); font-size: 20px; color: #111; background: #ffd400;
+  clip-path: polygon(50% 0, 61% 30%, 98% 20%, 72% 48%, 100% 70%, 64% 68%, 56% 100%, 42% 70%, 6% 88%, 28% 56%, 0 30%, 36% 32%); pointer-events: none; }
+html.style-comic-book .ss-tl::before { width: 18px; height: 18px; top: -9px; background: #ffd400; border: var(--ink-line); box-shadow: none; }
+html.style-comic-book .ss-nav.ss-solid { background: #fff; border-bottom: var(--ink-line); }
+html.style-comic-book .ss-phone { border: var(--ink-line); box-shadow: 10px 10px 0 #111; }

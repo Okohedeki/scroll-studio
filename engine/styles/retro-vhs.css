@@ -1,0 +1,25 @@
+/* retro VHS: scanlines, colour bleed and a tape counter; the picture wobbles when you scroll fast (--sv) */
+@keyframes ss-vhs-roll { 0% { background-position: 0 0; } 100% { background-position: 0 100vh; } }
+@keyframes ss-vhs-blink { 50% { opacity: 0; } }
+html.style-retro-vhs body::after { content: ""; position: fixed; inset: 0; z-index: 900; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px), linear-gradient(180deg, transparent 0 46%, rgba(255, 255, 255, .05) 50%, transparent 54%);
+  background-size: 100% 3px, 100% 100vh; animation: ss-vhs-roll 7s linear infinite; mix-blend-mode: multiply; }
+html.style-retro-vhs body::before { content: "PLAY \25B6"; position: fixed; left: 26px; top: 82px; z-index: 901; font-family: "VT323", monospace; font-size: 28px; color: #fff;
+  text-shadow: 2px 0 #ff2e6e, -2px 0 #29e6ff; pointer-events: none; animation: ss-vhs-blink 2s steps(1) infinite; }
+html.style-retro-vhs .fx-counter { position: fixed; right: 26px; top: 82px; z-index: 901; font-family: "VT323", monospace; font-size: 28px; color: #fff; text-shadow: 2px 0 #ff2e6e, -2px 0 #29e6ff; pointer-events: none; }
+html.style-retro-vhs main { transform: translateX(calc(var(--sv, 0) * 6px)); }
+html.style-retro-vhs .ss-h1, html.style-retro-vhs .ss-h2, html.style-retro-vhs .ss-display, html.style-retro-vhs .ss-v {
+  text-transform: uppercase; letter-spacing: .02em; line-height: .9; text-shadow: calc(2px + var(--sv, 0) * 8px) 0 rgba(255, 46, 110, .85), calc(-2px - var(--sv, 0) * 8px) 0 rgba(41, 230, 255, .85); }
+html.style-retro-vhs .ss-h1 { font-size: clamp(64px, 9vw, 170px); }
+html.style-retro-vhs .ss-h2, html.style-retro-vhs .ss-display { font-size: clamp(50px, 6.4vw, 120px); }
+html.style-retro-vhs em { font-style: normal; color: var(--accent-2); }
+html.style-retro-vhs .ss-kicker { font-family: var(--font-mono); font-size: 22px; letter-spacing: .06em; }
+html.style-retro-vhs .ss-features { gap: 14px; background: none; border: 0; }
+html.style-retro-vhs .ss-feature { background: linear-gradient(180deg, rgba(255, 79, 139, .1), rgba(92, 225, 255, .06)); border: 2px solid rgba(255, 255, 255, .2); }
+html.style-retro-vhs .ss-feature h3 { font-family: var(--font-display); font-size: 40px; text-transform: uppercase; letter-spacing: .02em; }
+html.style-retro-vhs .ss-btn { border: 2px solid #fff; background: transparent; font-family: var(--font-display); font-size: 24px; text-transform: uppercase; padding: 6px 20px; }
+html.style-retro-vhs .ss-btn--hot { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 3px 0 0 #29e6ff, -3px 0 0 #ff2e6e; }
+html.style-retro-vhs .ss-tl::before { border-radius: 0; background: var(--accent-2); }
+html.style-retro-vhs .ss-hero:not(.ss-hero--media), html.style-retro-vhs .ss-cta { background: radial-gradient(90% 70% at 50% 40%, #2a1847 0%, var(--bg) 70%); }
+@media (prefers-reduced-motion: reduce) { html.style-retro-vhs body::after, html.style-retro-vhs body::before { animation: none; } html.style-retro-vhs main { transform: none; filter: none; } }
+@media (max-width: 900px) { html.style-retro-vhs body::before, html.style-retro-vhs .fx-counter { top: 74px; font-size: 22px; } }

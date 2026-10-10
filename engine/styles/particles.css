@@ -1,0 +1,11 @@
+/* particles: a drifting point field (fx bg) behind hero, intro and CTA; glassy pill buttons, cool glow */
+html.style-particles .ss-h1, html.style-particles .ss-display { background: linear-gradient(180deg, var(--ink) 30%, rgba(var(--ink-rgb), .6)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+html.style-particles .ss-h1 em, html.style-particles .ss-display em { -webkit-text-fill-color: var(--accent-2); }
+html.style-particles .ss-btn--hot { box-shadow: 0 0 0 1px rgba(var(--accent-rgb), .4), 0 10px 40px -8px rgba(var(--accent-rgb), .7); }
+html.style-particles .ss-features { gap: 14px; background: none; border: 0; }
+html.style-particles .ss-feature { border: 1px solid var(--line); border-radius: 20px; background: rgba(var(--ink-rgb), .025); backdrop-filter: blur(6px); }
+html.style-particles .ss-feature:hover { border-color: rgba(var(--accent-rgb), .5); box-shadow: 0 0 40px -12px rgba(var(--accent-rgb), .6); }
+html.style-particles .ss-v { text-shadow: 0 0 40px rgba(var(--accent-rgb), .45); }
+html.style-particles .ss-kicker::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px var(--accent); margin-right: 12px; vertical-align: 2px; }
+html.style-particles .ss-tile { border-radius: 20px; }
+html.style-particles .ss-tl::before { box-shadow: 0 0 0 6px rgba(var(--accent-rgb), .15), 0 0 18px var(--accent); }
