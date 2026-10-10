@@ -1,0 +1,163 @@
+{# Art deco: an evening's programme on the centre axis. Overture (hero) behind the doors, acts in stepped gold
+   frames, features dealt in mirrored pairs from a central medallion, stats billed on a marquee, the timeline as a
+   ziggurat of tiers, programme notes, and the ADMIT ONE invitation. Every section is symmetric about the centre.
+   The runtime (runtime/src/styles/art-deco.ts) adds the doors, the fans, the dealing, the bulbs and the dial. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta", "gallery", "strip", "orbit"] %}
+
+{% macro act(loop) %}{% set R = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX"] %}{{ R[loop.index0 if loop.index0 < 21 else 20] }}{% endmacro %}
+
+{% macro title(b, hx, cls="dc-h2") %}<{{ hx }} class="{{ cls }}" data-dc-rise><span class="dc-gild">{{ b.title | rich }}</span></{{ hx }}>{% endmacro %}
+
+{% macro head(b, loop, hx, name) %}
+<header class="dc-head">
+  <p class="dc-actline"><span>Act {{ act(loop) }}</span><i aria-hidden="true">◆</i><span>{{ b.nav_label or name }}</span></p>
+  {% if b.kicker %}<p class="dc-kicker">{{ b.kicker }}</p>{% endif %}
+  {% if b.title %}{{ title(b, hx) }}{% endif %}
+  <i class="dc-rule" aria-hidden="true"><b>◆</b></i>
+</header>
+{% endmacro %}
+
+{% macro stepbtn(l, primary=True) %}<a class="dc-btn{% if not primary %} dc-btn--quiet{% endif %}" href="{{ l.href }}"><span>{{ l.label }}</span></a>{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX"] %}
+{% set idattr %}{% if b.id %} id="{{ b.id }}"{% endif %}{% endset %}
+{% set hx = 'h1' if e.first else 'h2' %}
+{% set names = {"intro": "Prologue", "features": "The company", "product": "The star", "stats": "Now showing", "timeline": "The programme", "quote": "Intermission", "faq": "Programme notes", "cta": "Finale", "gallery": "The gallery", "strip": "The gallery", "orbit": "The circuit"} %}
+
+{% if b.type == "hero" %}
+{% set media = e.img or e.video %}
+<section class="dc-sec dc-overture"{{ idattr }} data-dc="overture" data-act="Overture">
+  <div class="dc-stage">
+    <div class="dc-proscenium" aria-hidden="true"><i></i></div>
+    <i class="dc-spot" aria-hidden="true"></i>
+    {% if media %}<div class="dc-overture__media" aria-hidden="true">{% if e.video %}<video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video>{% else %}<img src="{{ e.img }}" alt="" fetchpriority="high">{% endif %}</div>{% endif %}
+    <i class="dc-burst dc-burst--hero" aria-hidden="true"></i>
+    <div class="dc-overture__in">
+      <p class="dc-actline"><span>Overture</span>{% if b.badge %}<i aria-hidden="true">◆</i><span>{{ b.badge }}</span>{% endif %}</p>
+      <{{ hx }} class="dc-h1" data-dc-rise data-dc-hero><span class="dc-gild">{{ b.title | rich }}</span></{{ hx }}>
+      <i class="dc-rule dc-rule--wide" aria-hidden="true"><b>◆</b></i>
+      {% if b.body %}<p class="dc-lede">{{ b.body | rich }}</p>{% endif %}
+      {% if b.buttons %}<div class="dc-btns">{% for l in b.buttons %}{{ stepbtn(l, loop.first) }}{% endfor %}</div>{% endif %}
+      {% if b.device %}<div class="dc-niche dc-niche--hero">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "intro" %}
+<section class="dc-sec dc-prologue"{{ idattr }} data-act="{{ b.nav_label or names.intro }}">
+  <div class="dc-frame">
+    <i class="dc-corner dc-corner--tl" aria-hidden="true"></i><i class="dc-corner dc-corner--tr" aria-hidden="true"></i><i class="dc-corner dc-corner--bl" aria-hidden="true"></i><i class="dc-corner dc-corner--br" aria-hidden="true"></i>
+    {{ head(b, loop, hx, names.intro) }}
+    {% if b.body %}<p class="dc-lede">{{ b.body | rich }}</p>{% endif %}
+    {% if b.button %}<div class="dc-btns">{{ stepbtn(b.button) }}</div>{% endif %}
+  </div>
+</section>
+
+{% elif b.type == "features" %}
+{% set n = b.items | length %}
+<section class="dc-sec dc-company"{{ idattr }} data-act="{{ b.nav_label or names.features }}">
+  {{ head(b, loop, hx, names.features) }}
+  <i class="dc-burst dc-burst--section" aria-hidden="true"></i>
+  <div class="dc-deal">
+    {% for row in b.items | batch(2) %}
+    {% set ri = loop.index %}
+    <div class="dc-pair{% if row | length == 1 %} dc-pair--solo{% endif %}" data-dc-pair>
+      {% for f in row %}
+      <article class="dc-niche dc-feature dc-feature--{{ 'l' if loop.first and row | length == 2 else ('r' if row | length == 2 else 'c') }}">
+        <span class="dc-medal" aria-hidden="true"><i></i><b>{{ f.tag or ROMAN[(ri - 1) * 2 + loop.index] }}</b></span>
+        <h3 class="dc-h3">{{ f.title | rich }}</h3>
+        {% if f.body %}<p>{{ f.body | rich }}</p>{% endif %}
+        {% if f.meter is not none %}<div class="dc-meter" role="img" aria-label="{{ (f.meter * 100) | round | int }}%"><i style="--m: {{ f.meter }}"></i></div>{% endif %}
+      </article>
+      {% if loop.first and row | length == 2 %}<span class="dc-pair__axis" aria-hidden="true"><i></i><b>{{ ROMAN[ri] if ri < 21 else ri }}</b></span>{% endif %}
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% elif b.type == "product" %}
+<section class="dc-sec dc-star"{{ idattr }} data-act="{{ b.nav_label or names.product }}">
+  {{ head(b, loop, hx, names.product) }}
+  {% if b.body %}<p class="dc-lede">{{ b.body | rich }}</p>{% endif %}
+  <div class="dc-star__stage">
+    <i class="dc-burst dc-burst--star" aria-hidden="true"></i>
+    <i class="dc-spot dc-spot--down" aria-hidden="true"></i>
+    <div class="dc-niche dc-niche--device">
+      {% if e.img %}<img class="dc-star__img" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+      {% if b.behind %}<div class="dc-star__behind" aria-hidden="true">{{ base.phone(b.behind, e.behind, e.behind_clip) }}</div>{% endif %}
+      {% if b.device %}{{ base.phone(b.device, e.screen, e.clip) }}{% endif %}
+    </div>
+  </div>
+  {% if b.stats %}<dl class="dc-billing dc-billing--mini">{% for st in b.stats %}<div><dd>{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</dd><dt>{{ st.label }}</dt></div>{% endfor %}</dl>
+  {% elif b.tags %}<p class="dc-tags">{% for t in b.tags %}<span>{{ t }}</span>{% if not loop.last %}<i aria-hidden="true">◆</i>{% endif %}{% endfor %}</p>{% endif %}
+  {% if b.buttons %}<div class="dc-btns">{% for l in b.buttons %}{{ stepbtn(l, loop.first) }}{% endfor %}</div>{% endif %}
+  {% if b.note %}<p class="dc-note">{{ b.note | rich }}</p>{% endif %}
+</section>
+
+{% elif b.type == "stats" %}
+<section class="dc-sec dc-marquee-sec"{{ idattr }} data-act="{{ b.nav_label or names.stats }}">
+  <div class="dc-marquee" data-dc-bulbs="chase">
+    <p class="dc-marquee__head"><span class="dc-neon">Now showing</span></p>
+    <dl class="dc-billing dc-billing--{{ b.items | length }}">
+      {% for st in b.items %}<div class="dc-bill"><dt>{{ st.label }}</dt><dd><span class="dc-num"{% if st.value | countable %} data-dc-count="{{ st.value }}"{% endif %}>{{ st.value }}</span>{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</dd></div>{% endfor %}
+    </dl>
+    <p class="dc-marquee__foot">Nightly <i aria-hidden="true">◆</i> All seats</p>
+  </div>
+</section>
+
+{% elif b.type == "timeline" %}
+{% set n = b.items | length %}
+<section class="dc-sec dc-programme"{{ idattr }} data-act="{{ b.nav_label or names.timeline }}">
+  {{ head(b, loop, hx, names.timeline) }}
+  <ol class="dc-ziggurat" style="--n: {{ n }}">
+    {% for t in b.items %}
+    <li class="dc-tier" style="--i: {{ loop.index0 }}" data-dc-tier>
+      <span class="dc-tier__when"><b>{{ ROMAN[loop.index] if loop.index < 21 else loop.index }}</b><i aria-hidden="true">◆</i>{{ t.when }}</span>
+      <h3 class="dc-tier__t">{{ t.title | rich }}</h3>
+      {% if t.body %}<p>{{ t.body | rich }}</p>{% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+
+{% elif b.type == "quote" %}
+<section class="dc-sec dc-intermission"{{ idattr }} data-act="{{ b.nav_label or names.quote }}">
+  <p class="dc-actline"><span>Intermission</span></p>
+  <figure class="dc-medallion">
+    <i class="dc-fanquote dc-fanquote--l" aria-hidden="true"></i><i class="dc-fanquote dc-fanquote--r" aria-hidden="true"></i>
+    <blockquote class="dc-q">{{ b.text | rich }}</blockquote>
+    {% if b.who %}<figcaption class="dc-who"><i aria-hidden="true"></i>{{ b.who }}<i aria-hidden="true"></i></figcaption>{% endif %}
+  </figure>
+</section>
+
+{% elif b.type == "faq" %}
+<section class="dc-sec dc-notes"{{ idattr }} data-act="{{ b.nav_label or names.faq }}">
+  {{ head(b, loop, hx, names.faq) }}
+  <div class="dc-notes__list">
+    {% for it in b.items %}<details class="dc-note-row"{% if loop.first %} open{% endif %}><summary><i aria-hidden="true">◆</i><span>{{ it.q | rich }}</span><i aria-hidden="true">◆</i></summary><div class="dc-note-row__a"><p>{{ it.a | rich }}</p></div></details>{% endfor %}
+  </div>
+</section>
+
+{% elif b.type == "cta" %}
+<section class="dc-sec dc-finale"{{ idattr }} data-act="{{ b.nav_label or names.cta }}" data-dc="finale">
+  <i class="dc-burst dc-burst--converge" aria-hidden="true"></i>
+  <i class="dc-spot dc-spot--down" aria-hidden="true"></i>
+  <div class="dc-ticket" data-dc-bulbs="lit">
+    <div class="dc-ticket__stub" aria-hidden="true"><span>Admit one</span></div>
+    <div class="dc-ticket__main">
+      <p class="dc-ticket__invite">You are cordially invited</p>
+      {% if b.kicker %}<p class="dc-kicker">{{ b.kicker }}</p>{% endif %}
+      <{{ hx }} class="dc-h2 dc-h2--finale" data-dc-rise><span class="dc-gild">{{ b.title | rich }}</span></{{ hx }}>
+      {% if b.button %}<div class="dc-btns">{{ stepbtn(b.button) }}</div>{% endif %}
+      <p class="dc-ticket__fine">Admit one <i aria-hidden="true">◆</i> Opening night <i aria-hidden="true">◆</i> Black tie optional</p>
+    </div>
+    <div class="dc-ticket__stub dc-ticket__stub--r" aria-hidden="true"><span>Admit one</span></div>
+  </div>
+</section>
+
+{% else %}
+<div class="dc-sec dc-wrapped" data-act="{{ b.nav_label or names.get(b.type, 'Encore') }}"><div class="dc-frame dc-frame--wide">{{ base.render(b, e) }}</div></div>
+{% endif %}
+{% endmacro %}

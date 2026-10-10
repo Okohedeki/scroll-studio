@@ -1,17 +1,20 @@
-# Glassmorphism: tokens and fonts for theme.style: glassmorphism. See README.md in this folder for the UX contract.
+# Glassmorphism: windows over a living world. See docs/styles/styles-06-10.md section 1 for the research.
 label: Glassmorphism
-about: Frosted panels floating over bright colour fields.
+about: Windows over a living world. Every word sits on frosted glass while a saturated colour world drifts behind at its own speed and changes hue section by section; a pinned glass lens holds still while the product turns beneath it, and feature layers fan apart in depth.
 mode: dark
 colors:
-  bg: '#0d1030'
-  bg2: '#141846'
+  bg: '#0b0b1a'
+  bg2: '#13112e'
   ink: '#ffffff'
-  accent: '#ffd166'
-  accent2: '#ffe39f'
-  accent_ink: '#231a00'
+  accent: '#ffffff'
+  accent2: '#d9dcff'
+  accent_ink: '#0b0b1a'
 fonts:
   display: Plus Jakarta Sans
   body: Plus Jakarta Sans
   mono: DM Mono
-display_weight: 700
-radius: 22px
+font_axes:
+  Plus Jakarta Sans: "ital,wght@0,200..800;1,200..800"
+  DM Mono: "ital,wght@0,300;0,400;0,500;1,400"
+display_weight: 500
+radius: 28px

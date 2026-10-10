@@ -1,0 +1,19 @@
+{# Glassmorphism furniture: the living world behind every pane (one fixed layer of colour orbs that drifts at its own
+   speed and changes hue per section), and a giant wordmark behind the footer slab so it reads blurred. #}
+{% macro top(site, sections, nav_links) %}
+<div class="gl-world" aria-hidden="true">
+  <i class="gl-orb" style="--x: 14%; --y: 18%; --s: 62vmax; --oc: var(--o1)"></i>
+  <i class="gl-orb" style="--x: 86%; --y: 28%; --s: 56vmax; --oc: var(--o2)"></i>
+  <i class="gl-orb" style="--x: 52%; --y: 92%; --s: 66vmax; --oc: var(--o3)"></i>
+  <i class="gl-orb" style="--x: 8%; --y: 78%; --s: 44vmax; --oc: var(--o4)"></i>
+  <i class="gl-orb" style="--x: 70%; --y: 62%; --s: 40vmax; --oc: var(--o1)"></i>
+  <i class="gl-orb" style="--x: 34%; --y: 44%; --s: 36vmax; --oc: var(--o2)"></i>
+  <i class="gl-orb gl-orb--lead" style="--x: 50%; --y: 40%; --s: 38vmax; --oc: var(--o2)"></i>
+  <div class="gl-world__veil"></div>
+  <div class="gl-world__grain"></div>
+</div>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}
+<div class="gl-coda" aria-hidden="true" style="--len: {{ [site.name | length, 4] | max }}"><span>{{ site.name }}</span></div>
+{% endmacro %}

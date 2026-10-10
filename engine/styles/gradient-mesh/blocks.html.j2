@@ -1,0 +1,140 @@
+{# Gradient mesh: an unbroken editorial document on a calm ground. The colour field appears only inside
+   [data-gm-zone] elements (the hero band, a band behind the product, small patches in the feature cards, the
+   closing band); the runtime (runtime/src/styles/gradient-mesh.ts) paints all of them on one fixed canvas. Without
+   it each zone has a CSS gradient of its own. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta", "gallery", "strip", "orbit"] %}
+
+{% macro arrow() %}<svg class="gm-arrow" viewBox="0 0 10 10" aria-hidden="true"><path class="gm-arrow__stem" d="M0 5h7"/><path class="gm-arrow__tip" d="M1 1l4 4-4 4"/></svg>{% endmacro %}
+{% macro btns(list) %}{% if list %}<div class="gm-btns">{% for l in list %}<a class="gm-btn{% if not loop.first %} gm-btn--ghost{% endif %}" href="{{ l.href }}">{{ l.label }} {{ arrow() }}</a>{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set idattr %}{% if b.id %} id="{{ b.id }}"{% endif %}{% endset %}
+{% set hx = 'h1' if e.first else 'h2' %}
+
+{% if b.type == "hero" %}
+{% set media = e.img or e.video %}
+<section class="gm-sec gm-hero gm-hero--{{ b.align }}{% if b.device %} gm-hero--device{% endif %}"{{ idattr }} data-gm-pal="0">
+  <div class="gm-zone gm-zone--hero" data-gm-zone="band" data-cut-b="{{ '7' if b.align == 'left' else '6' }}" data-wash="{{ '0.3,0.6,0.62,0.9' if b.align == 'left' else '0.5,0.56,0.6,0.9' }}" data-mwash="0.5,0.5,0.5,0" aria-hidden="true">
+    {% if media %}<div class="gm-zone__media">{% if e.video %}<video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video>{% else %}<img src="{{ e.img }}" alt="" fetchpriority="high">{% endif %}</div>{% endif %}
+  </div>
+  <div class="gm-hero__in">
+    {% if b.badge %}<span class="gm-badge"><b>{{ b.badge.split('·')[0] | trim }}</b>{% if '·' in b.badge %}<span>{{ b.badge.split('·', 1)[1] | trim }}</span>{% endif %}</span>{% endif %}
+    <{{ hx }} class="gm-h1" data-gm-lines>{{ b.title | rich }}</{{ hx }}>
+    {% if b.body %}<p class="gm-lede gm-rise" style="--d: 3">{{ b.body | rich }}</p>{% endif %}
+    <div class="gm-rise" style="--d: 4">{{ btns(b.buttons) }}</div>
+  </div>
+  {% if b.device %}<div class="gm-hero__phone" data-gm-par="0.92">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+</section>
+
+{% elif b.type == "intro" %}
+<section class="gm-sec gm-intro"{{ idattr }}>
+  <div class="gm-wrap gm-intro__in">
+    <{{ hx }} class="gm-h2 gm-h2--lg gm-rise">{{ b.title | rich }}</{{ hx }}>
+    <div class="gm-rise" style="--d: 1">
+      {% if b.kicker %}<span class="gm-kicker">{{ b.kicker }}</span>{% endif %}
+      {% if b.body %}<p class="gm-lede">{{ b.body | rich }}</p>{% endif %}
+      {% if b.button %}<div class="gm-btns"><a class="gm-btn gm-btn--link" href="{{ b.button.href }}">{{ b.button.label }} {{ arrow() }}</a></div>{% endif %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "features" %}
+{% set n = b.items | length %}
+<section class="gm-sec gm-features"{{ idattr }}>
+  <div class="gm-wrap">
+    {% if b.title or b.kicker %}<header class="gm-head gm-rise">{% if b.kicker %}<span class="gm-kicker">{{ b.kicker }}</span>{% endif %}{% if b.title %}<{{ hx }} class="gm-h2">{{ b.title | rich }}</{{ hx }}>{% endif %}</header>{% endif %}
+    <div class="gm-bento gm-bento--{{ n }}">
+      {% for f in b.items %}
+      <article class="gm-card gm-rise" style="--d: {{ loop.index0 }}" data-gm-card>
+        <div class="gm-card__mesh" data-gm-zone="patch" data-r="12" data-rest="0.32" aria-hidden="true"><span class="gm-card__tag">{{ f.tag or ("%02d" | format(loop.index)) }}</span></div>
+        <div class="gm-card__body">
+          <h3 class="gm-h3">{{ f.title | rich }}</h3>
+          {% if f.body %}<p>{{ f.body | rich }}</p>{% endif %}
+          {% if f.meter is not none %}<div class="gm-meter" role="img" aria-label="{{ (f.meter * 100) | round | int }}%"><i style="width: {{ (f.meter * 100) | round }}%"></i></div>{% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "product" %}
+<section class="gm-sec gm-product gm-product--{{ b.side }}"{{ idattr }}>
+  <div class="gm-zone gm-zone--band" data-gm-zone="band" data-cut-t="3" data-cut-b="3" data-rest="0.9" aria-hidden="true"></div>
+  <div class="gm-wrap gm-product__in">
+    <div class="gm-product__copy gm-rise">
+      {% if b.kicker %}<span class="gm-kicker">{{ b.kicker }}</span>{% endif %}
+      <{{ hx }} class="gm-h2">{{ b.title | rich }}</{{ hx }}>
+      {% if b.body %}<p class="gm-lede">{{ b.body | rich }}</p>{% endif %}
+      {% if b.stats %}<dl class="gm-minis">{% for st in b.stats %}<div><dt>{{ st.label }}</dt><dd>{{ st.value }}{% if st.unit %}<span class="gm-unit">{{ st.unit }}</span>{% endif %}</dd></div>{% endfor %}</dl>
+      {% elif b.tags %}<ul class="gm-tags">{% for t in b.tags %}<li>{{ t }}</li>{% endfor %}</ul>{% endif %}
+      {{ btns(b.buttons) }}
+      {% if b.note %}<p class="gm-note">{{ b.note | rich }}</p>{% endif %}
+    </div>
+    <div class="gm-product__media" data-gm-par="0.92">
+      {% if e.img %}<img class="gm-product__img" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+      {% if b.behind %}<div class="gm-product__behind">{{ base.phone(b.behind, e.behind, e.behind_clip) }}</div>{% endif %}
+      {% if b.device %}{{ base.phone(b.device, e.screen, e.clip) }}{% endif %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "stats" %}
+<section class="gm-sec gm-stats"{{ idattr }}>
+  <div class="gm-wrap">
+    <dl class="gm-figures gm-figures--{{ b.items | length }}">
+      {% for st in b.items %}
+      <div class="gm-figure gm-rise" style="--d: {{ loop.index0 }}">
+        <dt class="gm-figure__l">{{ st.label }}</dt>
+        <dd class="gm-figure__v"><span{% if st.value | countable %} data-gm-count="{{ st.value }}"{% endif %}>{{ st.value }}</span>{% if st.unit %}<span class="gm-unit">{{ st.unit }}</span>{% endif %}</dd>
+      </div>
+      {% endfor %}
+    </dl>
+  </div>
+</section>
+
+{% elif b.type == "timeline" %}
+<section class="gm-sec gm-timeline"{{ idattr }}>
+  <div class="gm-wrap gm-timeline__in">
+    {% if b.title or b.kicker %}<header class="gm-head gm-head--side gm-rise">{% if b.kicker %}<span class="gm-kicker">{{ b.kicker }}</span>{% endif %}{% if b.title %}<{{ hx }} class="gm-h2">{{ b.title | rich }}</{{ hx }}>{% endif %}</header>{% endif %}
+    <ol class="gm-steps" data-gm-line>
+      <li class="gm-steps__rail" aria-hidden="true"><i></i></li>
+      {% for t in b.items %}<li class="gm-step"><span class="gm-step__dot" aria-hidden="true"></span><span class="gm-step__when">{{ t.when }}</span><h3 class="gm-step__t">{{ t.title | rich }}</h3>{% if t.body %}<p>{{ t.body | rich }}</p>{% endif %}</li>{% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "quote" %}
+<section class="gm-sec gm-quote"{{ idattr }}>
+  <figure class="gm-wrap gm-quote__in gm-rise">
+    <blockquote class="gm-q">{{ b.text | rich }}</blockquote>
+    {% if b.who %}<figcaption class="gm-who"><span class="gm-avatar" aria-hidden="true">{{ b.who[:1] }}</span>{{ b.who }}</figcaption>{% endif %}
+  </figure>
+</section>
+
+{% elif b.type == "faq" %}
+<section class="gm-sec gm-faq"{{ idattr }}>
+  <div class="gm-wrap gm-faq__in">
+    <header class="gm-head gm-head--side gm-rise">{% if b.kicker %}<span class="gm-kicker">{{ b.kicker }}</span>{% endif %}<{{ hx }} class="gm-h2">{{ b.title | rich }}</{{ hx }}></header>
+    <div class="gm-faq__list">
+      {% for it in b.items %}<details class="gm-acc"{% if loop.first %} open{% endif %}><summary>{{ it.q | rich }}<i aria-hidden="true"></i></summary><div class="gm-acc__a"><p>{{ it.a | rich }}</p></div></details>{% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "cta" %}
+<section class="gm-sec gm-cta"{{ idattr }} data-gm-pal="0">
+  <div class="gm-zone gm-zone--cta" data-gm-zone="band" data-cut-t="6" data-wash="0.5,0.52,0.5,0.9" data-mwash="0.5,0.5,0.6,0.88" aria-hidden="true">
+    {% if e.bg %}<div class="gm-zone__media" style="background-image: url('{{ e.bg }}')"></div>{% endif %}
+  </div>
+  <div class="gm-cta__in">
+    {% if b.kicker %}<span class="gm-kicker">{{ b.kicker }}</span>{% endif %}
+    <{{ hx }} class="gm-h2 gm-h2--xl gm-rise">{{ b.title | rich }}</{{ hx }}>
+    {% if b.button %}<div class="gm-btns gm-rise" style="--d: 1"><a class="gm-btn" href="{{ b.button.href }}">{{ b.button.label }} {{ arrow() }}</a></div>{% endif %}
+  </div>
+</section>
+
+{% else %}
+<div class="gm-sec gm-wrapped"><div class="gm-wrap">{{ base.render(b, e) }}</div></div>
+{% endif %}
+{% endmacro %}

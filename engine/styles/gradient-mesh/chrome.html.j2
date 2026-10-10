@@ -1,0 +1,9 @@
+{# Gradient mesh furniture: the one fixed canvas the colour field is painted on (the runtime draws it only inside the
+   page's mesh zones: the hero band, the closing band and small local patches), and the dashed column guides that
+   expose the grid on the calm white ground. #}
+{% macro top(site, sections, nav_links) %}
+<canvas class="gm-field" aria-hidden="true"></canvas>
+<div class="gm-guides" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}{% endmacro %}

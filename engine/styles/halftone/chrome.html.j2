@@ -1,0 +1,48 @@
+{# Halftone furniture: the masthead (name, ears, dateline, section bar with page references), the slim running head
+   that replaces it once you are reading, crop marks at the sheet's corners, and the colophon with registration
+   target and colour bar. The default nav is hidden; its links and CTA live here. #}
+{% macro pageref(sections, href) %}{% set letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}{% for e in sections %}{% if e.s.id and ('#' ~ e.s.id) == href %}{{ letters[loop.index0 % 26] }}1{% endif %}{% endfor %}{% endmacro %}
+
+{% macro top(site, sections, nav_links) %}
+<div class="ht-crop ht-crop--tl" aria-hidden="true"></div><div class="ht-crop ht-crop--tr" aria-hidden="true"></div>
+<header class="ht-mast" data-ht-mast>
+  <div class="ht-mast__row">
+    <div class="ht-ear ht-ear--l">
+      <b>Late edition</b>
+      <span>{{ site.description[:90] if site.description else "Printed in two colours" }}{% if site.description and site.description | length > 90 %}…{% endif %}</span>
+    </div>
+    <a class="ht-mast__name" href="#" style="--len: {{ [site.name | length, 6] | max }}">{{ site.name }}</a>
+    <div class="ht-ear ht-ear--r">
+      {% if site.nav.cta %}<a class="ht-ear__cta" href="{{ site.nav.cta.href }}"><b>{{ site.nav.cta.label }}</b><span>Free · see coupon</span></a>{% else %}<b>Price</b><span>Free</span>{% endif %}
+    </div>
+  </div>
+  <div class="ht-dateline">
+    <span>Vol. I · No. {{ sections | length }}</span>
+    <span data-ht-date>Today's edition</span>
+    <span>{{ (sections | length) * 2 }} pages · Free</span>
+  </div>
+  {% if nav_links %}<nav class="ht-sections" aria-label="Sections">
+    {% for l in nav_links %}<a href="{{ l.href }}">{{ l.label }}{% set p = pageref(sections, l.href) | trim %}{% if p %}<small>{{ p }}</small>{% endif %}</a>{% endfor %}
+  </nav>{% endif %}
+</header>
+<div class="ht-runner" aria-hidden="true">
+  <span class="ht-runner__name">{{ site.name }}</span>
+  <span class="ht-runner__sec" data-ht-runner>Front page</span>
+  <span class="ht-runner__page" data-ht-page>A1</span>
+  {% if site.nav.cta %}<a class="ht-runner__cta" href="{{ site.nav.cta.href }}" tabindex="-1">{{ site.nav.cta.label }}</a>{% endif %}
+</div>
+<div class="ht-loupe" aria-hidden="true"><i></i></div>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}
+<aside class="ht-colophon" aria-label="Colophon">
+  <svg class="ht-reg" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="11" fill="none" stroke="#141414" stroke-width="1.2"/><circle cx="20" cy="20" r="5" fill="#141414"/><path d="M20 2v36M2 20h36" stroke="#141414" stroke-width="1.2"/></svg>
+  <div class="ht-colophon__text">
+    <b>{{ site.name }}</b> is printed in two colours on 80 gsm newsprint and screened at 85 lines per inch.
+    Set in Playfair Display, Libre Caslon and Libre Franklin. Vol. I, No. {{ sections | length }}.
+  </div>
+  <div class="ht-bar" aria-hidden="true"><i style="background:#00aeef"></i><i style="background:#ec008c"></i><i style="background:#fff200"></i><i style="background:#141414"></i><i style="background:#7fd6f7"></i><i style="background:#f580c5"></i><i style="background:#fff880"></i><i style="background:#8a8a8a"></i></div>
+  <svg class="ht-reg" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="11" fill="none" stroke="#141414" stroke-width="1.2"/><circle cx="20" cy="20" r="5" fill="#141414"/><path d="M20 2v36M2 20h36" stroke="#141414" stroke-width="1.2"/></svg>
+</aside>
+<div class="ht-crop ht-crop--bl" aria-hidden="true"></div><div class="ht-crop ht-crop--br" aria-hidden="true"></div>
+{% endmacro %}

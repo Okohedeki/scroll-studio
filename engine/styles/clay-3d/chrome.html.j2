@@ -1,0 +1,48 @@
+{# Clay 3D furniture: the clay buddy who travels with the visitor, hopping from tray to tray (runtime), and a soft
+   floor shadow under it. Pure decoration: aria-hidden, never in the way of a click. #}
+{% macro top(site, sections, nav_links) %}
+<div class="cl-buddy" aria-hidden="true">
+  <div class="cl-buddy__shadow"></div>
+  <div class="cl-buddy__body">
+    <svg viewBox="0 0 140 150" class="cl-buddy__svg">
+      <defs>
+        <radialGradient id="clb-skin" cx="36%" cy="28%" r="78%">
+          <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+          <stop offset=".16" stop-color="#d9cdff"/>
+          <stop offset=".55" stop-color="#9d86ff"/>
+          <stop offset="1" stop-color="#5a3fd6"/>
+        </radialGradient>
+        <radialGradient id="clb-rim" cx="50%" cy="50%" r="50%">
+          <stop offset=".72" stop-color="#3b2496" stop-opacity="0"/>
+          <stop offset="1" stop-color="#3b2496" stop-opacity=".35"/>
+        </radialGradient>
+        <radialGradient id="clb-foot" cx="40%" cy="30%" r="80%">
+          <stop offset="0" stop-color="#b8a6ff"/>
+          <stop offset="1" stop-color="#4c33c2"/>
+        </radialGradient>
+        <radialGradient id="clb-cheek" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#ff7fb0" stop-opacity=".85"/>
+          <stop offset="1" stop-color="#ff7fb0" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <ellipse cx="50" cy="136" rx="17" ry="11" fill="url(#clb-foot)"/>
+      <ellipse cx="90" cy="136" rx="17" ry="11" fill="url(#clb-foot)"/>
+      <g class="cl-buddy__arm"><rect x="104" y="72" width="40" height="18" rx="9" fill="url(#clb-foot)"/></g>
+      <path d="M70 12c34 0 58 26 58 62 0 36-24 64-58 64S12 110 12 74c0-36 24-62 58-62z" fill="url(#clb-skin)"/>
+      <path d="M70 12c34 0 58 26 58 62 0 36-24 64-58 64S12 110 12 74c0-36 24-62 58-62z" fill="url(#clb-rim)"/>
+      <ellipse cx="44" cy="40" rx="14" ry="8" fill="#fff" opacity=".55" transform="rotate(-28 44 40)"/>
+      <g class="cl-buddy__eyes">
+        <ellipse cx="54" cy="70" rx="7" ry="10" fill="#2b2140"/>
+        <ellipse cx="88" cy="70" rx="7" ry="10" fill="#2b2140"/>
+        <circle cx="56.5" cy="66" r="2.6" fill="#fff"/>
+        <circle cx="90.5" cy="66" r="2.6" fill="#fff"/>
+      </g>
+      <ellipse cx="40" cy="90" rx="11" ry="7" fill="url(#clb-cheek)"/>
+      <ellipse cx="102" cy="90" rx="11" ry="7" fill="url(#clb-cheek)"/>
+      <path class="cl-buddy__mouth" d="M62 92c4 6 14 6 18 0" fill="none" stroke="#2b2140" stroke-width="4.5" stroke-linecap="round"/>
+    </svg>
+  </div>
+</div>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}{% endmacro %}

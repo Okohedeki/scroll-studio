@@ -1,0 +1,184 @@
+{# Clay 3D: every section is a puffy tray in its own pastel; inside, chunky tiles, clay coins, stepping stones and
+   candy buttons. The runtime (runtime/src/styles/clay-3d.ts) adds the mass: drop-and-squash arrivals, jelly wobble
+   from scroll velocity, the hopping buddy, the rolling ball. Without it everything is in place and readable. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta", "gallery", "strip", "orbit"] %}
+
+{% macro candy(l, primary=True, big=False) %}<a class="cl-candy{% if not primary %} cl-candy--soft{% endif %}{% if big %} cl-candy--big{% endif %}" href="{{ l.href }}"><span>{{ l.label }}</span></a>{% endmacro %}
+{% macro candies(list) %}{% if list %}<div class="cl-btns">{% for l in list %}{{ candy(l, loop.first) }}{% endfor %}</div>{% endif %}{% endmacro %}
+
+{# a small clay object for a tile, chosen by position: sphere, ring, pill, star, cube, heart #}
+{% macro icon(i, uid) %}
+{% set k = i % 6 %}
+<svg class="cl-icon" viewBox="0 0 100 100" aria-hidden="true">
+  <defs>
+    <radialGradient id="ci{{ uid }}" cx="34%" cy="28%" r="80%">
+      <stop offset="0" style="stop-color: #fff; stop-opacity: .95"/><stop offset=".2" style="stop-color: var(--il)"/><stop offset=".62" style="stop-color: var(--ic)"/><stop offset="1" style="stop-color: var(--id)"/>
+    </radialGradient>
+  </defs>
+  {% if k == 0 %}<circle cx="50" cy="52" r="34" fill="url(#ci{{ uid }})"/>
+  {% elif k == 1 %}<circle cx="50" cy="52" r="26" fill="none" stroke="url(#ci{{ uid }})" stroke-width="20"/>
+  {% elif k == 2 %}<rect x="14" y="36" width="72" height="34" rx="17" fill="url(#ci{{ uid }})" transform="rotate(-32 50 53)"/>
+  {% elif k == 3 %}<path d="M50 12c5 0 8 14 13 18s19 1 21 6-10 13-11 19 7 18 3 22-17-4-26-4-21 8-25 4 3-16 3-22-13-14-11-19 16-2 21-6 7-18 12-18z" fill="url(#ci{{ uid }})" stroke="url(#ci{{ uid }})" stroke-width="6" stroke-linejoin="round"/>
+  {% elif k == 4 %}<rect x="20" y="22" width="60" height="60" rx="20" fill="url(#ci{{ uid }})" transform="rotate(12 50 52)"/>
+  {% else %}<path d="M50 84C26 68 14 54 14 40c0-12 9-20 19-20 8 0 13 4 17 10 4-6 9-10 17-10 10 0 19 8 19 20 0 14-12 28-36 44z" fill="url(#ci{{ uid }})"/>{% endif %}
+  <ellipse cx="38" cy="34" rx="9" ry="5" fill="#fff" opacity=".6" transform="rotate(-30 38 34)"/>
+</svg>
+{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set idattr %}{% if b.id %} id="{{ b.id }}"{% endif %}{% endset %}
+{% set hx = 'h1' if e.first else 'h2' %}
+{% set uid = loop.index0 %}
+
+{% if b.type == "hero" %}
+{% set media = e.img or e.video %}
+<section class="cl-sec cl-hero cl-hero--{{ b.align }}"{{ idattr }} data-cl="hero">
+  <div class="cl-hero__toys" aria-hidden="true">
+    <i class="cl-toy cl-toy--a"></i><i class="cl-toy cl-toy--b"></i><i class="cl-toy cl-toy--c"></i><i class="cl-toy cl-toy--d"></i>
+  </div>
+  <div class="cl-hero__in">
+    {% if b.badge %}<span class="cl-pill cl-pill--badge cl-drop" style="--d: 0">{{ b.badge }}</span>{% endif %}
+    <{{ hx }} class="cl-h1" data-cl-words>{{ b.title | rich }}</{{ hx }}>
+    {% if b.body %}<p class="cl-lede cl-drop" style="--d: 5">{{ b.body | rich }}</p>{% endif %}
+    {% if b.buttons %}<div class="cl-btns cl-drop" style="--d: 7">{% for l in b.buttons %}{{ candy(l, loop.first) }}{% endfor %}</div>{% endif %}
+  </div>
+  <div class="cl-hero__seat" data-seat aria-hidden="true"></div>
+  {% if media or b.device %}
+  <div class="cl-hero__media cl-drop" style="--d: 4">
+    {% if b.device %}<div class="cl-device" data-jelly>{{ base.phone(b.device, e.screen, e.clip) }}</div>
+    {% elif e.video %}<div class="cl-blobframe" data-jelly><video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video></div>
+    {% else %}<div class="cl-blobframe" data-jelly><img src="{{ e.img }}" alt="" fetchpriority="high"></div>{% endif %}
+  </div>
+  {% endif %}
+</section>
+
+{% elif b.type == "intro" %}
+<section class="cl-sec cl-tray cl-tray--lilac cl-intro"{{ idattr }} data-cl="tray">
+  <div class="cl-tray__in cl-intro__in">
+    <div>
+      {% if b.kicker %}<span class="cl-pill cl-drop" style="--d: 0">{{ b.kicker }}</span>{% endif %}
+      <{{ hx }} class="cl-h2 cl-h2--xl cl-drop" style="--d: 1">{{ b.title | rich }}</{{ hx }}>
+    </div>
+    {% if b.body or b.button %}
+    <div class="cl-puff cl-puff--white cl-drop" style="--d: 3"><div data-jelly>
+      {% if b.body %}<p class="cl-lede">{{ b.body | rich }}</p>{% endif %}
+      {% if b.button %}<div class="cl-btns">{{ candy(b.button) }}</div>{% endif %}
+    </div></div>
+    {% endif %}
+  </div>
+</section>
+
+{% elif b.type == "features" %}
+<section class="cl-sec cl-tray cl-tray--cream cl-features"{{ idattr }} data-cl="tray">
+  <div class="cl-tray__in">
+    {% if b.title or b.kicker %}<header class="cl-head">
+      {% if b.kicker %}<span class="cl-pill cl-drop" style="--d: 0">{{ b.kicker }}</span>{% endif %}
+      {% if b.title %}<{{ hx }} class="cl-h2 cl-drop" style="--d: 1">{{ b.title | rich }}</{{ hx }}>{% endif %}
+    </header>{% endif %}
+    <div class="cl-tiles cl-tiles--{{ b.items | length }}">
+      {% for f in b.items %}
+      <article class="cl-tile cl-p{{ loop.index0 % 6 }} cl-drop" style="--d: {{ 2 + loop.index0 }}">
+        <div class="cl-tile__body" data-jelly data-dent>
+          <div class="cl-tile__icon">{{ icon(loop.index0, uid ~ '-' ~ loop.index0) }}</div>
+          {% if f.tag %}<span class="cl-tile__tag">{{ f.tag }}</span>{% endif %}
+          <h3 class="cl-h3">{{ f.title | rich }}</h3>
+          {% if f.body %}<p>{{ f.body | rich }}</p>{% endif %}
+          {% if f.meter is not none %}<div class="cl-jellybar" role="img" aria-label="{{ (f.meter * 100) | round | int }}%"><i style="--m: {{ f.meter }}"></i></div>{% endif %}
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "product" %}
+<section class="cl-sec cl-tray cl-tray--mint cl-product cl-product--{{ b.side }}"{{ idattr }} data-cl="tray">
+  <div class="cl-tray__in cl-product__in">
+    <div class="cl-product__media cl-drop" style="--d: 1">
+      <div class="cl-product__pad" aria-hidden="true"></div>
+      {% if e.img %}<div class="cl-blobframe" data-jelly><img src="{{ e.img }}" alt="" loading="lazy"></div>{% endif %}
+      {% if b.behind %}<div class="cl-device cl-device--behind" aria-hidden="true">{{ base.phone(b.behind, e.behind, e.behind_clip) }}</div>{% endif %}
+      {% if b.device %}<div class="cl-device" data-jelly>{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+    </div>
+    <div class="cl-product__copy">
+      {% if b.kicker %}<span class="cl-pill cl-drop" style="--d: 0">{{ b.kicker }}</span>{% endif %}
+      <{{ hx }} class="cl-h2 cl-drop" style="--d: 1">{{ b.title | rich }}</{{ hx }}>
+      {% if b.body %}<p class="cl-lede cl-drop" style="--d: 2">{{ b.body | rich }}</p>{% endif %}
+      {% if b.stats %}<div class="cl-coins cl-coins--mini">{% for st in b.stats %}<div class="cl-coin cl-p{{ (loop.index0 + 2) % 6 }} cl-pop" style="--d: {{ 3 + loop.index0 }}"><span class="cl-coin__v">{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</span><span class="cl-coin__l">{{ st.label }}</span></div>{% endfor %}</div>
+      {% elif b.tags %}<ul class="cl-chips">{% for t in b.tags %}<li class="cl-p{{ loop.index0 % 6 }} cl-pop" style="--d: {{ 3 + loop.index0 }}">{{ t }}</li>{% endfor %}</ul>{% endif %}
+      {% if b.buttons %}<div class="cl-btns cl-drop" style="--d: 6">{% for l in b.buttons %}{{ candy(l, loop.first) }}{% endfor %}</div>{% endif %}
+      {% if b.note %}<p class="cl-note">{{ b.note | rich }}</p>{% endif %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "stats" %}
+<section class="cl-sec cl-tray cl-tray--butter cl-stats"{{ idattr }} data-cl="tray">
+  <div class="cl-tray__in">
+    <div class="cl-coins cl-coins--{{ b.items | length }}">
+      {% for st in b.items %}
+      <div class="cl-coinbox cl-pop" style="--d: {{ loop.index0 }}">
+        <div class="cl-coin cl-p{{ (loop.index0 * 2 + 1) % 6 }}" data-jelly><span class="cl-coin__v">{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</span></div>
+        <span class="cl-coin__l">{{ st.label }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "timeline" %}
+{% set n = b.items | length %}
+<section class="cl-sec cl-tray cl-tray--sky cl-timeline"{{ idattr }} data-cl="tray">
+  <div class="cl-tray__in">
+    {% if b.title or b.kicker %}<header class="cl-head">
+      {% if b.kicker %}<span class="cl-pill cl-drop" style="--d: 0">{{ b.kicker }}</span>{% endif %}
+      {% if b.title %}<{{ hx }} class="cl-h2 cl-drop" style="--d: 1">{{ b.title | rich }}</{{ hx }}>{% endif %}
+    </header>{% endif %}
+    <div class="cl-path" data-path style="--n: {{ n }}">
+      <svg class="cl-path__svg" aria-hidden="true"><path class="cl-path__line"/></svg>
+      <ol class="cl-stones">
+        {% for t in b.items %}<li class="cl-stone cl-drop" style="--d: {{ 2 + loop.index0 }}; --i: {{ loop.index0 }}"><div class="cl-stone__body" data-jelly><span class="cl-stone__dot" aria-hidden="true">{{ loop.index }}</span><span class="cl-stone__when">{{ t.when }}</span><h3 class="cl-stone__t">{{ t.title | rich }}</h3>{% if t.body %}<p>{{ t.body | rich }}</p>{% endif %}</div></li>{% endfor %}
+      </ol>
+      <i class="cl-ball" aria-hidden="true"></i>
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "quote" %}
+<section class="cl-sec cl-tray cl-tray--peach cl-quote"{{ idattr }} data-cl="tray">
+  <div class="cl-tray__in cl-quote__in">
+    <figure class="cl-bubble cl-drop" style="--d: 0">
+      <div data-jelly>
+        <blockquote class="cl-q">{{ b.text | rich }}</blockquote>
+      </div>
+      <i class="cl-bubble__tail" aria-hidden="true"></i>
+      {% if b.who %}<figcaption class="cl-who"><span class="cl-avatar" aria-hidden="true">{{ b.who[:1] }}</span><span>{{ b.who }}</span></figcaption>{% endif %}
+      <span class="cl-react" aria-hidden="true"><svg viewBox="0 0 100 100"><defs><radialGradient id="cr{{ uid }}" cx="34%" cy="28%" r="80%"><stop offset="0" stop-color="#fff"/><stop offset=".22" stop-color="#ffb3d1"/><stop offset=".65" stop-color="#ff5c9a"/><stop offset="1" stop-color="#c22a6a"/></radialGradient></defs><path d="M50 86C26 70 12 56 12 40c0-12 9-21 20-21 8 0 14 4 18 11 4-7 10-11 18-11 11 0 20 9 20 21 0 16-14 30-38 46z" fill="url(#cr{{ uid }})"/><ellipse cx="34" cy="34" rx="8" ry="5" fill="#fff" opacity=".7" transform="rotate(-30 34 34)"/></svg></span>
+    </figure>
+  </div>
+</section>
+
+{% elif b.type == "faq" %}
+<section class="cl-sec cl-tray cl-tray--lilac cl-faq"{{ idattr }} data-cl="tray">
+  <div class="cl-tray__in cl-faq__in">
+    <header class="cl-head">{% if b.kicker %}<span class="cl-pill cl-drop" style="--d: 0">{{ b.kicker }}</span>{% endif %}<{{ hx }} class="cl-h2 cl-drop" style="--d: 1">{{ b.title | rich }}</{{ hx }}></header>
+    <div class="cl-faq__list">
+      {% for it in b.items %}<details class="cl-q-pill cl-drop" style="--d: {{ 2 + loop.index0 }}"{% if loop.first %} open{% endif %}><summary><span>{{ it.q | rich }}</span><i class="cl-knob" aria-hidden="true"></i></summary><div class="cl-q-pill__a"><p>{{ it.a | rich }}</p></div></details>{% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "cta" %}
+<section class="cl-sec cl-tray cl-tray--gum cl-cta"{{ idattr }} data-cl="tray">
+  <div class="cl-tray__in cl-cta__in">
+    {% if b.kicker %}<span class="cl-pill cl-pill--white cl-drop" style="--d: 0">{{ b.kicker }}</span>{% endif %}
+    <{{ hx }} class="cl-h2 cl-h2--xl cl-drop" style="--d: 1">{{ b.title | rich }}</{{ hx }}>
+    {% if b.button %}<div class="cl-btns cl-drop" style="--d: 3">{{ candy(b.button, True, True) }}</div>{% endif %}
+    <div class="cl-cta__seat" data-seat="cta" aria-hidden="true"></div>
+  </div>
+</section>
+
+{% else %}
+<div class="cl-sec cl-tray cl-tray--cream cl-wrapped" data-cl="tray"><div class="cl-tray__in">{{ base.render(b, e) }}</div></div>
+{% endif %}
+{% endmacro %}

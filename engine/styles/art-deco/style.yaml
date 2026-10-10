@@ -1,17 +1,23 @@
-# Art deco: tokens and fonts for theme.style: art-deco. See README.md in this folder for the UX contract.
+# Art deco: an opening night. See docs/styles/styles-16-21.md section 4 for the research.
 label: Art deco
-about: Gold on black, sunbursts, stepped frames and tall elegant capitals.
+about: An opening night. Scroll parts gold-lacquered doors on the centre axis to reveal a spotlit headline under a fanning sunburst; every scene unfolds symmetrically from the centre, features are dealt in mirrored pairs, stats are billed on a marquee with chasing bulbs, an elevator dial sweeps floor by floor, and doors close and reopen between scenes until the ADMIT ONE invitation.
 mode: dark
 colors:
-  bg: '#0d0b08'
-  bg2: '#15120c'
-  ink: '#f3e7c9'
-  accent: '#d4af37'
-  accent2: '#f0d27a'
-  accent_ink: '#1a1406'
+  bg: '#0b0b0c'
+  bg2: '#121110'
+  ink: '#ede1c3'
+  accent: '#c9a227'
+  accent2: '#e9d18b'
+  accent_ink: '#0b0b0c'
 fonts:
   display: Limelight
   body: Josefin Sans
-  mono: Josefin Sans
+  mono: Federo
+  marquee: Monoton
+font_axes:
+  Limelight: ""
+  Josefin Sans: "ital,wght@0,100..700;1,100..700"
+  Federo: ""
+  Monoton: ""
 display_weight: 400
 radius: 0px

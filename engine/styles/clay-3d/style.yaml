@@ -1,17 +1,20 @@
-# Clay 3D: tokens and fonts for theme.style: clay-3d. See README.md in this folder for the UX contract.
+# Clay 3D (claymorphism): soft toys on a table. See docs/styles/styles-06-10.md section 4 for the research.
 label: Clay 3D
-about: Soft, puffy pastel shapes that look pressed out of modelling clay.
+about: Soft toys on a table. Everything has mass and squish; cards drop in and squash on landing, tiles wobble like jelly when you fling the page, a clay buddy tumbles and hops from tray to tray, and candy buttons push in under your finger.
 mode: light
 colors:
-  bg: '#f3ecff'
-  bg2: '#ebe0ff'
-  ink: '#2d2350'
-  accent: '#7c5cff'
-  accent2: '#b6a3ff'
+  bg: '#f4eeff'
+  bg2: '#fbf8ff'
+  ink: '#2b2140'
+  accent: '#6a48f0'
+  accent2: '#9d86ff'
   accent_ink: '#ffffff'
 fonts:
   display: Fredoka
   body: Nunito
-  mono: DM Mono
+  mono: Nunito
+font_axes:
+  Fredoka: "wdth,wght@75..125,300..700"
+  Nunito: "ital,wght@0,200..1000;1,200..1000"
 display_weight: 600
 radius: 32px

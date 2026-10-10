@@ -1,0 +1,33 @@
+{# Art deco furniture: the elevator floor dial (one floor per section: L for the lobby, P for the penthouse), the pair
+   of gold-lacquered doors that part for the overture and close between scenes (their medallion names the next
+   act), and the credits crown. Everything decorative is aria-hidden; the dial's floors are real links. #}
+{% macro top(site, sections, nav_links) %}
+{% set n = sections | length %}
+<nav class="dc-dial" aria-label="Floors">
+  <div class="dc-dial__face">
+    <svg class="dc-dial__arc" viewBox="0 0 200 110" aria-hidden="true">
+      <path d="M14 100a86 86 0 0 1 172 0" fill="none" stroke="currentColor" stroke-width="1.2"/>
+      <path d="M26 100a74 74 0 0 1 148 0" fill="none" stroke="currentColor" stroke-width=".6"/>
+      <path d="M86 100h28" stroke="currentColor" stroke-width="1"/>
+    </svg>
+    {% for e in sections %}
+    {% set a = -84 + (168 * loop.index0 / ((n - 1) if n > 1 else 1)) %}
+    {% set label = 'L' if loop.first else ('P' if loop.last and n > 2 else loop.index0) %}
+    {% if e.s.id %}<a class="dc-floor" href="#{{ e.s.id }}" style="--a: {{ a | round(2) }}deg" data-floor="{{ loop.index0 }}" aria-label="Floor {{ label }}: {{ e.s.nav_label or e.s.type }}">{{ label }}</a>
+    {% else %}<span class="dc-floor" style="--a: {{ a | round(2) }}deg" data-floor="{{ loop.index0 }}" aria-hidden="true">{{ label }}</span>{% endif %}
+    {% endfor %}
+    <i class="dc-dial__needle" aria-hidden="true"></i>
+    <i class="dc-dial__hub" aria-hidden="true"></i>
+  </div>
+  <a class="dc-dial__name" href="#" style="--len: {{ [site.name | length, 8] | max }}">{{ site.name }}</a>
+</nav>
+<div class="dc-doors" aria-hidden="true">
+  <div class="dc-door dc-door--l"><div class="dc-door__inlay"></div><div class="dc-door__half"><span class="dc-door__act">Act</span></div></div>
+  <div class="dc-door dc-door--r"><div class="dc-door__inlay"></div><div class="dc-door__half"><span class="dc-door__num">I</span></div></div>
+  <div class="dc-doors__title"><span class="dc-doors__kicker">Now entering</span><span class="dc-doors__name">{{ site.name }}</span></div>
+</div>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}
+<div class="dc-crown" aria-hidden="true"><i class="dc-burst dc-burst--crown"></i><span>Fin</span></div>
+{% endmacro %}

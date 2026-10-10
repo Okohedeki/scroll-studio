@@ -1,0 +1,190 @@
+{# Halftone: print grammar. The first section is the front page's lead story; every other section opens with a
+   section front (section letter, name, page) whose title prints plate by plate. Pictures are [data-ht-img] figures
+   that the runtime (runtime/src/styles/halftone.ts) screens on one shared canvas, resolving from coarse dots to a
+   fine screen at reading position; without it each shows a printed dot pattern. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta", "gallery", "strip", "orbit"] %}
+
+{% macro front(b, loop, fallback, hx="h2", title=None) %}
+{% set letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+{% set L = letters[loop.index0 % 26] %}
+{% set t = title if title is not none else b.title %}
+<header class="ht-front" data-ht-front data-sec="{{ b.nav_label or fallback }}" data-page="{{ L }}1">
+  <div class="ht-front__bar"><span>Section {{ L }}</span><b>{{ b.nav_label or fallback }}</b><span>Page {{ L }}1</span></div>
+  {% if b.kicker %}<span class="ht-kicker">{{ b.kicker }}</span>{% endif %}
+  {% if t %}<{{ hx }} class="ht-front__title"><span class="ht-plate-k">{{ t | rich }}</span><span class="ht-plates" aria-hidden="true"><span class="ht-plate ht-plate--y">{{ t | rich }}</span><span class="ht-plate ht-plate--m">{{ t | rich }}</span><span class="ht-plate ht-plate--c">{{ t | rich }}</span></span></{{ hx }}>{% endif %}
+</header>
+{% endmacro %}
+
+{% macro jumps(list) %}{% if list %}<p class="ht-jumps">{% for l in list %}<a class="ht-jump{% if loop.first %} ht-jump--box{% endif %}" href="{{ l.href }}">{{ l.label }} <span aria-hidden="true">→</span></a>{% endfor %}</p>{% endif %}{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set idattr %}{% if b.id %} id="{{ b.id }}"{% endif %}{% endset %}
+{% set hx = 'h1' if e.first else 'h2' %}
+{% set letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" %}
+
+{% if b.type == "hero" %}
+<section class="ht-sec ht-lead ht-lead--{{ b.align }}"{{ idattr }} data-ht-front data-sec="Front page" data-page="{{ letters[loop.index0 % 26] }}1">
+  <div class="ht-page">
+    {% if b.badge %}<p class="ht-kicker ht-kicker--rule">{{ b.badge }}</p>{% endif %}
+    <{{ hx }} class="ht-h1" data-ht-ink>{{ b.title | rich }}</{{ hx }}>
+    <div class="ht-lead__grid">
+      <figure class="ht-photo ht-photo--lead" data-ht-img="{{ 'url' if e.img else 'sunrise' }}"{% if e.img %} data-src="{{ e.img }}"{% endif %}>
+        <div class="ht-photo__plate" role="img" aria-label="{{ 'Lead photograph' if e.img else 'Halftone illustration: the sun rising over hills' }}"></div>
+        <figcaption><b>On the cover.</b> {{ "Photograph screened for print." if e.img else "First light over the hills." }} <span class="ht-credit">Halftone, 85 lpi</span></figcaption>
+      </figure>
+      <div class="ht-lead__story">
+        <p class="ht-byline">By the newsroom · Staff report</p>
+        {% if b.body %}<p class="ht-deck ht-dropcap">{{ b.body | rich }}</p>{% endif %}
+        {{ jumps(b.buttons) }}
+        {% if b.device %}<div class="ht-lead__device">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="ht-fold" aria-hidden="true"><span>Fold</span></div>
+</section>
+
+{% elif b.type == "intro" %}
+<section class="ht-sec ht-story"{{ idattr }} data-ht-front data-sec="{{ b.nav_label or b.kicker or 'The lead' }}" data-page="{{ letters[loop.index0 % 26] }}1">
+  <div class="ht-page ht-story__in">
+    {% if b.kicker %}<p class="ht-kicker">{{ b.kicker }}</p>{% endif %}
+    <{{ hx }} class="ht-h2">{{ b.title | rich }}</{{ hx }}>
+    <div class="ht-cols ht-cols--story">
+      {% if b.body %}<p class="ht-dropcap">{{ b.body | rich }}</p>{% endif %}
+      {% if b.button %}<p class="ht-jumps"><a class="ht-jump" href="{{ b.button.href }}">{{ b.button.label }} <span aria-hidden="true">→</span></a></p>{% endif %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "features" %}
+{% set n = b.items | length %}
+{% set boxed = ((n + 2) // 3) if n > 1 else 1 %}
+<section class="ht-sec ht-classifieds"{{ idattr }}>
+  <div class="ht-page">
+    {{ front(b, loop, "Classifieds", hx) }}
+    <div class="ht-ads">
+      <div class="ht-ads__display">
+        {% for f in b.items[:boxed] %}
+        <article class="ht-ad">
+          <span class="ht-ad__ref">{{ f.tag or ("No. %02d" | format(loop.index)) }}</span>
+          <h3 class="ht-ad__t">{{ f.title | rich }}</h3>
+          {% if f.body %}<p>{{ f.body | rich }}</p>{% endif %}
+          {% if f.meter is not none %}<p class="ht-rating" aria-label="{{ (f.meter * 100) | round | int }}%">{% for i in range(10) %}<i class="{% if i < (f.meter * 10) | round %}on{% endif %}"></i>{% endfor %}</p>{% endif %}
+        </article>
+        {% endfor %}
+      </div>
+      {% if b.items[boxed:] %}
+      <div class="ht-ads__small">
+        <p class="ht-ads__head">Classified · {{ b.items[boxed:] | length }} listing{{ 's' if b.items[boxed:] | length != 1 else '' }}</p>
+        {% for f in b.items[boxed:] %}
+        <p class="ht-small"><b>{{ f.title | rich }}.</b> {% if f.body %}{{ f.body | rich }}{% endif %}{% if f.tag %} <span class="ht-small__ref">Ref. {{ f.tag }}</span>{% endif %}{% if f.meter is not none %} <span class="ht-small__ref">{{ (f.meter * 100) | round | int }}%</span>{% endif %}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "product" %}
+{% set d = b.device %}
+<section class="ht-sec ht-feature ht-feature--{{ b.side }}"{{ idattr }}>
+  <div class="ht-page">
+    {{ front(b, loop, "Technology", hx) }}
+    <div class="ht-feature__grid">
+      <figure class="ht-photo ht-photo--tall" data-ht-img="{{ 'url' if e.img else ('phone' if d else 'sunrise') }}"{% if e.img %} data-src="{{ e.img }}"{% endif %}{% if d %} data-title="{{ d.title or '' }}" data-app="{{ d.app or '' }}" data-label="{{ d.label or '' }}" data-button="{{ d.button or '' }}" data-opts="{% for o in d.options %}{{ o.title }}{% if o.selected %}*{% endif %}{% if not loop.last %}|{% endif %}{% endfor %}"{% endif %}>
+        <div class="ht-photo__plate" role="img" aria-label="{{ ('Halftone photograph of the ' ~ (d.app or 'app') ~ ' screen' ~ (': ' ~ d.title if d.title else '')) if d else 'Product photograph' }}"></div>
+        <figcaption><b>{{ (d.app ~ '.') if d and d.app else 'Pictured.' }}</b> {{ d.title if d and d.title else '' }}{% if d and d.note %} {{ d.note }}{% endif %} <span class="ht-credit">Photograph: staff</span></figcaption>
+      </figure>
+      <div class="ht-feature__story">
+        {% if b.body %}<p class="ht-deck">{{ b.body | rich }}</p>{% endif %}
+        {% if d and d.options %}<div class="ht-cols ht-cols--2"><p class="ht-dropcap">{{ d.label or "On screen" }}: {% for o in d.options %}{{ o.title }}{% if o.body %}, {{ o.body | lower }}{% endif %}{% if o.selected %} (selected){% endif %}{% if not loop.last %}; {% else %}.{% endif %}{% endfor %}{% if d.button %} Then one tap: “{{ d.button }}.”{% endif %}</p></div>{% endif %}
+        {% if b.stats or b.tags %}
+        <aside class="ht-glance">
+          <p class="ht-glance__head">At a glance</p>
+          {% if b.stats %}<dl>{% for st in b.stats %}<div><dt>{{ st.label }}</dt><dd>{{ st.value }}{% if st.unit %} {{ st.unit }}{% endif %}</dd></div>{% endfor %}</dl>
+          {% else %}<dl><div><dt>Available on</dt><dd>{{ b.tags | join(' · ') }}</dd></div></dl>{% endif %}
+        </aside>
+        {% endif %}
+        {{ jumps(b.buttons) }}
+        {% if b.note %}<p class="ht-note">{{ b.note | rich }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "stats" %}
+{% set ns = namespace(mx=0) %}
+{% for st in b.items %}{% if st.unit != '%' %}{% set v = st.value | replace(',', '') | float %}{% if v > ns.mx %}{% set ns.mx = v %}{% endif %}{% endif %}{% endfor %}
+<section class="ht-sec ht-numbers"{{ idattr }}>
+  <div class="ht-page">
+    {{ front(b, loop, "By the numbers", hx, b.nav_label or "By the numbers") }}
+    <div class="ht-figs ht-figs--{{ b.items | length }}" data-ht-figs>
+      {% for st in b.items %}
+      {% set v = st.value | replace(',', '') | float %}
+      {% if st.unit == '%' %}{% set total = 100 %}{% set filled = v | round | int %}
+      {% elif ns.mx <= 60 %}{% set total = [10, ns.mx | round(0, 'ceil') | int] | max %}{% set filled = v | round | int %}
+      {% else %}{% set total = 50 %}{% set filled = (v / ns.mx * 50) | round | int %}{% endif %}
+      <figure class="ht-fig">
+        <p class="ht-fig__v">{{ st.value }}{% if st.unit %}<span>{{ st.unit }}</span>{% endif %}</p>
+        <figcaption class="ht-fig__l">{{ st.label }}</figcaption>
+        <svg class="ht-dots" viewBox="0 0 100 {{ ((total + 9) // 10) * 10 }}" aria-hidden="true">
+          {% for i in range(total) %}<circle cx="{{ (i % 10) * 10 + 5 }}" cy="{{ (i // 10) * 10 + 5 }}" r="{{ 3.6 if i < filled else 1.3 }}" class="{{ 'on' if i < filled else 'off' }}" style="--i: {{ i }}"/>{% endfor %}
+        </svg>
+        <p class="ht-fig__key">{% if st.unit == '%' %}Each dot: 1%{% elif ns.mx <= 60 %}Each dot: 1{% if st.unit %} {{ st.unit }}{% endif %}{% else %}Dots to scale{% endif %}</p>
+      </figure>
+      {% endfor %}
+    </div>
+    <p class="ht-source">Source: company figures. Final numbers as printed.</p>
+  </div>
+</section>
+
+{% elif b.type == "timeline" %}
+<section class="ht-sec ht-how"{{ idattr }}>
+  <div class="ht-page">
+    {{ front(b, loop, "How it works", hx) }}
+    <ol class="ht-diagram ht-diagram--{{ b.items | length }}">
+      {% for t in b.items %}<li class="ht-diagram__step"><span class="ht-diagram__n" aria-hidden="true">{{ loop.index }}</span><span class="ht-diagram__lead" aria-hidden="true"></span><span class="ht-diagram__when">{{ t.when }}</span><h3 class="ht-diagram__t">{{ t.title | rich }}</h3>{% if t.body %}<p>{{ t.body | rich }}</p>{% endif %}</li>{% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "quote" %}
+<section class="ht-sec ht-letters"{{ idattr }}>
+  <div class="ht-page">
+    {{ front(b, loop, "Letters", "h2", b.nav_label or "Letters to the editor") }}
+    <figure class="ht-pull">
+      <p class="ht-pull__to">To the Editor:</p>
+      <blockquote class="ht-pull__q">{{ b.text | rich }}</blockquote>
+      {% if b.who %}<figcaption class="ht-pull__who">— {{ b.who }}</figcaption>{% endif %}
+    </figure>
+  </div>
+</section>
+
+{% elif b.type == "faq" %}
+<section class="ht-sec ht-ask"{{ idattr }}>
+  <div class="ht-page">
+    {{ front(b, loop, "Ask the editor", hx) }}
+    <div class="ht-ask__list">
+      {% for it in b.items %}<details class="ht-qa"{% if loop.first %} open{% endif %}><summary><span class="ht-qa__q">Q.</span> {{ it.q | rich }}</summary><p><span class="ht-qa__q">A.</span> {{ it.a | rich }}</p></details>{% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "cta" %}
+<section class="ht-sec ht-coupon-sec"{{ idattr }}>
+  <div class="ht-page">
+    <div class="ht-coupon" data-ht-coupon>
+      <span class="ht-coupon__scissors" aria-hidden="true">✂</span>
+      <p class="ht-coupon__head">Clip and mail today</p>
+      {% if b.kicker %}<p class="ht-coupon__offer">{{ b.kicker }}</p>{% endif %}
+      <{{ hx }} class="ht-coupon__title">{{ b.title | rich }}</{{ hx }}>
+      <div class="ht-coupon__fields" aria-hidden="true"><span>Name</span><i></i><span>Address</span><i></i><span>Morning you want back</span><i></i></div>
+      {% if b.button %}<a class="ht-coupon__btn" href="{{ b.button.href }}" data-ht-cut>{{ b.button.label }} <span aria-hidden="true">→</span></a>{% endif %}
+      <p class="ht-coupon__fine">No stamp required. Offer good while the ink is wet.</p>
+    </div>
+  </div>
+</section>
+
+{% else %}
+<div class="ht-sec ht-wrapped"><div class="ht-page">{{ front(b, loop, (b.type | capitalize) if b.type != "gallery" else "Pictures", "h2", "") }}{{ base.render(b, e) }}</div></div>
+{% endif %}
+{% endmacro %}

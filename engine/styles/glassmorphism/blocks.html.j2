@@ -1,0 +1,171 @@
+{# Glassmorphism: every piece of content sits on a frosted pane; media lives behind the glass. The runtime
+   (runtime/src/styles/glassmorphism.ts) adds the living backdrop, the pinned lens, the exploded layers and the
+   specular pointer; without it the panes are a calm, complete page. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta", "gallery", "strip", "orbit"] %}
+
+{% macro btns(list, xl=False) %}{% if list %}<div class="gl-btns">{% for l in list %}<a class="gl-btn {{ 'gl-btn--solid' if loop.first else 'gl-btn--glass' }}{% if xl %} gl-btn--xl{% endif %}" href="{{ l.href }}">{{ l.label }}{% if loop.first %} <span class="gl-btn__arrow" aria-hidden="true">→</span>{% endif %}</a>{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro head(b, cls="") %}{% if b.title or b.kicker %}<header class="gl-pane gl-pane--head gl-cond {{ cls }}">
+  {% if b.kicker %}<span class="gl-kicker">{{ b.kicker }}</span>{% endif %}
+  {% if b.title %}<h2 class="gl-h2">{{ b.title | rich }}</h2>{% endif %}
+</header>{% endif %}{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set idattr %}{% if b.id %} id="{{ b.id }}"{% endif %}{% endset %}
+{% set hx = 'h1' if e.first else 'h2' %}
+
+{% if b.type == "hero" %}
+{% set media = e.img or e.video %}
+<section class="gl-sec gl-hero gl-hero--{{ b.align }}{% if b.device %} gl-hero--device{% endif %}{% if media %} gl-hero--media{% endif %}"{{ idattr }} data-gl="hero">
+  {% if media %}<div class="gl-hero__media" aria-hidden="true">{% if e.video %}<video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video>{% else %}<img src="{{ e.img }}" alt="" fetchpriority="high">{% endif %}</div>{% endif %}
+  <div class="gl-hero__in">
+    {% if b.device %}<div class="gl-hero__phone" data-depth="0.72">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+    <div class="gl-pane gl-pane--hero gl-tilt gl-cond">
+      {% if b.badge %}<span class="gl-chip"><i aria-hidden="true"></i>{{ b.badge }}</span>{% endif %}
+      <{{ hx }} class="gl-h1">{{ b.title | rich }}</{{ hx }}>
+      {% if b.body %}<p class="gl-lede">{{ b.body | rich }}</p>{% endif %}
+      {{ btns(b.buttons) }}
+    </div>
+  </div>
+  <div class="gl-cue" aria-hidden="true"><span></span></div>
+</section>
+
+{% elif b.type == "intro" %}
+<section class="gl-sec gl-intro"{{ idattr }}>
+  <div class="gl-intro__in">
+    <div class="gl-pane gl-pane--title gl-tilt gl-cond"><{{ hx }} class="gl-h2 gl-h2--xl">{{ b.title | rich }}</{{ hx }}></div>
+    {% if b.kicker or b.body or b.button %}
+    <div class="gl-pane gl-pane--note gl-tilt gl-cond" data-depth="1.16">
+      {% if b.kicker %}<span class="gl-kicker">{{ b.kicker }}</span>{% endif %}
+      {% if b.body %}<p class="gl-lede">{{ b.body | rich }}</p>{% endif %}
+      {% if b.button %}<div class="gl-btns"><a class="gl-btn gl-btn--solid" href="{{ b.button.href }}">{{ b.button.label }} <span class="gl-btn__arrow" aria-hidden="true">→</span></a></div>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+{% elif b.type == "features" %}
+{% set n = b.items | length %}
+<section class="gl-sec gl-features"{{ idattr }} data-gl="stack">
+  <div class="gl-features__in">
+    {% if b.title or b.kicker %}<header class="gl-pane gl-pane--head gl-cond">
+      {% if b.kicker %}<span class="gl-kicker">{{ b.kicker }}</span>{% endif %}
+      {% if b.title %}<{{ hx }} class="gl-h2">{{ b.title | rich }}</{{ hx }}>{% endif %}
+    </header>{% endif %}
+    <div class="gl-stack gl-stack--{{ n }}" data-stack>
+      {% for f in b.items %}
+      <article class="gl-pane gl-layer gl-cond" style="--i: {{ loop.index0 }}">
+        <div class="gl-layer__top"><span class="gl-glyph" aria-hidden="true">{{ f.tag or ("%02d" | format(loop.index)) }}</span><span class="gl-layer__n">Layer {{ loop.index }} / {{ n }}</span></div>
+        <h3 class="gl-h3">{{ f.title | rich }}</h3>
+        {% if f.body %}<p>{{ f.body | rich }}</p>{% endif %}
+        {% if f.meter is not none %}<div class="gl-meter" role="img" aria-label="{{ (f.meter * 100) | round | int }}%"><i style="width: {{ (f.meter * 100) | round }}%"></i></div>{% endif %}
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "product" %}
+{% set d = b.device %}
+<section class="gl-sec gl-product gl-product--{{ b.side }}"{{ idattr }} data-gl="lens">
+  <div class="gl-lensstage">
+    <div class="gl-scene" aria-hidden="true">
+      <div class="gl-scene__glow"></div>
+      <div class="gl-scene__turn">
+        {% if e.img %}<img class="gl-scene__img" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+        {% if b.behind %}<div class="gl-scene__behind">{{ base.phone(b.behind, e.behind, e.behind_clip) }}</div>{% endif %}
+        {% if d %}{{ base.phone(d, e.screen, e.clip) }}{% elif not e.img %}<div class="gl-scene__orb"></div>{% endif %}
+      </div>
+    </div>
+    <div class="gl-pane gl-lens gl-cond">
+      <div class="gl-lens__page" data-page>
+        {% if b.kicker %}<span class="gl-kicker">{{ b.kicker }}</span>{% endif %}
+        <{{ hx }} class="gl-h2">{{ b.title | rich }}</{{ hx }}>
+        {% if b.body %}<p class="gl-lede">{{ b.body | rich }}</p>{% endif %}
+      </div>
+      {% if d and (d.options or d.note or d.label) %}
+      <div class="gl-lens__page" data-page>
+        <span class="gl-kicker">{{ d.label or d.title or d.app or "On screen" }}</span>
+        {% if d.title and d.label %}<p class="gl-lens__screen">{{ d.title }}</p>{% endif %}
+        {% if d.note %}<p class="gl-lede">{{ d.note }}</p>{% endif %}
+        {% if d.options %}<ul class="gl-opts">{% for o in d.options %}<li class="{% if o.selected %}is-on{% endif %}"><b>{{ o.title }}</b>{% if o.body %}<small>{{ o.body }}</small>{% endif %}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      {% endif %}
+      {% if b.tags or b.stats or b.buttons or b.note %}
+      <div class="gl-lens__page" data-page>
+        {% if b.stats %}<div class="gl-minis">{% for st in b.stats %}<div class="gl-mini"><span class="gl-mini__v">{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</span><span class="gl-mini__l">{{ st.label }}</span></div>{% endfor %}</div>
+        {% elif b.tags %}<span class="gl-kicker">Works with</span><ul class="gl-tags">{% for t in b.tags %}<li>{{ t }}</li>{% endfor %}</ul>{% endif %}
+        {{ btns(b.buttons) }}
+        {% if b.note %}<p class="gl-note">{{ b.note | rich }}</p>{% endif %}
+      </div>
+      {% endif %}
+      <div class="gl-lens__dots" aria-hidden="true"></div>
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "stats" %}
+{% set ns = namespace(mx=0) %}
+{% for st in b.items %}{% set v = st.value | replace(',', '') | float %}{% if v > ns.mx %}{% set ns.mx = v %}{% endif %}{% endfor %}
+<section class="gl-sec gl-stats"{{ idattr }}>
+  <div class="gl-widgets gl-widgets--{{ b.items | length }}">
+    {% for st in b.items %}
+    {% set v = st.value | replace(',', '') | float %}
+    {% set frac = (v / 100) if st.unit == '%' else ((v / ns.mx) if ns.mx > 0 else 0) %}
+    <div class="gl-pane gl-widget gl-tilt gl-cond" data-depth="{{ '1' if loop.index0 % 2 == 0 else '1.14' }}" style="--ring: {{ [frac, 1] | min | round(3) }}">
+      <svg class="gl-ring" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" pathLength="100"/><circle class="gl-ring__fg" cx="22" cy="22" r="18" pathLength="100"/></svg>
+      <span class="gl-widget__l">{{ st.label }}</span>
+      <span class="gl-widget__v"{% if st.value | countable %} data-gl-count="{{ st.value }}"{% endif %}>{{ st.value }}</span>{% if st.unit %}<span class="gl-widget__u">{{ st.unit }}</span>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+{% elif b.type == "timeline" %}
+{% set n = b.items | length %}
+<section class="gl-sec gl-timeline"{{ idattr }}>
+  <div class="gl-timeline__in">
+    {{ head(b) }}
+    <div class="gl-pane gl-dock gl-cond" data-dock style="--n: {{ n }}">
+      <div class="gl-dock__lens" aria-hidden="true"></div>
+      <ol class="gl-dock__list">
+        {% for t in b.items %}<li class="gl-step" style="--i: {{ loop.index0 }}"><span class="gl-step__when">{{ t.when }}</span><h3 class="gl-step__t">{{ t.title | rich }}</h3>{% if t.body %}<p>{{ t.body | rich }}</p>{% endif %}</li>{% endfor %}
+      </ol>
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "quote" %}
+<section class="gl-sec gl-quote"{{ idattr }}>
+  <figure class="gl-pane gl-pane--quote gl-tilt gl-cond">
+    {% if b.who %}<span class="gl-avatar" aria-hidden="true">{{ b.who[:1] }}</span>{% endif %}
+    <blockquote class="gl-q">{{ b.text | rich }}</blockquote>
+    {% if b.who %}<figcaption class="gl-who">{{ b.who }}</figcaption>{% endif %}
+  </figure>
+</section>
+
+{% elif b.type == "faq" %}
+<section class="gl-sec gl-faq"{{ idattr }}>
+  <div class="gl-faq__in">
+    <header class="gl-pane gl-pane--head gl-cond">{% if b.kicker %}<span class="gl-kicker">{{ b.kicker }}</span>{% endif %}<{{ hx }} class="gl-h2">{{ b.title | rich }}</{{ hx }}></header>
+    <div class="gl-faq__list">
+      {% for it in b.items %}<details class="gl-bar gl-cond"{% if loop.first %} open{% endif %}><summary>{{ it.q | rich }}<i aria-hidden="true"></i></summary><div class="gl-bar__a"><p>{{ it.a | rich }}</p></div></details>{% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "cta" %}
+<section class="gl-sec gl-cta"{{ idattr }} data-gl="finale">
+  {% if e.bg %}<div class="gl-cta__bg" aria-hidden="true" style="background-image: url('{{ e.bg }}')"></div>{% endif %}
+  <div class="gl-pane gl-slab gl-tilt gl-cond">
+    {% if b.kicker %}<span class="gl-kicker">{{ b.kicker }}</span>{% endif %}
+    <{{ hx }} class="gl-h2 gl-h2--xl">{{ b.title | rich }}</{{ hx }}>
+    {% if b.button %}<div class="gl-btns"><a class="gl-btn gl-btn--solid gl-btn--xl" href="{{ b.button.href }}">{{ b.button.label }} <span class="gl-btn__arrow" aria-hidden="true">→</span></a></div>{% endif %}
+  </div>
+</section>
+
+{% else %}
+{# gallery, strip, orbit: the default markup, set on a pane so nothing sits straight on the backdrop #}
+<div class="gl-sec gl-wrapped gl-wrapped--{{ b.type }}"><div class="gl-pane gl-pane--wrap gl-cond">{{ base.render(b, e) }}</div></div>
+{% endif %}
+{% endmacro %}
