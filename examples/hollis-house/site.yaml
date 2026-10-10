@@ -1,5 +1,5 @@
-# Hollis House: a real place, scanned. Scene type `splat`: a Gaussian splat of a real kitchen and living room,
-# captured on a phone and trained locally (gsplat), that the camera walks through as you scroll.
+# Hollis House: a real place, scanned. Scene type `splat`: a Gaussian splat of a real house, trained locally (gsplat)
+# from three walkthrough clips by Kindel Media on Pexels (Pexels licence), that the camera walks through as you scroll.
 # inputs/house.spz is the trimmed scan (530k splats, 9 MB), written by `studio build` from the trainer's checkpoint;
 # point `source:` at your own .ply, .spz or gsplat .pt and set `keys` in the scan's coordinates
 # (`studio build` prints the scan's bounds).
@@ -12,7 +12,7 @@ nav:
 sections:
   - type: hero
     title: Walk through it <em>before you visit.</em>
-    body: Every room on this page is the real room, scanned with a phone. Scroll to walk from the hall into the living room.
+    body: Every room on this page is the real room, rebuilt in 3D from a walkthrough video. Scroll to walk from the hall into the living room.
     buttons:
       - { label: Start the walk, href: "#walk" }
       - { label: Book a viewing, href: "#viewing" }
@@ -26,7 +26,7 @@ sections:
     max_splats: 10000000
     up: [0, 0, 1]
     fov: 62
-    credit: "Scanned with a phone and reconstructed locally with gsplat"
+    credit: "Reconstructed locally with gsplat from walkthrough footage by Kindel Media (Pexels)"
     keys:
       - { t: 0.0,  at: [2.0, -0.6, 0.25],  look: [-2.0, -0.6, 0.1] }
       - { t: 0.4,  at: [0.2, -0.6, 0.25],  look: [-3.0, -0.3, 0.1] }
@@ -64,4 +64,4 @@ sections:
     button: { label: Book a viewing, href: "#" }
 footer:
   left: "© Hollis House. A concept site; the house details are fictional, the rooms are a real scan."
-  right: Reconstructed locally, nothing uploaded
+  right: Rooms reconstructed locally from footage by Kindel Media on Pexels

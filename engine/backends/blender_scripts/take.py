@@ -223,10 +223,15 @@ img = env.image
 w, h = img.size
 px = list(img.pixels[:])   # RGBA floats, bottom row first
 best, bi = -1.0, 0
+acc, cnt = [0.0, 0.0, 0.0], 0
 for i in range(0, len(px), 4 * 3):   # every third pixel is plenty to find the sun
     lum = px[i] * 0.2126 + px[i + 1] * 0.7152 + px[i + 2] * 0.0722
     if lum > best:
         best, bi = lum, i // 4
+    for c in range(3):
+        acc[c] += min(px[i + c], 2.0)   # the sun disc would swamp the average
+    cnt += 1
+sky = tuple(v / max(cnt, 1) for v in acc)
 u = (bi % w + 0.5) / w
 sun_az = (u - 0.5) * 2 * math.pi                       # equirect: u = atan2(y, -x) / 2pi + 0.5
 Lw = Vector(T.get("light", (0.4, -0.3, 0.85)))
@@ -236,7 +241,18 @@ mapping = nt.nodes.new("ShaderNodeMapping")
 mapping.inputs["Rotation"].default_value = (0.0, 0.0, light_az - sun_az + math.pi)
 nt.links.new(coord.outputs["Generated"], mapping.inputs["Vector"])
 nt.links.new(mapping.outputs["Vector"], env.inputs["Vector"])
-nt.links.new(env.outputs["Color"], nt.nodes["Background"].inputs["Color"])
+# reflections see the HDRI; diffuse light and shadows come from its average colour, so the product gets a soft
+# contact shadow and the sun lamp's crisp one, not a second long shadow from the HDRI's own (low) sun
+path = nt.nodes.new("ShaderNodeLightPath")
+mix = nt.nodes.new("ShaderNodeMixRGB")
+mix.inputs["Color1"].default_value = (*sky, 1.0)
+nt.links.new(path.outputs["Is Glossy Ray"], mix.inputs["Fac"])
+nt.links.new(env.outputs["Color"], mix.inputs["Color2"])
+cam_mix = nt.nodes.new("ShaderNodeMixRGB")   # the camera never sees the world (transparent film), but keep it exact
+nt.links.new(path.outputs["Is Camera Ray"], cam_mix.inputs["Fac"])
+nt.links.new(mix.outputs["Color"], cam_mix.inputs["Color1"])
+nt.links.new(env.outputs["Color"], cam_mix.inputs["Color2"])
+nt.links.new(cam_mix.outputs["Color"], nt.nodes["Background"].inputs["Color"])
 nt.nodes["Background"].inputs["Strength"].default_value = 1.0
 if P.get("sun_strength", 3.0) > 0:
     sun_data = bpy.data.lights.new("Sun", "SUN")
