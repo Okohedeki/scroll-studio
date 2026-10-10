@@ -24,12 +24,12 @@ sections:
       ground: { kind: plane, at: [0, 0, 0], size: [600, 600, 1], color: "#5b6b50" }
       objects:
         # a lake in front of the terrace, low hills behind it, a few pines
-        - { kind: plane, name: Lake, at: [0, 60, 0.05], size: [220, 160, 1], color: "#3a5c74" }
+        - { kind: plane, name: Lake, at: [0, 75, 0.05], size: [60, 140, 1], color: "#3a5c74" }
         - { kind: blob, name: HillL, at: [-90, 150, 0], size: [70, 50, 26], color: "#4d5e44" }
         - { kind: blob, name: HillR, at: [70, 170, 0], size: [90, 60, 32], color: "#4a5a42" }
         - { kind: blob, name: Ridge, at: [-10, 230, 0], size: [160, 60, 48], color: "#55604d" }
-        - { kind: scatter, name: Pines, count: 60, seed: 4, area: [-120, 40, -30, 140], height: [6, 14], footprint: [3, 5], color: "#3f5538" }
-        - { kind: scatter, name: PinesR, count: 50, seed: 9, area: [30, 50, 120, 140], height: [6, 14], footprint: [3, 5], color: "#3f5538" }
+        - { kind: scatter, name: Pines, count: 60, seed: 4, area: [-120, 40, -30, 140], height: [6, 14], footprint: [3, 5], shape: cone, color: "#3f5538" }
+        - { kind: scatter, name: PinesR, count: 50, seed: 9, area: [30, 50, 120, 140], height: [6, 14], footprint: [3, 5], shape: cone, color: "#3f5538" }
         # the wooden terrace and its table, the product stands on the table
         - { kind: box, name: Terrace, at: [0, -6, 0.2], size: [18, 14, 0.4], color: "#8a6f4e" }
         - { kind: box, name: Rail, at: [0, 0.8, 0.9], size: [18, 0.15, 1.0], color: "#7a6246" }

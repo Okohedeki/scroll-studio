@@ -84,7 +84,11 @@ def build_world():
                     continue
                 h, w, d = rng.uniform(h0, h1), rng.uniform(f0, f1), rng.uniform(f0, f1)
                 shade = rng.uniform(0.8, 1.1)
-                box(f"{name}_{j}", (x, y, at[2] + h / 2), (w, d, h), tuple(min(1, c * shade) for c in col))
+                c = tuple(min(1, c * shade) for c in col)
+                if o.get("shape", "box") == "cone":   # trees: a cone reads as a pine to the video model
+                    cone(f"{name}_{j}", (x, y, at[2] + h / 2), (w + d) / 4, h, c, vertices=12)
+                else:
+                    box(f"{name}_{j}", (x, y, at[2] + h / 2), (w, d, h), c)
 
 
 # ---------------------------------------------------------------- the product
@@ -214,6 +218,24 @@ hdri = next((q for q in (os.path.join(bpy.utils.resource_path(k), "datafiles", "
 if hdri is None:
     raise SystemExit(f"studio light '{P.get('hdri')}' not found in Blender's datafiles")
 env.image = bpy.data.images.load(hdri)
+# turn the HDRI so its own sun sits at the take's light azimuth: one shadow direction, matching the world
+img = env.image
+w, h = img.size
+px = list(img.pixels[:])   # RGBA floats, bottom row first
+best, bi = -1.0, 0
+for i in range(0, len(px), 4 * 3):   # every third pixel is plenty to find the sun
+    lum = px[i] * 0.2126 + px[i + 1] * 0.7152 + px[i + 2] * 0.0722
+    if lum > best:
+        best, bi = lum, i // 4
+u = (bi % w + 0.5) / w
+sun_az = (u - 0.5) * 2 * math.pi                       # equirect: u = atan2(y, -x) / 2pi + 0.5
+Lw = Vector(T.get("light", (0.4, -0.3, 0.85)))
+light_az = math.atan2(Lw.y, -Lw.x)
+coord = nt.nodes.new("ShaderNodeTexCoord")
+mapping = nt.nodes.new("ShaderNodeMapping")
+mapping.inputs["Rotation"].default_value = (0.0, 0.0, light_az - sun_az + math.pi)
+nt.links.new(coord.outputs["Generated"], mapping.inputs["Vector"])
+nt.links.new(mapping.outputs["Vector"], env.inputs["Vector"])
 nt.links.new(env.outputs["Color"], nt.nodes["Background"].inputs["Color"])
 nt.nodes["Background"].inputs["Strength"].default_value = 1.0
 if P.get("sun_strength", 3.0) > 0:
@@ -225,8 +247,11 @@ if P.get("sun_strength", 3.0) > 0:
     d = Vector(T.get("light", (0.4, -0.3, 0.85))).normalized()
     sun.rotation_euler = (-d).to_track_quat("-Z", "Y").to_euler()   # a sun lamp points along its -Z
 
+SHADOW = float(P.get("shadow_size") or P["height"] * 3)
 if P.get("shadow", True):
-    bpy.ops.mesh.primitive_plane_add(size=max(40.0, P["height"] * 40), location=(P["at"][0], P["at"][1], P["at"][2]))
+    # the catcher is the surface the product stands on (default 3x its height): shadows end at its edge
+    # instead of streaking across the world
+    bpy.ops.mesh.primitive_plane_add(size=SHADOW, location=(P["at"][0], P["at"][1], P["at"][2]))
     floor = bpy.context.active_object
     floor.is_shadow_catcher = True
 
@@ -235,19 +260,35 @@ cam, target = camera_rig(keys, lens=T.get("lens", 32))
 
 from bpy_extras.object_utils import world_to_camera_view  # noqa: E402
 
-def on_screen_px():
-    """Projected size of the product in pixels (0 when it is behind the camera or off-frame)."""
+FLOOR_Z = P["at"][2]
+
+def on_screen_box():
+    """The product's screen box (normalised, y up) including its shadow on the floor, or None when it is
+    behind the camera, off-frame or under 3 px. Frames are rendered only inside this box."""
     deps = bpy.context.evaluated_depsgraph_get()
-    pts = []
+    world_pts = []
     for o in meshes:
         ev = o.evaluated_get(deps)
-        pts += [world_to_camera_view(scene, cam, ev.matrix_world @ Vector(c)) for c in ev.bound_box]
-    if all(p.z <= 0 for p in pts):
-        return 0
-    xs, ys = [p.x for p in pts if p.z > 0], [p.y for p in pts if p.z > 0]
+        world_pts += [ev.matrix_world @ Vector(c) for c in ev.bound_box]
+    body = [world_to_camera_view(scene, cam, q) for q in world_pts]
+    if all(p.z <= 0 for p in body):
+        return None
+    xs, ys = [p.x for p in body if p.z > 0], [p.y for p in body if p.z > 0]
     if max(xs) < 0 or min(xs) > 1 or max(ys) < 0 or min(ys) > 1:
-        return 0
-    return max(max(xs) - min(xs), max(ys) - min(ys)) * max(a.width, a.height)
+        return None
+    if max(max(xs) - min(xs), max(ys) - min(ys)) * max(a.width, a.height) < 3:
+        return None
+    if P.get("shadow", True):   # the shadow can fall anywhere on the catcher
+        h = SHADOW / 2
+        for dx, dy in ((-h, -h), (h, -h), (-h, h), (h, h)):
+            v = world_to_camera_view(scene, cam, Vector((P["at"][0] + dx, P["at"][1] + dy, FLOOR_Z)))
+            if v.z <= 0:
+                return (0.0, 0.0, 1.0, 1.0)
+            xs.append(v.x)
+            ys.append(v.y)
+    pad = 0.02
+    box = (max(0.0, min(xs) - pad), max(0.0, min(ys) - pad), min(1.0, max(xs) + pad), min(1.0, max(ys) + pad))
+    return box if box[2] > box[0] and box[3] > box[1] else None
 
 os.makedirs(os.path.join(a.out, "frames"), exist_ok=True)
 blank = None
@@ -255,7 +296,8 @@ frames = a.only or range(1, a.frames + 1)
 for fi in frames:
     scene.frame_set(fi)
     path = os.path.join(a.out, "frames", f"{fi:04d}.png")
-    if on_screen_px() < 3:   # too small or off-screen: an empty frame, no render
+    box = on_screen_box()
+    if box is None:   # too small or off-screen: an empty frame, no render
         if blank is None:
             blank = bpy.data.images.new("blank", a.width, a.height, alpha=True)
             blank.pixels[:] = [0.0] * (a.width * a.height * 4)
@@ -264,6 +306,9 @@ for fi in frames:
         blank.save()
         print(f"FRAME {fi}/{a.frames} skipped", flush=True)
         continue
+    # render only the product's region; the rest of the full-size frame stays transparent
+    scene.render.use_border, scene.render.use_crop_to_border = True, False
+    scene.render.border_min_x, scene.render.border_min_y, scene.render.border_max_x, scene.render.border_max_y = box
     scene.render.filepath = path
     bpy.ops.render.render(write_still=True)
     print(f"FRAME {fi}/{a.frames}", flush=True)

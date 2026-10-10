@@ -120,6 +120,7 @@ class WorldObject(Model):
     area: tuple[float, float, float, float] = Field((-50, -50, 50, 50), description="scatter: x0, y0, x1, y1")
     height: tuple[float, float] = Field((2, 10), description="scatter: min and max box height")
     footprint: tuple[float, float] = Field((3, 6), description="scatter: min and max box width/depth")
+    shape: Literal["box", "cone"] = Field("box", description="scatter: box (buildings, rocks) or cone (pines)")
     clear: Optional[tuple[float, float, float]] = Field(None, description="scatter: keep (x, y, radius) empty")
 
 
@@ -144,6 +145,7 @@ class ProductLayer(Model):
     sun_strength: float = Field(3.0, description="A sun lamp along the take's light direction; 0 to turn it off")
     samples: int = Field(32, description="Cycles samples per frame (denoised)")
     shadow: bool = Field(True, description="Cast the product's shadow onto the generated ground")
+    shadow_size: Optional[float] = Field(None, description="Side of the square the shadow falls on, in metres (the table or floor patch); default 3x the height")
     res: tuple[int, int] = Field((1920, 1080), description="Render size of the product pass (also the final film size)")
 
 
