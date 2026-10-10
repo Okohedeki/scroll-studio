@@ -201,7 +201,7 @@ void main(){
   col = mix(mix(col, uGround, 0.5), col, s);
   col += infl * 0.06 * s;
   // the hero darkens a little under the nav, so its white links read
-  if (K.w > 0.5 && K.w < 1.5) col = mix(col, vec3(0.04, 0.1, 0.2), 0.32 * (1.0 - smoothstep(0.0, 130.0 * uScale, px.y - R.y)));
+  if (K.w > 0.5 && K.w < 1.5) col = mix(col, vec3(0.04, 0.1, 0.2), 0.52 * (1.0 - smoothstep(20.0 * uScale, 150.0 * uScale, px.y - R.y)));
   // mist behind copy that sits on the field
   if (W.w > 0.0) {
     vec2 wc = R.xy + W.xy * R.zw; vec2 wr = R.zw * W.z;

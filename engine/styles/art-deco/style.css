@@ -362,3 +362,9 @@ html.style-art-deco .ss-panel::after { display: none; }
   .dc-feature--l, .dc-feature--r, .dc-feature--c { transform: none; opacity: 1; }
   .dc-drum > span, .dc-rule::before, .dc-rule::after { transition: none; }
 }
+@media (prefers-reduced-motion: reduce) {
+  html.dc-live .dc-overture { height: auto; }
+  html.dc-live .dc-stage { position: relative; height: auto; min-height: 100svh; }
+  .dc-burst { --a: 180deg; }
+  .dc-burst--section, .dc-burst--star { --a: 90deg; }
+}
