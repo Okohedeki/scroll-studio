@@ -1,0 +1,15 @@
+{# Bauhaus page furniture: a black index strip down the left edge (numbered, lowercase, rotated labels; the active
+   poster is marked by a small red square) and a colophon at the end. #}
+{% macro top(site, sections, nav_links) %}
+<header class="bh-index">
+  <a class="bh-index__mark" href="#" aria-label="{{ site.name }}, top"><i aria-hidden="true"></i><span>{{ site.name }}</span></a>
+  <nav class="bh-index__links" aria-label="Sections">
+    {% for l in nav_links %}<a href="{{ l.href }}" data-target="{{ l.href }}"><b>{{ loop.index }}</b><span>{{ l.label }}</span></a>{% endfor %}
+  </nav>
+  {% if site.nav.cta %}<a class="bh-index__cta" href="{{ site.nav.cta.href }}"><span>{{ site.nav.cta.label }}</span></a>{% endif %}
+</header>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}
+<div class="bh-colophon" aria-hidden="true"><i class="bh-colophon__c"></i><i class="bh-colophon__b"></i></div>
+{% endmacro %}

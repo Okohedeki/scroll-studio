@@ -1,0 +1,135 @@
+{# Bauhaus: every section is one poster. Without JavaScript each poster stands on its own (static primitives drawn in
+   CSS); with it, one fixed stage holds the same primitives for the whole page and every section becomes a designed
+   resting state of that stage (runtime/src/styles/bauhaus.ts). Text is real HTML in reading order. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+
+{% macro btns(list) %}{% if list %}<div class="bh-btns">{% for l in list %}<a class="bh-btn{% if loop.first %} bh-btn--hot{% endif %}" href="{{ l.href }}"><span>{{ l.label }}</span><i class="bh-arrow" aria-hidden="true"></i></a>{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro statics(kind) %}<div class="bh-static bh-static--{{ kind }}" aria-hidden="true"><i class="s-c"></i><i class="s-b"></i><i class="s-t"></i><i class="s-q"></i></div>{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set no = "%d" | format(loop.index) %}
+{% if b.type == "hero" %}
+<section class="bh bh--hero" data-bh="hero"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {{ statics("hero") }}
+  <div class="bh-poster">
+    {% if b.badge %}<p class="bh-cap bh-slide" data-from="t">{{ b.badge }}</p>{% endif %}
+    {% if e.first %}<h1 class="bh-head bh-words">{{ b.title | rich }}</h1>{% else %}<h2 class="bh-head bh-words">{{ b.title | rich }}</h2>{% endif %}
+    {% if b.body %}<p class="bh-body bh-slide" data-from="b">{{ b.body | rich }}</p>{% endif %}
+    {% if b.buttons %}<div class="bh-slide" data-from="r">{{ btns(b.buttons) }}</div>{% endif %}
+    {% if b.device %}<figure class="bh-device bh-slide" data-from="r">{{ base.phone(b.device, e.screen, e.clip) }}</figure>{% endif %}
+  </div>
+</section>
+
+{% elif b.type == "intro" %}
+<section class="bh bh--intro" data-bh="intro"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {{ statics("intro") }}
+  <div class="bh-poster">
+    <p class="bh-margin bh-slide" data-from="b"><b>{{ no }}</b>{% if b.kicker %} {{ b.kicker }}{% endif %}</p>
+    <h2 class="bh-head bh-words">{{ b.title | rich }}</h2>
+    {% if b.body %}<p class="bh-body bh-slide" data-from="r">{{ b.body | rich }}</p>{% endif %}
+    {% if b.button %}<div class="bh-slide" data-from="r"><div class="bh-btns"><a class="bh-btn bh-btn--hot" href="{{ b.button.href }}"><span>{{ b.button.label }}</span><i class="bh-arrow" aria-hidden="true"></i></a></div></div>{% endif %}
+  </div>
+</section>
+
+{% elif b.type == "features" %}
+<section class="bh bh--features" data-bh="features" data-steps="{{ b.items | length }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {{ statics("features") }}
+  <div class="bh-poster">
+    <p class="bh-margin bh-slide" data-from="b"><b>{{ no }}</b>{% if b.kicker %} {{ b.kicker }}{% endif %}</p>
+    {% if b.title %}<h2 class="bh-head bh-head--s bh-words">{{ b.title | rich }}</h2>{% endif %}
+    <ol class="bh-feats">
+      {% for f in b.items %}
+      <li class="bh-feat" data-shape="{{ ['t', 'q', 'c', 'h', 'd'][loop.index0 % 5] }}">
+        <span class="bh-feat__no" aria-hidden="true">{{ f.tag or ("%02d" | format(loop.index)) }}</span>
+        <div class="bh-feat__txt"><h3>{{ f.title | rich }}</h3>{% if f.body %}<p>{{ f.body | rich }}</p>{% endif %}
+        {% if f.meter is not none %}<div class="bh-meter" aria-hidden="true"><i style="width: {{ (f.meter * 100) | round }}%"></i></div>{% endif %}</div>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "product" %}
+<section class="bh bh--product bh--{{ b.side }}" data-bh="product"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {{ statics("product") }}
+  <div class="bh-poster">
+    {% if e.img or b.device %}<figure class="bh-device bh-slide" data-from="r">
+      {% if e.img %}<img class="bh-photo" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+      {% if b.device %}{{ base.phone(b.device, e.screen, e.clip) }}{% endif %}
+    </figure>{% endif %}
+    <p class="bh-margin bh-slide" data-from="b"><b>{{ no }}</b>{% if b.kicker %} {{ b.kicker }}{% endif %}</p>
+    <h2 class="bh-head bh-head--s bh-words">{{ b.title | rich }}</h2>
+    {% if b.body %}<p class="bh-body bh-slide" data-from="l">{{ b.body | rich }}</p>{% endif %}
+    {% if b.stats %}<ul class="bh-mini bh-slide" data-from="l">{% for st in b.stats %}<li><b>{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</b><span>{{ st.label }}</span></li>{% endfor %}</ul>
+    {% elif b.tags %}<ul class="bh-tags bh-slide" data-from="l">{% for t in b.tags %}<li>{{ t }}</li>{% endfor %}</ul>{% endif %}
+    {% if b.buttons %}<div class="bh-slide" data-from="l">{{ btns(b.buttons) }}</div>{% endif %}
+    {% if b.note %}<p class="bh-note bh-slide" data-from="l">{{ b.note | rich }}</p>{% endif %}
+  </div>
+</section>
+
+{% elif b.type == "stats" %}
+<section class="bh bh--stats" data-bh="stats" data-steps="{{ b.items | length }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {{ statics("stats") }}
+  <div class="bh-poster">
+    <ul class="bh-stats">
+      {% for st in b.items %}
+      <li class="bh-stat" data-v="{{ st.value | replace(',', '') }}" data-unit="{{ st.unit or '' }}">
+        <span class="bh-stat__v">{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</span>
+        <span class="bh-stat__l">{{ st.label }}</span>
+        <span class="bh-stat__fig" aria-hidden="true"></span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
+
+{% elif b.type == "timeline" %}
+<section class="bh bh--timeline" data-bh="timeline" data-steps="{{ b.items | length }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {{ statics("timeline") }}
+  <div class="bh-poster">
+    <p class="bh-margin bh-slide" data-from="b"><b>{{ no }}</b>{% if b.kicker %} {{ b.kicker }}{% endif %}</p>
+    {% if b.title %}<h2 class="bh-head bh-head--s bh-words">{{ b.title | rich }}</h2>{% endif %}
+    <ol class="bh-steps">
+      {% for t in b.items %}
+      <li class="bh-step"><span class="bh-step__no" aria-hidden="true">{{ loop.index }}</span><div class="bh-step__txt"><span class="bh-step__when">{{ t.when }}</span><h3>{{ t.title | rich }}</h3>{% if t.body %}<p>{{ t.body | rich }}</p>{% endif %}</div></li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "quote" %}
+<section class="bh bh--quote" data-bh="quote"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {{ statics("quote") }}
+  <div class="bh-poster">
+    <figure class="bh-quote">
+      <span class="bh-qmark bh-slide" data-from="t" aria-hidden="true"><i></i><i></i></span>
+      <blockquote class="bh-head bh-head--q bh-words">{{ b.text | rich }}</blockquote>
+      {% if b.who %}<figcaption class="bh-cap bh-slide" data-from="r">{{ b.who }}</figcaption>{% endif %}
+    </figure>
+  </div>
+</section>
+
+{% elif b.type == "faq" %}
+<section class="bh bh--faq" data-bh="faq"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {{ statics("faq") }}
+  <div class="bh-poster">
+    <p class="bh-margin bh-slide" data-from="b"><b>{{ no }}</b>{% if b.kicker %} {{ b.kicker }}{% endif %}</p>
+    <h2 class="bh-head bh-head--s bh-words">{{ b.title | rich }}</h2>
+    <div class="bh-faq bh-slide" data-from="r">
+      {% for it in b.items %}<details{% if loop.first %} open{% endif %}><summary><b>{{ loop.index }}</b><span>{{ it.q | rich }}</span><i class="bh-plus" aria-hidden="true"></i></summary><p>{{ it.a | rich }}</p></details>{% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "cta" %}
+<section class="bh bh--cta" data-bh="cta"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {{ statics("cta") }}
+  <div class="bh-poster">
+    {% if b.kicker %}<p class="bh-cap bh-slide" data-from="t">{{ b.kicker }}</p>{% endif %}
+    <h2 class="bh-head bh-words">{{ b.title | rich }}</h2>
+    {% if b.button %}<a class="bh-go" href="{{ b.button.href }}"><span>{{ b.button.label }}</span></a>{% endif %}
+  </div>
+</section>
+{% endif %}
+{% endmacro %}

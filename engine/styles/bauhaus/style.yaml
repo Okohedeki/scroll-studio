@@ -1,17 +1,21 @@
-# Bauhaus: tokens and fonts for theme.style: bauhaus. See README.md in this folder for the UX contract.
+# Bauhaus: tokens and fonts for theme.style: bauhaus. See engine/styles/README.md for the contract and
+# docs/styles/styles-16-21.md section 1 for the research.
 label: Bauhaus
-about: Primary colours, circles, squares and triangles, everything on the grid.
+about: One pinned poster that recomposes as you scroll. A red circle, a black bar, a yellow triangle and a blue square slide, rotate and re-dock into a new designed layout for every section; the circle that was the sun becomes the pie chart and finally the button.
 mode: light
 colors:
-  bg: '#f2ede1'
-  bg2: '#e8e1d0'
+  bg: '#efe8da'
+  bg2: '#e6ddca'
   ink: '#111111'
-  accent: '#d7262b'
-  accent2: '#1d4fc4'
+  accent: '#be1e2d'
+  accent2: '#1f4e9c'
   accent_ink: '#ffffff'
+  accent_text: '#a51a27'
 fonts:
-  display: Josefin Sans
-  body: Josefin Sans
-  mono: Space Mono
+  display: Jost
+  body: Jost
+  mono: Jost
+font_axes:
+  Jost: "ital,wght@0,100..900;1,100..900"
 display_weight: 700
 radius: 0px
