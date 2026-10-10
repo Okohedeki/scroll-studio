@@ -1,0 +1,162 @@
+{# Particles: every section is a state of one conserved swarm. Each section is a pinned "scene" (a tall track with a
+   sticky stage); the stage holds the copy at its margins and invisible formation sources ([data-form]) that tell the
+   runtime what the swarm should become here: the headline's own letterforms, the phone, the stat digits, the
+   feature constellations, the stream of the timeline, the gravity well around the CTA. All text is real HTML. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+
+{% macro btns(list) %}{% if list %}<div class="px-btns">{% for l in list %}<a class="px-btn{% if loop.first %} px-btn--line{% endif %}" href="{{ l.href }}"><span>{{ l.label }}</span></a>{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro ghost(title) %}{% set parts = title.split('<em>') %}{% if parts | length > 1 %}{{ parts[1].split('</em>')[0] | striptags }}{% else %}{{ title | striptags }}{% endif %}{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set idattr %}{% if b.id %} id="{{ b.id }}"{% endif %}{% endset %}
+{% set num = "%02d" | format(loop.index) %}
+
+{% if b.type == "hero" %}
+{% set media = e.img or e.video %}
+<section class="px-scene px-hero{% if media %} px-hero--media{% endif %}{% if b.device %} px-hero--device{% endif %}" data-px="hero"{{ idattr }}>
+  <div class="px-stage">
+    <div class="px-hero__top">
+      {% if b.badge %}<p class="px-micro px-copy">{{ b.badge }}</p>{% endif %}
+      <p class="px-micro px-copy px-hero__n" aria-hidden="true">{{ num }} / {{ "%02d" | format(loop.length) }}</p>
+    </div>
+    {% if media %}<figure class="px-hero__media" data-form="{{ 'image' if e.img and not e.video else 'box' }}">{% if e.video %}<video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video>{% else %}<img src="{{ e.img }}" alt="" fetchpriority="high">{% endif %}</figure>{% endif %}
+    {% if e.first %}<h1 class="px-hero__title px-resolve" data-form="text">{{ b.title | rich }}</h1>{% else %}<h2 class="px-hero__title px-resolve" data-form="text">{{ b.title | rich }}</h2>{% endif %}
+    {% if b.device %}<div class="px-hero__phone px-resolve" data-form="phone">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+    <div class="px-hero__foot px-copy">
+      {% if b.body %}<p class="px-lede">{{ b.body | rich }}</p>{% endif %}
+      {{ btns(b.buttons) }}
+    </div>
+    <p class="px-micro px-hint px-copy" aria-hidden="true"><i></i>Scroll, and the matter re-forms</p>
+  </div>
+</section>
+
+{% elif b.type == "intro" %}
+<section class="px-scene px-intro" data-px="intro"{{ idattr }}>
+  <div class="px-stage">
+    <p class="px-ghost" data-form="text" aria-hidden="true">{{ ghost(b.title) | trim }}</p>
+    <div class="px-copy px-intro__copy">
+      {% if b.kicker %}<p class="px-micro"><span class="px-n">{{ num }}</span>{{ b.kicker }}</p>{% endif %}
+      <h2 class="px-h2">{{ b.title | rich }}</h2>
+      {% if b.body %}<p class="px-lede">{{ b.body | rich }}</p>{% endif %}
+      {% if b.button %}{{ btns([b.button]) }}{% endif %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "features" %}
+<section class="px-scene px-features" data-px="features" style="--n: {{ b.items | length }}"{{ idattr }}>
+  <div class="px-stage">
+    {% if b.title or b.kicker %}<header class="px-copy px-features__head">
+      {% if b.kicker %}<p class="px-micro"><span class="px-n">{{ num }}</span>{{ b.kicker }}</p>{% endif %}
+      {% if b.title %}<h2 class="px-h2">{{ b.title | rich }}</h2>{% endif %}
+    </header>{% endif %}
+    <ol class="px-feats px-feats--{{ [b.items | length, 6] | min }}">
+      {% for f in b.items %}
+      <li class="px-feat" data-i="{{ loop.index0 }}" tabindex="0">
+        <div class="px-feat__glyph" data-form="icon" data-icon="{{ loop.index0 }}" aria-hidden="true"></div>
+        <div class="px-feat__text">
+          <p class="px-micro">{{ f.tag or ("%02d" | format(loop.index)) }}</p>
+          <h3>{{ f.title | rich }}</h3>
+          {% if f.body %}<p>{{ f.body | rich }}</p>{% endif %}
+          {% if f.meter is not none %}<div class="px-meter" role="img" aria-label="{{ (f.meter * 100) | round | int }}%"><i style="--m: {{ f.meter }}"></i></div>{% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "product" %}
+<section class="px-scene px-product px-product--{{ b.side }}" data-px="product"{{ idattr }}>
+  <div class="px-stage">
+    <div class="px-product__media">
+      {% if e.img %}<img class="px-product__img px-resolve" src="{{ e.img }}" alt="" loading="lazy" data-form="image">{% endif %}
+      {% if b.behind %}<div class="px-phone px-phone--behind px-resolve" data-form="phone">{{ base.phone(b.behind, e.behind, e.behind_clip) }}</div>{% endif %}
+      {% if b.device %}<div class="px-phone px-resolve" data-form="phone">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+    </div>
+    <div class="px-copy px-product__copy">
+      {% if b.kicker %}<p class="px-micro"><span class="px-n">{{ num }}</span>{{ b.kicker }}</p>{% endif %}
+      <h2 class="px-h2">{{ b.title | rich }}</h2>
+      {% if b.body %}<p class="px-lede">{{ b.body | rich }}</p>{% endif %}
+      {% if b.stats %}<dl class="px-minis">{% for st in b.stats %}<div><dt>{{ st.label }}</dt><dd>{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</dd></div>{% endfor %}</dl>
+      {% elif b.tags %}<ul class="px-tags">{% for t in b.tags %}<li>{{ t }}</li>{% endfor %}</ul>{% endif %}
+      {{ btns(b.buttons) }}
+      {% if b.note %}<p class="px-note">{{ b.note | rich }}</p>{% endif %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "stats" %}
+<section class="px-scene px-stats" data-px="stats" style="--n: {{ b.items | length }}"{{ idattr }}>
+  <div class="px-stage">
+    <div class="px-stats__matter" data-form="digits" aria-hidden="true"></div>
+    <ol class="px-stats__list px-copy">
+      {% for st in b.items %}
+      <li class="px-stat" data-i="{{ loop.index0 }}">
+        <span class="px-stat__v" data-v="{{ st.value }}" data-unit="{{ st.unit or '' }}"{% if st.value | countable %} data-n="{{ st.value | replace(',', '') }}"{% endif %}><b>{{ st.value }}</b>{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</span>
+        <span class="px-stat__l">{{ st.label }}</span>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "timeline" %}
+<section class="px-scene px-timeline" data-px="timeline" style="--n: {{ b.items | length }}"{{ idattr }}>
+  <div class="px-stage">
+    {% if b.title or b.kicker %}<header class="px-copy px-timeline__head">
+      {% if b.kicker %}<p class="px-micro"><span class="px-n">{{ num }}</span>{{ b.kicker }}</p>{% endif %}
+      {% if b.title %}<h2 class="px-h2">{{ b.title | rich }}</h2>{% endif %}
+    </header>{% endif %}
+    <ol class="px-steps px-steps--{{ [b.items | length, 6] | min }}" data-form="stream">
+      {% for t in b.items %}
+      <li class="px-step" data-i="{{ loop.index0 }}">
+        <span class="px-step__node" data-node aria-hidden="true"></span>
+        <p class="px-micro">{{ t.when }}</p>
+        <h3>{{ t.title | rich }}</h3>
+        {% if t.body %}<p>{{ t.body | rich }}</p>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "quote" %}
+<section class="px-scene px-quote" data-px="quote"{{ idattr }}>
+  <div class="px-stage">
+    <span class="px-quote__mark" data-form="text" aria-hidden="true">&ldquo;</span>
+    <figure class="px-copy px-quote__copy">
+      <blockquote>{{ b.text | rich }}</blockquote>
+      {% if b.who %}<figcaption class="px-micro">{{ b.who }}</figcaption>{% endif %}
+    </figure>
+  </div>
+</section>
+
+{% elif b.type == "faq" %}
+<section class="px-scene px-faq px-scene--free" data-px="faq"{{ idattr }}>
+  <div class="px-stage">
+    <header class="px-faq__head">
+      {% if b.kicker %}<p class="px-micro"><span class="px-n">{{ num }}</span>{{ b.kicker }}</p>{% endif %}
+      <h2 class="px-h2">{{ b.title | rich }}</h2>
+      <p class="px-micro px-faq__calm" aria-hidden="true">Calm zone · the swarm thins to dust</p>
+    </header>
+    <div class="px-faq__list">
+      {% for it in b.items %}<details{% if loop.first %} open{% endif %}><summary><span>{{ it.q | rich }}</span><i aria-hidden="true"></i></summary><p>{{ it.a | rich }}</p></details>{% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "cta" %}
+<section class="px-scene px-cta" data-px="cta"{{ idattr }}>
+  {% if e.bg %}<div class="px-cta__bg" style="background-image: url('{{ e.bg }}')"></div>{% endif %}
+  <div class="px-stage">
+    <div class="px-cta__in px-copy">
+      {% if b.kicker %}<p class="px-micro">{{ b.kicker }}</p>{% endif %}
+      <h2 class="px-h2 px-cta__title">{{ b.title | rich }}</h2>
+    </div>
+    {% if b.button %}<a class="px-well" href="{{ b.button.href }}" data-form="well"><span class="px-well__core"></span><span class="px-well__label">{{ b.button.label }}</span></a>{% endif %}
+  </div>
+</section>
+{% endif %}
+{% endmacro %}

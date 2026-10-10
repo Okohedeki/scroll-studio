@@ -1,17 +1,26 @@
 # Neon glow: tokens and fonts for theme.style: neon-glow. See README.md in this folder for the UX contract.
+# A night street of storefront walls; real-signage tube colours, at most two per sign, body text never glows.
 label: Neon glow
-about: Tubes of light on a dark wall; headlines buzz on as they arrive.
+about: The lights come on as you arrive. A walk down a night street where each section's headline is a tube sign, unlit glass until you reach it, then it stutters on and floods the wall with its colour while the one behind you dims. Features light in sequence, stats are segmented tube numerals, and the call to action is the OPEN sign.
 mode: dark
 colors:
-  bg: '#07040d'
-  bg2: '#0e0818'
-  ink: '#fbeaff'
-  accent: '#ff2bd6'
-  accent2: '#3df5ff'
-  accent_ink: '#16031a'
+  bg: '#0b0a0e'
+  bg2: '#16131a'
+  ink: '#e9e4da'
+  accent: '#ff2a6d'
+  accent2: '#05d9e8'
+  accent_ink: '#0b0a0e'
 fonts:
   display: Tilt Neon
-  body: Outfit
-  mono: Space Mono
+  body: Barlow
+  mono: DM Mono
+  script: Neonderthaw
+  plaque: Barlow Condensed
+font_axes:
+  Tilt Neon: ""
+  Barlow: "ital,wght@0,400;0,500;0,600;1,400"
+  DM Mono: "ital,wght@0,300;0,400;0,500;1,400"
+  Neonderthaw: ""
+  Barlow Condensed: "wght@400;500;600;700"
 display_weight: 400
 radius: 999px

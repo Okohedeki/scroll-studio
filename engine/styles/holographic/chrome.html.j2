@@ -1,0 +1,12 @@
+{# Holographic chrome: an opt-in gyroscope control (phones: tilt to explore) and, at the foot of the page, a banknote
+   security strip: a diffraction band of repeated microtext with a hologram badge. #}
+{% macro top(site, sections, nav_links) %}
+<button class="hg-tilt" type="button" hidden aria-pressed="false"><i aria-hidden="true"></i><span>Tilt to explore</span></button>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}
+<div class="hg-strip" aria-hidden="true">
+  <div class="hg-strip__band"><span>{% for i in range(24) %}{{ site.name }} ✦ {% endfor %}</span></div>
+  <div class="hg-strip__badge hg-plate hg-pat--cosmos" data-hg-plate data-range="40"><div class="hg-plate__body"><b>{{ site.name[:1] }}</b><i class="hg-foil"></i><i class="hg-glare"></i></div></div>
+</div>
+{% endmacro %}

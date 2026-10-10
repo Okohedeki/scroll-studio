@@ -1,0 +1,16 @@
+{# Neon glow chrome: the room light (the shared wall and street take the colour of the sign you are at), the faint
+   light your hand casts near the glass, and closing time at the end of the street. #}
+{% macro top(site, sections, nav_links) %}
+<div class="ng-room" aria-hidden="true"></div>
+<div class="ng-torch" aria-hidden="true"></div>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}
+<section class="ng-front ng-wall--paint ng-closing" style="--tube: #2f7bff; --tube2: #ffe9c7" aria-label="Closing time">
+  <div class="ng-spill" aria-hidden="true"><i></i></div>
+  <div class="ng-closing__in">
+    <p class="ng-sign ng-sign--closing" data-sign aria-hidden="true"><span class="ng-sign__txt">Closed · see you tomorrow</span></p>
+    <p class="ng-minisign ng-minisign--brand" style="--tube: #ff2a6d" data-always><span>{{ site.name }}</span></p>
+  </div>
+</section>
+{% endmacro %}

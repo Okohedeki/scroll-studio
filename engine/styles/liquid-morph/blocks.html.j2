@@ -1,0 +1,156 @@
+{# Liquid morph: the page is one continuous fluid. Every section is a region of it (data-tone); with WebGL the regions
+   and the protagonist blob are drawn by one canvas, so section edges become moving menisci and the blob morphs into
+   each section's idea. Stats are droplets that divide from one drop; features are droplets in a fusion carousel.
+   Everything here is plain, readable HTML first; the regions fall back to flat colour bands. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+
+{% macro btns(list) %}{% if list %}<div class="lq-btns">{% for l in list %}<a class="lq-btn{% if loop.first %} lq-btn--fill{% endif %}" href="{{ l.href }}"><span>{{ l.label }}</span></a>{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro tone(b, loop) %}{% if b.type == "cta" %}plum{% elif b.type == "stats" %}candy{% elif b.surface == "dark" %}plum{% elif loop.index0 % 2 == 0 %}peach{% else %}lilac{% endif %}{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set idattr %}{% if b.id %} id="{{ b.id }}"{% endif %}{% endset %}
+{% set t = tone(b, loop) | trim %}
+
+{% if b.type == "hero" %}
+{% set media = e.img or e.video %}
+<section class="lq-sec lq-hero lq-tone--{{ t }}{% if media %} lq-hero--media{% endif %}" data-lq="hero" data-tone="{{ t }}"{{ idattr }}>
+  <div class="lq-hero__in">
+    {% if b.badge %}<p class="lq-badge"><i aria-hidden="true"></i>{{ b.badge }}</p>{% endif %}
+    {% if e.first %}<h1 class="lq-h1 lq-melt">{{ b.title | rich }}</h1>{% else %}<h2 class="lq-h1 lq-melt">{{ b.title | rich }}</h2>{% endif %}
+    {% if b.body %}<p class="lq-lede">{{ b.body | rich }}</p>{% endif %}
+    {{ btns(b.buttons) }}
+  </div>
+  {% if media %}<div class="lq-hero__media lq-blobmask">{% if e.video %}<video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video>{% else %}<img src="{{ e.img }}" alt="" fetchpriority="high">{% endif %}</div>{% endif %}
+  {% if b.device %}<div class="lq-hero__phone">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+  <p class="lq-scrollcue" aria-hidden="true"><i></i>scroll slowly, or fling it</p>
+</section>
+
+{% elif b.type == "intro" %}
+<section class="lq-sec lq-intro lq-tone--{{ t }}" data-lq="intro" data-tone="{{ t }}"{{ idattr }}>
+  <div class="lq-intro__in">
+    {% if b.kicker %}<p class="lq-kicker">{{ b.kicker }}</p>{% endif %}
+    <h2 class="lq-h2 lq-melt">{{ b.title | rich }}</h2>
+    {% if b.body %}<p class="lq-lede">{{ b.body | rich }}</p>{% endif %}
+    {% if b.button %}{{ btns([b.button]) }}{% endif %}
+  </div>
+</section>
+
+{% elif b.type == "features" %}
+<section class="lq-sec lq-features lq-tone--{{ t }}" data-lq="features" data-tone="{{ t }}" style="--n: {{ b.items | length }}"{{ idattr }}>
+  <div class="lq-features__stage">
+    {% if b.title or b.kicker %}<header class="lq-features__head">
+      {% if b.kicker %}<p class="lq-kicker">{{ b.kicker }}</p>{% endif %}
+      {% if b.title %}<h2 class="lq-h2 lq-melt">{{ b.title | rich }}</h2>{% endif %}
+    </header>{% endif %}
+    <ol class="lq-drops">
+      {% for f in b.items %}
+      <li class="lq-drop" data-i="{{ loop.index0 }}" tabindex="0">
+        <div class="lq-drop__in">
+          <span class="lq-drop__tag">{{ f.tag or ("%02d" | format(loop.index)) }}</span>
+          <h3>{{ f.title | rich }}</h3>
+          {% if f.body %}<p>{{ f.body | rich }}</p>{% endif %}
+          {% if f.meter is not none %}<div class="lq-meter" role="img" aria-label="{{ (f.meter * 100) | round | int }}%"><i style="--m: {{ f.meter }}"></i></div>{% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+    <p class="lq-features__hint" aria-hidden="true"><span>{{ "%02d" | format(1) }}</span> / {{ "%02d" | format(b.items | length) }}</p>
+  </div>
+</section>
+
+{% elif b.type == "product" %}
+<section class="lq-sec lq-product lq-product--{{ b.side }} lq-tone--{{ t }}" data-lq="product" data-side="{{ b.side }}" data-tone="{{ t }}"{{ idattr }}>
+  <div class="lq-product__in">
+    <div class="lq-product__media" data-lq-anchor>
+      {% if e.img %}<img class="lq-product__img lq-blobmask" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+      {% if b.behind %}<div class="lq-phone lq-phone--behind">{{ base.phone(b.behind, e.behind, e.behind_clip) }}</div>{% endif %}
+      {% if b.device %}<div class="lq-phone">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+    </div>
+    <div class="lq-product__copy">
+      {% if b.kicker %}<p class="lq-kicker">{{ b.kicker }}</p>{% endif %}
+      <h2 class="lq-h2 lq-melt">{{ b.title | rich }}</h2>
+      {% if b.body %}<p class="lq-lede">{{ b.body | rich }}</p>{% endif %}
+      {% if b.stats %}<dl class="lq-minis">{% for st in b.stats %}<div><dd>{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</dd><dt>{{ st.label }}</dt></div>{% endfor %}</dl>
+      {% elif b.tags %}<ul class="lq-pills">{% for tg in b.tags %}<li>{{ tg }}</li>{% endfor %}</ul>{% endif %}
+      {{ btns(b.buttons) }}
+      {% if b.note %}<p class="lq-note">{{ b.note | rich }}</p>{% endif %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "stats" %}
+<section class="lq-sec lq-stats lq-tone--{{ t }}" data-lq="stats" data-tone="{{ t }}" style="--n: {{ b.items | length }}"{{ idattr }}>
+  <div class="lq-stats__stage">
+    <p class="lq-stats__note" aria-hidden="true">one drop, divided</p>
+    <ol class="lq-cells lq-cells--{{ [b.items | length, 6] | min }}">
+      {% for st in b.items %}
+      <li class="lq-cell" data-i="{{ loop.index0 }}">
+        <div class="lq-cell__drop">
+          <span class="lq-cell__v"{% if st.value | countable %} data-n="{{ st.value | replace(',', '') }}"{% endif %}><b>{{ st.value }}</b>{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</span>
+          <span class="lq-cell__l">{{ st.label }}</span>
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "timeline" %}
+<section class="lq-sec lq-timeline lq-tone--{{ t }}" data-lq="timeline" data-tone="{{ t }}"{{ idattr }}>
+  <div class="lq-timeline__in">
+    {% if b.title or b.kicker %}<header class="lq-timeline__head">
+      {% if b.kicker %}<p class="lq-kicker">{{ b.kicker }}</p>{% endif %}
+      {% if b.title %}<h2 class="lq-h2 lq-melt">{{ b.title | rich }}</h2>{% endif %}
+    </header>{% endif %}
+    <ol class="lq-stream">
+      {% for it in b.items %}
+      <li class="lq-landing" data-i="{{ loop.index0 }}">
+        <span class="lq-landing__drop" aria-hidden="true"></span>
+        <p class="lq-landing__when">{{ it.when }}</p>
+        <h3>{{ it.title | rich }}</h3>
+        {% if it.body %}<p>{{ it.body | rich }}</p>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "quote" %}
+<section class="lq-sec lq-quote lq-tone--{{ t }}" data-lq="quote" data-tone="{{ t }}"{{ idattr }}>
+  <figure class="lq-quote__blob">
+    <blockquote>{{ b.text | rich }}</blockquote>
+    {% if b.who %}<figcaption><i aria-hidden="true"></i>{{ b.who }}</figcaption>{% endif %}
+  </figure>
+</section>
+
+{% elif b.type == "faq" %}
+<section class="lq-sec lq-faq lq-tone--{{ t }}" data-lq="faq" data-tone="{{ t }}"{{ idattr }}>
+  <div class="lq-faq__in">
+    <header>
+      {% if b.kicker %}<p class="lq-kicker">{{ b.kicker }}</p>{% endif %}
+      <h2 class="lq-h2 lq-melt">{{ b.title | rich }}</h2>
+    </header>
+    <div class="lq-faq__list">
+      {% for it in b.items %}
+      <details class="lq-q"{% if loop.first %} open{% endif %}>
+        <summary><span>{{ it.q | rich }}</span><i aria-hidden="true"></i></summary>
+        <div class="lq-q__a"><p>{{ it.a | rich }}</p></div>
+        <svg class="lq-q__membrane" viewBox="0 0 100 20" preserveAspectRatio="none" aria-hidden="true"><path d="M0 10 Q50 10 100 10"/></svg>
+      </details>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "cta" %}
+<section class="lq-sec lq-cta lq-tone--{{ t }}" data-lq="cta" data-tone="{{ t }}"{{ idattr }}>
+  {% if e.bg %}<div class="lq-cta__bg lq-blobmask" style="background-image: url('{{ e.bg }}')"></div>{% endif %}
+  <div class="lq-cta__in">
+    {% if b.kicker %}<p class="lq-kicker">{{ b.kicker }}</p>{% endif %}
+    <h2 class="lq-h1 lq-melt">{{ b.title | rich }}</h2>
+    {% if b.button %}<a class="lq-btn lq-btn--pour" href="{{ b.button.href }}"><span>{{ b.button.label }}</span></a>{% endif %}
+  </div>
+</section>
+{% endif %}
+{% endmacro %}

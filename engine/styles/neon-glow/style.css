@@ -1,20 +1,321 @@
-/* neon glow: tubes of light on a dark wall; headlines buzz on the first time they are seen (.fx-seen from the runtime) */
-@keyframes ss-neon-on { 0% { opacity: .15; } 8% { opacity: 1; } 10% { opacity: .3; } 14% { opacity: 1; } 22% { opacity: .5; } 26%, 100% { opacity: 1; } }
-@keyframes ss-neon-hum { 0%, 100% { opacity: 1; } 50% { opacity: .9; } }
-html.style-neon-glow body { background: radial-gradient(120% 80% at 50% 0%, #1a0b2e 0%, var(--bg) 60%) fixed; }
-html.style-neon-glow .ss-h1, html.style-neon-glow .ss-h2, html.style-neon-glow .ss-display, html.style-neon-glow .ss-v {
-  color: #fff; text-shadow: 0 0 4px #fff, 0 0 12px var(--accent), 0 0 28px var(--accent), 0 0 60px rgba(var(--accent-rgb), .6); }
-html.style-neon-glow .ss-h1 em, html.style-neon-glow .ss-h2 em, html.style-neon-glow .ss-display em {
-  color: #e9feff; font-style: normal; text-shadow: 0 0 4px #fff, 0 0 12px var(--accent-2), 0 0 30px var(--accent-2), 0 0 64px var(--accent-2); }
-html.style-neon-glow .fx-seen.ss-h1, html.style-neon-glow .fx-seen.ss-h2, html.style-neon-glow .fx-seen.ss-display { animation: ss-neon-on 1.4s steps(1, end) both, ss-neon-hum 3s 1.4s ease-in-out infinite; }
-html.style-neon-glow .ss-kicker { color: var(--accent-2); text-shadow: 0 0 10px var(--accent-2); }
-html.style-neon-glow .ss-btn { border: 1.5px solid var(--accent-2); color: #e9feff; background: transparent; box-shadow: 0 0 10px rgba(61, 245, 255, .5), inset 0 0 10px rgba(61, 245, 255, .35); text-shadow: 0 0 8px var(--accent-2); }
-html.style-neon-glow .ss-btn--hot { border-color: var(--accent); color: #fff; box-shadow: 0 0 12px var(--accent), inset 0 0 12px rgba(var(--accent-rgb), .5); text-shadow: 0 0 8px var(--accent); background: rgba(var(--accent-rgb), .12); }
-html.style-neon-glow .ss-btn:hover { background: rgba(var(--accent-rgb), .25); color: #fff; }
-html.style-neon-glow .ss-features { gap: 18px; background: none; border: 0; }
-html.style-neon-glow .ss-feature { border: 1.5px solid rgba(61, 245, 255, .55); border-radius: 18px; background: rgba(10, 4, 20, .6); box-shadow: 0 0 18px -4px rgba(61, 245, 255, .45), inset 0 0 22px -8px rgba(61, 245, 255, .35); }
-html.style-neon-glow .ss-feature:nth-child(2n) { border-color: rgba(var(--accent-rgb), .6); box-shadow: 0 0 18px -4px rgba(var(--accent-rgb), .5), inset 0 0 22px -8px rgba(var(--accent-rgb), .35); }
-html.style-neon-glow .ss-tl::before { background: var(--accent-2); box-shadow: 0 0 12px var(--accent-2), 0 0 24px var(--accent-2); }
-html.style-neon-glow .ss-tile { border-color: rgba(var(--accent-rgb), .45); box-shadow: 0 0 22px -8px var(--accent); }
-html.style-neon-glow .ss-band { background: rgba(255, 255, 255, .02); border-color: rgba(var(--accent-rgb), .3); }
-@media (prefers-reduced-motion: reduce) { html.style-neon-glow .fx-seen { animation: none !important; } }
+/* Neon glow: a night street of storefront walls. Every section is a wall (brick, concrete, black paint, or the warm
+   bar inside) with one primary sign mounted on a raceway, plain matte plaques for the copy, and darkness between the
+   storefronts. The runtime draws each sign as SVG tubes (glass, halo, core) over its real text and runs its power
+   state: unlit glass -> a two-dip stutter -> lit (spill on the wall, reflections on the wet ground) -> dimming behind
+   you. Glow is pre-rendered on separate layers and only their opacity ever changes. Body text never glows. */
+
+@property --room { syntax: "<color>"; inherits: true; initial-value: #ff2a6d; }
+html.style-neon-glow { --room: #ff2a6d; --core: #fff6f0; --glass: rgba(233, 228, 218, .42); --glassfill: rgba(233, 228, 218, .07); --plaque: "Barlow Condensed", var(--font-body);
+  transition: --room 1.3s ease; --brick: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='168' height='64'%3E%3Crect width='168' height='64' fill='%230a090c'/%3E%3Crect x='1' y='1' width='81' height='29' rx='2' fill='%231a1519'/%3E%3Crect x='85' y='1' width='81' height='29' rx='2' fill='%23171217'/%3E%3Crect x='-41' y='33' width='81' height='29' rx='2' fill='%231c161b'/%3E%3Crect x='43' y='33' width='81' height='29' rx='2' fill='%23161115'/%3E%3Crect x='127' y='33' width='81' height='29' rx='2' fill='%231c161b'/%3E%3Crect x='1' y='1' width='81' height='3' fill='%23ffffff' opacity='.025'/%3E%3Crect x='43' y='33' width='81' height='3' fill='%23ffffff' opacity='.02'/%3E%3C/svg%3E"); --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url%28%23n%29'/%3E%3C/svg%3E"); }
+html.style-neon-glow body { background: #08070a; }
+html.style-neon-glow em { color: inherit; font-style: normal; }
+
+/* stack layout: the street is continuous */
+html.style-neon-glow .ss-panel { position: relative; top: 0 !important; min-height: 0; display: block; border-radius: 0; box-shadow: none; overflow: visible; background: transparent; }
+html.style-neon-glow .ss-panel::after { display: none; }
+html.style-neon-glow .ss-panel > section { transform: none; }
+
+/* ------------------------------------------------------------- the room light and the hand near the glass */
+.ng-room { position: fixed; inset: 0; z-index: 40; pointer-events: none; mix-blend-mode: screen; opacity: .2;
+  background: radial-gradient(90% 40% at 50% 104%, var(--room), transparent 70%), radial-gradient(40% 60% at -4% 40%, var(--room), transparent 70%), radial-gradient(40% 60% at 104% 60%, var(--room), transparent 70%); }
+.ng-torch { position: fixed; left: 0; top: 0; width: 640px; height: 640px; margin: -320px 0 0 -320px; z-index: 41; pointer-events: none; mix-blend-mode: screen; opacity: 0;
+  background: radial-gradient(closest-side, var(--room), transparent); transform: translate(var(--tx, -999px), var(--ty, -999px)); transition: opacity .6s; }
+.ng-torch.is-on { opacity: .09; }
+html:not(.ng-live) .ng-torch { display: none; }
+
+/* ------------------------------------------------------------- nav: a small always-lit wordmark, plain links */
+html.style-neon-glow .ss-nav, html.style-neon-glow .ss-nav.ss-solid { background: linear-gradient(rgba(8, 7, 10, .92), rgba(8, 7, 10, 0)); backdrop-filter: none; -webkit-backdrop-filter: none; border-color: transparent; }
+html.style-neon-glow .ss-wordmark { font-family: var(--font-display); font-size: 24px; font-weight: 400; color: #ffd6e2; text-shadow: 0 0 4px rgba(255, 42, 109, .8), 0 0 14px rgba(255, 42, 109, .45); }
+html.style-neon-glow .ss-nav__links { gap: 30px; font-family: var(--plaque); font-weight: 500; font-size: 14px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+html.style-neon-glow .ss-nav__links a { position: relative; padding: 6px 0 9px; }
+html.style-neon-glow .ss-nav__links a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px; background: rgba(233, 228, 218, .16); }
+html.style-neon-glow .ss-nav__links a.is-on { color: var(--ink); }
+html.style-neon-glow .ss-nav__links a.is-on::after { background: var(--core); box-shadow: 0 0 4px var(--room), 0 0 12px var(--room); }
+html.style-neon-glow .ss-nav .ss-btn { background: transparent; border: 2px solid rgba(233, 228, 218, .3); font-family: var(--plaque); font-weight: 600; letter-spacing: .14em; text-transform: uppercase; font-size: 13px; backdrop-filter: none; }
+html.style-neon-glow .ss-nav .ss-btn:hover { background: transparent; color: var(--core); border-color: var(--core); box-shadow: 0 0 8px var(--room), inset 0 0 8px var(--room); }
+
+/* ------------------------------------------------------------- walls */
+.ng-front { position: relative; isolation: isolate; color: var(--ink); overflow: clip; }
+.ng-wall--brick { background: var(--noise), var(--brick); background-size: 240px, 168px 64px; }
+.ng-wall--concrete { background: var(--noise), linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px) 0 0 / 100% 46vh, linear-gradient(90deg, rgba(0, 0, 0, .35) 1px, transparent 1px) 0 0 / 33.33% 100%,
+  radial-gradient(circle, rgba(0, 0, 0, .55) 0 3px, transparent 4px) 40px 40px / 16.66% 23vh, #141217; }
+.ng-wall--paint { background: var(--noise), linear-gradient(180deg, #0d0c10, #0a090c); background-size: 240px, auto; }
+.ng-wall--bar { background: radial-gradient(60% 40% at 30% 0%, rgba(255, 179, 107, .16), transparent 70%), radial-gradient(50% 40% at 80% 0%, rgba(255, 179, 107, .12), transparent 70%),
+  var(--noise), repeating-linear-gradient(90deg, #1e1411 0 110px, #170f0d 110px 112px, #1b120f 112px 230px, #140d0b 230px 232px); }
+/* darkness between storefronts */
+.ng-front::before, .ng-front::after { content: ""; position: absolute; left: 0; right: 0; height: 16vh; z-index: 0; pointer-events: none; }
+.ng-front::before { top: 0; background: linear-gradient(#060508, rgba(6, 5, 8, 0)); }
+.ng-front::after { bottom: 0; background: linear-gradient(rgba(6, 5, 8, 0), #060508); }
+.ng-front > * { position: relative; z-index: 1; }
+.ng-spill { position: absolute !important; inset: 0; z-index: 0 !important; pointer-events: none; opacity: 0; transition: opacity 1.1s ease .1s; mix-blend-mode: screen;
+  background: radial-gradient(60% 46% at 32% 30%, color-mix(in srgb, var(--tube) 30%, transparent), transparent 72%); }
+.ng-front.is-lit .ng-spill { opacity: 1; transition-delay: .3s; }
+.ng-wet { position: absolute !important; left: 0; right: 0; bottom: 0; height: 24vh; z-index: 0 !important; pointer-events: none; opacity: 0; transition: opacity 1.2s .2s;
+  background: radial-gradient(34% 90% at 30% 0%, color-mix(in srgb, var(--tube) 55%, transparent), transparent 75%);
+  -webkit-mask: repeating-linear-gradient(0deg, #000 0 2px, rgba(0, 0, 0, .25) 2px 6px), linear-gradient(#000, transparent); -webkit-mask-composite: source-in;
+  mask: repeating-linear-gradient(0deg, #000 0 2px, rgba(0, 0, 0, .25) 2px 6px), linear-gradient(#000, transparent); mask-composite: intersect; }
+.ng-front.is-lit .ng-wet { opacity: .8; }
+
+/* ------------------------------------------------------------- signs: real text, drawn over as tubes */
+.ng-mount { position: relative; display: inline-block; max-width: 100%; }
+.ng-mount::before { content: ""; position: absolute; inset: -40% -18%; z-index: -1; pointer-events: none; opacity: 0; transition: opacity .9s .2s; mix-blend-mode: screen;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--tube) 34%, transparent), transparent); }
+.ng-mount:has(.is-lit)::before { opacity: calc(.72 + .28 * var(--near, 0)); }
+.ng-live .ng-sign:not(.has-tubes) .ng-sign__txt, .ng-live .ng-sign:not(.has-tubes) em { color: var(--glass); text-shadow: none; }
+.ng-mount::after { content: ""; position: absolute; left: 6%; right: 6%; top: 50%; height: 14px; margin-top: -7px; z-index: -1; border-radius: 3px;
+  background: radial-gradient(circle, #3a353f 0 2px, transparent 2.5px) 8px 50% / 120px 100% repeat-x, linear-gradient(#25222a, #17151b); box-shadow: 0 6px 12px -4px rgba(0, 0, 0, .8); }
+.ng-mount--script::after { display: none; }
+.ng-sign { position: relative; margin: 0; font-family: var(--font-display); font-weight: 400; line-height: 1.08; letter-spacing: .03em; text-wrap: balance; color: var(--core);
+  text-shadow: 0 0 2px #fff, 0 0 8px var(--tube), 0 0 20px var(--tube), 0 0 44px var(--tube); }
+.ng-sign em { color: var(--core); text-shadow: 0 0 2px #fff, 0 0 8px var(--tube2), 0 0 20px var(--tube2), 0 0 44px var(--tube2); }
+.ng-sign.has-tubes .ng-sign__txt, .ng-sign.has-tubes em { color: transparent; text-shadow: none; }
+.ng-sign.ng-sign--hero { font-size: clamp(52px, 8.6vw, 150px); }
+.ng-sign.ng-sign--big { font-size: clamp(42px, 6vw, 100px); }
+.ng-sign { font-size: clamp(36px, 4.4vw, 74px); }
+.ng-sign.ng-sign--small { font-size: clamp(26px, 2.2vw, 36px); }
+.ng-sign.ng-sign--script { font-family: "Neonderthaw", cursive; font-size: clamp(56px, 7.4vw, 128px); letter-spacing: 0; line-height: 1.1; }
+.ng-sign.ng-sign--closing { font-size: clamp(30px, 4vw, 64px); }
+.ng-tubes { position: absolute; inset: 0; pointer-events: none; }
+.ng-tubes svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.ng-glass text { fill: var(--glassfill); stroke: var(--glass); stroke-width: 1.15px; paint-order: stroke; }
+.ng-halo, .ng-halo2, .ng-core { opacity: 0; will-change: opacity; }
+.ng-halo { transition: opacity .45s ease; }
+.ng-halo2 { transition: opacity .35s ease; }
+.ng-core { transition: opacity 1.7s ease .15s; }   /* the core lingers: warm-off before unlit glass */
+.ng-core text { fill: var(--core); }
+.ng-sign.is-lit .ng-halo, .ng-sign.is-lit .ng-halo2, .ng-sign.is-lit .ng-core { opacity: 1; animation: ng-ignite .78s linear both; transition: none; }
+.ng-sign.is-lit .ng-halo2 { animation-name: ng-ignite2; }
+.ng-sign.is-idle .ng-core { opacity: .5; } .ng-sign.is-idle .ng-halo { opacity: .2; } .ng-sign.is-idle .ng-halo2 { opacity: 0; }
+/* two partial dips inside ~.6 s, then steady: under three flashes a second, never a full blackout */
+@keyframes ng-ignite { 0% { opacity: 0; } 9% { opacity: .95; } 18% { opacity: .3; } 32% { opacity: 1; } 44% { opacity: .42; } 60% { opacity: 1; } 100% { opacity: 1; } }
+@keyframes ng-ignite2 { 0%, 50% { opacity: 0; } 100% { opacity: 1; } }
+/* the bad tube: one letter of the hero sign lags, then buzzes now and then */
+.ng-sign--hero.is-lit .ng-core .ng-lag, .ng-sign--hero.is-lit .ng-halo .ng-lag { animation: ng-lag 1.7s linear both, ng-buzz 8s 3s linear infinite; }
+@keyframes ng-lag { 0%, 52% { opacity: .08; } 62% { opacity: 1; } 70% { opacity: .25; } 84% { opacity: 1; } 100% { opacity: 1; } }
+@keyframes ng-buzz { 0%, 93% { opacity: 1; } 94% { opacity: .35; } 95.5% { opacity: 1; } 97% { opacity: .5; } 98.5%, 100% { opacity: 1; } }
+
+/* small always-mounted signs (the badge, the brand at closing time) */
+.ng-minisign { display: inline-block; margin: 0 0 30px; }
+.ng-minisign span { position: relative; display: inline-block; padding: 9px 18px; border-radius: 10px; font-family: var(--font-display); font-size: 17px; letter-spacing: .06em; color: rgba(233, 228, 218, .78);
+  border: 2px solid var(--glass); transition: color .4s; }
+.ng-minisign span::before { content: ""; position: absolute; inset: -2px; border-radius: inherit; border: 2px solid var(--core); opacity: 0; transition: opacity .3s;
+  box-shadow: 0 0 6px var(--tube), 0 0 16px var(--tube), inset 0 0 10px var(--tube); }
+.is-lit .ng-minisign span, .ng-minisign[data-always] span, html:not(.ng-live) .ng-minisign span { color: var(--core); text-shadow: 0 0 6px var(--tube); }
+.is-lit .ng-minisign span::before, .ng-minisign[data-always] span::before, html:not(.ng-live) .ng-minisign span::before { opacity: 1; transition-delay: .9s; }
+
+/* ------------------------------------------------------------- plaques and labels: plain, matte, readable */
+.ng-plaque { position: relative; max-width: 46ch; padding: 18px 24px 20px; border-radius: 6px; background: linear-gradient(180deg, #1c1920, #131116); border: 1px solid rgba(233, 228, 218, .1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .05), 0 16px 34px -14px rgba(0, 0, 0, .9); font-family: var(--plaque); font-size: 19px; line-height: 1.45; letter-spacing: .01em; color: var(--ink); }
+.ng-plaque::before { content: ""; position: absolute; inset: 7px; pointer-events: none; background:
+  radial-gradient(circle, #4a4450 0 2px, transparent 2.5px) 0 0 / 7px 7px no-repeat, radial-gradient(circle, #4a4450 0 2px, transparent 2.5px) 100% 0 / 7px 7px no-repeat,
+  radial-gradient(circle, #4a4450 0 2px, transparent 2.5px) 0 100% / 7px 7px no-repeat, radial-gradient(circle, #4a4450 0 2px, transparent 2.5px) 100% 100% / 7px 7px no-repeat; }
+.is-lit .ng-plaque, .ng-plaque.is-lit { border-top-color: color-mix(in srgb, var(--tube) 45%, transparent); }
+.ng-plaque p + p { margin-top: 10px; }
+.ng-label { display: inline-block; margin: 0 0 22px; padding: 5px 10px; border-radius: 3px; background: #1d1a21; border: 1px solid rgba(233, 228, 218, .14);
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-2); }
+.ng-note { margin-top: 12px; font-size: 15px; color: var(--ink-2); }
+
+/* ------------------------------------------------------------- buttons: tube outlines, lit on hover */
+.ng-btns { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 28px; }
+.ng-btn { position: relative; display: inline-flex; align-items: center; padding: 14px 28px; border-radius: 999px; border: 2px solid var(--glass); color: var(--ink);
+  font-family: var(--plaque); font-weight: 600; font-size: 15px; letter-spacing: .16em; text-transform: uppercase; }
+.ng-btn::before { content: ""; position: absolute; inset: -2px; border-radius: inherit; border: 2px solid var(--core); opacity: 0; transition: opacity .25s;
+  box-shadow: 0 0 6px var(--tube), 0 0 18px var(--tube), inset 0 0 12px var(--tube); }
+.ng-btn--hot::before { opacity: .5; }
+.ng-btn:hover::before, .ng-btn:focus-visible::before { opacity: 1; }
+.ng-btn:hover, .ng-btn:focus-visible { color: var(--core); }
+.ng-btn:focus-visible, .ng-open:focus-visible { outline: 2px solid #fff; outline-offset: 8px; }
+
+/* ------------------------------------------------------------- hero: the densest wall */
+.ng-hero { min-height: 100vh; min-height: 100svh; display: flex; align-items: center; padding: 120px var(--gutter) 120px; }
+.ng-hero__in { width: min(1180px, 100%); }
+.ng-hero .ng-spill { background: radial-gradient(55% 50% at 30% 46%, color-mix(in srgb, var(--tube) 32%, transparent), transparent 72%); }
+.ng-hero__foot { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 24px 40px; margin-top: 46px; }
+.ng-hero__foot .ng-btns { margin-top: 0; }
+.ng-arrow { position: absolute !important; right: 9vw; top: 50%; width: 70px; transform: translateY(-50%); overflow: visible; }
+.ng-arrow path { fill: none; stroke: var(--glass); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.ng-arrow path { stroke-dasharray: 1 1; stroke-dashoffset: 0; }
+.ng-live .ng-hero.is-lit .ng-arrow path { stroke: var(--core); filter: drop-shadow(0 0 4px var(--tube2)) drop-shadow(0 0 12px var(--tube2)); animation: ng-draw 1.4s .6s ease-out both; }
+@keyframes ng-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.ng-window { position: absolute !important; border: 10px solid #1d1b21; border-radius: 4px; background: #0e0d11; overflow: hidden; box-shadow: inset 0 0 40px rgba(0, 0, 0, .9), 0 30px 60px -30px #000; }
+.ng-hero__window { right: 6vw; bottom: 16vh; width: min(30vw, 420px); aspect-ratio: 4 / 5; }
+.ng-hero__window img, .ng-hero__window video { width: 100%; height: 100%; object-fit: cover; opacity: .8; }
+.ng-hero__phone { right: 16vw; bottom: -20vh; padding: 20px; border: 0; background: none; box-shadow: none; overflow: visible; }
+
+/* ------------------------------------------------------------- intro */
+.ng-intro { padding: clamp(130px, 22vh, 240px) var(--gutter); }
+.ng-intro__in { max-width: 1240px; margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+.ng-intro .ng-plaque { margin-top: 44px; text-align: left; }
+.ng-intro .ng-spill { background: radial-gradient(55% 46% at 70% 40%, color-mix(in srgb, var(--tube) 30%, transparent), transparent 72%); }
+.ng-intro .ng-wet { background: radial-gradient(34% 90% at 70% 0%, color-mix(in srgb, var(--tube) 55%, transparent), transparent 75%); }
+
+/* ------------------------------------------------------------- features: a wall of small signs that light in turn */
+.ng-features__stage { padding: clamp(110px, 16vh, 170px) var(--gutter); }
+.ng-features__head { max-width: 900px; margin-bottom: clamp(40px, 7vh, 80px); }
+.ng-wallsigns { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6vh 4vw; align-items: start; }
+.ng-wallsigns--2, .ng-wallsigns--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ng-fsign { position: relative; }
+.ng-fsign:nth-child(3n + 2) { margin-top: 7vh; transform: rotate(.8deg); }
+.ng-fsign:nth-child(3n + 3) { margin-top: 2vh; transform: rotate(-1deg); }
+.ng-fsign__tag { display: inline-block; margin-bottom: 14px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .16em; color: var(--ink-2); padding: 3px 8px; border: 1px solid rgba(233, 228, 218, .18); border-radius: 3px; }
+.ng-fsign .ng-sign { margin-bottom: 18px; }
+.ng-plaque--small { font-size: 17px; padding: 14px 18px 16px; }
+.ng-meter { margin-top: 12px; height: 6px; border-radius: 6px; border: 1px solid var(--glass); position: relative; }
+.ng-meter i { position: absolute; left: -1px; top: -1px; bottom: -1px; width: calc(var(--m) * 100%); border-radius: inherit; background: var(--core); box-shadow: 0 0 6px var(--tube); }
+.ng-live .ng-features { height: calc(100vh + var(--n) * 48vh); height: calc(100svh + var(--n) * 48svh); }
+.ng-live .ng-features__stage { position: sticky; top: 0; min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; }
+.ng-live .ng-features.is-free { height: auto; }
+.ng-live .ng-features.is-free .ng-features__stage { position: relative; min-height: 0; }
+
+/* ------------------------------------------------------------- product: a shop window */
+.ng-product { padding: clamp(110px, 16vh, 170px) var(--gutter); min-height: 100vh; min-height: 100svh; display: flex; align-items: center; }
+.ng-product__in { width: 100%; max-width: var(--max); margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 6vw; align-items: center; }
+.ng-product--right .ng-shop { order: 2; }
+.ng-shop { position: relative; display: grid; place-items: center; }
+.ng-window--shop { position: relative !important; width: min(100%, 520px); height: min(72vh, 680px); display: grid; place-items: center;
+  background: radial-gradient(70% 60% at 50% 40%, color-mix(in srgb, var(--tube) 16%, #121016), #0b0a0d 80%); border-width: 14px; }
+.ng-window--shop .ss-phone { width: clamp(210px, 17vw, 270px); }
+.ng-phone { position: relative; z-index: 1; }
+.ng-phone--behind { position: absolute; transform: translate(-40%, 4%) rotate(-8deg) scale(.86); z-index: 0; }
+.ng-product__img { width: 100%; height: 100%; object-fit: cover; opacity: .85; }
+.ng-pane { position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(115deg, rgba(255, 255, 255, .07) 0 18%, transparent 18% 40%, rgba(255, 255, 255, .04) 40% 44%, transparent 44%); }
+.ng-product .ng-plaque { margin-top: 34px; }
+.ng-menu { list-style: none; display: grid; gap: 0; margin-top: 14px; border-top: 1px dashed rgba(233, 228, 218, .18); }
+.ng-menu li, .ng-menu div { display: flex; justify-content: space-between; gap: 20px; padding: 8px 0; border-bottom: 1px dashed rgba(233, 228, 218, .18); font-size: 17px; }
+.ng-menu--tags li::after { content: "✓"; color: var(--ink-2); }
+.ng-menu dd { font-family: var(--font-display); }
+
+/* ------------------------------------------------------------- stats: a motel sign board of tube numerals */
+.ng-stats { padding: clamp(110px, 16vh, 170px) var(--gutter); }
+.ng-stats .ng-spill { background: radial-gradient(60% 50% at 50% 50%, color-mix(in srgb, var(--room) 24%, transparent), transparent 72%); }
+.ng-stats__in { max-width: 1280px; margin: 0 auto; }
+.ng-board { position: relative; padding: clamp(46px, 6vw, 70px) clamp(18px, 3vw, 44px) clamp(28px, 4vw, 44px); border-radius: 18px; background: #09080b;
+  border: 12px solid #1c1a20; box-shadow: inset 0 0 50px rgba(0, 0, 0, .95), 0 0 0 1px #2a2730, 0 40px 80px -30px #000; }
+.ng-board__live { position: absolute; left: 22px; top: 16px; display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-2); }
+.ng-board__live i { width: 8px; height: 8px; border-radius: 50%; background: #3dffb4; box-shadow: 0 0 8px #3dffb4; }
+.ng-board__cells { list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.ng-board__cells--1 { grid-template-columns: 1fr; } .ng-board__cells--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .ng-board__cells--3, .ng-board__cells--5, .ng-board__cells--6 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ng-cell { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 10px 14px 4px; }
+.ng-cell + .ng-cell { border-left: 1px solid rgba(233, 228, 218, .08); }
+.ng-cell__v { position: relative; height: clamp(70px, 8vw, 128px); display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: clamp(56px, 6vw, 100px);
+  color: var(--core); text-shadow: 0 0 2px #fff, 0 0 10px var(--tube), 0 0 24px var(--tube); }
+.ng-cell__v small { font-size: .4em; margin-left: 4px; }
+.ng-cell__v.has-seg .ng-cell__txt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.ng-seg { height: 100%; width: auto; overflow: visible; }
+.ng-seg .g { fill: none; stroke: rgba(233, 228, 218, .09); stroke-linecap: round; stroke-width: 9; }
+.ng-seg .l { fill: none; stroke: var(--core); stroke-linecap: round; stroke-width: 5; opacity: 0; transition: opacity .12s; }
+.ng-seg .lt { fill: var(--core); opacity: 0; transition: opacity .12s; font-family: var(--font-display); }
+.ng-seg .gt { fill: rgba(233, 228, 218, .08); font-family: var(--font-display); }
+.ng-seg .lit { filter: drop-shadow(0 0 3px var(--tube)) drop-shadow(0 0 9px var(--tube)); }
+.ng-cell.is-lit .ng-seg .l, .ng-cell.is-lit .ng-seg .lt { opacity: 1; }
+.ng-cell__l { margin-top: 18px; font-family: var(--plaque); font-size: 17px; letter-spacing: .04em; color: var(--ink-2); max-width: 20ch; }
+
+/* ------------------------------------------------------------- timeline: one tube drawn along the wall */
+.ng-timeline { padding: clamp(110px, 16vh, 170px) var(--gutter) clamp(130px, 20vh, 220px); }
+.ng-timeline__in { max-width: 1240px; margin: 0 auto; }
+.ng-timeline__head { margin-bottom: clamp(60px, 10vh, 110px); }
+.ng-route { list-style: none; position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 10vw; row-gap: 12vh; }
+.ng-stop { position: relative; padding-top: 34px; }
+.ng-stop:nth-child(even) { margin-top: 18vh; }
+.ng-stop__hook { position: absolute; left: 24px; top: 0; width: 1px; height: 1px; }
+.ng-stop__sign { display: inline-flex; flex-direction: column; gap: 6px; padding: 14px 20px; border-radius: 12px; border: 2px solid var(--glass); margin-bottom: 18px; transition: border-color .3s, box-shadow .3s; }
+.ng-stop__when { font-family: var(--font-mono); font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-2); }
+.ng-stop h3 { font-family: var(--font-display); font-weight: 400; font-size: clamp(26px, 2.4vw, 40px); line-height: 1.1; color: rgba(233, 228, 218, .78); transition: color .3s; }
+.ng-stop.is-lit .ng-stop__sign { border-color: var(--core); box-shadow: 0 0 6px var(--tube), 0 0 18px var(--tube), inset 0 0 12px color-mix(in srgb, var(--tube) 60%, transparent); }
+.ng-stop.is-lit h3 { color: var(--core); text-shadow: 0 0 2px #fff, 0 0 10px var(--tube), 0 0 24px var(--tube); }
+html:not(.ng-live) .ng-stop h3 { color: var(--core); }
+.ng-line { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; z-index: 0; }
+.ng-line .g { fill: none; stroke: rgba(233, 228, 218, .13); stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; }
+.ng-line .h { fill: none; stroke: var(--tube); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 6px var(--tube)) drop-shadow(0 0 16px var(--tube)); }
+.ng-line .c { fill: none; stroke: var(--core); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ------------------------------------------------------------- quote: a script sign over its plaque */
+.ng-quote { padding: clamp(130px, 22vh, 240px) var(--gutter); }
+.ng-quote__in { margin: 0 auto; max-width: 1180px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.ng-quote .ng-spill { background: radial-gradient(55% 46% at 50% 34%, color-mix(in srgb, var(--tube) 22%, transparent), transparent 72%); }
+.ng-quote .ng-wet { background: radial-gradient(34% 90% at 50% 0%, color-mix(in srgb, var(--tube) 45%, transparent), transparent 75%); }
+.ng-plaque--quote { margin-top: 46px; max-width: 760px; padding: 26px 34px 28px; text-align: left; }
+.ng-plaque--quote blockquote { font-family: var(--font-body); font-size: clamp(19px, 1.6vw, 24px); line-height: 1.5; }
+.ng-plaque--quote figcaption { margin-top: 14px; font-family: var(--font-mono); font-size: 12.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); }
+
+/* ------------------------------------------------------------- faq: inside the bar, warm and calm */
+.ng-faq { padding: clamp(120px, 18vh, 200px) var(--gutter); }
+.ng-faq .ng-spill { background: radial-gradient(50% 40% at 25% 20%, color-mix(in srgb, var(--tube) 18%, transparent), transparent 72%); }
+.ng-faq__in { max-width: var(--max); margin: 0 auto; display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.4fr); gap: 6vw; align-items: start; }
+.ng-faq__kicker { margin-top: 20px; color: var(--ink-2); font-family: var(--plaque); font-size: 18px; }
+.ng-q { padding: 10px 0; border-bottom: 1px solid rgba(255, 220, 180, .08); }
+.ng-q summary { list-style: none; cursor: pointer; padding: 14px 0; }
+.ng-q summary::-webkit-details-marker { display: none; }
+.ng-q__sign { font-family: var(--font-display); font-size: clamp(21px, 1.8vw, 28px); line-height: 1.25; color: rgba(233, 222, 205, .74); transition: color .3s; }
+.ng-q summary:hover .ng-q__sign { color: rgba(255, 240, 222, .92); }
+.ng-q[open] .ng-q__sign { color: #fff3e2; text-shadow: 0 0 2px #fff, 0 0 10px #ffb36b, 0 0 24px rgba(255, 179, 107, .7); }
+.ng-plaque--answer { margin: 6px 0 14px; max-width: 60ch; background: linear-gradient(180deg, #2a1d16, #1f1510); border-color: rgba(255, 220, 180, .12); }
+
+/* ------------------------------------------------------------- cta: the OPEN sign */
+.ng-cta { min-height: 100vh; min-height: 100svh; display: grid; place-items: center; text-align: center; padding: 130px var(--gutter); }
+.ng-cta__bg { position: absolute !important; inset: 0; background-size: cover; background-position: center; opacity: .14; }
+.ng-cta .ng-spill { background: radial-gradient(50% 46% at 50% 66%, rgba(255, 78, 26, .3), transparent 72%), radial-gradient(50% 40% at 50% 30%, color-mix(in srgb, var(--tube) 18%, transparent), transparent 72%); }
+.ng-cta .ng-wet { background: radial-gradient(30% 90% at 50% 0%, rgba(255, 78, 26, .55), transparent 75%); }
+.ng-cta__in { display: flex; flex-direction: column; align-items: center; }
+.ng-open { position: relative; display: inline-flex; flex-direction: column; align-items: center; margin-top: 56px; padding: 26px 64px 22px; border-radius: 28px; color: var(--ink); }
+.ng-open__frame { position: absolute; inset: 0; border-radius: inherit; border: 3px solid var(--glass); }
+.ng-open__frame i { position: absolute; inset: -3px; border-radius: inherit; border: 3px solid #d9e6ff; opacity: 0; transition: opacity .2s;
+  box-shadow: 0 0 0 1px #2f7bff, 0 0 12px 2px rgba(47, 123, 255, .9), 0 0 38px 6px rgba(47, 123, 255, .4), inset 0 0 16px rgba(47, 123, 255, .6); }
+.ng-open__word { position: relative; font-family: var(--font-display); font-size: clamp(64px, 9vw, 150px); line-height: 1; letter-spacing: .07em; }
+.ng-open__word b { font-weight: 400; color: transparent; -webkit-text-stroke: 1.2px var(--glass); }
+.ng-open__word i { position: absolute; inset: 0; font-style: normal; color: #ffe4da; opacity: 0; transition: opacity .2s; text-shadow: 0 0 2px #fff, 0 0 10px #ff4e1a, 0 0 26px #ff4e1a, 0 0 60px #ff4e1a; }
+.ng-open__word::after { content: ""; position: absolute; inset: -30% -20%; z-index: -1; opacity: 0; transition: opacity .4s; background: radial-gradient(closest-side, rgba(255, 78, 26, .35), transparent); }
+.ng-open__label { margin-top: 12px; font-family: var(--plaque); font-weight: 600; font-size: 18px; letter-spacing: .2em; text-transform: uppercase; }
+.ng-open.is-on .ng-open__frame i, .ng-open.is-on .ng-open__word i, html:not(.ng-live) .ng-open .ng-open__word i, html:not(.ng-live) .ng-open .ng-open__frame i { opacity: 1; }
+.ng-open.is-on { animation: ng-clunk .5s cubic-bezier(.3, 1.6, .5, 1) both; }
+.ng-open.is-on:hover .ng-open__word::after, .ng-open.is-on:focus-visible .ng-open__word::after { opacity: 1; }
+.ng-open:hover .ng-open__label { color: var(--core); }
+@keyframes ng-clunk { 0% { transform: scale(.985); } 35% { transform: scale(1.035); } 100% { transform: none; } }
+
+/* ------------------------------------------------------------- closing time */
+.ng-closing { padding: clamp(110px, 18vh, 180px) var(--gutter) clamp(70px, 10vh, 110px); text-align: center; }
+.ng-closing__in { display: flex; flex-direction: column; align-items: center; gap: 30px; }
+.ng-closing .ng-spill { background: radial-gradient(50% 50% at 50% 40%, color-mix(in srgb, var(--tube) 20%, transparent), transparent 72%); }
+html.style-neon-glow .ss-footer { background: #060508; border-top: 0; position: relative; z-index: 1; }
+html.style-neon-glow .ss-footer__in { font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); }
+
+/* ------------------------------------------------------------- default blocks on the street */
+html.style-neon-glow main > .ss-block, html.style-neon-glow main > * > .ss-block { background: var(--noise), linear-gradient(#0d0c10, #0a090c); }
+html.style-neon-glow .ss-display, html.style-neon-glow .ss-h2, html.style-neon-glow .ss-h1 { font-weight: 400; color: var(--core); text-shadow: 0 0 2px #fff, 0 0 10px var(--accent), 0 0 24px var(--accent); }
+html.style-neon-glow .ss-tile { background: #141217; border-color: rgba(233, 228, 218, .12); border-radius: 8px; }
+html.style-neon-glow .ss-btn--hot { background: transparent; color: var(--core); border: 2px solid var(--core); box-shadow: 0 0 8px var(--accent), inset 0 0 8px var(--accent); }
+
+/* ------------------------------------------------------------- phones */
+@media (max-width: 900px) {
+  .ng-hero { padding: 110px var(--gutter) 90px; align-items: flex-end; }
+  .ng-sign.ng-sign--hero { font-size: clamp(48px, 14vw, 80px); }
+  .ng-sign.ng-sign--big { font-size: clamp(38px, 11vw, 60px); }
+  .ng-sign { font-size: clamp(32px, 9vw, 46px); }
+  .ng-sign.ng-sign--small { font-size: 26px; }
+  .ng-sign.ng-sign--script { font-size: clamp(46px, 13vw, 74px); }
+  .ng-arrow { right: 20px; top: 120px; width: 40px; transform: none; }
+  .ng-intro__in { align-items: flex-start; text-align: left; }
+  .ng-wallsigns, .ng-wallsigns--2, .ng-wallsigns--4 { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+  .ng-fsign:nth-child(n) { margin-top: 0; transform: none; }
+  .ng-fsign .ng-sign { margin-bottom: 10px; }
+  .ng-fsign__tag { margin-bottom: 8px; }
+  .ng-plaque--small { font-size: 16px; padding: 10px 14px 12px; }
+  .ng-product__in { grid-template-columns: minmax(0, 1fr); gap: 30px; }
+  .ng-product--right .ng-shop { order: 0; }
+  .ng-window--shop { height: 56vh; }
+  .ng-window--shop .ss-phone { width: min(52vw, 220px); }
+  .ng-board__cells, .ng-board__cells--3, .ng-board__cells--5, .ng-board__cells--6 { grid-template-columns: 1fr 1fr; row-gap: 26px; }
+  .ng-cell + .ng-cell { border-left: 0; }
+  .ng-cell__v { height: 64px; font-size: 52px; }
+  .ng-cell__l { font-size: 15px; }
+  .ng-route { grid-template-columns: minmax(0, 1fr); row-gap: 50px; padding-left: 26px; }
+  .ng-stop:nth-child(even) { margin-top: 0; }
+  .ng-stop__hook { left: -14px; top: 30px; }
+  .ng-faq__in { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+  .ng-open { padding: 20px 40px 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ng-sign.is-lit .ng-halo, .ng-sign.is-lit .ng-halo2, .ng-sign.is-lit .ng-core, .ng-sign--hero.is-lit .ng-core .ng-lag, .ng-sign--hero.is-lit .ng-halo .ng-lag, .ng-open.is-on, .ng-live .ng-hero.is-lit .ng-arrow path { animation: none; }
+  .ng-halo, .ng-halo2, .ng-core { transition: opacity .15s; }
+  html.style-neon-glow { transition: none; }
+}

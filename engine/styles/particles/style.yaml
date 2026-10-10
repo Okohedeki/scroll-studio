@@ -1,19 +1,21 @@
 # Particles: tokens and fonts for theme.style: particles. See README.md in this folder for the UX contract.
+# "Ink on paper": one conserved swarm of graphite points on warm paper (normal blending, not additive glow).
 label: Particles
-about: A slow field of connected points drifting behind the copy; the field stirs when you scroll.
-mode: dark
+about: One handful of living sand. The same swarm of points re-forms into every section's subject (the headline, the phone, the numbers, the logo), migrating through a turbulent swirl as you scroll; the pointer is a hand in the sand.
+mode: light
 colors:
-  bg: '#06070d'
-  bg2: '#0c0e18'
-  ink: '#eef1ff'
-  accent: '#7aa2ff'
-  accent2: '#b8ccff'
-  accent_ink: '#050816'
+  bg: '#f3f1ec'
+  bg2: '#e9e6df'
+  ink: '#141414'
+  accent: '#ff4d2e'
+  accent2: '#e8401f'
+  accent_ink: '#ffffff'
 fonts:
-  display: Sora
-  body: Inter
-  mono: JetBrains Mono
-display_weight: 500
+  display: Inter Tight
+  body: Inter Tight
+  mono: IBM Plex Mono
+font_axes:
+  Inter Tight: "ital,wght@0,100..900;1,100..900"
+  IBM Plex Mono: "ital,wght@0,300;0,400;0,500;1,400"
+display_weight: 300
 radius: 999px
-fx:
-  bg: particles

@@ -1,0 +1,19 @@
+{# Particles chrome: the one fixed canvas the swarm lives on, a micro-label HUD that shows the count of points never
+   changes (conservation of matter), and the ending, where the swarm settles into the wordmark like sediment. #}
+{% macro top(site, sections, nav_links) %}
+<div class="px-field" aria-hidden="true"><canvas class="px-canvas"></canvas></div>
+<div class="px-hud" aria-hidden="true">
+  <span class="px-hud__n"><b data-px-count>0</b> points</span>
+  <span class="px-hud__form">form <b data-px-form>01</b> / {{ "%02d" | format(sections | length + 1) }}</span>
+  <span class="px-hud__state" data-px-state>assembled</span>
+</div>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}
+<div class="px-scene px-end" data-px="end">
+  <div class="px-stage">
+    <p class="px-end__mark" data-form="text" aria-hidden="true">{{ site.name }}</p>
+    <p class="px-micro px-end__note">{{ site.name }} · the same matter, from the first frame to the last</p>
+  </div>
+</div>
+{% endmacro %}

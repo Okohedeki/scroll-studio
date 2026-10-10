@@ -1,0 +1,182 @@
+{# Neon glow: a night street. Each section is a storefront wall (brick, concrete, black paint, the warm bar inside)
+   with one primary sign (its headline, [data-sign]) and plain plaques for the copy. The runtime draws every sign as
+   SVG tubes over its real text: unlit glass until you reach it, then it stutters on and spills its colour on the
+   wall; behind you it dims. Without JavaScript the signs simply show lit. Two tube colours at most per sign. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+{% set tubes = [["#ff2a6d", "#ffe9c7"], ["#05d9e8", "#ff2a6d"], ["#3dffb4", "#ffe9c7"], ["#b14cff", "#05d9e8"], ["#ffe9c7", "#ff2a6d"], ["#2f7bff", "#3dffb4"]] %}
+
+{% macro btns(list) %}{% if list %}<div class="ng-btns">{% for l in list %}<a class="ng-btn{% if loop.first %} ng-btn--hot{% endif %}" href="{{ l.href }}"><span>{{ l.label }}</span></a>{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro sign(tag, title, cls="") %}<{{ tag }} class="ng-sign {{ cls }}" data-sign><span class="ng-sign__txt">{{ title | rich }}</span></{{ tag }}>{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set idattr %}{% if b.id %} id="{{ b.id }}"{% endif %}{% endset %}
+{% set tc = tubes[loop.index0 % 6] %}
+{% set colors %} style="--tube: {{ tc[0] }}; --tube2: {{ tc[1] }}"{% endset %}
+
+{% if b.type == "hero" %}
+{% set media = e.img or e.video %}
+<section class="ng-front ng-wall--brick ng-hero" data-ng="hero"{{ colors }}{{ idattr }}>
+  <div class="ng-spill" aria-hidden="true"><i></i></div>
+  <div class="ng-hero__in">
+    {% if b.badge %}<p class="ng-minisign" style="--tube: #05d9e8" data-minisign><span>{{ b.badge }}</span></p>{% endif %}
+    <div class="ng-mount">{{ sign("h1" if e.first else "h2", b.title, "ng-sign--hero") }}</div>
+    <div class="ng-hero__foot">
+      {% if b.body %}<div class="ng-plaque"><p>{{ b.body | rich }}</p></div>{% endif %}
+      {{ btns(b.buttons) }}
+    </div>
+  </div>
+  {% if media %}<div class="ng-window ng-hero__window">{% if e.video %}<video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video>{% else %}<img src="{{ e.img }}" alt="" fetchpriority="high">{% endif %}</div>{% endif %}
+  {% if b.device %}<div class="ng-window ng-hero__phone">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+  <svg class="ng-arrow" viewBox="0 0 120 220" aria-hidden="true"><path d="M60 10 V170 M24 134 L60 172 L96 134" pathLength="1"/></svg>
+  <div class="ng-wet" aria-hidden="true"></div>
+</section>
+
+{% elif b.type == "intro" %}
+<section class="ng-front ng-wall--paint ng-intro" data-ng="intro"{{ colors }}{{ idattr }}>
+  <div class="ng-spill" aria-hidden="true"><i></i></div>
+  <div class="ng-intro__in">
+    {% if b.kicker %}<p class="ng-label">{{ b.kicker }}</p>{% endif %}
+    <div class="ng-mount">{{ sign("h2", b.title, "ng-sign--big") }}</div>
+    {% if b.body %}<div class="ng-plaque ng-plaque--wide"><p>{{ b.body | rich }}</p>{% if b.button %}{{ btns([b.button]) }}{% endif %}</div>{% elif b.button %}{{ btns([b.button]) }}{% endif %}
+  </div>
+  <div class="ng-wet" aria-hidden="true"></div>
+</section>
+
+{% elif b.type == "features" %}
+<section class="ng-front ng-wall--concrete ng-features" data-ng="features" style="--tube: {{ tc[0] }}; --tube2: {{ tc[1] }}; --n: {{ b.items | length }}"{{ idattr }}>
+  <div class="ng-features__stage">
+    <div class="ng-spill" aria-hidden="true"><i></i></div>
+    {% if b.title or b.kicker %}<header class="ng-features__head">
+      {% if b.kicker %}<p class="ng-label">{{ b.kicker }}</p>{% endif %}
+      {% if b.title %}<div class="ng-mount">{{ sign("h2", b.title) }}</div>{% endif %}
+    </header>{% endif %}
+    <ol class="ng-wallsigns ng-wallsigns--{{ [b.items | length, 6] | min }}">
+      {% for f in b.items %}
+      {% set fc = tubes[(loop.index0 + 1) % 6] %}
+      <li class="ng-fsign" style="--tube: {{ fc[0] }}; --tube2: {{ fc[1] }}">
+        <span class="ng-fsign__tag">{{ f.tag or ("%02d" | format(loop.index)) }}</span>
+        {{ sign("h3", f.title, "ng-sign--small") }}
+        {% if f.body %}<div class="ng-plaque ng-plaque--small"><p>{{ f.body | rich }}</p>{% if f.meter is not none %}<div class="ng-meter" role="img" aria-label="{{ (f.meter * 100) | round | int }}%"><i style="--m: {{ f.meter }}"></i></div>{% endif %}</div>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "product" %}
+<section class="ng-front ng-wall--brick ng-product ng-product--{{ b.side }}" data-ng="product"{{ colors }}{{ idattr }}>
+  <div class="ng-spill" aria-hidden="true"><i></i></div>
+  <div class="ng-product__in">
+    <div class="ng-shop">
+      <div class="ng-window ng-window--shop">
+        {% if e.img %}<img class="ng-product__img" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+        {% if b.behind %}<div class="ng-phone ng-phone--behind">{{ base.phone(b.behind, e.behind, e.behind_clip) }}</div>{% endif %}
+        {% if b.device %}<div class="ng-phone">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+        <i class="ng-pane" aria-hidden="true"></i>
+      </div>
+    </div>
+    <div class="ng-product__copy">
+      {% if b.kicker %}<p class="ng-label">{{ b.kicker }}</p>{% endif %}
+      <div class="ng-mount">{{ sign("h2", b.title) }}</div>
+      <div class="ng-plaque">
+        {% if b.body %}<p>{{ b.body | rich }}</p>{% endif %}
+        {% if b.stats %}<dl class="ng-menu">{% for st in b.stats %}<div><dt>{{ st.label }}</dt><dd>{{ st.value }}{% if st.unit %} {{ st.unit }}{% endif %}</dd></div>{% endfor %}</dl>
+        {% elif b.tags %}<ul class="ng-menu ng-menu--tags">{% for t in b.tags %}<li>{{ t }}</li>{% endfor %}</ul>{% endif %}
+        {% if b.note %}<p class="ng-note">{{ b.note | rich }}</p>{% endif %}
+      </div>
+      {{ btns(b.buttons) }}
+    </div>
+  </div>
+  <div class="ng-wet" aria-hidden="true"></div>
+</section>
+
+{% elif b.type == "stats" %}
+<section class="ng-front ng-wall--paint ng-stats" data-ng="stats" style="--tube: #ff2a6d; --tube2: #ffe9c7"{{ idattr }}>
+  <div class="ng-spill" aria-hidden="true"><i></i></div>
+  <div class="ng-stats__in">
+    <div class="ng-board" data-board>
+      <span class="ng-board__live" aria-hidden="true"><i></i>Live</span>
+      <ol class="ng-board__cells ng-board__cells--{{ [b.items | length, 6] | min }}">
+        {% for st in b.items %}
+        {% set sc = tubes[(loop.index0 + 2) % 6] %}
+        <li class="ng-cell" style="--tube: {{ sc[0] }}; --tube2: {{ sc[1] }}">
+          <p class="ng-cell__v" data-seg="{{ st.value }}" data-unit="{{ st.unit or '' }}"><span class="ng-cell__txt">{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</span></p>
+          <p class="ng-cell__l">{{ st.label }}</p>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "timeline" %}
+<section class="ng-front ng-wall--paint ng-timeline" data-ng="timeline"{{ colors }}{{ idattr }}>
+  <div class="ng-spill" aria-hidden="true"><i></i></div>
+  <div class="ng-timeline__in">
+    {% if b.title or b.kicker %}<header class="ng-timeline__head">
+      {% if b.kicker %}<p class="ng-label">{{ b.kicker }}</p>{% endif %}
+      {% if b.title %}<div class="ng-mount">{{ sign("h2", b.title) }}</div>{% endif %}
+    </header>{% endif %}
+    <ol class="ng-route">
+      {% for it in b.items %}
+      <li class="ng-stop">
+        <span class="ng-stop__hook" aria-hidden="true"></span>
+        <div class="ng-stop__sign"><span class="ng-stop__when">{{ it.when }}</span><h3>{{ it.title | rich }}</h3></div>
+        {% if it.body %}<div class="ng-plaque ng-plaque--small"><p>{{ it.body | rich }}</p></div>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "quote" %}
+{% set first = (b.text | striptags).split('. ')[0] | trim %}
+{% set words = first.split() %}
+{% set pull = (words[:7] | join(' ') ~ '…') if words | length > 9 else first %}
+<section class="ng-front ng-wall--brick ng-quote" data-ng="quote" style="--tube: #ffe9c7; --tube2: #ff2a6d"{{ idattr }}>
+  <div class="ng-spill" aria-hidden="true"><i></i></div>
+  <figure class="ng-quote__in">
+    <div class="ng-mount ng-mount--script"><p class="ng-sign ng-sign--script" data-sign aria-hidden="true"><span class="ng-sign__txt">{{ pull }}</span></p></div>
+    <div class="ng-plaque ng-plaque--quote">
+      <blockquote>{{ b.text | rich }}</blockquote>
+      {% if b.who %}<figcaption>{{ b.who }}</figcaption>{% endif %}
+    </div>
+  </figure>
+  <div class="ng-wet" aria-hidden="true"></div>
+</section>
+
+{% elif b.type == "faq" %}
+<section class="ng-front ng-wall--bar ng-faq" data-ng="faq" style="--tube: #ffe9c7; --tube2: #ffb36b"{{ idattr }}>
+  <div class="ng-spill" aria-hidden="true"><i></i></div>
+  <div class="ng-faq__in">
+    <header>
+      <p class="ng-label">Inside</p>
+      <div class="ng-mount">{{ sign("h2", b.title) }}</div>
+      {% if b.kicker %}<p class="ng-faq__kicker">{{ b.kicker }}</p>{% endif %}
+    </header>
+    <div class="ng-faq__list">
+      {% for it in b.items %}<details class="ng-q"{% if loop.first %} open{% endif %}><summary><span class="ng-q__sign">{{ it.q | rich }}</span></summary><div class="ng-plaque ng-plaque--answer"><p>{{ it.a | rich }}</p></div></details>{% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "cta" %}
+<section class="ng-front ng-wall--brick ng-cta" data-ng="cta" style="--tube: #ffe9c7; --tube2: #ff4e1a"{{ idattr }}>
+  {% if e.bg %}<div class="ng-cta__bg" style="background-image: url('{{ e.bg }}')"></div>{% endif %}
+  <div class="ng-spill" aria-hidden="true"><i></i></div>
+  <div class="ng-cta__in">
+    {% if b.kicker %}<p class="ng-label">{{ b.kicker }}</p>{% endif %}
+    <div class="ng-mount">{{ sign("h2", b.title, "ng-sign--big") }}</div>
+    {% if b.button %}
+    <a class="ng-open" href="{{ b.button.href }}" data-open>
+      <span class="ng-open__frame" aria-hidden="true"><i></i></span>
+      <span class="ng-open__word" aria-hidden="true"><b>OPEN</b><i>OPEN</i></span>
+      <span class="ng-open__label">{{ b.button.label }}</span>
+    </a>
+    {% endif %}
+  </div>
+  <div class="ng-wet" aria-hidden="true"></div>
+</section>
+{% endif %}
+{% endmacro %}

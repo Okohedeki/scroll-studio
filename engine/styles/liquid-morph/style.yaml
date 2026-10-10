@@ -1,17 +1,22 @@
 # Liquid morph: tokens and fonts for theme.style: liquid-morph. See README.md in this folder for the UX contract.
+# "Candy fluid": one glossy protagonist blob on peach and lilac regions of one continuous liquid.
 label: Liquid morph
-about: Soft blobs that melt into each other behind the page, buttons that wobble like a drop.
-mode: dark
+about: Nothing cuts, everything becomes. One glossy blob morphs into each section's idea, stretches and wobbles with your scroll speed, divides into the stats and fuses through the features, while section edges arrive as moving liquid surfaces.
+mode: light
 colors:
-  bg: '#0b0614'
-  bg2: '#140b22'
-  ink: '#f6efff'
-  accent: '#ff5fa2'
-  accent2: '#ffa0c8'
-  accent_ink: '#1a0610'
+  bg: '#fff4ec'
+  bg2: '#efe7ff'
+  ink: '#1b1530'
+  accent: '#ff6b9a'
+  accent2: '#8b7bff'
+  accent_ink: '#1b1530'
 fonts:
-  display: Syne
-  body: Manrope
+  display: Fraunces
+  body: DM Sans
   mono: DM Mono
-display_weight: 700
+font_axes:
+  Fraunces: "ital,opsz,wght,SOFT,WONK@0,9..144,100..900,0..100,0..1;1,9..144,100..900,0..100,0..1"
+  DM Sans: "ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000"
+  DM Mono: "ital,wght@0,300;0,400;0,500;1,400"
+display_weight: 560
 radius: 999px

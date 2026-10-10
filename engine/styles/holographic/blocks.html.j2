@@ -1,0 +1,247 @@
+{# Holographic: every section presents one rigid holographic object on a pedestal (a card, a plate, the phone, a
+   seal) beside matte copy. The runtime turns each object as it travels through the screen (scroll = viewing angle),
+   sweeps a spectral sheen across it, and shows its latent content (.hg-latent) only inside a narrow band of angles.
+   Sections materialise behind a projector scan line. Latent content always repeats something already on the page. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+
+{% macro btns(list) %}{% if list %}<div class="hg-btns">{% for l in list %}<a class="hg-btn{% if loop.first %} hg-btn--foil{% endif %}" href="{{ l.href }}"><span>{{ l.label }}</span></a>{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro em_of(title) %}{% set parts = title.split('<em>') %}{% if parts | length > 1 %}{{ parts[1].split('</em>')[0] | striptags }}{% else %}{{ (title | striptags).split() | last }}{% endif %}{% endmacro %}
+
+{% macro layers() %}<i class="hg-foil" aria-hidden="true"></i><i class="hg-glare" aria-hidden="true"></i>{% endmacro %}
+
+{% macro scan() %}<span class="hg-scan" aria-hidden="true"></span>{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set idattr %}{% if b.id %} id="{{ b.id }}"{% endif %}{% endset %}
+{% set serial = "%04d" | format(loop.index * 137 % 9000 + 1000) %}
+
+{% if b.type == "hero" %}
+{% set media = e.img or e.video %}
+<section class="hg-sec hg-hero" data-hg="hero"{{ idattr }}>
+  <div class="hg-sec__in hg-hero__in">
+    {{ scan() }}
+    <div class="hg-hero__copy">
+      {% if b.badge %}<p class="hg-chip"><i aria-hidden="true"></i>{{ b.badge }}</p>{% endif %}
+      {% if e.first %}<h1 class="hg-h1 hg-sheen">{{ b.title | rich }}</h1>{% else %}<h2 class="hg-h1 hg-sheen">{{ b.title | rich }}</h2>{% endif %}
+      {% if b.body %}<p class="hg-lede">{{ b.body | rich }}</p>{% endif %}
+      {{ btns(b.buttons) }}
+    </div>
+    <div class="hg-pedestal hg-pedestal--hero">
+      {% if b.device %}
+      <div class="hg-plate hg-object" data-hg-plate data-off="-0.14" data-range="24">
+        <div class="hg-plate__body">{{ base.phone(b.device, e.screen, e.clip) }}<i class="hg-rimfoil" aria-hidden="true"></i></div>
+      </div>
+      {% else %}
+      <div class="hg-plate hg-card hg-card--hero hg-pat--cosmos" data-hg-plate data-off="-0.14" data-range="22">
+        <div class="hg-plate__body">
+          <div class="hg-card__top"><span>Authentic</span><span>No. {{ serial }}</span></div>
+          <div class="hg-card__art">
+            {% if media %}{% if e.video %}<video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video>{% else %}<img src="{{ e.img }}" alt="" fetchpriority="high">{% endif %}{% endif %}
+            <span class="hg-emblem" aria-hidden="true"></span>
+            <p class="hg-latent hg-latent--big" aria-hidden="true">{{ em_of(b.title) | trim }}</p>
+          </div>
+          <div class="hg-card__name">{{ b.badge or (b.title | striptags) }}</div>
+          <div class="hg-micro" aria-hidden="true">{% for i in range(8) %}{{ b.badge or (b.title | striptags) }} · {% endfor %}</div>
+          {{ layers() }}
+        </div>
+      </div>
+      {% endif %}
+      <div class="hg-base" aria-hidden="true"></div>
+    </div>
+    <p class="hg-cue" aria-hidden="true">Scroll to turn it · the mark shows at one angle</p>
+  </div>
+</section>
+
+{% elif b.type == "intro" %}
+<section class="hg-sec hg-intro" data-hg="intro"{{ idattr }}>
+  <div class="hg-sec__in hg-intro__in">
+    {{ scan() }}
+    <div class="hg-pedestal">
+      <div class="hg-plate hg-slab hg-pat--linear" data-hg-plate data-range="26">
+        <div class="hg-plate__body">
+          <span class="hg-slab__serial">{{ b.kicker or "Plate" }} · No. {{ serial }}</span>
+          <div class="hg-slab__grid" aria-hidden="true"></div>
+          <p class="hg-latent hg-latent--slab" aria-hidden="true">{{ em_of(b.title) | trim }}</p>
+          <span class="hg-slab__hint" aria-hidden="true">latent image</span>
+          {{ layers() }}
+        </div>
+      </div>
+      <div class="hg-base" aria-hidden="true"></div>
+    </div>
+    <div class="hg-intro__copy hg-matte">
+      {% if b.kicker %}<p class="hg-kicker">{{ b.kicker }}</p>{% endif %}
+      <h2 class="hg-h2 hg-sheen">{{ b.title | rich }}</h2>
+      {% if b.body %}<p class="hg-lede">{{ b.body | rich }}</p>{% endif %}
+      {% if b.button %}{{ btns([b.button]) }}{% endif %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "features" %}
+{% set pats = ["linear", "sparkle", "cosmos", "starburst"] %}
+<section class="hg-sec hg-features" data-hg="features"{{ idattr }}>
+  <div class="hg-sec__in hg-features__in">
+    {{ scan() }}
+    {% if b.title or b.kicker %}<header class="hg-features__head">
+      {% if b.kicker %}<p class="hg-kicker">{{ b.kicker }}</p>{% endif %}
+      {% if b.title %}<h2 class="hg-h2 hg-sheen">{{ b.title | rich }}</h2>{% endif %}
+      <p class="hg-note">A binder of {{ b.items | length }}. Tilt a card toward the light; turn it over for its back.</p>
+    </header>{% endif %}
+    <ol class="hg-binder hg-binder--{{ [b.items | length, 4] | min }}">
+      {% for f in b.items %}
+      {% set pat = pats[loop.index0 % 4] %}
+      <li class="hg-slot">
+        <div class="hg-plate hg-tcard hg-pat--{{ pat }}" data-hg-plate data-wave="{{ loop.index0 }}" data-range="16">
+          <div class="hg-plate__body">
+            <article class="hg-tcard__front">
+              <div class="hg-tcard__top"><span>{{ f.tag or ("%02d" | format(loop.index)) }}</span><span class="hg-rarity" aria-hidden="true">{{ ["Holo", "Reverse holo", "Cosmos", "Starlight"][loop.index0 % 4] }}</span></div>
+              <div class="hg-tcard__art" aria-hidden="true"><span class="hg-latent hg-latent--num">{{ "%02d" | format(loop.index) }}</span></div>
+              <h3>{{ f.title | rich }}</h3>
+              {% if f.body %}<p>{{ f.body | rich }}</p>{% endif %}
+              {% if f.meter is not none %}<div class="hg-meter" role="img" aria-label="{{ (f.meter * 100) | round | int }}%"><i style="--m: {{ f.meter }}"></i></div>{% endif %}
+              {{ layers() }}
+            </article>
+            <div class="hg-tcard__back" aria-hidden="true">
+              <span class="hg-tcard__mark"></span>
+              <span class="hg-tcard__of">{{ "%02d" | format(loop.index) }} / {{ "%02d" | format(b.items | length) }}</span>
+              <span class="hg-tcard__btitle">{{ f.title | striptags }}</span>
+              <span class="hg-tcard__serial">Series {{ serial }} · {{ ["Holo", "Reverse holo", "Cosmos", "Starlight"][loop.index0 % 4] }} foil</span>
+              {{ layers() }}
+            </div>
+          </div>
+        </div>
+        <button class="hg-flip" type="button" aria-pressed="false">Turn over</button>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "product" %}
+{% set sel = (b.device.options | selectattr("selected") | first) if b.device and b.device.options else none %}
+{% set latent = (sel.title if sel else none) or (b.tags[0] if b.tags else none) or b.kicker or "" %}
+<section class="hg-sec hg-product hg-product--{{ b.side }}" data-hg="product"{{ idattr }}>
+  <div class="hg-sec__in hg-product__in">
+    {{ scan() }}
+    <div class="hg-pedestal hg-pedestal--object">
+      <div class="hg-plate hg-object" data-hg-plate data-range="26">
+        <div class="hg-plate__body">
+          {% if e.img %}<img class="hg-product__img" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+          {% if b.device %}{{ base.phone(b.device, e.screen, e.clip) }}{% endif %}
+          <i class="hg-rimfoil" aria-hidden="true"></i>
+          {% if latent %}<p class="hg-latent hg-latent--tag" aria-hidden="true"><small>Latent</small>{{ latent }}</p>{% endif %}
+        </div>
+      </div>
+      <div class="hg-base" aria-hidden="true"></div>
+    </div>
+    <div class="hg-product__copy hg-matte">
+      {% if b.kicker %}<p class="hg-kicker">{{ b.kicker }}</p>{% endif %}
+      <h2 class="hg-h2 hg-sheen">{{ b.title | rich }}</h2>
+      {% if b.body %}<p class="hg-lede">{{ b.body | rich }}</p>{% endif %}
+      {% if b.stats %}<dl class="hg-specs">{% for st in b.stats %}<div><dt>{{ st.label }}</dt><dd>{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</dd></div>{% endfor %}</dl>
+      {% elif b.tags %}<ul class="hg-tags">{% for t in b.tags %}<li>{{ t }}</li>{% endfor %}</ul>{% endif %}
+      {{ btns(b.buttons) }}
+      {% if b.note %}<p class="hg-note">{{ b.note | rich }}</p>{% endif %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "stats" %}
+<section class="hg-sec hg-stats" data-hg="stats"{{ idattr }}>
+  <div class="hg-sec__in hg-stats__in">
+    {{ scan() }}
+    <ol class="hg-emitters hg-emitters--{{ [b.items | length, 6] | min }}">
+      {% for st in b.items %}
+      <li class="hg-emitter">
+        <div class="hg-proj">
+          <i class="hg-cone" aria-hidden="true"></i>
+          <span class="hg-num"{% if st.value | countable %} data-n="{{ st.value | replace(',', '') }}"{% endif %}><b>{{ st.value }}</b>{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</span>
+        </div>
+        <div class="hg-base hg-base--emitter" aria-hidden="true"></div>
+        <p class="hg-emitter__l">{{ st.label }}</p>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "timeline" %}
+<section class="hg-sec hg-timeline" data-hg="timeline" style="--n: {{ b.items | length }}"{{ idattr }}>
+  <div class="hg-sec__in hg-timeline__in">
+    {{ scan() }}
+    {% if b.title or b.kicker %}<header class="hg-timeline__head">
+      {% if b.kicker %}<p class="hg-kicker">{{ b.kicker }}</p>{% endif %}
+      {% if b.title %}<h2 class="hg-h2 hg-sheen">{{ b.title | rich }}</h2>{% endif %}
+    </header>{% endif %}
+    <ol class="hg-volume">
+      {% for it in b.items %}
+      <li class="hg-pane" data-i="{{ loop.index0 }}">
+        <span class="hg-pane__idx" aria-hidden="true">Slice {{ "%02d" | format(loop.index) }} / {{ "%02d" | format(b.items | length) }}</span>
+        <p class="hg-pane__when">{{ it.when }}</p>
+        <h3>{{ it.title | rich }}</h3>
+        {% if it.body %}<p>{{ it.body | rich }}</p>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+    <div class="hg-depthbar" aria-hidden="true"><i></i></div>
+  </div>
+</section>
+
+{% elif b.type == "quote" %}
+{% set initials = ((b.who or "OK").split()[:2] | map("first") | join | upper) %}
+<section class="hg-sec hg-quote" data-hg="quote"{{ idattr }}>
+  <div class="hg-sec__in hg-quote__in">
+    {{ scan() }}
+    <figure class="hg-cert">
+      <p class="hg-cert__head" aria-hidden="true"><span>Certificate of testimony</span><span>No. {{ serial }}</span></p>
+      <blockquote>{{ b.text | rich }}</blockquote>
+      {% if b.who %}<figcaption>{{ b.who }}</figcaption>{% endif %}
+      <div class="hg-plate hg-seal hg-pat--starburst" data-hg-plate data-range="34" aria-hidden="true">
+        <div class="hg-plate__body">
+          <svg viewBox="0 0 100 100" class="hg-seal__ring"><defs><path id="hgseal{{ loop.index }}" d="M50 50 m-38 0 a38 38 0 1 1 76 0 a38 38 0 1 1 -76 0"/></defs><text><textPath href="#hgseal{{ loop.index }}">VERIFIED · AUTHENTIC · VERIFIED · AUTHENTIC ·</textPath></text></svg>
+          <b class="hg-latent hg-latent--seal">{{ initials }}</b>
+          {{ layers() }}
+        </div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+{% elif b.type == "faq" %}
+<section class="hg-sec hg-faq" data-hg="faq"{{ idattr }}>
+  <div class="hg-sec__in hg-faq__in">
+    {{ scan() }}
+    <header>
+      {% if b.kicker %}<p class="hg-kicker">{{ b.kicker }}</p>{% endif %}
+      <h2 class="hg-h2 hg-sheen">{{ b.title | rich }}</h2>
+    </header>
+    <div class="hg-faq__list">
+      {% for it in b.items %}<details{% if loop.first %} open{% endif %}><summary>{{ it.q | rich }}</summary><p>{{ it.a | rich }}</p></details>{% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "cta" %}
+<section class="hg-sec hg-cta" data-hg="cta"{{ idattr }}>
+  {% if e.bg %}<div class="hg-cta__bg" style="background-image: url('{{ e.bg }}')"></div>{% endif %}
+  <div class="hg-sec__in hg-cta__in">
+    {{ scan() }}
+    <div class="hg-pedestal hg-pedestal--rare">
+      <div class="hg-plate hg-rare hg-pat--sparkle" data-hg-plate data-range="12" data-rare>
+        <div class="hg-plate__body">
+          <div class="hg-rare__top" aria-hidden="true"><span>1 / 1</span><span>Ultra rare · security foil</span></div>
+          <div class="hg-rare__panel">
+            {% if b.kicker %}<p class="hg-kicker">{{ b.kicker }}</p>{% endif %}
+            <h2 class="hg-h2 hg-rare__title">{{ b.title | rich }}</h2>
+            {% if b.button %}<a class="hg-btn hg-btn--foil hg-btn--big" href="{{ b.button.href }}"><span>{{ b.button.label }}</span></a>{% endif %}
+          </div>
+          {{ layers() }}
+        </div>
+      </div>
+      <div class="hg-base" aria-hidden="true"></div>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endmacro %}
