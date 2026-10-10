@@ -1,0 +1,14 @@
+{# Isometric page furniture: a flat HUD bar (districts as links), a corner minimap of the world with a you-are-here
+   marker (drawn by the runtime), and the underside of the world slab as the footer. #}
+{% macro top(site, sections, nav_links) %}
+<header class="iso-bar">
+  <a class="iso-bar__mark" href="#"><i aria-hidden="true"></i><span>{{ site.name }}</span></a>
+  <nav class="iso-bar__links" aria-label="Districts">{% for l in nav_links %}<a href="{{ l.href }}"><b>{{ "%02d" | format(loop.index) }}</b> {{ l.label }}</a>{% endfor %}</nav>
+  {% if site.nav.cta %}<a class="iso-flat iso-bar__cta" href="{{ site.nav.cta.href }}"><span>{{ site.nav.cta.label }}</span></a>{% endif %}
+</header>
+<div class="iso-mini" aria-hidden="true"><svg class="iso-mini__map"></svg><span class="iso-mini__here">01</span></div>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}
+<div class="iso-under" aria-hidden="true"><i></i><i></i><i></i></div>
+{% endmacro %}

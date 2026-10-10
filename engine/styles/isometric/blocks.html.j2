@@ -1,0 +1,109 @@
+{# Isometric: the page is a map. Every section is a district of one small model world; with JavaScript the world is
+   drawn once (SVG, 2:1 projection) and a fixed-angle camera glides from district to district while the district
+   builds itself (runtime/src/styles/isometric.ts). All copy lives on the flat overlay plane: callout cards pinned to
+   world objects by leader lines. Without JavaScript the cards read top to bottom as an ordinary page.
+   data-anchor names the world object a card or label is pinned to. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+
+{% macro btns(list) %}{% if list %}<div class="iso-btns">{% for l in list %}<a class="{% if loop.first %}iso-key{% else %}iso-flat{% endif %}" href="{{ l.href }}"><span>{{ l.label }}</span></a>{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set no = "%02d" | format(loop.index) %}
+{% if b.type == "hero" %}
+<section class="iso-sec iso-sec--hero" data-iso="hero" data-name="{{ b.badge or 'Welcome' }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="iso-hud iso-hud--hero">
+    {% if b.badge %}<p class="iso-badge"><i aria-hidden="true"></i>{{ b.badge }}</p>{% endif %}
+    {% if e.first %}<h1 class="iso-h1">{{ b.title | rich }}</h1>{% else %}<h2 class="iso-h1">{{ b.title | rich }}</h2>{% endif %}
+    {% if b.body %}<p class="iso-lede">{{ b.body | rich }}</p>{% endif %}
+    {{ btns(b.buttons) }}
+  </div>
+  {% if b.device %}<figure class="iso-screen" data-screen>{{ base.phone(b.device, e.screen, e.clip) }}</figure>{% endif %}
+</section>
+
+{% elif b.type == "intro" %}
+<section class="iso-sec iso-sec--intro" data-iso="intro" data-name="{{ b.kicker or 'Intro' }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="iso-hud"><div class="iso-card" data-anchor="main">
+    <p class="iso-kicker"><b>{{ no }}</b>{% if b.kicker %} {{ b.kicker }}{% endif %}</p>
+    <h2 class="iso-h2">{{ b.title | rich }}</h2>
+    {% if b.body %}<p class="iso-body">{{ b.body | rich }}</p>{% endif %}
+    {% if b.button %}<div class="iso-btns"><a class="iso-flat" href="{{ b.button.href }}"><span>{{ b.button.label }}</span></a></div>{% endif %}
+  </div></div>
+</section>
+
+{% elif b.type == "features" %}
+<section class="iso-sec iso-sec--features" data-iso="features" data-n="{{ b.items | length }}" data-name="{{ b.kicker or 'Features' }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="iso-hud">
+    {% if b.title %}<div class="iso-card iso-card--head"><p class="iso-kicker"><b>{{ no }}</b>{% if b.kicker %} {{ b.kicker }}{% endif %}</p><h2 class="iso-h2">{{ b.title | rich }}</h2></div>{% endif %}
+    <ol class="iso-list">
+      {% for f in b.items %}
+      <li class="iso-card iso-card--item" data-anchor="f{{ loop.index0 }}"><span class="iso-pin" aria-hidden="true">{{ loop.index }}</span>
+        {% if f.tag %}<p class="iso-tag">{{ f.tag }}</p>{% endif %}<h3>{{ f.title | rich }}</h3>{% if f.body %}<p class="iso-body">{{ f.body | rich }}</p>{% endif %}
+        {% if f.meter is not none %}<div class="iso-meter" aria-hidden="true"><i style="width: {{ (f.meter * 100) | round }}%"></i></div>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "product" %}
+<section class="iso-sec iso-sec--product" data-iso="product" data-n="{{ (b.stats or b.tags) | length }}" data-name="{{ b.kicker or 'Product' }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="iso-hud">
+    <div class="iso-card" data-anchor="main">
+      <p class="iso-kicker"><b>{{ no }}</b>{% if b.kicker %} {{ b.kicker }}{% endif %}</p>
+      <h2 class="iso-h2">{{ b.title | rich }}</h2>
+      {% if b.body %}<p class="iso-body">{{ b.body | rich }}</p>{% endif %}
+      {{ btns(b.buttons) }}
+      {% if b.note %}<p class="iso-note">{{ b.note | rich }}</p>{% endif %}
+    </div>
+    {% if b.stats %}<ul class="iso-layers">{% for st in b.stats %}<li data-anchor="l{{ loop.index0 }}"><b>{{ st.value }}{% if st.unit %} {{ st.unit }}{% endif %}</b> {{ st.label }}</li>{% endfor %}</ul>
+    {% elif b.tags %}<ul class="iso-layers">{% for t in b.tags %}<li data-anchor="l{{ loop.index0 }}">{{ t }}</li>{% endfor %}</ul>{% endif %}
+  </div>
+  {% if e.img %}<figure class="iso-photo"><img src="{{ e.img }}" alt="" loading="lazy"></figure>{% endif %}
+  {% if b.device %}<figure class="iso-screen" data-screen>{{ base.phone(b.device, e.screen, e.clip) }}</figure>{% endif %}
+</section>
+
+{% elif b.type == "stats" %}
+<section class="iso-sec iso-sec--stats" data-iso="stats" data-n="{{ b.items | length }}" data-name="Figures"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="iso-hud">
+    <ul class="iso-stats">
+      {% for st in b.items %}<li class="iso-stat" data-anchor="s{{ loop.index0 }}" data-v="{{ st.value | replace(',', '') }}"><b>{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</b><span>{{ st.label }}</span></li>{% endfor %}
+    </ul>
+  </div>
+</section>
+
+{% elif b.type == "timeline" %}
+<section class="iso-sec iso-sec--timeline" data-iso="timeline" data-n="{{ b.items | length }}" data-name="{{ b.kicker or 'Route' }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="iso-hud">
+    {% if b.title %}<div class="iso-card iso-card--head"><p class="iso-kicker"><b>{{ no }}</b>{% if b.kicker %} {{ b.kicker }}{% endif %}</p><h2 class="iso-h2">{{ b.title | rich }}</h2></div>{% endif %}
+    <ol class="iso-list">
+      {% for t in b.items %}<li class="iso-card iso-card--item" data-anchor="t{{ loop.index0 }}"><span class="iso-pin" aria-hidden="true">{{ loop.index }}</span><p class="iso-tag">{{ t.when }}</p><h3>{{ t.title | rich }}</h3>{% if t.body %}<p class="iso-body">{{ t.body | rich }}</p>{% endif %}</li>{% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "quote" %}
+<section class="iso-sec iso-sec--quote" data-iso="quote" data-name="{{ b.who or 'Neighbour' }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="iso-hud"><figure class="iso-card iso-bubble" data-anchor="person">
+    <blockquote>{{ b.text | rich }}</blockquote>{% if b.who %}<figcaption>{{ b.who }}</figcaption>{% endif %}
+  </figure></div>
+</section>
+
+{% elif b.type == "faq" %}
+<section class="iso-sec iso-sec--faq" data-iso="faq" data-name="{{ b.kicker or 'Help desk' }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="iso-hud"><div class="iso-card iso-card--faq" data-anchor="main">
+    <p class="iso-kicker"><b>{{ no }}</b>{% if b.kicker %} {{ b.kicker }}{% endif %}</p>
+    <h2 class="iso-h2">{{ b.title | rich }}</h2>
+    <div class="iso-faq">{% for it in b.items %}<details{% if loop.first %} open{% endif %}><summary><span>{{ it.q | rich }}</span><i aria-hidden="true"></i></summary><p>{{ it.a | rich }}</p></details>{% endfor %}</div>
+  </div></div>
+</section>
+
+{% elif b.type == "cta" %}
+<section class="iso-sec iso-sec--cta" data-iso="cta" data-name="{{ b.kicker or 'Finish' }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="iso-hud iso-hud--cta">
+    {% if b.kicker %}<p class="iso-badge"><i aria-hidden="true"></i>{{ b.kicker }}</p>{% endif %}
+    <h2 class="iso-h1 iso-h1--cta">{{ b.title | rich }}</h2>
+    {% if b.button %}<div class="iso-btns"><a class="iso-key iso-key--big" href="{{ b.button.href }}"><span>{{ b.button.label }}</span></a></div>{% endif %}
+  </div>
+</section>
+{% endif %}
+{% endmacro %}

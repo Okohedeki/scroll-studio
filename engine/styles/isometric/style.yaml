@@ -1,17 +1,21 @@
-# Isometric: tokens and fonts for theme.style: isometric. See README.md in this folder for the UX contract.
+# Isometric: tokens and fonts for theme.style: isometric. See engine/styles/README.md for the contract and
+# docs/styles/styles-06-10.md section 3 for the research.
 label: Isometric
-about: Cards and buttons extruded into isometric blocks on a 30-degree grid.
+about: A fixed-angle drone over a tiny model world that builds itself. Every section is a district on one map; the camera glides diagonally between them while tiles drop in and buildings extrude, stats rise as towers, a token drives the road between steps, and the last district holds a keycap button.
 mode: light
 colors:
-  bg: '#eef2f8'
-  bg2: '#e2e8f2'
-  ink: '#16213a'
-  accent: '#4f6bff'
-  accent2: '#8fa2ff'
+  bg: '#cfe8f3'
+  bg2: '#bfdcea'
+  ink: '#1d2b3a'
+  accent: '#d24a28'
+  accent2: '#21998e'
   accent_ink: '#ffffff'
 fonts:
-  display: Outfit
-  body: Outfit
+  display: Sora
+  body: Sora
   mono: DM Mono
+font_axes:
+  Sora: "wght@100..800"
+  DM Mono: "ital,wght@0,300;0,400;0,500;1,400"
 display_weight: 700
-radius: 4px
+radius: 3px
