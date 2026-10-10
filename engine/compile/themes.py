@@ -64,7 +64,7 @@ def presets() -> dict:
 
 @lru_cache(maxsize=1)
 def styles() -> dict:
-    """Every engine/styles/<name>/style.yaml, by name (label, about, mode, colors, fonts, font_axes, radius, fx...)."""
+    """Every engine/styles/<name>/style.yaml, by name (label, about, mode, colors, fonts, font_axes, radius)."""
     out = {}
     for f in sorted(STYLES_DIR.glob("*/style.yaml")):
         with open(f, encoding="utf-8") as fh:
@@ -106,7 +106,6 @@ def resolve(theme: Theme) -> dict:
     return {
         "style": theme.style,
         "font_axes": st.get("font_axes", {}),
-        "fx": st.get("fx", {}),
         "mode": theme.mode or base.get("mode", "dark"),
         "colors": colors,
         "fonts": fonts,

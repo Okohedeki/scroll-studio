@@ -6,13 +6,9 @@ import Lenis from "lenis";
 import "./styles.css";
 import { clamp, debugP, follow, params, reducedMotion, scaleAt } from "./lib/util";
 import { makeBlocks } from "./lib/blocks";
-import { startFx } from "./fx/index";
 import type { FrameState, Player, PlayerFactory, SectionData } from "./lib/types";
 
 document.documentElement.classList.add("js");
-// a style whose numbers arrive their own way (split-flap, decoding) takes over from the count-ups
-const fxText = (() => { try { return JSON.parse(document.documentElement.dataset.fx || "{}").text as string | undefined; } catch { return undefined; } })();
-if (document.documentElement.dataset.fx) startFx();
 // A style's own experience (runtime/src/styles/<style>.ts): its scroll mechanics, transitions and interactions.
 const EXPERIENCES = import.meta.glob<{ default: () => void }>("./styles/[a-z]*.ts");
 const styleName = document.documentElement.dataset.style;
@@ -310,7 +306,7 @@ if (debugP !== null) {
 // viewport, however fast the page is scrolled, and count-ups finish before the number reaches mid-screen.
 const reveals = [...document.querySelectorAll<HTMLElement>(".ss-reveal")].map((el, i) => ({
   el, lag: (i % 4) * 0.25, k: -1,
-  counts: [...el.querySelectorAll<HTMLElement>(fxText === "flap" || fxText === "scramble" ? ":not(*)" : "[data-count]")].map((v) => ({
+  counts: [...el.querySelectorAll<HTMLElement>("[data-count]")].map((v) => ({
     v, end: parseFloat(v.dataset.count!), sup: v.querySelector("sup")?.outerHTML || "",
     dec: (v.dataset.count!.split(".")[1] || "").length, k: -1,
   })),
