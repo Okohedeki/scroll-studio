@@ -78,7 +78,7 @@ export default function start() {
     const slides = $$<HTMLElement>(".bh-slide", poster).map((s) => ({ el: s, dir: s.dataset.from || "b", dist: 0, last: "" }));
     let stats: Sec["stats"] = [];
     if (kind === "stats") {
-      const vals = items.map((li) => parseFloat(li.dataset.v || "") );
+      const vals = items.map((li) => (/^-?\d+(\.\d+)?%?$/.test((li.dataset.v || "").trim()) ? parseFloat(li.dataset.v || "") : NaN));
       const units = items.map((li) => (li.dataset.unit || "").trim());
       const maxBar = Math.max(1, ...vals.filter((v, i) => isFinite(v) && units[i] !== "%" && v > 24));
       stats = vals.map((v, i) => {
@@ -88,7 +88,7 @@ export default function start() {
         else if (pct && v >= 0 && v <= 100) k = "pie";
         else if (v === 0) k = "zero";
         else if (Number.isInteger(v) && v > 0 && v <= 24) k = "squares";
-        return { v: isFinite(v) ? v : 1, kind: k, max: maxBar };
+        return { v: isFinite(v) ? v : maxBar * 0.6, kind: k, max: maxBar };
       });
       items.forEach((li, i) => {
         const fig = li.querySelector<HTMLElement>(".bh-stat__fig")!;
@@ -164,7 +164,7 @@ export default function start() {
         if (st.kind === "bar") {
           const w = (P ? 0.8 : 0.48) * g.Wst * clamp(st.v / st.max, 0.06, 1);
           const x0 = g.X(P ? 0.1 : 0.44);
-          c.b = { x: x0 + w / 2, y: g.Y(P ? 0.26 : 0.52), w, h: 0.09 * S, r: 0, o: 1, pie: 1 };
+          c.b = { x: x0 + w / 2, y: g.Y(P ? 0.26 : 0.66), w, h: 0.09 * S, r: 0, o: 1, pie: 1 };
         }
         if (st.kind === "zero") c.r1 = P ? rule(0.5, 0.3, 0.8, 7) : rule(0.7, 0.6, 0.42, 7);
         break;
@@ -200,8 +200,8 @@ export default function start() {
   }
   function legendSpot(n: number, j: number) {
     const s = (g.P ? 0.07 : 0.05) * g.S;
-    const step = g.P ? Math.min(0.13, 0.5 / Math.max(1, n - 1)) : Math.min(0.13, 0.36 / Math.max(1, n - 1));
-    return { cx: g.X((g.P ? 0.08 : 0.585) + j * step), cy: g.Y(g.P ? 0.4 : 0.9), s };
+    const step = g.P ? Math.min(0.13, 0.5 / Math.max(1, n - 1)) : Math.min(0.14, 0.34 / Math.max(1, n - 1));
+    return { cx: g.X((g.P ? 0.08 : 0.58) + j * step), cy: g.Y(g.P ? 0.4 : 0.9), s };
   }
   function diag() {
     return g.P ? { p0: { x: g.X(0.06), y: g.Y(0.94) }, p1: { x: g.X(0.94), y: g.Y(0.56) } }
@@ -227,6 +227,13 @@ export default function start() {
       s.words.forEach((w) => { w.el.style.transform = ""; w.last = ""; });
       s.slides.forEach((sl) => { sl.el.style.transform = ""; sl.last = ""; });
     });
+    // a long head shrinks until it fits its part of the poster
+    secs.forEach((s) => s.poster.querySelectorAll<HTMLElement>(".bh-head").forEach((h) => {
+      h.style.fontSize = "";
+      const lim = g.Hst * (h.classList.contains("bh-head--q") ? 0.5 : h.classList.contains("bh-head--s") ? (g.P ? 0.2 : 0.27) : (g.P ? 0.26 : 0.4));
+      let fs = parseFloat(getComputedStyle(h).fontSize), guard = 0;
+      while ((h.offsetHeight > lim || h.scrollWidth > h.clientWidth + 2) && fs > 22 && guard++ < 40) { fs *= 0.93; h.style.fontSize = fs + "px"; }
+    }));
     secs.forEach((s) => {
       const r = s.el.getBoundingClientRect();
       s.top = r.top + scrollY;
@@ -276,7 +283,7 @@ export default function start() {
               cell.style.top = cy + (row - (rows - 1) / 2) * (size + gap) - size / 2 + "px";
             });
           } else if (st.kind === "bar") {
-            const x0 = g.X(g.P ? 0.1 : 0.44) - g.L, span = (g.P ? 0.8 : 0.48) * g.Wst, y = g.Y(g.P ? 0.26 : 0.52) - g.top + 0.045 * g.S + 10;
+            const x0 = g.X(g.P ? 0.1 : 0.44) - g.L, span = (g.P ? 0.8 : 0.48) * g.Wst, y = g.Y(g.P ? 0.26 : 0.66) - g.top + 0.045 * g.S + 10;
             cells.forEach((cell, k) => {
               cell.style.width = "4px"; cell.style.height = (k % 5 === 0 ? 22 : 12) + "px";
               cell.style.left = x0 + (span * k) / (cells.length - 1) - 2 + "px"; cell.style.top = y + "px";
@@ -434,7 +441,7 @@ export default function start() {
         li.style.setProperty("--a", clamp((a - 0.75) / 0.25).toFixed(3));
         li.style.zIndex = a > 0.5 ? "2" : "1";
         const h3 = li.querySelector<HTMLElement>("h3");
-        if (h3 && g.P) h3.style.opacity = a > 0.5 ? "1" : "0";
+        if (h3 && (g.P || s.items.length > 3)) h3.style.opacity = a > 0.5 ? "1" : "0";
         else if (h3) h3.style.opacity = "";
       });
     } else if (s.kind === "stats") {

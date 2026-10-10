@@ -92,7 +92,6 @@ export default function start() {
   });
   const featSec = secs.find((s) => s.kind === "features");
   const nFeat = featSec ? Math.max(1, featSec.rows.length) : 0;
-  const statSec = secs.find((s) => s.kind === "stats");
   const tlSec = secs.find((s) => s.kind === "timeline");
   const nWp = tlSec ? Math.max(1, tlSec.rows.length) : 3;
 
@@ -178,14 +177,15 @@ export default function start() {
   }
 
   // ------------------------------------------------------------ the measuring yard: stats as dimensioned towers
-  const towers: { dim: THREE.Group; h: number; x: number; z: number }[] = [];
-  const yard = V(30, 0, -6);
-  if (statSec) {
-    const vals = statSec.dims.map((d) => parseFloat(d.dataset.v || ""));
+  type Tower = { dim: THREE.Group; h: number; x: number; z: number };
+  const yards = new Map<Sec, { at: THREE.Vector3; towers: Tower[] }>();
+  secs.filter((sc) => sc.kind === "stats").forEach((sc) => {
+    const at = V(30, 0, -6 - sc.occ * 26), towers: Tower[] = [];
+    const vals = sc.dims.map((d) => parseFloat(d.dataset.v || ""));
     const max = Math.max(1e-6, ...vals.filter((v) => isFinite(v)));
     vals.forEach((v, j) => {
       const h = !isFinite(v) ? 6 : v === 0 ? 0.25 : 1.6 + 11 * (v / max);
-      const x = yard.x + j * 5.2, z = yard.z;
+      const x = at.x + j * 5.2, z = at.z;
       const bg = new THREE.BoxGeometry(2.6, h, 2.6);
       const tw = new THREE.Group(); tw.add(solidOf(bg), edgesOf(bg, mInk)); tw.position.set(x, h / 2, z); scene.add(tw);
       // floors drawn as horizontal hatches
@@ -199,7 +199,8 @@ export default function start() {
       scene.add(dim);
       towers.push({ dim, h, x: x + 1.3 + dx, z: z + 1.3 });
     });
-  }
+    yards.set(sc, { at, towers });
+  });
 
   // ------------------------------------------------------------ the survey: contour terrain and a route with waypoints
   const hgt = (x: number, z: number) => 7 * Math.exp(-((x - 62) ** 2 + (z - 14) ** 2) / 260) + 5 * Math.exp(-((x - 86) ** 2 + (z - 44) ** 2) / 220) + 3 * Math.exp(-((x - 44) ** 2 + (z - 42) ** 2) / 160);
@@ -260,9 +261,9 @@ export default function start() {
       }
       case "product": stations.push(around(V(1.5, PH.y + 0.2, 0), V(9, 2.5, 27), s.occ, 34)); break;
       case "stats": {
-        const n = Math.max(1, statSec?.dims.length || 1);
-        const mid = V(yard.x + ((n - 1) * 5.2) / 2 + 1.5, 6, yard.z);
-        stations.push(around(mid, V(4, 7, 30 + n * 2), s.occ, 38));
+        const n = Math.max(1, s.dims.length);
+        const at = yards.get(s)!.at;
+        stations.push({ pos: V(at.x + ((n - 1) * 5.2) / 2 + 1.5, 6, at.z).add(V(4, 7, 30 + n * 2)), target: V(at.x + ((n - 1) * 5.2) / 2 + 1.5, 6, at.z), fov: 38 });
         break;
       }
       case "timeline": wps.forEach((w) => stations.push({ pos: w.clone().add(V(-10, 9, 16)), target: w.clone().add(V(0, -2, 0)), fov: 42 })); break;
@@ -298,6 +299,12 @@ export default function start() {
       s.travel = k === 0 ? 0 : Math.min(0.42, 0.75 / screens);
     });
     secs.forEach((s) => { const r = s.el.getBoundingClientRect(); s.top = r.top + scrollY; s.len = Math.max(1, r.height); });
+    // a long headline shrinks until it fits its callout
+    $$<HTMLElement>(".wf-head").forEach((h) => {
+      h.style.fontSize = "";
+      let fs = parseFloat(getComputedStyle(h).fontSize), guard = 0;
+      while (h.offsetHeight > H * (mobile ? 0.26 : 0.4) && fs > 24 && guard++ < 30) { fs *= 0.93; h.style.fontSize = fs + "px"; }
+    });
     dirty = true;
   }
 
@@ -392,9 +399,11 @@ export default function start() {
     camera.fov = lerp(stations[Math.min(i0, stations.length - 1)].fov, stations[i1].fov, c.u - i0);
     // drag-orbit within limits, springing back to the authored path
     const off = pos.clone().sub(tgt).multiplyScalar(distK).applyAxisAngle(V(0, 1, 0), yaw);
+    if (off.length() < 15 * distK) off.setLength(15 * distK);   // between stations the path never grazes the model
     const right = V(0, 1, 0).cross(off).normalize();
     off.applyAxisAngle(right, pitch);
     camera.position.copy(tgt).add(off);
+    { const away = camera.position.clone().sub(C); const minD = 13 * distK; if (away.length() < minD) camera.position.copy(C).add(away.setLength(minD)); }
     camera.lookAt(tgt);
     camera.updateProjectionMatrix();
 
@@ -424,9 +433,12 @@ export default function start() {
     cutPlane.visible = introK >= 0 && (c.si === introK || (c.si === introK + 1 && c.q < secs[c.si].travel * 0.5));
     if (cutPlane.visible) { const k = c.si === introK ? clamp((c.q - secs[introK].travel) / (1 - secs[introK].travel)) : 1; cutPlane.position.set(0, PH.y + PH.h / 2 - 0.5 - k * (PH.h - 1), 0); }
     // dimension lines grow up the towers
-    const statK = secs.findIndex((sc) => sc.kind === "stats");
-    const grow = statK < 0 ? 0 : reduced ? (c.si >= statK ? 1 : 0) : statK === c.si ? clamp((c.q - secs[statK].travel * 0.8) / 0.25) : statK < c.si ? 1 : 0;
-    towers.forEach((t, j) => { t.dim.scale.y = Math.max(0.001, clamp(grow * 1.4 - j * 0.12)); });
+    secs.forEach((sc, k) => {
+      const y2 = yards.get(sc);
+      if (!y2) return;
+      const grow = reduced ? (c.si >= k ? 1 : 0) : k === c.si ? clamp((c.q - sc.travel * 0.8) / 0.25) : k < c.si ? 1 : 0;
+      y2.towers.forEach((t, j) => { t.dim.scale.y = Math.max(0.001, clamp(grow * 1.4 - j * 0.12)); });
+    });
     // the route: driven part solid, the road ahead dashed
     const tlK = secs.findIndex((sc) => sc.kind === "timeline");
     let route = 0;
@@ -473,7 +485,7 @@ export default function start() {
       }
       if (sc.kind === "features") {
         sc.rows.forEach((r, j) => r.classList.toggle("is-on", j === c.stop && k === c.si));
-        for (let j = 0; j < Math.min(nFeat, parts.length); j++) {
+        for (let j = 0; j < Math.min(sc.rows.length, parts.length); j++) {
           const pt = parts[j];
           const [bx, by, vis] = toScreen(pt.group.localToWorld(pt.top.clone()));
           if (!vis) continue;
@@ -492,7 +504,7 @@ export default function start() {
       }
       if (sc.kind === "stats") {
         sc.dims.forEach((d, j) => {
-          const t = towers[j];
+          const t = yards.get(sc)?.towers[j];
           if (!t) { d.style.visibility = "hidden"; return; }
           const [sx, sy, vis] = toScreen(V(t.x, t.h * Math.max(0.001, t.dim.scale.y) * 0.5, t.z));
           const show = vis && t.dim.scale.y > 0.3;

@@ -387,6 +387,13 @@ export default function start() {
         if (x === 0) { d.style.width = "auto"; d.style.justifyItems = "start"; d.style.paddingLeft = "56px"; } else { d.style.width = ""; d.style.justifyItems = ""; d.style.paddingLeft = ""; }
       });
     });
+    // a long drawing title shrinks until it fits its view
+    $$<HTMLElement>(".bp-title", main!).forEach((t) => {
+      t.style.fontSize = "";
+      let fs = parseFloat(getComputedStyle(t).fontSize), guard = 0;
+      const lim = vh * (mobile ? 0.3 : t.closest(".bp-view--hero") ? 0.42 : 0.3);
+      while (t.offsetHeight > lim && fs > 26 && guard++ < 30) { fs *= 0.93; t.style.fontSize = fs + "px"; }
+    });
     $$<HTMLElement>(".bp-btn", document).forEach((b) => b.setAttribute("data-w", (b.offsetWidth / 4).toFixed(1)));
     if (!flow && sheet) {
       sheet.style.transform = "none";

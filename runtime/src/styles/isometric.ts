@@ -212,7 +212,7 @@ export default function start() {
           d.towers.push(b);
           d.anchors["s" + j] = [cx + x + 0.8, cy + y + 0.8, h];
         });
-        person(5.6, 1.2); person(6.1, 2.2, PAL.accent);
+        person(5.4, 3.8); person(6.1, 4.6, PAL.accent);
         d.anchors.main = [cx, cy, 2];
         break;
       }
@@ -303,12 +303,12 @@ export default function start() {
     lead.setAttribute("viewBox", `0 0 ${W} ${H}`);
     secs.forEach((s) => {
       const n = s.d.stops.length;
-      const lenScreens = s.kind === "hero" ? 1.3 : s.kind === "cta" ? 1.6 : s.kind === "product" ? 1.9 : s.kind === "stats" ? 1.5 : 1.0 + n * 0.7;
+      const lenScreens = s.kind === "hero" ? 1.3 : s.kind === "cta" ? 2.1 : s.kind === "product" ? 1.9 : s.kind === "stats" ? 1.5 : 1.0 + n * 0.7;
       s.el.style.setProperty("--len", lenScreens.toFixed(2));
     });
     secs.forEach((s, i) => {
       const r = s.el.getBoundingClientRect();
-      s.top = r.top + scrollY; s.len = Math.max(1, r.height);
+      s.top = r.top + scrollY; s.len = Math.max(1, r.height - (i === secs.length - 1 ? H * 0.9 : 0));
       s.glideFrac = i === 0 ? 0 : Math.min(0.4, (H * 0.6) / s.len);
     });
     drawMini();
