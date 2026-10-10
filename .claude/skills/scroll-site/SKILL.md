@@ -17,6 +17,9 @@ Use the MCP tools (`scroll-studio` server) when available, otherwise the `studio
 | a physical product with parts | `sequence` | a .glb/.obj/.fbx/.stl (file or https URL) |
 | a place: hotel, home, landscape, venue | `parallax` | one photo per step (`file:` or `generate:`) |
 | a manifesto, event, agency, statement | `type` | text only |
+| a physical product the client owns, in a cinematic world | `film` + `take:` | the product's .glb (or a photo with TRELLIS) + rough world shapes and camera keys |
+| a real place: house, venue, shop (scanned) | `splat` | a Gaussian-splat scan (.ply or gsplat .pt) + camera keys |
+| a data story with figures that must be right | `chart` + `callouts`, `stats` with `data:` | a CSV (file or URL) |
 
 Mix them: a `film` hero, then `features`/`stats`, then an `artwork` section, then a `cta`.
 
@@ -24,6 +27,9 @@ Mix them: a `film` hero, then `features`/`stats`, then an `artwork` section, the
 - Start from the closest example: `list_projects`, then `create_project(name, example=...)`, then edit with `get_spec`/`set_spec`.
 - `spec_schema('<type>')` gives every field with descriptions. Pick a theme preset that fits the domain
   (night, brass, paper, lab, cosmos, studio, dusk, ink, blueprint) and override colours only if the brand needs it.
+- A look in one word: `theme: { style: <name> }` (neo-brutalism, split-flap, holographic, art-deco, ... see
+  `engine/styles.yaml`). Offer two or three that fit and show them with `studio looks <project> --styles a,b,c`.
+- Brand: `studio brand <project> --logo inputs/logo.png` sets contrast-checked colours from the client's logo.
 - Copy: short, specific, written for the reader. `<em>…</em>` marks the accent words in a title.
 - Steps: the first step can be `intro: true` (the section's opening headline). For `artwork`, `scene3d`, `parallax`,
   each further step drives one stage, level or photo, in order. For `film`/`overlay`, use `at: [from, to]`.
@@ -36,6 +42,7 @@ Mix them: a `film` hero, then `features`/`stats`, then an `artwork` section, the
    (not hidden behind the copy), nothing cut off, colours on brand, every stage actually visible.
 3. Fix the spec (or the engine, if it's an engine limitation) and repeat. Finish with a full `build`.
 4. `record(project)` for an MP4 scroll-through when the user wants something to share.
+5. Client revisions: `studio copy export <project>` -> send copy.md -> `studio copy import <project> copy.md` -> build.
 
 ## 4. Hand over
 Tell the user where the site is (`dist/index.html`, preview with `studio preview <name>` or in `studio ui`), what

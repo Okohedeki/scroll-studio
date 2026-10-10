@@ -5,12 +5,13 @@ html.style-bauhaus .ss-hero:not(.ss-hero--media)::before { content: ""; position
   transform: translateY(calc(var(--hero-p, 0) * 120px)); }
 html.style-bauhaus .ss-hero:not(.ss-hero--media)::after { content: ""; position: absolute; z-index: -1; left: -4vw; bottom: -2vh; width: min(30vw, 400px); aspect-ratio: 1; background: var(--blue);
   clip-path: polygon(0 100%, 50% 0, 100% 100%); transform: rotate(calc(var(--hero-p, 0) * 30deg)); }
-html.style-bauhaus .ss-cta::before { content: ""; position: absolute; z-index: -1; left: 8vw; top: 10vh; width: min(18vw, 240px); aspect-ratio: 1; background: var(--yellow); }
-html.style-bauhaus .ss-cta::after { content: ""; position: absolute; z-index: -1; right: 10vw; bottom: 8vh; width: min(22vw, 300px); aspect-ratio: 1; border-radius: 50%; border: 28px solid var(--blue); }
+html.style-bauhaus .ss-cta::before { content: ""; position: absolute; z-index: -1; left: 3vw; top: 6vh; width: min(12vw, 170px); aspect-ratio: 1; background: var(--yellow); }
+html.style-bauhaus .ss-cta::after { content: ""; position: absolute; z-index: -1; right: -4vw; bottom: -6vh; width: min(22vw, 300px); aspect-ratio: 1; border-radius: 50%; border: 28px solid var(--blue); }
 html.style-bauhaus .ss-h1, html.style-bauhaus .ss-h2, html.style-bauhaus .ss-display { text-transform: uppercase; letter-spacing: -.01em; line-height: .92; }
 html.style-bauhaus em { font-style: normal; color: var(--blue); }
 html.style-bauhaus .ss-hero .ss-h1 em { color: var(--ink); background: var(--yellow); padding: 0 .12em; }
-html.style-bauhaus .ss-features { background: var(--ink); border: 4px solid var(--ink); gap: 4px; }
+html.style-bauhaus .ss-features { background: none; border: 0; gap: 0; }
+html.style-bauhaus .ss-feature { border: 4px solid var(--ink); margin: -2px; }
 html.style-bauhaus .ss-feature { position: relative; overflow: hidden; }
 html.style-bauhaus .ss-feature::after { content: ""; position: absolute; right: 22px; top: 22px; width: 44px; height: 44px; }
 html.style-bauhaus .ss-feature:nth-child(3n+1)::after { border-radius: 50%; background: var(--red); }

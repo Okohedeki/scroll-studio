@@ -7,7 +7,8 @@ html.style-kinetic-type em { font-style: normal; color: var(--accent); }
 html.style-kinetic-type .fx-ch { display: inline-block; transform: translateY(105%) rotate(6deg); opacity: 0; transition: transform .8s cubic-bezier(.2, .9, .2, 1), opacity .4s; transition-delay: calc(var(--i) * 28ms); }
 html.style-kinetic-type .fx-word { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .04em; }
 html.style-kinetic-type .fx-seen .fx-ch { transform: none; opacity: 1; }
-html.style-kinetic-type .ss-features { background: var(--ink); border-color: var(--ink); gap: 2px; }
+html.style-kinetic-type .ss-features { background: none; border: 0; gap: 0; }
+html.style-kinetic-type .ss-feature { border: 2px solid var(--ink); margin: -1px; }
 html.style-kinetic-type .ss-feature h3 { font-family: var(--font-display); text-transform: uppercase; font-size: 38px; letter-spacing: 0; }
 html.style-kinetic-type .ss-v { font-size: clamp(72px, 9vw, 160px); }
 html.style-kinetic-type .ss-btn { border: 2px solid var(--ink); text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }

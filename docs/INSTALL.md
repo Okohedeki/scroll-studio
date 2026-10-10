@@ -10,6 +10,8 @@ Scroll Studio runs entirely on your machine. What you need depends on which scen
 | `parallax` | + PyTorch (depth estimation). Runs on the CPU; a CUDA GPU is much faster. `generate:` images need ComfyUI. |
 | `sequence` | + Blender 4.2+ (Cycles uses the GPU when there is one, otherwise the CPU). |
 | `film` | + Blender, FFmpeg, ComfyUI with the LTX-2.3 and Z-Image models, a 24 GB GPU (RTX 4090/5090 class). |
+| `film` with `take.product` | + the product's 3D model (.glb/.gltf/.obj/.fbx/.stl/.ply). `from_photo:` instead needs TRELLIS (below). |
+| `splat` | A scan as a 3DGS `.ply` (any) or a gsplat `.pt` checkpoint (needs PyTorch to read). No GPU at build time. |
 
 `studio doctor` (or the Toolchain page in the UI) shows what this machine has.
 
@@ -58,7 +60,19 @@ in `studio.toml` (copy `studio.example.toml`) or the `BLENDER` environment varia
 
 Scroll Studio talks to ComfyUI at `comfy_url` (default http://127.0.0.1:8188).
 
-## 5. Claude
+## 5. TRELLIS (optional: a product model from one photo)
+
+`take.product.from_photo` turns a product photo into a mesh with TRELLIS before rendering it. Install TRELLIS in
+its own environment, then tell Scroll Studio how to run it (`studio.toml` or environment variables):
+
+```toml
+trellis_python = "D:/ai/TRELLIS/venv/Scripts/python.exe"   # TRELLIS_PYTHON
+trellis_script = "D:/ai/TRELLIS/image_to_mesh.py"          # TRELLIS_SCRIPT: --dir <work> reads object.png, writes mesh.ply
+```
+
+A real model (`model:`) always looks better than a reconstruction; use the photo route when there is no model.
+
+## 6. Claude
 
 - **Claude Code**: open the repo; `.mcp.json` registers the `scroll-studio` MCP server and the `scroll-site` skill
   teaches the workflow. Ask for a site in plain language.

@@ -7,9 +7,17 @@ or a script tied to one image or one shot. If a site needs something the engine 
 
 ## Layout
 - `engine/spec.py`: the site spec (Pydantic). Source of truth for site.yaml, the UI forms and the MCP tools.
-- `engine/scenes/<type>.py`: one builder per scene type: film, artwork, scene3d, sequence, parallax, type.
+- `engine/scenes/<type>.py`: one builder per scene type: film (with `take:` for One Take: Blender world blockout ->
+  LTX-2.3, plus the real product rendered by `backends/blender_scripts/take.py` and composited), artwork, scene3d,
+  sequence, parallax, type, vector, chart (callouts resolved from the data), map, splat (`backends/splats.py`: .ply /
+  gsplat .pt -> SPZ for Spark).
 - `runtime/src/players/<type>.ts`: the browser player for each scene type; `runtime/src/index.ts` is the scroll core.
 - `engine/compile/`: templates + themes -> `dist/`. Content blocks: intro, features, stats, timeline, quote, cta, gallery, hero, product (with an HTML phone or a clip; `pose:` beside/rise/close/lean/pair/turn varies the composition, `behind:` adds a second phone that swaps places with the first, `stats:` big figures; a hero takes a `device:` too; `theme.display_em: bold` sets emphasis as bold italics). `scroll.speed` (read by the runtime as `window.__ssScroll`) paces smooth scrolling and reveals, strip, orbit, faq. `layout: stack` turns every section into a full-screen panel that slides over the last; `surface:` (light, dark, accent) recolours one section with contrast-checked tokens. `pages:` adds plain Markdown pages (privacy policy, support) set in the site's theme at `/<slug>/`, linked from the footer (`page.html.j2`). Any section takes a full-bleed `backdrop:` image (`engine/inputs.py` also renders `gradient:` backdrops locally: stops, glows, stars, grain).
+- Styles: `engine/styles.yaml` + `engine/styles/<name>.css` (twenty looks picked with `theme.style`) and their runtime
+  effects in `runtime/src/fx/`. `studio looks <project>` builds a site in every style. A new style is a yaml entry, a
+  stylesheet that styles every block, and (optionally) an fx module; check it with `studio looks --styles <name>`.
+- Client work: `engine/brand.py` (`studio copy export|import`, `studio brand --logo`), round-trip YAML via ruamel so
+  site.yaml comments survive.
 - `engine/server/` + `ui/`: the Studio app (`studio ui`). `engine/mcp_server.py`: MCP tools for Claude.
 - `examples/`: example projects; each must keep building with `studio build examples/<name>`.
 

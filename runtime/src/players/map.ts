@@ -32,6 +32,10 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     center: cams[0]?.center ?? [0, 20], zoom: cams[0]?.zoom ?? 1.5, pitch: cams[0]?.pitch ?? 0, bearing: cams[0]?.bearing ?? 0,
     canvasContextAttributes: { preserveDrawingBuffer: true }, maxPitch: 75,
   } as any);
+  // icons the hosted style names but its sprite lacks (e.g. "circle-11"): a blank stands in, no console noise
+  map.on("styleimagemissing", (e: any) => {
+    if (!map.hasImage(e.id)) map.addImage(e.id, { width: 1, height: 1, data: new Uint8Array(4) });
+  });
   let ready = false;
   const lengths: Record<string, number[]> = {};
   map.on("load", () => {

@@ -59,6 +59,22 @@ def _knockout(im):
     return Image.fromarray(a.astype(np.uint8))
 
 
+def favicon(site: Site, theme: dict) -> str:
+    """A data-URI SVG icon: the nav logo's path on the accent, or the site's initial. Browsers ask for
+    /favicon.ico on every page otherwise, and hosts such as GitHub Pages answer with a 404."""
+    from urllib.parse import quote
+    acc, ink = theme["colors"]["accent"], theme["colors"]["accent_ink"]
+    logo = site.nav.logo
+    if logo and logo.startswith("M"):
+        body = f'<path d="{logo}" fill="none" stroke="{ink}" stroke-width="1.8" transform="translate(4 4)"/>'
+    else:
+        letter = (site.name.strip()[:1] or "S").upper().replace("&", "&amp;").replace("<", "&lt;")
+        body = (f'<text x="16" y="22.5" text-anchor="middle" font-family="system-ui,sans-serif" font-size="18" '
+                f'font-weight="700" fill="{ink}">{letter}</text>')
+    svg = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="{acc}"/>{body}</svg>'
+    return "data:image/svg+xml," + quote(svg)
+
+
 def runtime_ready() -> bool:
     return (STATIC / "runtime" / "index.js").exists()
 
@@ -228,7 +244,7 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         font_css=font_css, font_links=[] if font_css else links, nav_links=nav, page_links=page_links, credits=credits,
         configs={e["s"].id: e["config"] for e in sections if e["scene"]},
         style_css=themes.style_css(theme["style"]) if theme["style"] else "", fx=json.dumps(theme["fx"]),
-        runtime=runtime_href or "runtime/", looks=looks,
+        runtime=runtime_href or "runtime/", looks=looks, icon=favicon(site, theme),
     )
     (dist / "index.html").write_text(html, encoding="utf-8")
 
@@ -246,7 +262,7 @@ def build_site(project: Project, log: Callable[[str], None] = print,
             body = markdown.markdown(src.read_text(encoding="utf-8"), extensions=["sane_lists", "smarty", "tables", "fenced_code", "toc"],
                                      extension_configs={"toc": {"permalink": False}})
             page_html = env.get_template("page.html.j2").render(
-                site=site, page=p, body=Markup(body), theme=theme, css_vars=css_vars, base=base,
+                site=site, page=p, icon=favicon(site, theme), body=Markup(body), theme=theme, css_vars=css_vars, base=base,
                 logo=rebase(logo) if logo and not logo.startswith("M") else logo,
                 font_css=rebase(font_css) if font_css else None, font_links=[] if font_css else links,
                 nav_links=[{"label": l["label"], "href": rebase(l["href"])} for l in nav],

@@ -5,13 +5,14 @@ through MCP.**
 
 [![Lodestar Orbital: a rocket launch that plays as you scroll](docs/media/lodestar.gif)](https://okohedeki.github.io/scroll-studio-showcase/)
 
-**[See all twelve example sites live →](https://okohedeki.github.io/scroll-studio-showcase/)**
+**[See every example site live →](https://okohedeki.github.io/scroll-studio-showcase/)** ·
+**[One page in twenty styles →](https://okohedeki.github.io/scroll-studio-showcase/halcyon/looks/)**
 
 Give it a brief, a photo, a painting, a 3D model, a CSV or a film idea. It builds a static site where scrolling
 plays the visuals: generated video, a painting drawn stroke by stroke, a live 3D zoom, a data story, a map flight.
 The output is plain HTML, CSS and JS you can host anywhere.
 
-**What you need:** 6 of the 9 scene types (`scene3d`, `chart`, `map`, `type`, `vector`, and `artwork` from your own
+**What you need:** 7 of the 10 scene types (`scene3d`, `chart`, `map`, `type`, `vector`, `splat`, and `artwork` from your own
 images) need no GPU at all, just Python and a browser. `parallax` and `sequence` run on the CPU but are much
 faster on a GPU. `film` generates video locally with LTX-2.3 and needs Blender, ComfyUI and a 24 GB card (RTX
 4090 class). Details in [docs/INSTALL.md](docs/INSTALL.md).
@@ -26,9 +27,28 @@ site.yaml ──► studio build ──► dist/  (plain static files: host anyw
                    ├─ parallax  photos + estimated depth (Depth Anything V2) → 2.5D camera moves
                    ├─ type      kinetic typography: reveal, stack, swap, scale
                    ├─ vector    SVG or vectorised artwork drawing itself stroke by stroke
-                   ├─ chart     CSV data stories with D3: series, zooms, annotations per step
-                   └─ map       live vector maps (MapLibre): camera flights and routes per step
+                   ├─ chart     CSV data stories with D3: series, zooms, callouts read from the data
+                   ├─ map       live vector maps (MapLibre): camera flights and routes per step
+                   └─ splat     a Gaussian-splat scan of a real place, walked through on scroll (Spark)
 ```
+
+### New in v3
+
+- **One Take** (`film` with `take:`): one unbroken camera move through a generated world. You block the world out
+  in rough shapes and camera keys; Blender renders the depth guide, LTX-2.3 paints the world along it in chained
+  segments, and your real product is rendered by Cycles from its own 3D model through the identical camera and
+  composited onto every frame. The product never warps, because it is never generated.
+  ([Stillwater](examples/one-take/site.yaml))
+- **Real places** (`splat`): a phone or drone scan as a Gaussian splat (`.ply` or a gsplat `.pt`), trimmed and
+  compressed to SPZ at build time and walked through on scroll. ([Hollis House](examples/hollis-house/site.yaml))
+- **Numbers you can check** (`chart` callouts, `stats` bound to data): headline figures and chart notes are read
+  from the source CSV when the site is built, so the copy can't drift from the data. ([Pelorus](examples/pelorus/site.yaml))
+- **Twenty styles** (`theme: { style: … }`): a whole look in one word, from neo-brutalism and split-flap to
+  holographic foil and a wireframe landscape. `studio looks` builds a site in every style with a switcher.
+  ([Halcyon](examples/halcyon/site.yaml))
+- **Client work**: `studio copy export` gives the client a Markdown copy deck; `studio copy import` applies their
+  edits back into site.yaml (comments kept, invalid edits refused). `studio brand --logo` draws a contrast-checked
+  theme from their logo.
 
 ## Examples
 
@@ -58,6 +78,10 @@ Every example is a `site.yaml` in [`examples/`](examples/) and rebuilds with `st
 | [Casa Alta](examples/casa-alta/site.yaml) | Hospitality | `parallax` | Generated photos of a cliff hotel in 2.5D (needs ComfyUI to build) |
 | [Hushwell](examples/hushwell/site.yaml) | Healthcare | `stack` layout | Panels slide over each other: hero, product with phone, photo strip, orbit, FAQ |
 | [Hale & Rowe](examples/hale-rowe/site.yaml) | Architecture | `artwork` | A house drawn from construction lines to finished photo (needs ComfyUI) |
+| [Stillwater](examples/one-take/site.yaml) | Consumer product | `film` + `take` | One take from a mountain ridge down to a bottle on a lakeside table; the bottle is the real 3D model |
+| [Hollis House](examples/hollis-house/site.yaml) | Real estate | `splat` | A walk through a scanned house, room by room |
+| [Pelorus](examples/pelorus/site.yaml) | Research | `chart` (bar) | The renewables share of electricity, every figure read from Our World in Data |
+| [Halcyon](examples/halcyon/site.yaml) | Software | blocks | One product page built in twenty styles (`studio looks`) |
 
 ## Quick start
 
@@ -132,6 +156,60 @@ model: colour stops, glows, stars and grain, enough for colour cards, dusk skies
         stars: 120
     title: Your words stay <em>on your phone.</em>
 ```
+
+## Styles
+
+`theme: { style: <name> }` sets a whole look: colours, fonts, corner radius, a stylesheet and, where the look moves,
+a runtime effect. `theme.colors` and `theme.fonts` still win, so a brand's palette can wear any style.
+
+`particles` · `liquid-morph` · `holographic` · `neon-glow` · `wireframe-3d` · `glassmorphism` · `kinetic-type` ·
+`isometric` · `clay-3d` · `ascii-art` · `gradient-mesh` · `comic-book` · `split-flap` · `retro-vhs` · `halftone` ·
+`bauhaus` · `pixel-art` · `blueprint` · `art-deco` · `neo-brutalism`
+
+```bash
+studio looks examples/halcyon            # dist/looks/<style>/ for every style, plus a gallery at dist/looks/
+studio looks my-site --styles split-flap,bauhaus,art-deco
+```
+
+## One Take, places and data
+
+A `film` scene with a `take:` is one continuous shot. `objects` are rough shapes (`box`, `cylinder`, `cone`, `blob`,
+`plane`, `scatter` for forests or towns), `camera` is a list of `{t, at, look}` keys, and `product` is your 3D model
+(`model: inputs/bottle.glb`, or `from_photo:` with TRELLIS configured) standing at a point in that world. The world is
+generated; the product is rendered, lit by the take's sun, with its shadow on the surface it stands on:
+
+```yaml
+  - id: take
+    type: film
+    take:
+      duration: 15
+      objects:
+        - { kind: box, name: Table, at: [0, -5, 0.75], size: [1.6, 0.9, 0.06], color: "#9a7b56" }
+        - { kind: scatter, count: 60, area: [-120, 40, -30, 140], height: [6, 14], shape: cone, color: "#3f5538" }
+      camera:
+        - { t: 0, at: [-70, 190, 70], look: [0, 40, 6] }
+        - { t: 15, at: [1.6, -3.4, 1.3], look: [0, -5, 0.95] }
+      product: { model: inputs/bottle.glb, at: [0, -5, 0.78], height: 0.27 }
+```
+
+A `splat` scene takes a scan (`source: inputs/house.ply` or a gsplat checkpoint) and camera `keys` with `{t, at,
+look}`; the build trims faint and oversized splats, keeps the `max_splats` most visible and writes SPZ.
+
+A `chart` can carry `callouts` resolved from the data (`{series: Denmark, at: last, label: "Denmark {y} in {x}"}`;
+`at` is `max`, `min`, `first`, `last` or an x value), and a `stats` item can take its number from a chart:
+`{ unit: "%", label: World share, data: { section: share, series: World, at: last } }`.
+
+## Client work
+
+```bash
+studio copy export my-site                 # my-site/copy.md: every visible line of text, ready to send
+studio copy import my-site copy.md         # apply the client's edits (prints a diff; --dry-run to preview)
+studio brand my-site --logo inputs/logo.png --mode light   # theme colours from the logo, contrast-checked
+```
+
+The copy deck is plain Markdown: one `###` key per field, the text under it. Imports keep site.yaml's comments and
+layout and refuse anything that would make the spec invalid. A rebuild after an import re-renders only what the
+text touches.
 
 ## With Claude
 

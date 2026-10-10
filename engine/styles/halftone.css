@@ -8,7 +8,8 @@ html.style-halftone .ss-h1, html.style-halftone .ss-h2, html.style-halftone .ss-
 html.style-halftone .ss-h1 em, html.style-halftone .ss-h2 em, html.style-halftone .ss-display em { font-style: normal; color: transparent;
   background-image: radial-gradient(circle, var(--accent) 0 58%, transparent 62%); background-size: .075em .075em; -webkit-background-clip: text; background-clip: text; }
 html.style-halftone .ss-band { background-color: var(--bg-2); background-image: radial-gradient(circle, rgba(var(--ink-rgb), .09) 0 30%, transparent 33%); background-size: 8px 8px; border-block: 3px solid var(--ink); }
-html.style-halftone .ss-features { background: var(--ink); border: 3px solid var(--ink); gap: 3px; }
+html.style-halftone .ss-features { background: none; border: 0; gap: 0; }
+html.style-halftone .ss-feature { border: 3px solid var(--ink); margin: -1.5px; }
 html.style-halftone .ss-feature h3 { text-transform: uppercase; font-size: 26px; }
 html.style-halftone .ss-feature:hover { background: var(--accent); color: #fff; }
 html.style-halftone .ss-feature:hover p, html.style-halftone .ss-feature:hover .ss-tag { color: rgba(255, 255, 255, .9); }

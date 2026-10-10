@@ -194,6 +194,50 @@ def record(project: str, section: Optional[str] = None, seconds: float = 12.0) -
 
 
 @mcp.tool()
+def list_styles() -> list[dict]:
+    """The twenty looks a site can take with theme.style (name, label, what it looks like)."""
+    from .compile import themes
+    return [{"name": k, "label": v["label"], "about": v.get("about", "")} for k, v in themes.styles().items()]
+
+
+@mcp.tool()
+def looks(project: str, styles: Optional[list[str]] = None) -> dict:
+    """Build the (already built) site once per style into dist/looks/<style>/ with a gallery at dist/looks/index.html,
+    so the user can compare looks. styles: names from list_styles (default: all)."""
+    from .cli import looks as run_looks
+    p = _find(project)
+    with contextlib.redirect_stdout(sys.stderr):
+        run_looks(str(p.root), styles=",".join(styles) if styles else None, thumbs=True)
+    return {"gallery": str(p.dist / "looks" / "index.html")}
+
+
+@mcp.tool()
+def copy_deck(project: str) -> dict:
+    """Write the site's visible text to <project>/copy.md: a Markdown deck the client can edit and send back."""
+    from .brand import export_deck
+    p = _find(project)
+    out = p.root / "copy.md"
+    out.write_text(export_deck(p), encoding="utf-8")
+    return {"deck": str(out)}
+
+
+@mcp.tool()
+def apply_copy_deck(project: str, deck_path: str, dry_run: bool = False) -> dict:
+    """Apply an edited copy deck to site.yaml (comments kept, invalid edits refused). Returns the changed fields."""
+    from .brand import import_deck
+    p = _find(project)
+    changes = import_deck(p, Path(deck_path).read_text(encoding="utf-8"), dry_run=dry_run)
+    return {"changed": [{"key": k, "old": o, "new": n} for k, o, n in changes], "written": bool(changes) and not dry_run}
+
+
+@mcp.tool()
+def brand_from_logo(project: str, logo: str, mode: str = "light", dry_run: bool = False) -> dict:
+    """Set theme colours from a logo inside the project (contrast-checked) and use it as the nav logo."""
+    from .brand import apply_brand
+    return apply_brand(_find(project), logo, mode=mode, dry_run=dry_run)
+
+
+@mcp.tool()
 def doctor() -> list[dict]:
     """Which tools are installed (Blender, FFmpeg, GPU, ComfyUI...) and which scene types need them."""
     from .doctor import checks
