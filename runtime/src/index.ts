@@ -16,7 +16,10 @@ if (document.documentElement.dataset.fx) startFx();
 // A style's own experience (runtime/src/styles/<style>.ts): its scroll mechanics, transitions and interactions.
 const EXPERIENCES = import.meta.glob<{ default: () => void }>("./styles/[a-z]*.ts");
 const styleName = document.documentElement.dataset.style;
-if (styleName && EXPERIENCES[`./styles/${styleName}.ts`]) EXPERIENCES[`./styles/${styleName}.ts`]().then((m) => m.default());
+if (styleName && EXPERIENCES[`./styles/${styleName}.ts`]) {
+  EXPERIENCES[`./styles/${styleName}.ts`]().then((m) => m.default())
+    .finally(() => { document.documentElement.dataset.ssStyle = "ready"; });
+} else if (styleName) document.documentElement.dataset.ssStyle = "ready";
 
 const PLAYERS: Record<string, () => Promise<{ default: PlayerFactory }>> = {
   film: () => import("./players/video"),

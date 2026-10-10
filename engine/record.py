@@ -99,7 +99,7 @@ def record(dist: Path, out: Path, section: Optional[str] = None, size=(1920, 108
                 break
             time.sleep(0.25)
         for _ in range(240):   # the loading screen holds scrolling until every scene's media is in
-            if cdp.js("document.documentElement.dataset.ssReady === '1' || !document.getElementById('ss-loader')"):
+            if cdp.js("(document.documentElement.dataset.ssReady === '1' || !document.getElementById('ss-loader')) && (!document.documentElement.dataset.style || document.documentElement.dataset.ssStyle === 'ready')"):
                 break
             time.sleep(0.25)
         time.sleep(1.5)

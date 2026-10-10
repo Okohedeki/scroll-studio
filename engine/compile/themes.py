@@ -193,6 +193,9 @@ def css_vars(t: dict, log=lambda m: None) -> str:
         "--radius": t["radius"],
         "color-scheme": t["mode"],
     }
+    for role, fam in f.items():   # extra roles a style declares (masthead, script, marquee...): --font-<role>
+        if role not in ("display", "body", "mono"):
+            tokens[f"--font-{role}"] = f'"{fam}", {"Georgia, serif" if fam in SERIFS else FALLBACK["body"]}'
     out = ":root {\n" + "\n".join(f"  {k}: {v};" for k, v in tokens.items()) + "\n}"
     return out + "\n" + surface_css(c, t["mode"])
 

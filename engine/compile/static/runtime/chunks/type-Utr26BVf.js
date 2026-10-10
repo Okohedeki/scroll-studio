@@ -1,4 +1,4 @@
-import{c as d,s as x,e as w}from"../index.js";function f(s){return s.replace(/<em>(.*?)<\/em>/g,(r,c)=>c.split(/\s+/).map(n=>`<em>${n}</em>`).join(" ")).split(/\s+/).filter(Boolean)}const v=async(s,h)=>{const r=document.createElement("div");r.className="ss-type ss-type--"+s.mode,h.visual.appendChild(r);const c=document.createElement("style");c.textContent=`
+import{c as d,s as x,g as w}from"../index.js";function f(s){return s.replace(/<em>(.*?)<\/em>/g,(r,c)=>c.split(/\s+/).map(n=>`<em>${n}</em>`).join(" ")).split(/\s+/).filter(Boolean)}const v=async(s,h)=>{const r=document.createElement("div");r.className="ss-type ss-type--"+s.mode,h.visual.appendChild(r);const c=document.createElement("style");c.textContent=`
   .ss-type { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 var(--gutter); }
   .ss-type__text { font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: -.035em; line-height: 1.02; max-width: 1500px; }
   .ss-type--reveal .ss-type__text { font-size: clamp(36px, 5.2vw, 92px); text-wrap: balance; }

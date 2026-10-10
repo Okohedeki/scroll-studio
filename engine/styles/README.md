@@ -11,7 +11,9 @@ anti-patterns, and a one-paragraph UX signature) is in [docs/styles/](../../docs
 
 ```
 engine/styles/<name>/
-  style.yaml        label, about, mode, colors, fonts, font_axes (Google css2 specs for its fonts), radius
+  style.yaml        label, about, mode, colors, fonts, font_axes (Google css2 specs for its fonts), radius.
+                    fonts beyond display/body/mono (e.g. masthead: UnifrakturMaguntia) are loaded and exposed as
+                    --font-<role> CSS variables
   style.css         everything visual, scoped under html.style-<name>
   blocks.html.j2    its own markup for block types (optional, but every real style has one)
   chrome.html.j2    page furniture around the sections: its own nav, HUD, title block, OSD... (optional)
