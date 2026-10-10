@@ -1,19 +1,24 @@
-# Retro VHS: tokens and fonts for theme.style: retro-vhs. See README.md in this folder for the UX contract.
+# Retro VHS: tokens and fonts for theme.style: retro-vhs. The page is a tape playing on a 4:3 TV in a dark room:
+# scrolling is the transport (PLAY, PAUSE, SEARCH, REW on the on-screen display), sections arrive mistracked and lock.
 label: Retro VHS
-about: Scanlines, colour bleed and a tape counter; the picture wobbles when you scroll fast.
+about: A tape on a 4:3 TV. Scroll is the transport, so the on-screen display reads PLAY, PAUSE, SEARCH or REW with a running tape counter; every section arrives mistracked and locks, nav jumps are channel changes, and the call to action is ● REC.
 mode: dark
 colors:
-  bg: '#0c0a14'
-  bg2: '#14111f'
-  ink: '#f4f0ff'
-  accent: '#ff4f8b'
-  accent2: '#5ce1ff'
-  accent_ink: '#16020a'
+  bg: '#121016'
+  bg2: '#0b0a0e'
+  ink: '#f4f4f4'
+  accent: '#ff3b3b'
+  accent2: '#3cff7a'
+  accent_ink: '#14000a'
+  accent_text: '#ff6b6b'
 fonts:
   display: VT323
-  body: Space Mono
+  body: IBM Plex Mono
   mono: VT323
+  hand: Permanent Marker
+font_axes:
+  VT323: ""
+  IBM Plex Mono: "ital,wght@0,400;0,500;0,600;1,400"
+  Permanent Marker: ""
 display_weight: 400
 radius: 0px
-fx:
-  vhs: true

@@ -1,0 +1,78 @@
+{# Retro VHS chrome: the TV (a 4:3 screen window over a dark room, with scanlines and the on-screen display at the
+   screen's corners), the tape's index label (chapters, left), the deck's transport keys (right) and, on narrow
+   screens, a remote. Everything works as plain links without JavaScript; the runtime (runtime/src/styles/retro-vhs.ts)
+   drives the OSD from scroll velocity and turns jumps into channel changes. #}
+
+{% macro clean(t) %}{{ (t or "") | striptags | replace("&amp;", "&") | trim }}{% endmacro %}
+{% macro chname(e, site) %}{% set b = e.s %}{% if b.nav_label %}{{ clean(b.nav_label) }}{% elif b.type == "hero" %}Start{% elif b.type == "quote" %}Home video{% elif b.type == "stats" %}Setup{% elif b.type == "faq" %}Guide{% elif b.type == "cta" %}Record{% elif b.kicker %}{{ clean(b.kicker) }}{% elif b.title %}{{ clean(b.title) }}{% elif b.steps %}{{ clean(b.steps[0].title) }}{% else %}{{ clean(b.id or b.type) }}{% endif %}{% endmacro %}
+
+{% macro top(site, sections, nav_links) %}
+<div class="vhs-room" aria-hidden="true"></div>
+<div class="vhs-tv" aria-hidden="true">
+  <div class="vhs-glass">
+    <div class="vhs-bands"><i></i><i></i><i></i></div>
+    <div class="vhs-head"></div>
+    <div class="vhs-snow"></div>
+    <div class="vhs-osd vhs-osd--tl"><span class="vhs-mode">PLAY ▶</span></div>
+    <div class="vhs-osd vhs-osd--tr"><span class="vhs-counter">0:00:00</span><small class="vhs-sp">SP</small></div>
+    <div class="vhs-osd vhs-osd--bl"><span class="vhs-ch"></span></div>
+    <div class="vhs-osd vhs-osd--br"><span class="vhs-track"></span></div>
+    <div class="vhs-osd vhs-osd--c"><span class="vhs-big"></span></div>
+  </div>
+  <div class="vhs-bezel"><span class="vhs-brand">{{ site.name }}</span><span class="vhs-led"></span></div>
+</div>
+
+<nav class="vhs-label" aria-label="Chapters">
+  <div class="vhs-label__card">
+    <div class="vhs-label__stripes" aria-hidden="true"><i></i><i></i><i></i></div>
+    <p class="vhs-label__title">{{ site.name }}</p>
+    <p class="vhs-label__sub" aria-hidden="true">T-120 · SP</p>
+    <ol class="vhs-label__list">
+      {% for e in sections %}{% if e.s.id or loop.first %}
+      <li><a href="#{{ e.s.id or '' }}" data-ch="{{ loop.index0 }}"><span class="vhs-label__t" aria-hidden="true">0:00:00</span><span class="vhs-label__n">{{ chname(e, site) }}</span></a></li>
+      {% endif %}{% endfor %}
+    </ol>
+    <p class="vhs-label__kind" aria-hidden="true">Be kind · rewind</p>
+  </div>
+</nav>
+
+<div class="vhs-deck" role="group" aria-label="Tape transport">
+  <div class="vhs-deck__lcd" aria-hidden="true"><span class="vhs-deck__chn">CH 01</span><span class="vhs-deck__cnt">0:00:00</span></div>
+  <div class="vhs-deck__keys">
+    <button type="button" class="vhs-key" data-act="rew" aria-label="Rewind to the previous chapter"><b aria-hidden="true">◀◀</b><small>REW</small></button>
+    <button type="button" class="vhs-key" data-act="play" aria-label="Play: scroll on its own"><b aria-hidden="true">▶</b><small>PLAY</small></button>
+    <button type="button" class="vhs-key" data-act="pause" aria-label="Pause"><b aria-hidden="true">‖</b><small>PAUSE</small></button>
+    <button type="button" class="vhs-key" data-act="ff" aria-label="Fast forward to the next chapter"><b aria-hidden="true">▶▶</b><small>F.FWD</small></button>
+  </div>
+  {% if site.nav.cta %}<a class="vhs-rec" href="{{ site.nav.cta.href }}"><span class="vhs-rec__dot" aria-hidden="true"></span><span><small aria-hidden="true">REC</small>{{ site.nav.cta.label }}</span></a>{% endif %}
+  <button type="button" class="vhs-clean" aria-pressed="false"><span>Tracking</span><b>Auto</b></button>
+</div>
+
+<div class="vhs-remote" role="group" aria-label="Remote">
+  <button type="button" class="vhs-rk" data-act="chdown" aria-label="Previous channel">CH ▼</button>
+  <button type="button" class="vhs-rk vhs-rk--play" data-act="toggle" aria-label="Play or pause">▶ ‖</button>
+  <button type="button" class="vhs-rk" data-act="chup" aria-label="Next channel">CH ▲</button>
+  <button type="button" class="vhs-rk vhs-rk--clean" aria-pressed="false" aria-label="Clean tracking (effects off)">TRK</button>
+  {% if site.nav.cta %}<a class="vhs-rk vhs-rk--rec" href="{{ site.nav.cta.href }}"><span class="vhs-rec__dot" aria-hidden="true"></span>{{ site.nav.cta.label }}</a>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro bottom(site, sections) -%}
+{# End credits roll up the screen (they are simply the end of the tape), then the tape runs out into snow. #}
+<section class="vhs-credits" aria-label="Credits">
+  <p class="vhs-credits__k">The end</p>
+  <p class="vhs-credits__name">{{ site.name }}</p>
+  {% if site.description %}<p class="vhs-credits__d">{{ site.description }}</p>{% endif %}
+  <dl class="vhs-credits__list">
+    {% for e in sections %}<div><dt>Chapter {{ loop.index }}</dt><dd>{{ chname(e, site) }}</dd></div>{% endfor %}
+  </dl>
+  <div class="vhs-warning">
+    <p class="vhs-warning__h">Warning</p>
+    <p>This tape is for home viewing. Copying it to your own calendar is strongly encouraged.</p>
+  </div>
+  <div class="vhs-eot">
+    <p class="vhs-eot__t">End of tape</p>
+    <a class="vhs-key vhs-key--wide vhs-rewind" href="#"><b aria-hidden="true">◀◀</b><small>Auto rewind</small></a>
+  </div>
+</section>
+{%- endmacro %}

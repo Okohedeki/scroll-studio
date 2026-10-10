@@ -1,0 +1,140 @@
+{# Retro VHS blocks: each section is a program on the tape, shown inside the 4:3 screen. The hero is a blue screen
+   with an OSD-typed headline, features are cassettes on a shelf, stats a VCR setup menu, steps a tape-counter
+   timeline, the quote a camcorder home video, questions a TV program guide, and the call to action is ● REC. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+
+{% macro vcr(list) %}{% if list %}<div class="vhs-btns">{% for l in list %}<a class="vhs-key vhs-key--wide{% if loop.first %} vhs-key--hot{% endif %}" href="{{ l.href }}"><b aria-hidden="true">{{ "▶" if loop.first else "▶▶" }}</b><small>{{ l.label }}</small></a>{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set h = "h1" if e.first else "h2" %}
+{% set name = (b.nav_label or b.kicker or "") | striptags %}
+<section class="vhs-prog vhs-prog--{{ b.type }}" data-ch="{{ loop.index0 }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+<div class="vhs-prog__in">
+
+{% if b.type == "hero" %}
+  {% if b.badge %}<p class="vhs-osdline">{{ b.badge }}</p>{% endif %}
+  <{{ h }} class="vhs-title vhs-title--hero" data-type>{{ b.title | rich }}</{{ h }}>
+  {% if b.body %}<p class="vhs-lede">{{ b.body | rich }}</p>{% endif %}
+  {{ vcr(b.buttons) }}
+  {% if b.device %}<div class="vhs-monitor vhs-monitor--hero vhs-media">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+
+{% elif b.type == "intro" %}
+  <p class="vhs-chap" aria-hidden="true"><span>Chapter {{ loop.index0 }}</span><span class="vhs-chap__t"></span></p>
+  {% if b.kicker %}<p class="vhs-kicker">{{ b.kicker }}</p>{% endif %}
+  <{{ h }} class="vhs-title">{{ b.title | rich }}</{{ h }}>
+  {% if b.body %}<p class="vhs-lede">{{ b.body | rich }}</p>{% endif %}
+  {% if b.button %}{{ vcr([b.button]) }}{% endif %}
+
+{% elif b.type == "features" %}
+  <div class="vhs-hd">
+    {% if b.kicker %}<p class="vhs-kicker">{{ b.kicker }}</p>{% endif %}
+    {% if b.title %}<{{ h }} class="vhs-title vhs-title--m">{{ b.title | rich }}</{{ h }}>{% endif %}
+  </div>
+  <ul class="vhs-shelf">
+    {% for f in b.items %}
+    <li class="vhs-tape vhs-media" style="--hue: {{ [8, 32, 198, 280, 140, 50][loop.index0 % 6] }}" tabindex="0" aria-label="{{ f.title | striptags }}">
+      <div class="vhs-tape__shell" aria-hidden="true"><i class="vhs-tape__screw"></i><i class="vhs-tape__screw"></i><i class="vhs-tape__screw"></i><i class="vhs-tape__screw"></i></div>
+      <div class="vhs-tape__label">
+        <span class="vhs-tape__stripe" aria-hidden="true"></span>
+        {% if f.tag %}<span class="vhs-tape__sticker">{{ f.tag }}</span>{% endif %}
+        <h3 class="vhs-tape__title">{{ f.title | rich }}</h3>
+        {% if f.body %}<p class="vhs-tape__body">{{ f.body | rich }}</p>{% endif %}
+        {% if f.meter is not none %}<span class="vhs-tape__meter" aria-label="{{ (f.meter * 100) | round | int }}%"><i style="width: {{ (f.meter * 100) | round }}%"></i></span>{% endif %}
+      </div>
+      <div class="vhs-tape__window" aria-hidden="true"><i class="vhs-reel"></i><i class="vhs-tape__mid"></i><i class="vhs-reel"></i></div>
+      {% if loop.first %}<span class="vhs-tape__kind" aria-hidden="true">Be kind rewind</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+
+{% elif b.type == "product" %}
+  <div class="vhs-split vhs-side--{{ b.side }}">
+    <div class="vhs-split__copy">
+      {% if b.kicker %}<p class="vhs-kicker">{{ b.kicker }}</p>{% endif %}
+      <{{ h }} class="vhs-title vhs-title--m">{{ b.title | rich }}</{{ h }}>
+      {% if b.body %}<p class="vhs-lede vhs-lede--s">{{ b.body | rich }}</p>{% endif %}
+      {% if b.stats %}<dl class="vhs-menu vhs-menu--inline">{% for st in b.stats %}<div class="vhs-menu__row"><dt>{{ st.label }}</dt><dd>{{ st.value }}{% if st.unit %} {{ st.unit }}{% endif %}</dd></div>{% endfor %}</dl>
+      {% elif b.tags %}<ul class="vhs-chips">{% for t in b.tags %}<li>{{ t }}</li>{% endfor %}</ul>{% endif %}
+      {{ vcr(b.buttons) }}
+      {% if b.note %}<p class="vhs-note">{{ b.note | rich }}</p>{% endif %}
+    </div>
+    {% if b.device or e.img %}
+    <div class="vhs-monitor vhs-media">
+      {% if e.img %}<img class="vhs-shot" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+      {% if b.behind %}<div class="vhs-behind">{{ base.phone(b.behind, e.behind, e.behind_clip) }}</div>{% endif %}
+      {% if b.device %}{{ base.phone(b.device, e.screen, e.clip) }}{% endif %}
+      <span class="vhs-monitor__osd" aria-hidden="true">TAPE 2 &nbsp;▶ PLAY</span>
+    </div>
+    {% endif %}
+  </div>
+
+{% elif b.type == "stats" %}
+  <div class="vhs-setup">
+    <p class="vhs-setup__h" aria-hidden="true">— Setup menu —</p>
+    <dl class="vhs-menu">
+      {% for st in b.items %}
+      <div class="vhs-menu__row"><dt>{{ st.label }}</dt><dd><span class="vhs-roll">{{ st.value }}</span>{% if st.unit %}<span class="vhs-unit">{{ st.unit }}</span>{% endif %}</dd></div>
+      {% endfor %}
+    </dl>
+    <p class="vhs-setup__f" aria-hidden="true"><span>▲▼ Select</span><span>▶ Set</span><span>Menu: exit</span></p>
+  </div>
+
+{% elif b.type == "timeline" %}
+  <div class="vhs-hd">
+    {% if b.kicker %}<p class="vhs-kicker">{{ b.kicker }}</p>{% endif %}
+    {% if b.title %}<{{ h }} class="vhs-title vhs-title--m">{{ b.title | rich }}</{{ h }}>{% endif %}
+  </div>
+  <div class="vhs-tl">
+    <div class="vhs-tl__bar" aria-hidden="true">
+      <div class="vhs-tl__fill"></div>
+      {% for t in b.items %}<span class="vhs-tl__tick" style="--at: {{ loop.index0 / (b.items | length) }}"><i></i><small>{{ t.when }}</small></span>{% endfor %}
+      <span class="vhs-tl__head"></span>
+    </div>
+    <ol class="vhs-tl__list">
+      {% for t in b.items %}
+      <li class="vhs-tl__ch"><span class="vhs-tl__when">{{ t.when }}</span><h3>{{ t.title | rich }}</h3>{% if t.body %}<p>{{ t.body | rich }}</p>{% endif %}</li>
+      {% endfor %}
+    </ol>
+  </div>
+
+{% elif b.type == "quote" %}
+  <figure class="vhs-cam">
+    <div class="vhs-cam__scene" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="vhs-cam__ui" aria-hidden="true">
+      <span class="vhs-cam__rec"><i></i>REC</span><span class="vhs-cam__bat"><i></i></span>
+      <span class="vhs-cam__date"></span>
+      <span class="vhs-cam__corner vhs-cam__corner--a"></span><span class="vhs-cam__corner vhs-cam__corner--b"></span><span class="vhs-cam__corner vhs-cam__corner--c"></span><span class="vhs-cam__corner vhs-cam__corner--d"></span>
+    </div>
+    <blockquote class="vhs-sub">{{ b.text | rich }}</blockquote>
+    {% if b.who %}<figcaption class="vhs-cam__who">{{ b.who }}</figcaption>{% endif %}
+  </figure>
+
+{% elif b.type == "faq" %}
+  <div class="vhs-guide">
+    <div class="vhs-guide__top">
+      {% if b.kicker %}<p class="vhs-kicker">{{ b.kicker }}</p>{% endif %}
+      <{{ h }} class="vhs-title vhs-title--m">{{ b.title | rich }}</{{ h }}>
+      <p class="vhs-guide__now" aria-hidden="true">Tonight · CH {{ "%02d" | format(loop.index) }}</p>
+    </div>
+    <div class="vhs-guide__grid">
+      {% for it in b.items %}
+      <details class="vhs-guide__row"{% if loop.first %} open{% endif %}>
+        <summary><span class="vhs-guide__time" aria-hidden="true">{{ (7 + (loop.index0 // 2)) }}:{{ "30" if loop.index0 % 2 else "00" }} PM</span><span class="vhs-guide__q">{{ it.q | rich }}</span></summary>
+        <p class="vhs-guide__a">{{ it.a | rich }}</p>
+      </details>
+      {% endfor %}
+    </div>
+  </div>
+
+{% elif b.type == "cta" %}
+  <div class="vhs-recpanel">
+    {% if b.kicker %}<p class="vhs-osdline vhs-osdline--g">{{ b.kicker }}</p>{% endif %}
+    <{{ h }} class="vhs-title">{{ b.title | rich }}</{{ h }}>
+    {% if b.button %}<a class="vhs-recbtn" href="{{ b.button.href }}"><span class="vhs-recbtn__dot" aria-hidden="true"></span><span class="vhs-recbtn__t"><small aria-hidden="true">● REC</small>{{ b.button.label }}</span></a>{% endif %}
+    <p class="vhs-recpanel__stamp" aria-live="polite"></p>
+  </div>
+{% endif %}
+
+</div>
+</section>
+{% endmacro %}
