@@ -1,0 +1,27 @@
+{# Kinetic type furniture: a minimal nav (wordmark, a few links, the word MENU) that inverts over whatever it crosses,
+   a full-screen menu of huge stacked links, a verb cursor, and a footer that is one massive cropped wordmark. #}
+{% macro top(site, sections, nav_links) %}
+<header class="kt-nav">
+  <a class="kt-nav__mark" href="#">{{ site.name }}</a>
+  <nav class="kt-nav__links" aria-label="Sections">{% for l in nav_links[:3] %}<a href="{{ l.href }}">{{ l.label }}</a>{% endfor %}</nav>
+  <button class="kt-nav__menu" type="button" aria-expanded="false" aria-controls="kt-menu">Menu</button>
+</header>
+<nav class="kt-menu" id="kt-menu" aria-label="Menu">
+  <ol>
+    {% for l in nav_links %}<li><a href="{{ l.href }}"><span>{{ l.label }}</span></a></li>{% endfor %}
+    {% if site.nav.cta %}<li><a class="kt-menu__cta" href="{{ site.nav.cta.href }}"><span>{{ site.nav.cta.label }}</span></a></li>{% endif %}
+  </ol>
+</nav>
+<div class="kt-cursor" aria-hidden="true"><span></span></div>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}
+<footer class="kt-foot kt-ink">
+  <div class="kt-foot__row">
+    <p class="kt-label">{{ (site.footer.left or ("© " ~ site.name)) | rich }}</p>
+    {% if site.nav.cta %}<a class="kt-btn kt-btn--hot" href="{{ site.nav.cta.href }}"><span class="kt-roll" data-text="{{ site.nav.cta.label }}"><span>{{ site.nav.cta.label }}</span></span><i aria-hidden="true">→</i></a>{% endif %}
+    {% if site.footer.right %}<p class="kt-label">{{ site.footer.right | rich }}</p>{% endif %}
+  </div>
+  <p class="kt-foot__mark" data-kt-fill aria-hidden="true">{{ site.name }}</p>
+</footer>
+{% endmacro %}

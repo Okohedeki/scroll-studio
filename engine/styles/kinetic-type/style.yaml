@@ -1,19 +1,23 @@
-# Kinetic type: tokens and fonts for theme.style: kinetic-type. See README.md in this folder for the UX contract.
+# Kinetic type: tokens and fonts for theme.style: kinetic-type. See engine/styles/README.md for the contract and
+# docs/styles/styles-06-10.md section 2 for the research.
 label: Kinetic type
-about: Huge condensed headlines whose letters rise one by one and lean into a fast scroll.
+about: An instrument made of letters. Giant words inflate on their width and weight as they arrive and condense as they leave, lines skew and stretch with your scroll speed, marquees surge and reverse, and sections cut by colour inversion.
 mode: light
 colors:
-  bg: '#f1efe9'
-  bg2: '#e6e2d8'
-  ink: '#111111'
-  accent: '#ff3d00'
-  accent2: '#ff7a4d'
-  accent_ink: '#ffffff'
+  bg: '#f2efe8'
+  bg2: '#e7e3da'
+  ink: '#0a0a0a'
+  accent: '#0a0a0a'
+  accent2: '#d4ff3a'
+  accent_ink: '#d4ff3a'
 fonts:
-  display: Anton
-  body: Inter
+  display: Anybody
+  body: Anybody
   mono: JetBrains Mono
-display_weight: 400
+  accent: Instrument Serif
+font_axes:
+  Anybody: "ital,wdth,wght@0,50..150,100..900;1,50..150,100..900"
+  JetBrains Mono: "wght@100..800"
+  Instrument Serif: "ital@0;1"
+display_weight: 800
 radius: 0px
-fx:
-  text: kinetic

@@ -1,0 +1,79 @@
+{# Comic book furniture: a cover masthead (corner box, lettered logo, chapters as issue numbers, page/strip toggle),
+   the inked figures every page draws from, and a back cover (mail-order ad, credits box, legal in tiny caps). #}
+{% macro top(site, sections, nav_links) %}
+<svg class="cb-symbols" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute">
+  <defs>
+    <symbol id="cb-hero" viewBox="0 0 200 220">
+      <g stroke="#111" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M14 222 L32 134 Q100 104 168 134 L186 222Z" fill="#E8262B"/>
+        <path d="M34 222 Q36 160 76 144 L124 144 Q164 160 166 222Z" fill="#1B4F9C"/>
+        <path d="M86 126 L114 126 L116 146 Q100 154 84 146Z" fill="#FFD2A6"/>
+        <path d="M100 160 L126 174 L100 210 L74 174Z" fill="#FFF200"/>
+        <ellipse cx="100" cy="82" rx="44" ry="48" fill="#FFD2A6"/>
+        <path d="M56 82 Q48 28 100 26 Q152 26 146 80 Q140 58 120 54 Q128 42 112 34 Q106 50 84 54 Q64 58 56 82Z" fill="#111"/>
+        <path d="M56 76 Q100 60 144 76 L140 98 Q120 88 100 97 Q80 88 60 98Z" fill="#00AEEF"/>
+        <path d="M70 83 Q81 75 93 85 Q81 90 70 83Z" fill="#fff" stroke-width="3"/>
+        <path d="M107 85 Q119 75 130 83 Q119 90 107 85Z" fill="#fff" stroke-width="3"/>
+        <path d="M82 112 Q100 125 120 108" fill="none" stroke-width="4.5"/>
+        <path d="M60 140 Q64 150 60 160 M140 140 Q136 150 140 160" fill="none" stroke-width="3"/>
+      </g>
+      <text x="100" y="192" text-anchor="middle" font-family="Bangers, Impact, sans-serif" font-size="28" fill="#111">{{ (site.name or "S")[0] | upper }}</text>
+    </symbol>
+    <symbol id="cb-hero-point" viewBox="0 0 280 220">
+      <use href="#cb-hero" x="0" y="0" width="200" height="220"/>
+      <g stroke="#111" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M138 160 Q186 128 234 112 L242 134 Q198 150 164 184Z" fill="#1B4F9C"/>
+        <circle cx="246" cy="122" r="17" fill="#FFD2A6"/>
+        <path d="M254 112 L277 108 Q282 114 277 120 L258 124Z" fill="#FFD2A6" stroke-width="4"/>
+        <path d="M233 106 L229 98 M244 101 L245 92 M222 116 L214 112" fill="none" stroke-width="3.5"/>
+      </g>
+    </symbol>
+    <symbol id="cb-citizen" viewBox="0 0 200 220">
+      <g stroke="#111" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M30 222 Q34 162 74 148 L126 148 Q166 162 170 222Z" fill="#EC008C"/>
+        <path d="M80 148 L100 172 L120 148Z" fill="#fff"/>
+        <path d="M86 128 L114 128 L116 150 Q100 158 84 150Z" fill="#E9A87A"/>
+        <ellipse cx="100" cy="86" rx="42" ry="47" fill="#E9A87A"/>
+        <path d="M54 104 Q42 28 100 28 Q158 28 146 104 Q150 124 136 126 Q140 96 132 72 Q112 76 92 62 Q80 76 66 72 Q60 96 64 126 Q50 124 54 104Z" fill="#7A3B12"/>
+        <circle cx="82" cy="92" r="12" fill="#fff" stroke-width="4"/>
+        <circle cx="118" cy="92" r="12" fill="#fff" stroke-width="4"/>
+        <path d="M94 92 L106 92" fill="none" stroke-width="4"/>
+        <circle cx="83" cy="93" r="3.5" fill="#111" stroke="none"/>
+        <circle cx="117" cy="93" r="3.5" fill="#111" stroke="none"/>
+        <path d="M90 116 Q100 122 110 115" fill="none" stroke-width="4"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+<header class="cb-mast-bar" aria-label="Masthead">
+  <a class="cb-cornerbox" href="#" aria-label="{{ site.name }}, issue 1, back to the cover"><b>#1</b><small>Free</small></a>
+  <a class="cb-logo" href="#">{{ site.name }}</a>
+  <nav class="cb-chapters" aria-label="Chapters">
+    {% for l in nav_links %}<a href="{{ l.href }}" data-chapter="{{ l.href }}"><b>{{ loop.index }}</b><span>{{ l.label }}</span></a>{% endfor %}
+  </nav>
+  <button class="cb-mode" type="button" aria-pressed="false" hidden><span>Read as</span> <b data-mode-label>strip</b></button>
+  {% if site.nav.cta %}<a class="cb-btn cb-btn--hot cb-mast-cta" href="{{ site.nav.cta.href }}">{{ site.nav.cta.label }}</a>{% endif %}
+</header>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}
+<footer class="cb-back" aria-label="Back cover">
+  <div class="cb-back__in">
+    <div class="cb-ad">
+      <p class="cb-ad__shout">Send no money!</p>
+      <p class="cb-ad__body">{{ site.description or site.name }}</p>
+      {% if site.nav.cta %}<a class="cb-burstbtn cb-burstbtn--sm" href="{{ site.nav.cta.href }}"><span>{{ site.nav.cta.label }}</span></a>{% endif %}
+      <p class="cb-ad__coupon" aria-hidden="true">✂ - - - - - - - - - - - - - - - - - - - - - - - - - -</p>
+    </div>
+    <div class="cb-credits">
+      <p class="cb-credits__title">{{ site.name }} · Issue #1</p>
+      <dl>
+        <div><dt>Story</dt><dd>{{ site.name }}</dd></div>
+        <div><dt>Pages</dt><dd>{{ sections | length }}</dd></div>
+        <div><dt>Printed by</dt><dd>Scroll Studio</dd></div>
+      </dl>
+    </div>
+  </div>
+  <p class="cb-legal">{{ (site.footer.left or ("© " ~ site.name)) | rich }}{% if site.footer.right %} · {{ site.footer.right | rich }}{% endif %}</p>
+</footer>
+{% endmacro %}

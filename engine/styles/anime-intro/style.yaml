@@ -1,9 +1,10 @@
-# 2D anime intro: tokens and fonts for theme.style: anime-intro. See README.md in this folder for the UX contract.
+# 2D anime intro: tokens and fonts for theme.style: anime-intro. See engine/styles/README.md for the contract and
+# docs/styles/styles-16-21.md section 6 for the research.
 label: Anime intro
-about: Your scroll is the playhead of an anime opening, cut by cut, with title-card smashes, speed lines and freeze frames.
+about: Your scroll is the playhead of an anime opening. A silent cold open, a title card that smashes in, then hard cuts from shot to shot, freeze frames with vertical name cards, a VS split and an eyecatch, ending on the full-cast pose and a NEXT EPISODE card.
 mode: dark
-colors: { bg: "#0d0d14", bg2: "#16161f", ink: "#fff7ee", accent: "#ff3b5c", accent2: "#ffd23f", accent_ink: "#ffffff" }
-fonts: { display: "Dela Gothic One", body: "M PLUS 1p", mono: "M PLUS 1 Code" }
-font_axes: { "Dela Gothic One": "", "M PLUS 1p": "wght@400;500;700;800", "M PLUS 1 Code": "wght@400;700" }
+colors: { bg: "#0a0a12", bg2: "#14141f", ink: "#fff7ee", accent: "#ff2b55", accent2: "#ffe600", accent_ink: "#ffffff" }
+fonts: { display: "Dela Gothic One", body: "M PLUS 1p", mono: "M PLUS 1 Code", card: "Anton", title: "Shippori Mincho B1" }
+font_axes: { "Dela Gothic One": "", "M PLUS 1p": "wght@400;500;700;800", "M PLUS 1 Code": "wght@400;700", "Anton": "", "Shippori Mincho B1": "wght@800" }
 display_weight: 400
 radius: 0px

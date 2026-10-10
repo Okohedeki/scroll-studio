@@ -1,0 +1,57 @@
+{# Anime intro furniture: a HUD-less frame with corner microcopy (logo, EP.01 timecode, the song section, a running
+   staff credit, the cut number), a Persona-style slanted menu, the eyecatch card the runtime places mid-page, and
+   the ending: a credits roll and the NEXT EPISODE card. #}
+{% macro top(site, sections, nav_links) %}
+<div class="ai-hud" aria-label="Opening controls">
+  <a class="ai-hud__logo" href="#"><b>{{ site.name }}</b><span>EP.01</span><span class="ai-hud__tc" data-tc aria-hidden="true">00:00</span></a>
+  <p class="ai-hud__song" data-song aria-hidden="true">Cold open</p>
+  <button class="ai-hud__menu" type="button" aria-expanded="false" aria-controls="ai-menu"><span>Menu</span></button>
+  <p class="ai-hud__credit" data-credit aria-hidden="true"></p>
+  <p class="ai-hud__cut" data-cut aria-hidden="true">C-001</p>
+</div>
+<nav class="ai-menu" id="ai-menu" aria-label="Menu">
+  <ol>
+    {% for l in nav_links %}<li><a href="{{ l.href }}"><small>{{ "%02d" | format(loop.index) }}</small>{{ l.label }}</a></li>{% endfor %}
+    {% if site.nav.cta %}<li class="ai-menu__cta"><a href="{{ site.nav.cta.href }}"><small>GO</small>{{ site.nav.cta.label }}</a></li>{% endif %}
+  </ol>
+</nav>
+<section class="ai-sec ai-sec--eyecatch" aria-label="Intermission" hidden>
+  <div class="ai-shot ai-shot--eyecatch" data-len="1.1" data-song="Eyecatch" data-fx="">
+    <div class="ai-bg" aria-hidden="true"></div>
+    <div class="ai-cam">
+      <div class="ai-eyecatch">
+        <span class="ai-eyecatch__ring" aria-hidden="true"></span>
+        <p class="ai-eyecatch__logo">{{ site.name }}</p>
+        {% if site.description %}<p class="ai-eyecatch__tag">{{ site.description }}</p>{% endif %}
+      </div>
+      <p class="ai-eyecatch__parts"><span lang="ja">Aパート</span> <i aria-hidden="true">▸</i> <span lang="ja">Bパート</span> <small>A-part to B-part</small></p>
+      <p class="ai-eyecatch__label"><span lang="ja">アイキャッチ</span> <small>Eyecatch</small></p>
+    </div>
+  </div>
+</section>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}
+{% set hero = sections | selectattr("s.type", "equalto", "hero") | first %}
+{% set next = hero.s.buttons[1] if hero and hero.s.buttons | length > 1 else none %}
+{% set eps = sections | map(attribute="s") | selectattr("nav_label") | map(attribute="nav_label") | list %}
+<section class="ai-sec ai-sec--end" aria-label="Credits">
+  <div class="ai-shot ai-shot--next" data-len="1.2" data-song="Ending" data-fx="">
+    <div class="ai-bg" aria-hidden="true"></div>
+    <div class="ai-cam">
+      <dl class="ai-roll">
+        <div><dt>Original concept</dt><dd>{{ site.name }}</dd></div>
+        {% if eps %}<div><dt>Episodes</dt><dd>{{ eps | join(" · ") }}</dd></div>{% endif %}
+        <div><dt>Animation production</dt><dd>Scroll Studio</dd></div>
+        <div><dt>Production</dt><dd><span lang="ja">{{ site.name }} 製作委員会</span> <small>{{ site.name }} Production Committee</small></dd></div>
+      </dl>
+      <div class="ai-nextcard">
+        <p class="ai-ja"><span class="ai-ja__jp" lang="ja">次回予告</span><small>Next episode preview</small></p>
+        <a class="ai-next" href="{{ next.href if next else '#' }}">{{ next.label if next else "Watch again" }} <span aria-hidden="true">▸</span></a>
+        <p class="ai-tbc">To be continued</p>
+      </div>
+      <p class="ai-legal">{{ (site.footer.left or ("© " ~ site.name)) | rich }}{% if site.footer.right %} · {{ site.footer.right | rich }}{% endif %}</p>
+    </div>
+  </div>
+</section>
+{% endmacro %}

@@ -1,0 +1,134 @@
+{# Kinetic type: an instrument made of letters. A full-bleed type canvas, one idea per screen; sections are words and
+   hand over by colour inversion (paper / ink / acid) with hard edges. The runtime (runtime/src/styles/kinetic-type.ts)
+   fits and inflates the giant lines on the variable-font axes, couples skew, stretch and marquees to scroll velocity,
+   pins the sentence reading, rolls the odometers and runs the hover list. Without it, everything reads as set. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+
+{% macro head(e, cls, text, attrs="") %}{% if e.first %}<h1 class="{{ cls }}" {{ attrs | safe }}>{{ text | rich }}</h1>{% else %}<h2 class="{{ cls }}" {{ attrs | safe }}>{{ text | rich }}</h2>{% endif %}{% endmacro %}
+{% macro label(n, text) %}<p class="kt-label"><span class="kt-label__n">({{ "%02d" | format(n) }})</span> {{ text }}</p>{% endmacro %}
+{% macro btn(l, hot=false) %}<a class="kt-btn{% if hot %} kt-btn--hot{% endif %}" href="{{ l.href }}"><span class="kt-roll" data-text="{{ l.label }}"><span>{{ l.label }}</span></span><i aria-hidden="true">→</i></a>{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set pg = loop %}
+{% set n = pg.index0 + 1 %}
+
+{% if b.type == "hero" %}
+<section class="kt-sec kt-paper kt-hero"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="kt-hero__top">{% if b.badge %}{{ label(n, b.badge) }}{% endif %}<p class="kt-label kt-hint" aria-hidden="true">Scroll — faster is louder</p></div>
+  {{ head(e, "kt-giant kt-hero__title", b.title, 'data-kt-fill data-kt-arrive data-kt-pack="95"') }}
+  <div class="kt-hero__foot">
+    {% if b.body %}<p class="kt-body">{{ b.body | rich }}</p>{% endif %}
+    {% if b.buttons %}<div class="kt-btns">{% for l in b.buttons %}{{ btn(l, loop.first) }}{% endfor %}</div>{% endif %}
+  </div>
+  {% if b.device %}<div class="kt-hero__device">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+</section>
+
+{% elif b.type == "intro" %}
+<section class="kt-sec kt-ink kt-intro"{% if b.id %} id="{{ b.id }}"{% endif %} data-kt-read>
+  <div class="kt-intro__in">
+    {{ label(n, b.kicker or "") }}
+    {{ head(e, "kt-read", b.title) }}
+    {% if b.body %}<p class="kt-body kt-intro__body">{{ b.body | rich }}</p>{% endif %}
+    {% if b.button %}<div class="kt-btns">{{ btn(b.button, true) }}</div>{% endif %}
+  </div>
+</section>
+
+{% elif b.type == "features" %}
+<section class="kt-sec kt-paper kt-features"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="kt-marquee kt-marquee--big" data-kt-marquee="1" aria-hidden="true"><div class="kt-marquee__row">{% for f in b.items %}<span>{{ f.title | striptags }}</span><b>—</b>{% endfor %}</div></div>
+  <div class="kt-head">
+    {{ label(n, b.kicker or "") }}
+    {% if b.title %}{{ head(e, "kt-display", b.title) }}{% endif %}
+  </div>
+  <ol class="kt-list" data-kt-list>
+    {% for f in b.items %}
+    <li class="kt-row" tabindex="0">
+      <span class="kt-row__n">{{ f.tag or ("%02d" | format(loop.index)) }}</span>
+      <h3 class="kt-row__word">{{ f.title | rich }}</h3>
+      {% if f.body %}<p class="kt-row__body">{{ f.body | rich }}</p>{% endif %}
+      {% if f.meter is not none %}<span class="kt-row__meter" aria-label="{{ (f.meter * 100) | round | int }}%"><i style="width: {{ (f.meter * 100) | round }}%"></i></span>{% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+  <div class="kt-preview" aria-hidden="true"><span class="kt-preview__n"></span><span class="kt-preview__t"></span></div>
+</section>
+
+{% elif b.type == "product" %}
+{% set words = (b.title | striptags).split() %}
+{% set half = ((words | length) / 2) | round(0, "ceil") | int %}
+<section class="kt-sec kt-acid kt-product"{% if b.id %} id="{{ b.id }}"{% endif %} data-kt-portal>
+  <div class="kt-product__in">
+    {{ label(n, b.kicker or "") }}
+    {{ head(e, "kt-sr", b.title) }}
+    <p class="kt-giant kt-portal__a" aria-hidden="true" data-kt-fill>{{ words[:half] | join(" ") }}</p>
+    <div class="kt-portal__media">
+      {% if b.device %}{{ base.phone(b.device, e.screen, e.clip) }}{% elif e.img %}<img src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+    </div>
+    <p class="kt-giant kt-portal__b" aria-hidden="true" data-kt-fill>{{ words[half:] | join(" ") }}</p>
+    <div class="kt-product__copy">
+      {% if b.body %}<p class="kt-body">{{ b.body | rich }}</p>{% endif %}
+      {% if b.stats %}<ul class="kt-tags">{% for st in b.stats %}<li><b>{{ st.value }}{{ st.unit or "" }}</b> {{ st.label }}</li>{% endfor %}</ul>
+      {% elif b.tags %}<ul class="kt-tags">{% for t in b.tags %}<li>{{ t }}</li>{% endfor %}</ul>{% endif %}
+      {% if b.buttons %}<div class="kt-btns">{% for l in b.buttons %}{{ btn(l, loop.first) }}{% endfor %}</div>{% endif %}
+      {% if b.note %}<p class="kt-label">{{ b.note | rich }}</p>{% endif %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "stats" %}
+<section class="kt-sec kt-ink kt-stats"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {% for st in b.items %}
+  <div class="kt-stat kt-stat--{{ 'r' if loop.index0 % 2 else 'l' }}">
+    <p class="kt-stat__v" data-kt-odo aria-label="{{ st.value }}{{ st.unit or '' }}"><span class="kt-stat__num">{{ st.value }}</span>{% if st.unit %}<span class="kt-stat__u">{{ st.unit }}</span>{% endif %}</p>
+    <p class="kt-label kt-stat__l"><span class="kt-label__n">({{ "%02d" | format(loop.index) }})</span> {{ st.label }}</p>
+  </div>
+  {% endfor %}
+</section>
+
+{% elif b.type == "timeline" %}
+<section class="kt-sec kt-paper kt-steps"{% if b.id %} id="{{ b.id }}"{% endif %} data-kt-steps>
+  <div class="kt-steps__in">
+    <p class="kt-steps__num" aria-hidden="true">01</p>
+    <div class="kt-steps__row">
+      <div class="kt-step kt-step--head">
+        {{ label(n, b.kicker or "") }}
+        {% if b.title %}{{ head(e, "kt-display", b.title) }}{% endif %}
+      </div>
+      {% for t in b.items %}
+      <div class="kt-step" data-n="{{ '%02d' | format(loop.index) }}">
+        <p class="kt-label">{{ t.when }}</p>
+        <h3 class="kt-step__title">{{ t.title | rich }}</h3>
+        {% if t.body %}<p class="kt-body">{{ t.body | rich }}</p>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+{% elif b.type == "quote" %}
+<section class="kt-sec kt-ink kt-quote"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <figure>
+    <blockquote class="kt-lens" data-kt-lens>{{ b.text | rich }}</blockquote>
+    {% if b.who %}<figcaption class="kt-label">— {{ b.who }}</figcaption>{% endif %}
+  </figure>
+</section>
+
+{% elif b.type == "faq" %}
+<section class="kt-sec kt-paper kt-faq"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {{ head(e, "kt-giant kt-faq__title", b.title, 'data-kt-fill') }}
+  {% if b.kicker %}{{ label(n, b.kicker) }}{% endif %}
+  <div class="kt-faq__list">
+    {% for it in b.items %}<details class="kt-q"><summary><span class="kt-q__n">{{ "%02d" | format(loop.index) }}</span><span class="kt-q__t">{{ it.q | rich }}</span><i aria-hidden="true">+</i></summary><div class="kt-q__a"><p>{{ it.a | rich }}</p></div></details>{% endfor %}
+  </div>
+</section>
+
+{% elif b.type == "cta" %}
+<section class="kt-sec kt-acid kt-cta"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {% if b.kicker %}{{ label(n, b.kicker) }}{% endif %}
+  <div class="kt-marquee kt-marquee--cta" data-kt-marquee="-1">
+    <div class="kt-marquee__row">{{ head(e, "kt-cta__word", b.title) }}<b aria-hidden="true">→</b></div>
+  </div>
+  {% if b.button %}<a class="kt-go" href="{{ b.button.href }}" data-kt-magnet><span>{{ b.button.label }}</span><i aria-hidden="true">→</i></a>{% endif %}
+</section>
+{% endif %}
+{% endmacro %}

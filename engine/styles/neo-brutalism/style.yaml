@@ -1,17 +1,26 @@
-# Neo-brutalism: tokens and fonts for theme.style: neo-brutalism. See README.md in this folder for the UX contract.
+# Neo-brutalism: tokens and fonts for theme.style: neo-brutalism. See engine/styles/README.md for the contract and
+# docs/styles/styles-16-21.md section 5 for the research.
 label: Neo-brutalism
-about: Flat loud colour, thick black borders, hard shadows and buttons that press in.
+about: A desk you fill up and can mess with. Every scroll threshold slaps something down with a spring and it stays there, feature cards stack into a deck, marquee bands race with your scroll, stickers and windows can be grabbed and flung, and every button sinks into the page.
 mode: light
 colors:
-  bg: '#ffc8e8'
-  bg2: '#ffe14d'
+  bg: '#fff4e0'
+  bg2: '#ffc900'
   ink: '#000000'
-  accent: '#00d1ff'
-  accent2: '#7bff5c'
+  accent: '#ff90e8'
+  accent2: '#a388ee'
   accent_ink: '#000000'
 fonts:
   display: Archivo Black
   body: Space Grotesk
   mono: Space Mono
+  hand: Gochi Hand
+  sticker: Rubik Mono One
+font_axes:
+  Archivo Black: ""
+  Space Grotesk: "wght@300..700"
+  Space Mono: "ital,wght@0,400;0,700;1,400"
+  Gochi Hand: ""
+  Rubik Mono One: ""
 display_weight: 400
 radius: 8px

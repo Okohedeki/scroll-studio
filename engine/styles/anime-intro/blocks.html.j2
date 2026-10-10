@@ -1,0 +1,189 @@
+{# Anime intro: the page is a TV anime opening, and every section is a run of SHOTS (full-frame compositions). The
+   runtime (runtime/src/styles/anime-intro.ts) pins each section and makes the scroll a playhead: hard cuts between
+   shots, camera moves inside them, freeze frames with vertical name cards. Without it (no JS, reduced motion) the
+   same shots read top to bottom as a storyboard: numbered 16:9 frames with their cut notes.
+   Every Japanese caption is a plain, checkable word with its English beside it:
+   第一話 episode 1 · 問題 problem · 対決 showdown · 機能 feature · 実演 demonstration · 戦闘力 power level ·
+   手順 steps · 証言 testimony · 質問 question · 出撃 launch (sortie) · 次回予告 next episode preview #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+
+{% macro head(e, cls, text) %}{% if e.first %}<h1 class="{{ cls }}">{{ text | rich }}</h1>{% else %}<h2 class="{{ cls }}">{{ text | rich }}</h2>{% endif %}{% endmacro %}
+
+{# a shot: background layer + a camera layer that moves inside the frame. data-len is its length in screens of
+   scroll, data-song its place in the song, data-fx what the effects layer draws over it #}
+{% macro shot(kind, len, song, fx="", cls="", extra="") %}
+<div class="ai-shot ai-shot--{{ kind }} {{ cls }}" data-len="{{ len }}" data-song="{{ song }}" data-fx="{{ fx }}" {{ extra | safe }}>
+  <div class="ai-bg" aria-hidden="true"></div>
+  <div class="ai-cam">{{ caller() }}</div>
+</div>
+{% endmacro %}
+
+{% macro ja(jp, en, cls="") %}<span class="ai-ja {{ cls }}"><span class="ai-ja__jp" lang="ja">{{ jp }}</span><small>{{ en }}</small></span>{% endmacro %}
+
+{% macro pad(i) %}{{ "%02d" | format(i) }}{% endmacro %}
+
+{% macro buttons(list, cls="") %}{% if list %}<div class="ai-btns {{ cls }}">{% for l in list %}<a class="ai-btn{% if loop.first %} ai-btn--hot{% endif %}" href="{{ l.href }}"><span>{{ l.label }}</span></a>{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set pg = loop %}
+
+{% if b.type == "hero" %}
+{# ---------------------------------------------------------------- cold open, then the title card smash #}
+{% set first = ((b.body or b.badge or "") | striptags).split(". ")[0] %}
+<section class="ai-sec ai-sec--hero"{% if b.id %} id="{{ b.id }}"{% endif %} aria-label="Opening">
+  {% call shot("cold", 0.9, "Cold open") %}
+    <p class="ai-cold" aria-hidden="true">{{ first }}{% if not first.endswith(".") %}.{% endif %}</p>
+    <p class="ai-hint" aria-hidden="true"><span>▼</span> Scroll to play</p>
+    <a class="ai-skip" href="#ai-after-title">Skip intro ▸</a>
+  {% endcall %}
+  {% call shot("title", 1.6, "Intro", "focus debris", "", 'data-impact="11"') %}
+    {{ ja("第一話", "Episode 1", "ai-ja--ep") }}
+    {% if b.badge %}<p class="ai-badge">{{ b.badge }}</p>{% endif %}
+    {{ head(e, "ai-titlecard", b.title) }}
+    {% if b.body %}<p class="ai-sub ai-sub--title">{{ b.body | rich }}</p>{% endif %}
+    {{ buttons(b.buttons) }}
+    {% if b.device %}<div class="ai-device">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+    <span id="ai-after-title" class="ai-anchor"></span>
+  {% endcall %}
+</section>
+
+{% elif b.type == "intro" %}
+{# ---------------------------------------------------------------- the problem versus the product: a diagonal VS split #}
+<section class="ai-sec ai-sec--vs"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {% call shot("vs", 1.8, "Verse A", "focus", "", 'data-focus="0.5,0.5" data-impact="6"') %}
+    <div class="ai-vs__a">
+      {{ ja("問題", b.kicker or "The problem", "ai-ja--v ai-ja--red") }}
+      {{ head(e, "ai-vs__title", b.title) }}
+    </div>
+    <div class="ai-vs__b">
+      {{ ja("対決", "Showdown", "ai-ja--v ai-ja--blue") }}
+      {% if b.body %}<p class="ai-sub">{{ b.body | rich }}</p>{% endif %}
+      {% if b.button %}<a class="ai-btn ai-btn--hot" href="{{ b.button.href }}"><span>{{ b.button.label }}</span></a>{% endif %}
+    </div>
+    <span class="ai-vs__glyph" aria-hidden="true">VS</span>
+  {% endcall %}
+</section>
+
+{% elif b.type == "features" %}
+{# ---------------------------------------------------------------- a cast introduction: one character per feature #}
+<section class="ai-sec ai-sec--cast"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {% if b.title or b.kicker %}
+  {% call shot("roster", 0.9, "Verse A", "speed", "", 'data-dir="1"') %}
+    <span class="ai-watermark" lang="ja" aria-hidden="true">機能</span>
+    {% if b.kicker %}<p class="ai-kicker">{{ b.kicker }}</p>{% endif %}
+    {% if b.title %}{{ head(e, "ai-cardtitle", b.title) }}{% endif %}
+    <ol class="ai-roster" aria-hidden="true">{% for f in b.items %}<li><b>{{ f.tag or pad(loop.index) }}</b> {{ f.title | striptags }}</li>{% endfor %}</ol>
+  {% endcall %}
+  {% endif %}
+  {% for f in b.items %}
+  {% call shot("cast", 1.7, "Verse A", "speed whip", "ai-tone-" ~ (loop.index0 % 4), 'data-dir="' ~ (1 if loop.index0 % 2 == 0 else -1) ~ '" data-freeze="0.42"') %}
+    <div class="ai-pose" aria-hidden="true"><span>{{ f.tag or pad(loop.index) }}</span></div>
+    <div class="ai-namecard">
+      <span class="ai-namecard__no">{{ pad(loop.index) }}</span>
+      <h3 class="ai-namecard__name">{{ f.title | rich }}</h3>
+    </div>
+    <div class="ai-freeze">
+      {{ ja("機能", "Feature " ~ pad(loop.index), "ai-ja--v ai-ja--big") }}
+      {% if f.body %}<p class="ai-sub">{{ f.body | rich }}</p>{% endif %}
+      {% if f.meter is not none %}<div class="ai-gauge" aria-label="{{ (f.meter * 100) | round | int }}%"><i style="width: {{ (f.meter * 100) | round }}%"></i></div>{% endif %}
+    </div>
+  {% endcall %}
+  {% endfor %}
+</section>
+
+{% elif b.type == "product" %}
+{# ---------------------------------------------------------------- the chorus: one long scrubbed sakuga shot of the product #}
+<section class="ai-sec ai-sec--sakuga"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {% call shot("sakuga", 3.0, "Chorus", "speed", "ai-side-" ~ b.side, 'data-dir="-1" data-impact-at="0.7"') %}
+    <div class="ai-sakuga__copy">
+      {{ ja("実演", b.kicker or "Demonstration", "ai-ja--v ai-ja--red") }}
+      {{ head(e, "ai-cardtitle ai-cardtitle--sm", b.title) }}
+      {% if b.body %}<p class="ai-sub">{{ b.body | rich }}</p>{% endif %}
+      {% if b.stats %}<ul class="ai-chips">{% for st in b.stats %}<li><b>{{ st.value }}{{ st.unit or "" }}</b> {{ st.label }}</li>{% endfor %}</ul>
+      {% elif b.tags %}<ul class="ai-chips">{% for t in b.tags %}<li>{{ t }}</li>{% endfor %}</ul>{% endif %}
+      {{ buttons(b.buttons) }}
+      {% if b.note %}<p class="ai-note">{{ b.note | rich }}</p>{% endif %}
+    </div>
+    <div class="ai-sakuga__art">
+      {% if b.device %}{{ base.phone(b.device, e.screen, e.clip) }}
+      {% elif e.img %}<img class="ai-cel" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+    </div>
+  {% endcall %}
+</section>
+
+{% elif b.type == "stats" %}
+{# ---------------------------------------------------------------- power levels: one smash per cut #}
+<section class="ai-sec ai-sec--power"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {% for st in b.items %}
+  {% call shot("power", 0.9, "Chorus", "focus", "ai-tone-" ~ (loop.index0 % 4), 'data-impact="5" data-focus="' ~ ("0.62" if loop.index0 % 2 else "0.38") ~ ',0.5"') %}
+    {{ ja("戦闘力", "Power level", "ai-ja--v ai-ja--big") }}
+    <p class="ai-power"><span class="ai-power__v">{{ st.value }}</span>{% if st.unit %}<span class="ai-power__u">{{ st.unit }}</span>{% endif %}</p>
+    <p class="ai-power__l">{{ st.label }}</p>
+  {% endcall %}
+  {% endfor %}
+</section>
+
+{% elif b.type == "timeline" %}
+{# ---------------------------------------------------------------- pre-chorus: faster cuts, one episode per step #}
+<section class="ai-sec ai-sec--eps"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {% if b.title or b.kicker %}
+  {% call shot("roster", 0.7, "Pre-chorus", "speed", "ai-roster--eps", 'data-dir="-1"') %}
+    <span class="ai-watermark" lang="ja" aria-hidden="true">手順</span>
+    {{ ja("手順", "Steps", "ai-ja--v ai-ja--red") }}
+    {% if b.kicker %}<p class="ai-kicker">{{ b.kicker }}</p>{% endif %}
+    {% if b.title %}{{ head(e, "ai-cardtitle", b.title) }}{% endif %}
+  {% endcall %}
+  {% endif %}
+  {% for t in b.items %}
+  {% call shot("ep", 0.75, "Pre-chorus", "speed", "ai-tone-" ~ (loop.index0 % 4), 'data-dir="' ~ (-1 if loop.index0 % 2 else 1) ~ '"') %}
+    <p class="ai-ep"><span>EP.</span>{{ pad(loop.index) }}</p>
+    <p class="ai-ep__when">{{ t.when }}</p>
+    <h3 class="ai-ep__title">{{ t.title | rich }}</h3>
+    {% if t.body %}<p class="ai-sub">{{ t.body | rich }}</p>{% endif %}
+  {% endcall %}
+  {% endfor %}
+</section>
+
+{% elif b.type == "quote" %}
+{# ---------------------------------------------------------------- the bridge: a quiet, slow shot with a subtitle #}
+<section class="ai-sec ai-sec--bridge"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {% call shot("bridge", 2.0, "Bridge", "clouds") %}
+    {{ ja("証言", "Testimony", "ai-ja--v ai-ja--soft") }}
+    <figure class="ai-bridge">
+      <blockquote class="ai-subtitle">{{ b.text | rich }}</blockquote>
+      {% if b.who %}<figcaption>{{ b.who }}</figcaption>{% endif %}
+    </figure>
+  {% endcall %}
+</section>
+
+{% elif b.type == "faq" %}
+{# ---------------------------------------------------------------- each question is the next episode's title #}
+<section class="ai-sec ai-sec--faq"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {% call shot("roster", 0.7, "B-part", "speed", "ai-roster--faq", 'data-dir="1"') %}
+    <span class="ai-watermark" lang="ja" aria-hidden="true">質問</span>
+    {{ ja("質問", "Questions", "ai-ja--v ai-ja--blue") }}
+    {% if b.kicker %}<p class="ai-kicker">{{ b.kicker }}</p>{% endif %}
+    {{ head(e, "ai-cardtitle", b.title) }}
+  {% endcall %}
+  {% for it in b.items %}
+  {% call shot("qa", 1.0, "B-part", "", "ai-tone-" ~ ((loop.index0 + 1) % 4)) %}
+    <p class="ai-qa__no">Q.{{ pad(loop.index) }}</p>
+    <h3 class="ai-qa__q">「{{ it.q | rich }}」</h3>
+    <p class="ai-subtitle ai-qa__a">{{ it.a | rich }}</p>
+  {% endcall %}
+  {% endfor %}
+</section>
+
+{% elif b.type == "cta" %}
+{# ---------------------------------------------------------------- the ending pose: the cast lines up, the logo returns #}
+<section class="ai-sec ai-sec--ending"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {% call shot("ending", 2.0, "Final chorus", "focus", "", 'data-impact="7" data-focus="0.5,0.62"') %}
+    <div class="ai-lineup" aria-hidden="true"></div>
+    {{ ja("出撃", "Launch", "ai-ja--v ai-ja--red ai-ja--big") }}
+    {% if b.kicker %}<p class="ai-kicker">{{ b.kicker }}</p>{% endif %}
+    {{ head(e, "ai-titlecard ai-titlecard--end", b.title) }}
+    {% if b.button %}<a class="ai-btn ai-btn--hot ai-btn--big" href="{{ b.button.href }}"><span>{{ b.button.label }}</span></a>{% endif %}
+  {% endcall %}
+</section>
+{% endif %}
+{% endmacro %}

@@ -1,0 +1,166 @@
+{# Neo-brutalism: the page is a desk you fill up and can mess with. Sections are flat coloured surfaces with hard
+   edges; content arrives as objects (tiles, windows, stickers, notes) that the runtime
+   (runtime/src/styles/neo-brutalism.ts) slaps down at scroll thresholds with a spring and leaves where they land.
+   Anything marked data-nb-drag can be grabbed and flung (or nudged with the arrow keys). Without JS it is all just
+   lying on the desk. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+{% set COLORS = ["pink", "yellow", "lime", "violet", "coral", "sky"] %}
+
+{% macro head(e, cls, text, attrs="") %}{% if e.first %}<h1 class="{{ cls }}" {{ attrs | safe }}>{{ text | rich }}</h1>{% else %}<h2 class="{{ cls }}" {{ attrs | safe }}>{{ text | rich }}</h2>{% endif %}{% endmacro %}
+{% macro btn(l, hot=false, cls="") %}<a class="nb-btn{% if hot %} nb-btn--hot{% endif %} {{ cls }}" href="{{ l.href }}">{{ l.label }}{% if hot %} <span aria-hidden="true">→</span>{% endif %}</a>{% endmacro %}
+{% macro win(title, cls="", attrs="") %}<div class="nb-win {{ cls }}" {{ attrs | safe }}><div class="nb-win__bar"><i></i><i></i><i></i><span>{{ title }}</span></div><div class="nb-win__body">{{ caller() }}</div></div>{% endmacro %}
+{% macro band(text, cls="", dir=1) %}<div class="nb-band {{ cls }}" data-nb-band="{{ dir }}" aria-hidden="true"><div class="nb-band__row">{% for i in range(6) %}<span>{{ text }}</span><b>✱</b>{% endfor %}</div></div>{% endmacro %}
+{% macro icon(i) %}{% set k = i % 4 %}<svg class="nb-icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+{% if k == 0 %}<path d="M32 4l7.6 17.8L58 24l-14 12.6L48 56 32 46 16 56l4-19.4L6 24l18.4-2.2z"/>
+{% elif k == 1 %}<path d="M36 4L10 36h18l-4 24 26-32H32z"/>
+{% elif k == 2 %}<path d="M32 56S6 40 6 22a13 13 0 0126-4 13 13 0 0126 4c0 18-26 34-26 34z"/>
+{% else %}<circle cx="32" cy="32" r="26"/><path d="M20 34l8 8 16-18" fill="none" stroke-width="6"/>{% endif %}
+</svg>{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set pg = loop %}
+
+{% if b.type == "hero" %}
+<section class="nb-sec nb-desk nb-hero"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="nb-hero__in">
+    <div class="nb-hero__head">
+      {{ head(e, "nb-h1", b.title, 'data-nb-words') }}
+      {% if b.badge %}<p class="nb-starburst nb-hero__badge" data-nb-slap="last" data-nb-drag><span>{{ b.badge }}</span></p>{% endif %}
+    </div>
+    {% call win("readme.txt", "nb-hero__win nb-c-white", 'data-nb-slap data-nb-drag tabindex="0" aria-label="Window: readme"') %}
+      {% if b.body %}<p class="nb-lede">{{ b.body | rich }}</p>{% endif %}
+      {% if b.buttons %}<div class="nb-btns">{% for l in b.buttons %}{{ btn(l, loop.first) }}{% endfor %}</div>{% endif %}
+    {% endcall %}
+    {% if b.device %}{% call win("app", "nb-hero__app nb-c-sky", 'data-nb-slap data-nb-drag tabindex="0" aria-label="Window: app"') %}{{ base.phone(b.device, e.screen, e.clip) }}{% endcall %}{% endif %}
+    <div class="nb-stickers" aria-hidden="true">
+      <span class="nb-sticker nb-sticker--star" data-nb-slap data-nb-drag>★</span>
+      <span class="nb-sticker nb-sticker--smile" data-nb-slap data-nb-drag><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28"/><circle cx="23" cy="26" r="4" class="i"/><circle cx="41" cy="26" r="4" class="i"/><path d="M19 38q13 14 26 0" class="m"/></svg></span>
+      <span class="nb-sticker nb-sticker--pill" data-nb-slap data-nb-drag>{{ (b.badge or b.title) | striptags | truncate(18, true, "") }}</span>
+      <span class="nb-sticker nb-sticker--hand" data-nb-slap data-nb-drag>drag me!</span>
+    </div>
+  </div>
+  <div class="nb-cross">{{ band((b.title | striptags) | upper, "nb-band--pink", 1) }}{{ band(((b.badge or "") ~ " " ~ (b.buttons | map(attribute="label") | join(" ✱ "))) | upper, "nb-band--lime", -1) }}</div>
+</section>
+
+{% elif b.type == "intro" %}
+<section class="nb-sec nb-c-yellow nb-intro"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {% call win(((b.kicker or "note") | lower | replace(" ", "-")) ~ ".txt", "nb-intro__win nb-c-white", 'data-nb-slap data-nb-drag tabindex="0" aria-label="Window: ' ~ (b.kicker or "note") ~ '"') %}
+    {{ head(e, "nb-h2", b.title, 'data-nb-scribble') }}
+    {% if b.body %}<p class="nb-lede">{{ b.body | rich }}</p>{% endif %}
+    {% if b.button %}<div class="nb-btns">{{ btn(b.button, true) }}</div>{% endif %}
+  {% endcall %}
+  {% if b.kicker %}<p class="nb-note" data-nb-slap data-nb-drag aria-hidden="true">{{ b.kicker }}!</p>{% endif %}
+</section>
+
+{% elif b.type == "features" %}
+<section class="nb-sec nb-desk nb-features"{% if b.id %} id="{{ b.id }}"{% endif %} data-nb-deck>
+  {{ band((b.items | map(attribute="title") | join(" ✱ ")) | striptags | upper, "nb-band--yellow nb-band--edge", 1) }}
+  <div class="nb-deck__in">
+    <div class="nb-deck__head">
+      {% if b.kicker %}<p class="nb-chip">{{ b.kicker }}</p>{% endif %}
+      {% if b.title %}{{ head(e, "nb-h2", b.title) }}{% endif %}
+      <p class="nb-count" aria-hidden="true"><b data-nb-count>0</b> / {{ b.items | length }} on the desk</p>
+    </div>
+    <ol class="nb-deck">
+      {% for f in b.items %}
+      <li class="nb-card nb-c-{{ COLORS[loop.index0 % 6] }}" data-nb-card data-nb-drag tabindex="0" style="--i: {{ loop.index0 }}">
+        <div class="nb-card__top">{{ icon(loop.index0) }}<span class="nb-tag">{{ f.tag or ("%02d" | format(loop.index)) }}</span></div>
+        <h3 class="nb-card__title">{{ f.title | rich }}</h3>
+        {% if f.body %}<p>{{ f.body | rich }}</p>{% endif %}
+        {% if f.meter is not none %}<div class="nb-meter" aria-label="{{ (f.meter * 100) | round | int }}%"><i style="width: {{ (f.meter * 100) | round }}%"></i></div>{% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "product" %}
+<section class="nb-sec nb-c-sky nb-product nb-product--{{ b.side }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="nb-product__in">
+    {% call win((b.kicker or "app") | lower, "nb-product__copy nb-c-white", 'data-nb-slap="pop" data-nb-drag tabindex="0" aria-label="Window: ' ~ (b.kicker or "app") ~ '"') %}
+      {{ head(e, "nb-h2", b.title) }}
+      {% if b.body %}<p class="nb-lede">{{ b.body | rich }}</p>{% endif %}
+      {% if b.stats %}<ul class="nb-chips">{% for st in b.stats %}<li><b>{{ st.value }}{{ st.unit or "" }}</b> {{ st.label }}</li>{% endfor %}</ul>
+      {% elif b.tags %}<ul class="nb-chips">{% for t in b.tags %}<li>{{ t }}</li>{% endfor %}</ul>{% endif %}
+      {% if b.buttons %}<div class="nb-btns">{% for l in b.buttons %}{{ btn(l, loop.first) }}{% endfor %}</div>{% endif %}
+      {% if b.note %}<p class="nb-small">{{ b.note | rich }}</p>{% endif %}
+    {% endcall %}
+    {% if b.device or e.img %}
+    {% call win(((b.device.app if b.device and b.device.app else "preview") | lower) ~ ".app", "nb-product__shot nb-c-pink", 'data-nb-slap="pop" data-nb-drag tabindex="0" aria-label="Window: app preview"') %}
+      {% if b.device %}{{ base.phone(b.device, e.screen, e.clip) }}{% else %}<img src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+    {% endcall %}
+    {% endif %}
+    <span class="nb-sticker nb-sticker--burst" data-nb-slap="last" data-nb-drag aria-hidden="true">★</span>
+  </div>
+</section>
+
+{% elif b.type == "stats" %}
+<section class="nb-sec nb-c-pink nb-stats"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="nb-stats__grid nb-stats--{{ b.items | length }}">
+    {% for st in b.items %}
+    {% if loop.last and b.items | length > 2 %}
+    <div class="nb-stat nb-stat--sticker" data-nb-slap data-nb-drag tabindex="0"><p class="nb-stat__v" data-nb-flip>{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</p><p class="nb-stat__l">{{ st.label }}</p></div>
+    {% else %}
+    <div class="nb-stat nb-c-{{ ['yellow', 'lime', 'white', 'violet', 'coral', 'sky'][loop.index0 % 6] }}" data-nb-slap data-nb-drag tabindex="0"><p class="nb-stat__v" data-nb-flip>{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</p><p class="nb-stat__l">{{ st.label }}</p></div>
+    {% endif %}
+    {% endfor %}
+  </div>
+</section>
+
+{% elif b.type == "timeline" %}
+<section class="nb-sec nb-desk nb-steps"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="nb-steps__head">
+    {% if b.kicker %}<p class="nb-chip">{{ b.kicker }}</p>{% endif %}
+    {% if b.title %}{{ head(e, "nb-h2", b.title) }}{% endif %}
+  </div>
+  <div class="nb-steps__wrap" data-nb-path>
+  <svg class="nb-arrow" aria-hidden="true" focusable="false"><path d=""/></svg>
+  <ol class="nb-steps__row">
+    {% for t in b.items %}
+    <li class="nb-step" data-nb-slap>
+      <span class="nb-step__n nb-c-{{ COLORS[loop.index0 % 6] }}" aria-hidden="true">{{ loop.index }}</span>
+      <div class="nb-step__card"><p class="nb-step__when">{{ t.when }}</p><h3>{{ t.title | rich }}</h3>{% if t.body %}<p>{{ t.body | rich }}</p>{% endif %}</div>
+    </li>
+    {% endfor %}
+  </ol>
+  </div>
+</section>
+
+{% elif b.type == "quote" %}
+{% set who = b.who or "" %}
+<section class="nb-sec nb-c-lime nb-quote"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <figure class="nb-tweet nb-c-white" data-nb-slap data-nb-drag tabindex="0">
+    <div class="nb-tweet__who"><span class="nb-avatar" aria-hidden="true">{{ (who | striptags)[:1] | upper or "“" }}</span><figcaption>{% if who %}<b>{{ who.split(",")[0] }}</b>{% if "," in who %}<small>{{ who.split(",", 1)[1] | trim }}</small>{% endif %}{% endif %}</figcaption></div>
+    <blockquote>{{ b.text | rich }}</blockquote>
+  </figure>
+  <span class="nb-sticker nb-sticker--quote" data-nb-slap="last" data-nb-drag aria-hidden="true">“”</span>
+  <span class="nb-sticker nb-sticker--heart" data-nb-slap="last" data-nb-drag aria-hidden="true">♥</span>
+</section>
+
+{% elif b.type == "faq" %}
+<section class="nb-sec nb-desk nb-faq"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="nb-faq__head">
+    {% if b.kicker %}<p class="nb-chip">{{ b.kicker }}</p>{% endif %}
+    {{ head(e, "nb-h2", b.title) }}
+  </div>
+  <div class="nb-faq__list">
+    {% for it in b.items %}<details class="nb-q nb-q--{{ COLORS[loop.index0 % 6] }}" data-nb-slap{% if loop.first %} open{% endif %}><summary><span>{{ it.q | rich }}</span><i aria-hidden="true"></i></summary><p>{{ it.a | rich }}</p></details>{% endfor %}
+  </div>
+</section>
+
+{% elif b.type == "cta" %}
+<section class="nb-sec nb-c-violet nb-cta"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="nb-cross nb-cross--cta">{{ band((b.title | striptags) | upper, "nb-band--yellow", 1) }}{{ band((b.button.label if b.button else b.title) | striptags | upper, "nb-band--pink", -1) }}</div>
+  <div class="nb-cta__in">
+    {{ head(e, "nb-h2 nb-cta__title", b.title) }}
+    {% if b.button %}
+    <div class="nb-cta__go">
+      {% if b.kicker %}<p class="nb-scrawl" aria-hidden="true">{{ b.kicker }}</p>{% endif %}
+      <svg class="nb-scrawl__arrow" viewBox="0 0 160 110" aria-hidden="true" focusable="false"><path d="M8 18c40-14 92-6 112 30 8 14 8 28 4 42"/><path d="M104 76l20 18 16-24"/></svg>
+      <a class="nb-btn nb-btn--hot nb-btn--huge" href="{{ b.button.href }}" data-nb-confetti>{{ b.button.label }} <span aria-hidden="true">→</span></a>
+    </div>
+    {% elif b.kicker %}<p class="nb-chip">{{ b.kicker }}</p>{% endif %}
+  </div>
+</section>
+{% endif %}
+{% endmacro %}

@@ -1,17 +1,24 @@
-# Comic book: tokens and fonts for theme.style: comic-book. See README.md in this folder for the UX contract.
+# Comic book: tokens and fonts for theme.style: comic-book. See engine/styles/README.md for the contract and
+# docs/styles/styles-11-15.md section 2 for the research.
 label: Comic book
-about: Inked outlines, halftone dots, speech-bubble labels and a POW on the buttons.
+about: Read it like a comic. Each section is a page of panels, and every scroll moves your eye to the next panel. Captions slide in, balloons pop up in order, and the camera pulls back to show the whole page before you turn it.
 mode: light
 colors:
-  bg: '#fff7e0'
-  bg2: '#ffe9a8'
+  bg: '#f3e9cf'
+  bg2: '#fffbef'
   ink: '#111111'
-  accent: '#e8202a'
-  accent2: '#1f6fe5'
+  accent: '#e8262b'
+  accent2: '#1b4f9c'
   accent_ink: '#ffffff'
 fonts:
   display: Bangers
   body: Comic Neue
   mono: Space Mono
+  chapter: Luckiest Guy
+font_axes:
+  Bangers: ""
+  Comic Neue: "ital,wght@0,400;0,700;1,700"
+  Space Mono: "ital,wght@0,400;0,700;1,400"
+  Luckiest Guy: ""
 display_weight: 400
-radius: 6px
+radius: 0px

@@ -1,0 +1,27 @@
+{# Neo-brutalism furniture: a floating, thick-bordered pill nav with outlined link chips (the current one filled),
+   and a footer made of a marquee band, outlined link boxes, a sticker and a viewport-wide wordmark. #}
+{% macro top(site, sections, nav_links) %}
+<header class="nb-nav">
+  <a class="nb-nav__mark" href="#"><span aria-hidden="true">✱</span> {{ site.name }}</a>
+  <nav class="nb-nav__links" aria-label="Sections">{% for l in nav_links %}<a class="nb-navchip" href="{{ l.href }}" data-nb-nav="{{ l.href }}">{{ l.label }}</a>{% endfor %}</nav>
+  {% if site.nav.cta %}<a class="nb-btn nb-btn--hot nb-btn--sm" href="{{ site.nav.cta.href }}">{{ site.nav.cta.label }}</a>{% endif %}
+</header>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}
+<footer class="nb-foot">
+  <div class="nb-band nb-band--yellow" data-nb-band="1" aria-hidden="true"><div class="nb-band__row">{% for i in range(6) %}<span>{{ site.name | upper }}</span><b>✱</b>{% if site.nav.cta %}<span>{{ site.nav.cta.label | upper }}</span><b>✱</b>{% endif %}{% endfor %}</div></div>
+  <div class="nb-foot__in">
+    <div class="nb-foot__box">
+      <p class="nb-foot__label">Sections</p>
+      <ul>{% for e in sections %}{% if e.s.id and e.s.nav_label %}<li><a href="#{{ e.s.id }}">{{ e.s.nav_label }}</a></li>{% endif %}{% endfor %}{% if site.nav.cta %}<li><a href="{{ site.nav.cta.href }}">{{ site.nav.cta.label }}</a></li>{% endif %}</ul>
+    </div>
+    <div class="nb-foot__box">
+      <p class="nb-foot__label">Small print</p>
+      <p>{{ (site.footer.left or ("© " ~ site.name)) | rich }}</p>
+    </div>
+    {% if site.footer.right %}<p class="nb-sticker nb-sticker--foot" data-nb-drag>{{ site.footer.right | rich }}</p>{% endif %}
+  </div>
+  <p class="nb-foot__mark" aria-hidden="true">{{ site.name }}</p>
+</footer>
+{% endmacro %}

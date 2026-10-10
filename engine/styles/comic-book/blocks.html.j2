@@ -1,0 +1,220 @@
+{# Comic book: every section is a PAGE of panels read in Z-order. A splash page is the hero; each chapter after it is
+   one page (a CSS grid of panels with gutters). Captions are yellow narration boxes, speech balloons carry short
+   spoken lines, figures are inked SVG symbols defined in chrome.html.j2. All text is real HTML in reading order; the
+   runtime (runtime/src/styles/comic-book.ts) adds the guided camera, balloon pops and SFX slams. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+
+{% macro head(e, cls, text) %}{% if e.first %}<h1 class="{{ cls }}">{{ text | rich }}</h1>{% else %}<h2 class="{{ cls }}">{{ text | rich }}</h2>{% endif %}{% endmacro %}
+
+{# one panel: wrapper (lift + hard shadow on hover) > ink frame (clip-path shape) > inner (art + content) #}
+{% macro panel(n, i, span, art="", extra="") %}
+<div class="cb-panel cb-c-{{ span }} {{ extra }}" role="group" aria-label="Panel {{ i }} of {{ n }}"><div class="cb-frame"><div class="cb-in">
+  {% if art %}<div class="cb-art cb-art--{{ art }}" aria-hidden="true"></div>{% endif %}
+  {{ caller() }}
+</div></div></div>
+{% endmacro %}
+
+{% macro fig(kind, side="r", size="") %}<svg class="cb-fig cb-fig--{{ side }} {{ size }}" viewBox="0 0 {{ 280 if kind == 'hero-point' else 200 }} 220" aria-hidden="true" focusable="false"><use href="#cb-{{ kind }}"/></svg>{% endmacro %}
+
+{# a long caption drops the all-caps lettering: comic caps over ~22 words stop being readable #}
+{% macro cap(text, b=0, cls="") %}<p class="cb-cap {{ cls }}{% if (text | striptags | wordcount) > 22 %} cb-long{% endif %}" style="--b:{{ b }}">{{ text | rich }}</p>{% endmacro %}
+{% macro bal(text, tail="bl", b=1, cls="", tag="p") %}{% set wc = text | striptags | wordcount %}<{{ tag }} class="cb-bal cb-tail-{{ tail }} {{ cls }}{% if wc <= 12 %} cb-oval{% endif %}{% if wc > 22 %} cb-long{% endif %}" style="--b:{{ b }}">{{ text | rich }}</{{ tag }}>{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set pg = loop %}
+{% set ART = ["speed", "dots-c", "burst", "dots-m", "dots-y", "night"] %}
+
+{% if b.type == "hero" %}
+{# ---------------------------------------------------------------- the splash page #}
+<section class="cb-page cb-splash"{% if b.id %} id="{{ b.id }}"{% endif %} aria-label="Splash page">
+  <div class="cb-sheet cb-sheet--splash">
+    <div class="cb-panel cb-c-12 cb-splash__panel" role="group" aria-label="Splash panel"><div class="cb-frame"><div class="cb-in">
+      <div class="cb-art cb-art--burst cb-art--splash" aria-hidden="true"></div>
+      <div class="cb-splash__copy">
+        {% if b.badge %}<p class="cb-corner"><span>{{ b.badge }}</span></p>{% endif %}
+        {% if b.body %}{{ cap(b.body, 0, "cb-cap--lead") }}{% endif %}
+        {{ head(e, "cb-mast", b.title) }}
+        {% if b.buttons %}<div class="cb-btns">{% for l in b.buttons %}<a class="cb-btn{% if loop.first %} cb-btn--hot{% endif %}" href="{{ l.href }}">{{ l.label }}</a>{% endfor %}</div>{% endif %}
+      </div>
+      <div class="cb-splash__art">
+        {% if b.device %}<div class="cb-tv">{{ base.phone(b.device, e.screen, e.clip) }}</div>
+        {% elif e.img %}<img class="cb-inked" src="{{ e.img }}" alt="" fetchpriority="high">
+        {% else %}{{ fig("hero", "r", "cb-fig--xl") }}{% endif %}
+      </div>
+    </div></div></div>
+  </div>
+</section>
+
+{% elif b.type == "intro" %}
+{# ---------------------------------------------------------------- the problem: establishing panel, narration, the hero answers #}
+{% set parts = (b.body or "").split(". ") %}
+{% set said = parts[-1] if parts | length > 1 else "" %}
+{% set told = (parts[:-1] | join(". ") ~ ".") if parts | length > 1 else (b.body or "") %}
+{% set n = 2 + (1 if said or b.button else 0) %}
+<section class="cb-page cb-page--intro"{% if b.id %} id="{{ b.id }}"{% endif %} data-guided aria-label="Page {{ pg.index0 + 1 }}">
+  <div class="cb-sheet" style="--rows: 0.8fr 1.2fr">
+    {% call panel(n, 1, 12, "night", "cb-establish") %}
+      {% if b.kicker %}{{ cap(b.kicker ~ "…", 0, "cb-cap--tl") }}{% endif %}
+      {{ head(e, "cb-letters cb-letters--light", b.title) }}
+    {% endcall %}
+    {% call panel(n, 2, 12 if n == 2 else 7, "dots-m", "" if n == 2 else "cb-sl-r") %}
+      {% if told %}{{ cap(told, 0) }}{% endif %}
+      <span class="cb-sfx cb-sfx--quiet" aria-hidden="true">?!</span>
+    {% endcall %}
+    {% if n == 3 %}
+    {% call panel(n, 3, 5, "burst", "cb-sl-l cb-has-fig") %}
+      {% if said %}{{ bal(said, "br", 0, "cb-bal--shout") }}{% endif %}
+      {% if b.button %}<a class="cb-btn cb-btn--hot" href="{{ b.button.href }}" style="--b:1">{{ b.button.label }}</a>{% endif %}
+      {{ fig("hero", "r") }}
+    {% endcall %}
+    {% endif %}
+  </div>
+</section>
+
+{% elif b.type == "features" %}
+{# ---------------------------------------------------------------- an action-sequence page: one panel per feature #}
+{% set n = 1 + b.items | length %}
+{% set rows = ((b.items | length) / 3) | round(0, "ceil") | int %}
+{% set mid = (b.items | length) // 2 %}
+<section class="cb-page cb-page--features"{% if b.id %} id="{{ b.id }}"{% endif %} data-guided aria-label="Page {{ pg.index0 + 1 }}">
+  <div class="cb-sheet" style="--rows: 0.62fr repeat({{ rows }}, 1.38fr)">
+    {% call panel(n, 1, 12, "speed", "cb-establish") %}
+      {% if b.kicker %}{{ cap(b.kicker ~ "…", 0, "cb-cap--tl") }}{% endif %}
+      {% if b.title %}{{ head(e, "cb-letters", b.title) }}{% endif %}
+    {% endcall %}
+    {% for row in b.items | batch(3) %}{% set r = loop.index0 %}{% set k = row | length %}
+      {% set spans = [[12], ([7, 5] if r % 2 == 0 else [5, 7]), ([4, 3, 5] if r % 2 == 0 else [5, 4, 3])][k - 1] %}
+      {% for f in row %}{% set gi = r * 3 + loop.index0 %}
+        {% set shape = ("cb-sl-r" if loop.first and k > 1 else ("cb-sl-l" if loop.index0 == 1 else "")) if r == 0 else "" %}
+        {% set side = "l" if gi % 2 else "r" %}
+        {% call panel(n, gi + 2, spans[loop.index0], ART[gi % ART | length], shape ~ " cb-has-fig cb-feature") %}
+          <h3 class="cb-cap cb-cap--name" style="--b:0">{% if f.tag %}<span class="cb-tag">{{ f.tag }}</span> {% endif %}{{ f.title | rich }}</h3>
+          {% if f.body %}{{ bal(f.body, "b" ~ side, 1) }}{% endif %}
+          {% if f.meter is not none %}<div class="cb-meter" style="--b:2" aria-label="{{ (f.meter * 100) | round | int }}%"><i style="width: {{ (f.meter * 100) | round }}%"></i></div>{% endif %}
+          {% if gi == mid and b.items | length > 1 %}<span class="cb-sfx cb-sfx--slam" aria-hidden="true">ZAP!</span>{% endif %}
+          {{ fig("hero", side, "cb-fig--sm" if spans[loop.index0] < 5 else "") }}
+        {% endcall %}
+      {% endfor %}
+    {% endfor %}
+  </div>
+</section>
+
+{% elif b.type == "product" %}
+{# ---------------------------------------------------------------- the product as a TV screen inside the art #}
+{% set n = 3 %}
+<section class="cb-page cb-page--product cb-product--{{ b.side }}"{% if b.id %} id="{{ b.id }}"{% endif %} data-guided aria-label="Page {{ pg.index0 + 1 }}">
+  <div class="cb-sheet" style="--rows: 1fr 1fr">
+    {% call panel(n, 1, 6, "burst", "cb-tall cb-product__shot") %}
+      {% if b.kicker %}{{ cap(b.kicker ~ "!", 0, "cb-cap--tl") }}{% endif %}
+      <div class="cb-tv">
+        {% if b.device %}{{ base.phone(b.device, e.screen, e.clip) }}
+        {% elif e.img %}<img class="cb-inked" src="{{ e.img }}" alt="" loading="lazy">
+        {% else %}{{ fig("hero", "r", "cb-fig--xl") }}{% endif %}
+      </div>
+    {% endcall %}
+    {% call panel(n, 2, 6, "dots-c") %}
+      {{ head(e, "cb-letters", b.title) }}
+      {% if b.body %}{{ cap(b.body, 1) }}{% endif %}
+    {% endcall %}
+    {% call panel(n, 3, 6, "dots-y", "cb-has-fig") %}
+      {% if b.stats %}
+        <div class="cb-bursts">{% for st in b.stats %}<p class="cb-burst cb-burst--{{ loop.index0 % 4 }}" style="--b:{{ loop.index0 }}"><b>{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}!</b><span>{{ st.label }}</span></p>{% endfor %}</div>
+      {% elif b.tags %}
+        <div class="cb-bal cb-tail-br" style="--b:0"><ul class="cb-shout">{% for t in b.tags %}<li>{{ t }}!</li>{% endfor %}</ul></div>
+      {% endif %}
+      {% if b.buttons %}<div class="cb-btns" style="--b:2">{% for l in b.buttons %}<a class="cb-btn{% if loop.first %} cb-btn--hot{% endif %}" href="{{ l.href }}">{{ l.label }}</a>{% endfor %}</div>{% endif %}
+      {% if b.note %}<p class="cb-small">{{ b.note | rich }}</p>{% endif %}
+      {{ fig("hero", "r", "cb-fig--sm") }}
+    {% endcall %}
+  </div>
+</section>
+
+{% elif b.type == "stats" %}
+{# ---------------------------------------------------------------- stats as SFX numerals in starbursts: frozen, never counted #}
+{% set n = b.items | length %}
+{% set cols = n if n <= 3 else (2 if n == 4 else 3) %}
+<section class="cb-page cb-page--stats"{% if b.id %} id="{{ b.id }}"{% endif %}{% if n > 1 %} data-guided{% endif %} aria-label="Page {{ pg.index0 + 1 }}">
+  <div class="cb-sheet cb-sheet--cols" style="--cols: {{ cols }}">
+    {% for st in b.items %}
+    {% call panel(n, loop.index, 1, ["dots-m", "speed", "dots-c", "burst", "dots-y", "night"][loop.index0 % 6], "cb-statpanel") %}
+      <p class="cb-burst cb-burst--{{ loop.index0 % 4 }}{% if loop.first %} cb-burst--slam{% endif %}" style="--b:0"><b>{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}!</b></p>
+      {{ cap(st.label, 1, "cb-cap--bl") }}
+    {% endcall %}
+    {% endfor %}
+  </div>
+</section>
+
+{% elif b.type == "timeline" %}
+{# ---------------------------------------------------------------- a daily strip: one row of panels, "LATER..." captions #}
+{% set n = (b.items | length) + (1 if b.title else 0) %}
+<section class="cb-page cb-page--strip"{% if b.id %} id="{{ b.id }}"{% endif %} data-guided aria-label="Page {{ pg.index0 + 1 }}">
+  <div class="cb-sheet cb-sheet--cols cb-sheet--strip" style="--cols: {{ [n, 5] | min }}">
+    {% if b.title %}
+    {% call panel(n, 1, 1, "night", "cb-strip__title") %}
+      {% if b.kicker %}{{ cap(b.kicker, 0) }}{% endif %}
+      {{ head(e, "cb-letters cb-letters--light", b.title) }}
+    {% endcall %}
+    {% endif %}
+    {% for t in b.items %}
+    {% call panel(n, loop.index + (1 if b.title else 0), 1, ["dots-y", "dots-c", "speed", "dots-m", "burst"][loop.index0 % 5]) %}
+      {{ cap(t.when ~ "…", 0, "cb-cap--tl") }}
+      <h3 class="cb-letters cb-letters--sm">{{ t.title | rich }}</h3>
+      {% if t.body %}{{ bal(t.body, "bl" if loop.index0 % 2 else "br", 1) }}{% endif %}
+    {% endcall %}
+    {% endfor %}
+  </div>
+</section>
+
+{% elif b.type == "quote" %}
+{# ---------------------------------------------------------------- a portrait panel with the customer's own balloon #}
+<section class="cb-page cb-page--quote"{% if b.id %} id="{{ b.id }}"{% endif %} aria-label="Page {{ pg.index0 + 1 }}">
+  <figure class="cb-sheet cb-sheet--single">
+    <div class="cb-panel cb-c-12 cb-has-fig" role="group" aria-label="Testimonial panel"><div class="cb-frame"><div class="cb-in">
+      <div class="cb-art cb-art--dots-y" aria-hidden="true"></div>
+      <blockquote class="cb-bal cb-tail-bl cb-bal--big{% if (b.text | striptags | wordcount) > 22 %} cb-long{% endif %}" style="--b:0">{{ b.text | rich }}</blockquote>
+      {% if b.who %}<figcaption class="cb-cap cb-cap--br" style="--b:1">— {{ b.who }}</figcaption>{% endif %}
+      {{ fig("citizen", "l", "cb-fig--lg") }}
+    </div></div></div>
+  </figure>
+</section>
+
+{% elif b.type == "faq" %}
+{# ---------------------------------------------------------------- a conversation: the reader asks, the hero answers #}
+{% set n = 1 + b.items | length %}
+{% set rows = ((b.items | length) / 2) | round(0, "ceil") | int %}
+<section class="cb-page cb-page--faq"{% if b.id %} id="{{ b.id }}"{% endif %} data-guided aria-label="Page {{ pg.index0 + 1 }}">
+  <div class="cb-sheet" style="--rows: 0.5fr repeat({{ rows }}, 1fr)">
+    {% call panel(n, 1, 12, "dots-c", "cb-establish") %}
+      {% if b.kicker %}{{ cap(b.kicker, 0, "cb-cap--tl") }}{% endif %}
+      {{ head(e, "cb-letters", b.title) }}
+    {% endcall %}
+    {% for row in b.items | batch(2) %}{% set r = loop.index0 %}
+      {% for it in row %}
+      {% call panel(n, r * 2 + loop.index + 1, 12 if row | length == 1 else 6, ["dots-y", "speed", "dots-m", "burst"][(r * 2 + loop.index0) % 4], "cb-talk") %}
+        {{ bal(it.q, "bl", 0, "cb-bal--q", "h3") }}
+        {{ bal(it.a, "br", 1, "cb-bal--a") }}
+        <div class="cb-cast" aria-hidden="true">{{ fig("citizen", "l", "cb-fig--sm") }}{{ fig("hero", "r", "cb-fig--sm") }}</div>
+      {% endcall %}
+      {% endfor %}
+    {% endfor %}
+  </div>
+</section>
+
+{% elif b.type == "cta" %}
+{# ---------------------------------------------------------------- the last page: YOUR TURN! and the next issue #}
+<section class="cb-page cb-page--cta"{% if b.id %} id="{{ b.id }}"{% endif %} data-guided aria-label="Last page">
+  <div class="cb-sheet" style="--rows: 1fr">
+    {% call panel(2, 1, 7, "burst", "cb-has-fig cb-sl-r") %}
+      <p class="cb-bal cb-tail-br cb-bal--shout cb-oval" style="--b:0">Your turn!</p>
+      {{ head(e, "cb-letters cb-letters--xl", b.title) }}
+      {{ fig("hero-point", "r", "cb-fig--point") }}
+    {% endcall %}
+    {% call panel(2, 2, 5, "night", "cb-sl-l cb-final") %}
+      {% if b.kicker %}<p class="cb-price" style="--b:0"><span>{{ b.kicker }}</span></p>{% endif %}
+      {% if b.button %}<a class="cb-burstbtn" href="{{ b.button.href }}" style="--b:1"><span>{{ b.button.label }}</span></a>{% endif %}
+      <p class="cb-cap cb-next" style="--b:2"><a href="{{ b.button.href if b.button else '#' }}">Next issue →</a></p>
+    {% endcall %}
+  </div>
+</section>
+{% endif %}
+{% endmacro %}
