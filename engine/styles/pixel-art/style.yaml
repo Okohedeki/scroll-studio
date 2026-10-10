@@ -1,17 +1,22 @@
-# Pixel art: tokens and fonts for theme.style: pixel-art. See README.md in this folder for the UX contract.
+# Pixel art: tokens and fonts for theme.style: pixel-art. The site is a game: a title screen, then scrolling walks a
+# sprite through a side-scrolling level where every section is a stop (signs, ? blocks, NPCs, a flagpole).
 label: Pixel art
-about: Chunky pixel type, stepped borders and 8-bit buttons.
+about: The site is a side-scrolling game. A title screen says PRESS START; each scroll notch walks a sprite through the level in whole pixels, features pop out of ? blocks as ITEM GET! cards, the testimonial is an NPC whose dialog advances a notch at a time, stats are an RPG status sheet and the call to action is COURSE CLEAR and a CONTINUE? menu. A READ AS PAGE switch shows it as a plain manual.
 mode: dark
 colors:
-  bg: '#1b1035'
-  bg2: '#241548'
-  ink: '#fff8e7'
-  accent: '#ffd23f'
-  accent2: '#3ee089'
-  accent_ink: '#1b1035'
+  bg: '#1d2b53'
+  bg2: '#111a36'
+  ink: '#fff1e8'
+  accent: '#ffec27'
+  accent2: '#00e436'
+  accent_ink: '#1d2b53'
 fonts:
   display: Press Start 2P
   body: Pixelify Sans
-  mono: Pixelify Sans
+  mono: Silkscreen
+font_axes:
+  Press Start 2P: ""
+  Pixelify Sans: "wght@400..700"
+  Silkscreen: "wght@400;700"
 display_weight: 400
 radius: 0px

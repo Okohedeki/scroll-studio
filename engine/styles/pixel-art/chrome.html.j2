@@ -1,0 +1,34 @@
+{# Pixel art chrome: the game HUD (world, items, score, timer, level links, READ AS PAGE, the call to action as a coin
+   key), the level canvas and the START menu for small screens. The runtime (runtime/src/styles/pixel-art.ts) runs
+   the game; without it the sections read as a game manual. #}
+{% macro top(site, sections, nav_links) %}
+<header class="px-hud" id="px-hud">
+  <a class="px-hud__name" href="#">{{ site.name }}</a>
+  <span class="px-hud__stat px-hud__world" aria-hidden="true"><small>World</small><b>1-0</b></span>
+  <span class="px-hud__stat px-hud__items" aria-hidden="true"><small>Items</small><b><i class="px-star"></i>×0</b></span>
+  <span class="px-hud__stat px-hud__score" aria-hidden="true"><small>Score</small><b>000000</b></span>
+  <span class="px-hud__stat px-hud__time" aria-hidden="true"><small>Time</small><b>400</b></span>
+  {% if nav_links %}<nav class="px-hud__levels" aria-label="Levels">{% for l in nav_links %}<a href="{{ l.href }}"><b>1-{{ loop.index }}</b> {{ l.label }}</a>{% endfor %}</nav>{% endif %}
+  <span class="px-hud__sp"></span>
+  <button type="button" class="px-mode" aria-pressed="false" hidden>Read as page</button>
+  <button type="button" class="px-startbtn" aria-expanded="false" aria-controls="px-pause" hidden>Start</button>
+  {% if site.nav.cta %}<a class="px-coin" href="{{ site.nav.cta.href }}"><i aria-hidden="true"></i>{{ site.nav.cta.label }}</a>{% endif %}
+</header>
+<div class="px-pause" id="px-pause" role="dialog" aria-label="Pause menu" hidden>
+  <p class="px-pause__h">Pause</p>
+  <nav class="px-pause__list">
+    <a href="#" data-go="0">▶ Title screen</a>
+    {% for l in nav_links %}<a href="{{ l.href }}">▶ 1-{{ loop.index }} {{ l.label }}</a>{% endfor %}
+    <button type="button" class="px-pause__page">▶ Read as page</button>
+  </nav>
+</div>
+<canvas class="px-canvas" aria-hidden="true"></canvas>
+<div class="px-banner" aria-hidden="true"></div>
+{% endmacro %}
+
+{% macro bottom(site, sections) -%}
+<div class="px-credits" aria-hidden="true">
+  <p class="px-credits__k">Thank you for playing</p>
+  <p class="px-credits__n">{{ site.name }}</p>
+</div>
+{%- endmacro %}

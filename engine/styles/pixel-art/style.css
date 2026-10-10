@@ -1,35 +1,291 @@
-/* pixel art: chunky pixel type, stepped (notched) borders, 8-bit buttons and a twinkling pixel sky */
-@keyframes ss-twinkle { 50% { opacity: .35; } }
-html.style-pixel-art { --px: 4px; image-rendering: pixelated; }
-html.style-pixel-art body { background-color: var(--bg);
-  background-image: linear-gradient(#fff 0 0), linear-gradient(#fff 0 0), linear-gradient(var(--accent) 0 0), linear-gradient(#fff 0 0), linear-gradient(var(--accent-2) 0 0);
-  background-size: 4px 4px; background-repeat: no-repeat; background-position: 12% 18%, 78% 9%, 40% 70%, 88% 56%, 22% 92%; background-attachment: fixed; }
-html.style-pixel-art .ss-block, html.style-pixel-art .ss-hero:not(.ss-hero--media), html.style-pixel-art .ss-panel, html.style-pixel-art .ss-panel > section { background: transparent; }
-html.style-pixel-art .ss-band { background: var(--bg-2); border: 0; box-shadow: 0 -4px 0 #000, 0 4px 0 #000; }
-html.style-pixel-art .ss-h1, html.style-pixel-art .ss-h2, html.style-pixel-art .ss-display { letter-spacing: 0; line-height: 1.25; text-shadow: 4px 4px 0 #000; }
-html.style-pixel-art .ss-h1 { font-size: clamp(30px, 4.6vw, 72px); }
-html.style-pixel-art .ss-h2, html.style-pixel-art .ss-display { font-size: clamp(24px, 3.2vw, 52px); }
-html.style-pixel-art .ss-cta .ss-display { font-size: clamp(30px, 4.8vw, 78px); }
-html.style-pixel-art .ss-v { font-size: clamp(30px, 4vw, 64px); letter-spacing: 0; color: var(--accent); text-shadow: 4px 4px 0 #000; }
-html.style-pixel-art em { font-style: normal; color: var(--accent); }
-html.style-pixel-art .ss-lede, html.style-pixel-art .ss-body { font-size: 20px; }
-html.style-pixel-art .ss-kicker { font-family: var(--font-display); font-size: 11px; letter-spacing: .05em; color: var(--accent-2); }
-/* notched pixel frame: a box-shadow ring with the corners left out */
-html.style-pixel-art .ss-feature, html.style-pixel-art .ss-tile, html.style-pixel-art .ss-stats > div, html.style-pixel-art .ss-quote, html.style-pixel-art .ss-faq__list details {
-  border: 0; border-radius: 0; background: #2d1d5c; box-shadow: 0 -4px 0 #fff8e7, 0 4px 0 #fff8e7, -4px 0 0 #fff8e7, 4px 0 0 #fff8e7, 8px 8px 0 #000; margin: 4px; }
-html.style-pixel-art .ss-features { gap: 22px; background: none; border: 0; }
-html.style-pixel-art .ss-feature h3 { font-family: var(--font-display); font-size: 15px; line-height: 1.5; letter-spacing: 0; }
-html.style-pixel-art .ss-feature p { font-size: 18px; }
-html.style-pixel-art .ss-stats > div { padding: 22px; }
-html.style-pixel-art .ss-quote { padding: 32px; }
-html.style-pixel-art .ss-faq__list details { padding: 16px 20px; margin-bottom: 18px; }
-html.style-pixel-art .ss-btn { border: 0; border-radius: 0; background: #fff8e7; color: #1b1035; font-family: var(--font-display); font-size: 12px; padding: 14px 20px;
-  box-shadow: 0 -4px 0 #000, 0 4px 0 #000, -4px 0 0 #000, 4px 0 0 #000, inset -4px -4px 0 rgba(0, 0, 0, .25); }
-html.style-pixel-art .ss-btn--hot { background: var(--accent); color: #1b1035; }
-html.style-pixel-art .ss-btn:hover { background: var(--accent-2); color: #1b1035; transform: translateY(2px); box-shadow: 0 -4px 0 #000, 0 4px 0 #000, -4px 0 0 #000, 4px 0 0 #000, inset 4px 4px 0 rgba(0, 0, 0, .25); }
-html.style-pixel-art .ss-tl::before { border-radius: 0; width: 12px; height: 12px; top: -6px; background: var(--accent); box-shadow: 4px 4px 0 #000; }
-html.style-pixel-art .ss-pills li, html.style-pixel-art .ss-badge { border-radius: 0; border: 0; background: #2d1d5c; box-shadow: 0 -2px 0 #fff8e7, 0 2px 0 #fff8e7, -2px 0 0 #fff8e7, 2px 0 0 #fff8e7; }
-html.style-pixel-art .ss-phone { border-radius: 0; box-shadow: 0 -8px 0 #000, 0 8px 0 #000, -8px 0 0 #000, 8px 0 0 #000, 16px 16px 0 rgba(0, 0, 0, .4); }
-html.style-pixel-art .ss-phone__screen { border-radius: 0; }
-html.style-pixel-art .ss-nav.ss-solid { background: var(--bg); box-shadow: 0 4px 0 #000; backdrop-filter: none; }
-@media (max-width: 900px) { html.style-pixel-art .ss-h1 { font-size: clamp(22px, 7vw, 36px); } html.style-pixel-art .ss-h2 { font-size: clamp(20px, 6vw, 30px); } }
+/* Pixel art: two readings of the same sections. In the game (html.px-game, set by the runtime) a fixed canvas draws
+   the level and each section is a window that opens when the player reaches it. Without JavaScript, or with
+   READ AS PAGE, the sections are the pages of a game manual. One art pixel = 4 CSS px (3 on phones); borders are
+   stepped, shadows are stepped, nothing eases. */
+
+html.style-pixel-art {
+  --px: 4px; --K: #000; --W: #fff1e8; --Y: #ffec27; --G: #00e436; --R: #ff004d; --B: #29adff; --N: #1d2b53; --O: #ffa300; --L: #c2c3c7;
+  --hud-h: 56px; --px-ground: 136px;
+  --frame: -4px 0 0 0 var(--W), 4px 0 0 0 var(--W), 0 -4px 0 0 var(--W), 0 4px 0 0 var(--W),
+           -8px 0 0 0 var(--K), 8px 0 0 0 var(--K), 0 -8px 0 0 var(--K), 0 8px 0 0 var(--K),
+           -4px -4px 0 0 var(--K), 4px -4px 0 0 var(--K), -4px 4px 0 0 var(--K), 4px 4px 0 0 var(--K);
+  background: var(--N); image-rendering: pixelated;
+}
+html.style-pixel-art body { background: var(--N); color: var(--W); font: 400 20px/1.5 "Pixelify Sans", var(--font-body); -webkit-font-smoothing: none; }
+html.style-pixel-art .ss-nav { display: none; }
+html.style-pixel-art em { font-style: normal; color: var(--Y); }
+html.style-pixel-art :focus-visible { outline: 4px solid var(--Y); outline-offset: 4px; }
+html.style-pixel-art ::selection { background: var(--Y); color: var(--N); }
+html.px-game .px-sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.px-typed { display: none; }
+html.px-game .px-typed { display: block; min-height: 3em; }
+
+/* ---------------------------------------------------------------- the HUD */
+.px-hud { position: sticky; top: 0; z-index: 60; display: flex; align-items: center; gap: 22px; height: var(--hud-h); padding: 0 20px; background: var(--K); color: var(--W);
+  box-shadow: 0 4px 0 0 var(--W), 0 8px 0 0 var(--K); font: 400 14px/1 "Silkscreen", monospace; }
+html.px-game .px-hud { position: fixed; left: 0; right: 0; }
+.px-hud__name { font: 400 16px/1 "Press Start 2P", monospace; color: var(--Y); text-transform: uppercase; white-space: nowrap; }
+.px-hud__stat { display: flex; flex-direction: column; gap: 4px; text-transform: uppercase; }
+.px-hud__stat small { font: 700 12px/1 "Silkscreen", monospace; color: var(--L); }
+.px-hud__stat b { font: 400 16px/1 "Press Start 2P", monospace; font-variant-numeric: tabular-nums; display: flex; align-items: center; gap: 4px; }
+.px-star { display: inline-block; width: 12px; height: 12px; background: var(--Y); clip-path: polygon(50% 0, 62% 36%, 100% 38%, 70% 60%, 80% 100%, 50% 76%, 20% 100%, 30% 60%, 0 38%, 38% 36%); }
+.px-hud__levels { display: flex; gap: 6px; margin-left: 8px; }
+.px-hud__levels a { padding: 6px 8px 5px; font: 700 13px/1 "Silkscreen", monospace; text-transform: uppercase; color: var(--W); }
+.px-hud__levels a b { color: var(--Y); }
+.px-hud__levels a:hover, .px-hud__levels a:focus-visible { background: var(--W); color: var(--K); outline: none; }
+.px-hud__levels a:hover b { color: var(--R); }
+.px-hud__sp { flex: 1; }
+.px-mode, .px-startbtn { font: 700 13px/1 "Silkscreen", monospace; text-transform: uppercase; color: var(--W); background: var(--K); border: 0; padding: 9px 10px 8px; cursor: pointer; box-shadow: inset 0 0 0 2px var(--W); }
+.px-mode:hover, .px-startbtn:hover { background: var(--W); color: var(--K); }
+.px-mode[hidden], .px-startbtn[hidden] { display: none; }
+.px-startbtn { display: none; }
+.px-coin { display: inline-flex; align-items: center; gap: 10px; padding: 10px 12px 9px; background: var(--Y); color: var(--K); font: 400 12px/1 "Press Start 2P", monospace; text-transform: uppercase; white-space: nowrap;
+  box-shadow: 0 4px 0 0 #ab5236; }
+.px-coin i { width: 12px; height: 16px; background: var(--O); box-shadow: inset 4px 0 0 0 var(--Y), inset -2px 0 0 0 #ab5236; }
+.px-coin:hover { background: var(--W); }
+.px-coin:active { transform: translate(var(--px), var(--px)); box-shadow: none; }
+@media (max-width: 1100px) { .px-hud__levels, .px-hud__time { display: none; } .px-startbtn:not([hidden]) { display: inline-block; } }
+@media (max-width: 700px) {
+  html.style-pixel-art { --hud-h: 50px; }
+  .px-hud { gap: 12px; padding: 0 10px; }
+  .px-hud__name, .px-hud__score, .px-mode { display: none !important; }
+  .px-hud__stat b { font-size: 12px; }
+  .px-coin { font-size: 10px; padding: 9px 8px 8px; gap: 6px; }
+}
+.px-pause { position: fixed; z-index: 70; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(420px, calc(100vw - 48px)); padding: 24px 26px; background: var(--K); box-shadow: var(--frame), 0 0 0 100vmax rgba(0, 0, 0, .6); }
+.px-pause[hidden] { display: none; }
+.px-pause__h { font: 400 20px/1 "Press Start 2P", monospace; text-transform: uppercase; color: var(--Y); margin-bottom: 18px; text-align: center; }
+.px-pause__list { display: grid; gap: 4px; }
+.px-pause__list a, .px-pause__list button { text-align: left; padding: 8px 10px; font: 400 20px/1.2 "Pixelify Sans", sans-serif; color: var(--W); background: none; border: 0; cursor: pointer; }
+.px-pause__list .is-sel, .px-pause__list a:hover, .px-pause__list button:hover { background: var(--W); color: var(--K); }
+
+/* ---------------------------------------------------------------- shared window and type */
+.px-win { position: relative; background: var(--K); color: var(--W); padding: 26px 30px 28px; box-shadow: var(--frame); }
+.px-h { font: 400 clamp(16px, 2vw, 22px)/1.5 "Press Start 2P", monospace; text-transform: uppercase; color: var(--W); margin-bottom: 14px; }
+.px-h em { color: var(--Y); }
+.px-body { font: 400 clamp(19px, 1.6vw, 22px)/1.5 "Pixelify Sans", sans-serif; color: var(--W); max-width: 46ch; }
+.px-name { display: inline-block; margin-bottom: 12px; padding: 6px 10px 5px; background: var(--W); color: var(--K); font: 700 14px/1 "Silkscreen", monospace; text-transform: uppercase; }
+.px-world { display: flex; gap: 14px; margin-bottom: 14px; font: 700 14px/1 "Silkscreen", monospace; text-transform: uppercase; color: var(--Y); }
+.px-world span + span { color: var(--L); }
+.px-badge { display: inline-block; font: 700 14px/1 "Silkscreen", monospace; text-transform: uppercase; color: var(--G); margin-bottom: 14px; }
+.px-note { margin-top: 12px; font: 400 16px/1.4 "Pixelify Sans", sans-serif; color: var(--L); }
+.px-next { position: absolute; right: 22px; bottom: 14px; color: var(--Y); font: 400 14px/1 "Press Start 2P", monospace; animation: px-bob .5s steps(1) infinite; }
+@keyframes px-bob { 50% { transform: translateY(4px); } }
+
+/* menus: a ▶ cursor on the selected item */
+.px-menu, .px-askmenu { display: grid; gap: 6px; margin-top: 18px; justify-items: start; }
+.px-menu__i { position: relative; display: inline-block; padding: 6px 10px 6px 34px; font: 400 14px/1.4 "Press Start 2P", monospace; text-transform: uppercase; color: var(--W); background: none; border: 0; text-align: left; cursor: pointer; }
+.px-menu__i::before { content: "▶"; position: absolute; left: 8px; top: 6px; visibility: hidden; color: var(--Y); }
+.px-menu__i.is-sel::before, .px-menu__i:hover::before, .px-menu__i:focus-visible::before { visibility: visible; animation: px-blink 1s steps(1) infinite; }
+.px-menu__i:hover, .px-menu__i:focus-visible, .px-menu__i.is-sel { color: var(--Y); outline: none; }
+.px-menu__i:active { transform: translate(var(--px), var(--px)); }
+@keyframes px-blink { 50% { visibility: hidden; } }
+
+/* item icons, bars */
+.px-icon { flex: none; width: 48px; height: 48px; background-size: 100% 100%; image-rendering: pixelated; }
+.px-bar, .px-seg { position: relative; display: block; height: 16px; width: 100%; max-width: 288px;
+  background: repeating-linear-gradient(90deg, #3a3550 0 14px, transparent 14px 18px); }
+.px-bar::after, .px-seg::after { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: calc(var(--fill, 1) * 100%);
+  background: repeating-linear-gradient(90deg, var(--G) 0 14px, transparent 14px 18px); background-size: 288px 100%; }
+@supports (width: calc(round(down, 1.5, 1) * 1%)) { .px-seg::after, .px-bar::after { width: calc(round(down, var(--fill, 1) * 16, 1) / 16 * 100%); } }
+
+/* the phone on a TV stand */
+.px-tv { position: relative; display: grid; place-items: center; padding: 24px; background: #5f574f; box-shadow: var(--frame); }
+.px-tv::after { content: ""; position: absolute; left: 30%; right: 30%; bottom: -24px; height: 12px; background: #5f574f; box-shadow: 0 4px 0 0 var(--K); }
+.px-tv .ss-phone { width: 210px; border-radius: 0; box-shadow: 0 0 0 4px var(--K), 8px 8px 0 0 rgba(0, 0, 0, .35); image-rendering: pixelated; font-family: "Pixelify Sans", sans-serif; }
+.px-tv .ss-phone__screen { border-radius: 0; }
+.px-tv .ss-app__opt, .px-tv .ss-app__btn { border-radius: 0; }
+.px-shot { max-height: 50vh; width: auto; image-rendering: pixelated; }
+
+/* ---------------------------------------------------------------- the manual (no JavaScript, or READ AS PAGE) */
+html:not(.px-game) .px-canvas, html:not(.px-game) .px-banner { display: none; }
+html:not(.px-game) main { max-width: 1000px; margin: 0 auto; padding: 72px 24px 40px; }
+html:not(.px-game) .px-sec { margin: 0 0 64px; }
+html:not(.px-game) .px-title { text-align: center; padding: 56px 30px 48px; background: var(--N); box-shadow: none; }
+html:not(.px-game) .px-title .px-menu { justify-items: center; }
+html:not(.px-game) .px-item { display: flex; gap: 20px; align-items: flex-start; padding: 16px 0; border-top: 4px dotted #3a3550; }
+html:not(.px-game) .px-item:first-child { border-top: 0; }
+html:not(.px-game) .px-askmenu, html:not(.px-game) .px-answer { display: none; }
+html:not(.px-game) .px-next, html:not(.px-game) .px-start, html:not(.px-game) .px-clear__big, html:not(.px-game) .px-continue, html:not(.px-game) .px-lvup { display: none; }
+html:not(.px-game) .px-portrait { float: left; margin: 0 20px 10px 0; }
+html:not(.px-game) .px-map__nodes { display: grid; gap: 16px; }
+html:not(.px-game) .px-credits { display: none; }
+.px-items__list, .px-map__nodes { list-style: none; }
+
+/* title */
+.px-logo { font: 400 clamp(28px, 5.4vw, 64px)/1.25 "Press Start 2P", monospace; text-transform: uppercase; color: var(--W); text-shadow: 4px 4px 0 var(--K), 8px 8px 0 #ab5236; max-width: 14em; margin: 0 auto 26px; }
+.px-logo em { color: var(--Y); }
+.px-start { font: 400 18px/1 "Press Start 2P", monospace; text-transform: uppercase; color: var(--Y); text-shadow: 4px 4px 0 var(--K); margin-bottom: 28px; animation: px-blink 1s steps(1) infinite; cursor: pointer; }
+.px-title__body { margin: 0 auto; }
+
+/* gear */
+.px-gear { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 40px; align-items: center; }
+.px-side--left.px-gear .px-tv { order: -1; }
+.px-tags { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.px-tags li { padding: 6px 10px 5px; font: 700 14px/1 "Silkscreen", monospace; text-transform: uppercase; color: var(--K); background: var(--B); box-shadow: 0 4px 0 0 var(--N); }
+.px-kv { display: grid; gap: 6px; margin-top: 16px; }
+.px-kv div { display: flex; justify-content: space-between; gap: 16px; max-width: 360px; }
+.px-kv dd { color: var(--Y); }
+
+/* status sheet */
+.px-status__who { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; font: 400 16px/1 "Press Start 2P", monospace; text-transform: uppercase; }
+.px-status__who b { color: var(--Y); font-weight: 400; margin-left: auto; }
+.px-status__face { width: 40px; height: 40px; background: var(--B) center / 100% 100% no-repeat; image-rendering: pixelated; box-shadow: 0 0 0 4px var(--W); }
+.px-status__list { display: grid; gap: 14px; }
+.px-stat dt { font: 700 14px/1.3 "Silkscreen", monospace; text-transform: uppercase; color: var(--L); margin-bottom: 6px; }
+.px-stat dd { display: flex; align-items: center; gap: 16px; }
+.px-stat__v { flex: none; font: 400 16px/1 "Press Start 2P", monospace; color: var(--W); min-width: 5ch; }
+.px-stat__v small { font-size: 12px; margin-left: 4px; color: var(--Y); }
+.px-lvup { position: absolute; right: 24px; top: -14px; padding: 6px 8px; background: var(--Y); color: var(--K); font: 400 12px/1 "Press Start 2P", monospace; }
+
+/* overworld map */
+.px-node { position: relative; padding-left: 40px; }
+.px-node__dot { position: absolute; left: 0; top: 4px; width: 20px; height: 20px; background: var(--R); box-shadow: 0 0 0 4px var(--W); }
+.px-node.is-done .px-node__dot, html:not(.px-game) .px-node__dot { background: var(--G); }
+.px-node__when { font: 700 14px/1 "Silkscreen", monospace; text-transform: uppercase; color: var(--Y); }
+.px-node__t { font: 400 15px/1.5 "Press Start 2P", monospace; text-transform: uppercase; margin: 6px 0; }
+
+/* NPC dialog */
+.px-portrait { display: block; flex: none; width: 80px; height: 56px; background: var(--N) center / 100% 100% no-repeat; image-rendering: pixelated; box-shadow: 0 0 0 4px var(--W); }
+.px-say { quotes: none; }
+
+/* ask about */
+.px-qa { display: grid; gap: 18px; }
+.px-qa dt { font: 400 14px/1.6 "Press Start 2P", monospace; text-transform: uppercase; color: var(--Y); margin-bottom: 6px; }
+.px-answer { position: relative; margin-top: 18px; padding: 18px 22px; background: var(--N); box-shadow: inset 0 0 0 4px var(--W); }
+
+/* course clear */
+.px-clear { text-align: center; }
+.px-clear__big { font: 400 clamp(22px, 4vw, 44px)/1.2 "Press Start 2P", monospace; text-transform: uppercase; color: var(--Y); text-shadow: 4px 4px 0 #ab5236; margin-bottom: 20px; }
+.px-clear__h { margin: 0 auto 18px; max-width: 26em; }
+.px-tally { display: grid; gap: 8px; max-width: 420px; margin: 0 auto 22px; font: 400 14px/1 "Press Start 2P", monospace; text-transform: uppercase; }
+.px-tally div { display: flex; justify-content: space-between; }
+.px-tally dd { color: var(--Y); }
+.px-continue { font: 400 18px/1 "Press Start 2P", monospace; text-transform: uppercase; color: var(--W); margin-bottom: 4px; }
+.px-menu--continue { justify-items: center; }
+
+/* credits, footer */
+.px-credits { text-align: center; padding: 80px 20px 40px; background: var(--K); }
+.px-credits__k { font: 400 16px/1.6 "Press Start 2P", monospace; text-transform: uppercase; color: var(--Y); }
+.px-credits__n { font: 400 28px/1.4 "Press Start 2P", monospace; text-transform: uppercase; margin-top: 16px; }
+html.style-pixel-art .ss-footer { background: var(--K); border-top: 0; position: relative; z-index: 6; }
+html.style-pixel-art .ss-footer__in { justify-content: center; text-align: center; font: 700 13px/1.6 "Silkscreen", monospace; text-transform: uppercase; color: var(--L); }
+
+/* ---------------------------------------------------------------- the game */
+html.px-game .px-canvas { position: fixed; left: 0; top: 0; z-index: 1; image-rendering: pixelated; image-rendering: crisp-edges; }
+html.px-game main { position: relative; z-index: 2; }
+html.px-game .px-sec { position: fixed; left: 0; right: 0; top: calc(var(--hud-h) + 26px); bottom: calc(var(--px-ground) + var(--px-s, 4) * 30px); z-index: 5; display: none;
+  padding: 0 24px; pointer-events: none; }
+html.px-game .px-sec.is-on { display: flex; }
+html.px-game .px-win { pointer-events: auto; max-height: 100%; overflow: auto; scrollbar-width: none; animation: px-open .2s steps(3) both; transform-origin: 50% 100%; }
+@keyframes px-open { from { transform: scaleY(.2); } }
+html.px-game .px-world { display: none; }
+html.px-mosaic .px-sec { visibility: hidden; }
+
+/* title screen: over the level, no box */
+html.px-game .px-sec--hero { align-items: center; justify-content: center; text-align: center; }
+html.px-game .px-title { background: none; box-shadow: none; padding: 0; max-width: 1000px; overflow: visible; animation: none; }
+html.px-game .px-logo { animation: px-drop .7s steps(7) both; }
+@keyframes px-drop { 0% { transform: translateY(-60vh); } 45% { transform: translateY(0); } 60% { transform: translateY(-28px); } 75% { transform: translateY(0); } 87% { transform: translateY(-8px); } 100% { transform: translateY(0); } }
+html.px-game .px-title .px-badge { padding: 6px 10px; background: var(--K); }
+html.px-game .px-title__body { display: inline-block; padding: 14px 18px; background: rgba(0, 0, 0, .78); box-shadow: var(--frame); max-width: 40ch; }
+html.px-game .px-title .px-menu { justify-items: center; margin-top: 22px; }
+html.px-game .px-title .px-menu__i { background: var(--K); }
+html.px-game .px-tv--hero { display: none; }
+
+/* signs and NPCs: a dialog just above the player */
+html.px-game .px-sec--intro, html.px-game .px-sec--quote, html.px-game .px-sec--other { align-items: flex-end; justify-content: center; }
+html.px-game .px-dialog { width: min(820px, 100%); min-height: 210px; }
+html.px-game .px-dialog--npc { display: flex; gap: 22px; align-items: flex-start; }
+html.px-game .px-dialog--npc .px-npc { flex: 1; }
+html.px-game .is-last .px-next { content: ""; }
+html.px-game .px-sec--quote.is-last .px-next { display: none; }
+
+/* items: one ITEM GET! card at a time */
+html.px-game .px-sec--features { align-items: flex-start; justify-content: center; }
+html.px-game .px-items { width: min(720px, 100%); }
+html.px-game .px-items .px-h { font-size: 14px; color: var(--L); margin-bottom: 12px; }
+html.px-game .px-item { display: none; gap: 22px; align-items: flex-start; }
+html.px-game .px-item.is-on { display: flex; animation: px-open .2s steps(3) both; }
+html.px-game .px-item__get { font: 400 18px/1 "Press Start 2P", monospace; text-transform: uppercase; color: var(--Y); margin-bottom: 12px; }
+html.px-game .px-item__get span { color: var(--L); font-size: 12px; }
+html.px-game .px-icon { width: 64px; height: 64px; animation: px-bob .5s steps(1) infinite; }
+.px-item__get { font: 700 14px/1 "Silkscreen", monospace; text-transform: uppercase; color: var(--Y); margin-bottom: 8px; }
+.px-item__name { font: 400 16px/1.5 "Press Start 2P", monospace; text-transform: uppercase; margin-bottom: 8px; }
+
+/* gear, status, map, ask, clear */
+html.px-game .px-sec--product { align-items: flex-start; justify-content: flex-end; }
+html.px-game .px-sec--product:has(.px-side--left) { justify-content: flex-start; }
+html.px-game .px-gear { width: min(940px, 100%); }
+html.px-game .px-gear .ss-phone { width: 170px; }
+html.px-game .px-sec--stats { align-items: flex-start; justify-content: center; }
+html.px-game .px-status { width: min(620px, 100%); }
+html.px-game .px-lvup { display: none; }
+html.px-game .is-fill .px-seg::after { animation: px-fill .9s steps(16) both; }
+html.px-game .is-fill .px-lvup { display: block; animation: px-lv 1.4s steps(1) both; }
+@keyframes px-fill { from { width: 0; } }
+@keyframes px-lv { 0%, 60% { visibility: hidden; } 61%, 100% { visibility: visible; } }
+html.px-game .px-sec--timeline { align-items: flex-start; justify-content: center; }
+html.px-game .px-map { width: min(900px, 100%); }
+html.px-game .px-map__nodes { display: flex; justify-content: space-between; position: relative; padding: 12px 0 0; margin-bottom: 4px; }
+html.px-game .px-map__nodes::before { content: ""; position: absolute; left: 10px; right: 10px; top: 22px; border-top: 4px dashed var(--L); }
+html.px-game .px-node { padding: 38px 0 0; flex: 1; min-width: 0; }
+html.px-game .px-node__dot { top: 0; left: 0; }
+html.px-game .px-node .px-node__when { display: block; }
+html.px-game .px-node .px-node__t, html.px-game .px-node .px-body { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+html.px-game .px-node.is-on .px-node__dot { background: var(--Y); animation: px-blink 1s steps(1) infinite; }
+html.px-game .px-node.is-on .px-node__when { color: var(--W); }
+.px-map__detail { display: none; }
+html.px-game .px-map__detail { display: block; margin-top: 18px; padding: 16px 18px; background: var(--N); box-shadow: inset 0 0 0 4px var(--W); min-height: 110px; }
+html.px-game .px-map__detail .px-node__t { margin: 0 0 6px; }
+html.px-game .px-sec--faq { align-items: flex-end; justify-content: center; }
+html.px-game .px-ask { width: min(940px, 100%); display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 0 24px; align-items: start; }
+html.px-game .px-ask .px-ask__h, html.px-game .px-ask .px-name { grid-column: 1 / -1; }
+html.px-game .px-ask .px-askmenu { margin-top: 0; }
+html.px-game .px-askmenu .px-menu__i { font-size: 12px; line-height: 1.6; }
+html.px-game .px-answer { margin-top: 0; min-height: 150px; }
+html.px-game .px-sec--cta { align-items: center; justify-content: center; }
+html.px-game .px-clear { width: min(680px, 100%); }
+html.px-game .px-clear .px-continue, html.px-game .px-clear .px-menu--continue { visibility: hidden; }
+html.px-game .px-sec--cta.is-menu .px-continue, html.px-game .px-sec--cta.is-menu .px-menu--continue { visibility: visible; }
+html.px-game .px-clear__big { animation: px-blink .5s steps(1) 4; }
+
+/* the banner that names each world as you enter it */
+.px-banner { position: fixed; z-index: 7; left: 50%; top: calc(var(--hud-h) + 26px); transform: translateX(-50%); font: 400 18px/1 "Press Start 2P", monospace; text-transform: uppercase; color: var(--W);
+  text-shadow: 4px 4px 0 var(--K); visibility: hidden; pointer-events: none; white-space: nowrap; }
+.px-banner.is-on { animation: px-ban 1.4s steps(1) both; }
+@keyframes px-ban { 0% { visibility: visible; } 100% { visibility: hidden; } }
+html.px-game .px-sec.is-on ~ .px-banner { display: none; }
+html.px-game .px-credits { position: relative; z-index: 6; }
+
+/* sections without their own markup (and scenes, which switch the page to the manual) */
+html.style-pixel-art main > .ss-block { background: var(--K); box-shadow: var(--frame); margin: 0 8px 64px; }
+html.style-pixel-art .ss-display, html.style-pixel-art .ss-h2 { font-family: "Press Start 2P", monospace; text-transform: uppercase; font-size: clamp(18px, 2.4vw, 28px); line-height: 1.5; letter-spacing: 0; }
+html.style-pixel-art .ss-btn { border-radius: 0; font-family: "Press Start 2P", monospace; font-size: 12px; text-transform: uppercase; box-shadow: 0 4px 0 0 var(--K); }
+
+/* phones */
+@media (max-width: 700px) {
+  html.style-pixel-art body { font-size: 19px; }
+  .px-win { padding: 20px 18px 22px; }
+  html.px-game .px-sec { padding: 0 14px; top: calc(var(--hud-h) + 22px); }
+  html.px-game .px-dialog { min-height: 0; }
+  html.px-game .px-dialog--npc { flex-direction: column; gap: 12px; }
+  html.px-game .px-portrait { width: 60px; height: 42px; }
+  .px-gear, html.px-game .px-ask { grid-template-columns: minmax(0, 1fr); }
+  html.px-game .px-gear .px-tv { display: none; }
+  html.px-game .px-ask .px-askmenu { margin-bottom: 14px; }
+  html.px-game .px-icon { width: 48px; height: 48px; }
+  html.px-game .px-item__get { font-size: 14px; }
+  .px-logo { text-shadow: 3px 3px 0 var(--K), 6px 6px 0 #ab5236; }
+  .px-start { font-size: 14px; }
+  .px-h { font-size: 15px; }
+  .px-menu__i { font-size: 12px; }
+  html.px-game .px-map__nodes .px-node__when { font-size: 11px; }
+}
+
+/* reduced motion: no blinking, bobbing, dropping or stepped openings; text appears at once (runtime) */
+@media (prefers-reduced-motion: reduce) {
+  .px-start, .px-next, .px-menu__i::before, html.px-game .px-icon, html.px-game .px-logo, html.px-game .px-win, html.px-game .px-item.is-on,
+  html.px-game .px-clear__big, html.px-game .px-node.is-on .px-node__dot { animation: none !important; }
+}
+html:not(.px-game) .px-sec { scroll-margin-top: calc(var(--hud-h) + 24px); }

@@ -1,0 +1,136 @@
+{# Pixel art blocks: every section is a stop in the level. Read without the game (no JavaScript, or READ AS PAGE)
+   they are pages of a game manual; in the game the runtime shows each one as a window when the player reaches it:
+   the title screen, a sign, ITEM GET! cards from ? blocks, a gear window, a status sheet, an overworld map, an NPC
+   dialog, an ASK ABOUT menu and COURSE CLEAR with a CONTINUE? menu. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+{% set ICONS = ["star", "heart", "gem", "key", "potion", "shield", "clock", "coin"] %}
+
+{% macro menu(list, cls="") %}{% if list %}<nav class="px-menu{{ cls }}">{% for l in list %}<a class="px-menu__i{% if loop.first %} is-sel{% endif %}" href="{{ l.href }}">{{ l.label }}</a>{% endfor %}</nav>{% endif %}{% endmacro %}
+{% macro world(n, label) %}<p class="px-world" aria-hidden="true"><span>World 1-{{ n }}</span>{% if label %}<span>{{ label }}</span>{% endif %}</p>{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set h = "h1" if e.first else "h2" %}
+{% set n = loop.index0 %}
+<section class="px-sec px-sec--{{ b.type }}" data-zone="{{ b.type }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+
+{% if b.type == "hero" %}
+  <div class="px-win px-title">
+    {% if b.badge %}<p class="px-badge">{{ b.badge }}</p>{% endif %}
+    <{{ h }} class="px-logo">{{ b.title | rich }}</{{ h }}>
+    <p class="px-start" aria-hidden="true">Press start</p>
+    {% if b.body %}<p class="px-body px-title__body">{{ b.body | rich }}</p>{% endif %}
+    {{ menu(b.buttons, " px-menu--title") }}
+    {% if b.device %}<div class="px-tv px-tv--hero">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+  </div>
+
+{% elif b.type == "intro" %}
+  <div class="px-win px-dialog px-dialog--sign">
+    {{ world(n, b.kicker) }}
+    <p class="px-name" aria-hidden="true">Sign</p>
+    <{{ h }} class="px-h">{{ b.title | rich }}</{{ h }}>
+    {% if b.body %}<p class="px-body px-type">{{ b.body | rich }}</p>{% endif %}
+    {% if b.button %}{{ menu([b.button]) }}{% endif %}
+    <span class="px-next" aria-hidden="true">▼</span>
+  </div>
+
+{% elif b.type == "features" %}
+  <div class="px-win px-items">
+    {{ world(n, b.kicker) }}
+    {% if b.title %}<{{ h }} class="px-h">{{ b.title | rich }}</{{ h }}>{% endif %}
+    <ul class="px-items__list">
+      {% for f in b.items %}
+      <li class="px-item" data-icon="{{ ICONS[loop.index0 % 8] }}">
+        <span class="px-icon px-icon--{{ ICONS[loop.index0 % 8] }}" aria-hidden="true"></span>
+        <div class="px-item__txt">
+          <p class="px-item__get" aria-hidden="true">Item get!{% if f.tag %} <span>No.{{ f.tag }}</span>{% endif %}</p>
+          <h3 class="px-item__name">{{ f.title | rich }}</h3>
+          {% if f.body %}<p class="px-body">{{ f.body | rich }}</p>{% endif %}
+          {% if f.meter is not none %}<span class="px-bar" style="--fill: {{ f.meter }}" aria-label="{{ (f.meter * 100) | round | int }}%"><i></i></span>{% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+{% elif b.type == "product" %}
+  <div class="px-win px-gear px-side--{{ b.side }}">
+    <div class="px-gear__copy">
+      {{ world(n, b.kicker) }}
+      <p class="px-name" aria-hidden="true">New gear</p>
+      <{{ h }} class="px-h">{{ b.title | rich }}</{{ h }}>
+      {% if b.body %}<p class="px-body">{{ b.body | rich }}</p>{% endif %}
+      {% if b.stats %}<dl class="px-kv">{% for st in b.stats %}<div><dt>{{ st.label }}</dt><dd>{{ st.value }}{% if st.unit %} {{ st.unit }}{% endif %}</dd></div>{% endfor %}</dl>
+      {% elif b.tags %}<ul class="px-tags">{% for t in b.tags %}<li>{{ t }}</li>{% endfor %}</ul>{% endif %}
+      {{ menu(b.buttons) }}
+      {% if b.note %}<p class="px-note">{{ b.note | rich }}</p>{% endif %}
+    </div>
+    {% if b.device or e.img %}
+    <div class="px-tv">
+      {% if e.img %}<img class="px-shot" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+      {% if b.device %}{{ base.phone(b.device, e.screen, e.clip) }}{% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+{% elif b.type == "stats" %}
+  {% set vals = [] %}{% for st in b.items %}{% set v = (st.value | string | replace(",", "")) %}{% if v | countable %}{% set _ = vals.append(v | float) %}{% endif %}{% endfor %}
+  {% set mx = (vals | max) if vals else 0 %}
+  <div class="px-win px-status">
+    {{ world(n, "Status") }}
+    <p class="px-status__who" aria-hidden="true"><span class="px-status__face"></span><span>Status</span><b>LV {{ b.items | length }}</b></p>
+    <dl class="px-status__list">
+      {% for st in b.items %}{% set v = (st.value | string | replace(",", "")) %}
+      {% set fill = ((v | float) / mx) if (mx > 0 and v | countable) else (1 if not (v | countable) else 0) %}
+      <div class="px-stat"><dt>{{ st.label }}</dt><dd><span class="px-seg" style="--fill: {{ '%.3f' | format(fill) }}" aria-hidden="true"></span><b class="px-stat__v">{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</b></dd></div>
+      {% endfor %}
+    </dl>
+    <p class="px-lvup" aria-hidden="true">LV UP!</p>
+  </div>
+
+{% elif b.type == "timeline" %}
+  <div class="px-win px-map">
+    {{ world(n, b.kicker) }}
+    {% if b.title %}<{{ h }} class="px-h">{{ b.title | rich }}</{{ h }}>{% endif %}
+    <ol class="px-map__nodes">
+      {% for t in b.items %}
+      <li class="px-node"><span class="px-node__dot" aria-hidden="true"></span><span class="px-node__when">{{ t.when }}</span><h3 class="px-node__t">{{ t.title | rich }}</h3>{% if t.body %}<p class="px-body">{{ t.body | rich }}</p>{% endif %}</li>
+      {% endfor %}
+    </ol>
+  </div>
+
+{% elif b.type == "quote" %}
+  <div class="px-win px-dialog px-dialog--npc">
+    <span class="px-portrait" aria-hidden="true"></span>
+    <figure class="px-npc">
+      {% if b.who %}<figcaption class="px-name">{{ b.who }}</figcaption>{% endif %}
+      <blockquote class="px-body px-say">{{ b.text | rich }}</blockquote>
+    </figure>
+    <span class="px-next" aria-hidden="true">▼</span>
+  </div>
+
+{% elif b.type == "faq" %}
+  <div class="px-win px-ask">
+    {{ world(n, b.kicker) }}
+    <{{ h }} class="px-h px-ask__h">{{ b.title | rich }}</{{ h }}>
+    <p class="px-name" aria-hidden="true">Ask about...</p>
+    <dl class="px-qa">
+      {% for it in b.items %}<div class="px-qa__i"><dt>{{ it.q | rich }}</dt><dd class="px-body">{{ it.a | rich }}</dd></div>{% endfor %}
+    </dl>
+  </div>
+
+{% elif b.type == "cta" %}
+  <div class="px-win px-clear">
+    <p class="px-clear__big" aria-hidden="true">Course clear!</p>
+    {% if b.kicker %}<p class="px-badge">{{ b.kicker }}</p>{% endif %}
+    <{{ h }} class="px-h px-clear__h">{{ b.title | rich }}</{{ h }}>
+    <dl class="px-tally" aria-hidden="true" hidden></dl>
+    <p class="px-continue" aria-hidden="true">Continue?</p>
+    <nav class="px-menu px-menu--continue">
+      {% if b.button %}<a class="px-menu__i is-sel" href="{{ b.button.href }}">{{ b.button.label }}</a>{% endif %}
+      <button type="button" class="px-menu__i px-again" hidden>Play again</button>
+    </nav>
+  </div>
+{% endif %}
+
+</section>
+{% endmacro %}
