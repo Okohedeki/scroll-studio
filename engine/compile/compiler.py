@@ -89,10 +89,12 @@ def build_site(project: Project, log: Callable[[str], None] = print,
                progress: Callable[[float, str], None] = lambda f, m="": None,
                only: Optional[str] = None, force: bool = False, options: Optional[dict] = None,
                style: Optional[str] = None, out: Optional[Path] = None, runtime_href: Optional[str] = None,
-               looks: Optional[dict] = None) -> Path:
+               looks: Optional[dict] = None, link_base: str = "") -> Path:
     """style: build in this look instead of the spec's; out: write the site here instead of dist/;
     runtime_href: link a runtime published elsewhere (e.g. ../../runtime/) instead of copying it in;
-    looks: {"current", "items": [{name, label, href}], "home"} adds the look switcher bar."""
+    looks: {"current", "items": [{name, label, href}], "home"} adds the look switcher bar.
+    link_base: prefix for the page's own relative links when it is built below the site root (e.g. "../../"
+    for dist/looks/<style>/), so a button to "looks/" or "privacy/" still lands on the site's page."""
     from ..scenes import builder_for
 
     site = project.load()
@@ -246,6 +248,8 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         style_css=themes.style_css(theme["style"]) if theme["style"] else "", fx=json.dumps(theme["fx"]),
         runtime=runtime_href or "runtime/", looks=looks, icon=favicon(site, theme),
     )
+    if link_base:
+        html = re.sub(r'(<a\s[^>]*?href=")(?!#|[a-z][a-z0-9+.-]*:|/|\.\./)([^"]*")', lambda m: m.group(1) + link_base + m.group(2), html)
     (dist / "index.html").write_text(html, encoding="utf-8")
 
     # Plain pages (privacy policy, support): Markdown set in the site's theme at /<slug>/. They live one
