@@ -1,0 +1,23 @@
+{# Wireframe 3D page furniture: a CAD toolbar (views as named stations, an axis gizmo that turns with the camera), a
+   probe readout with live world coordinates, and the drawing-sheet title block, where the CTA is APPROVED FOR BUILD. #}
+{% macro top(site, sections, nav_links) %}
+{% set VIEWS = {"hero": "FRONT", "intro": "SIDE", "features": "EXPLODED", "product": "RENDER", "stats": "DIMS", "timeline": "ROUTE", "quote": "REAR", "faq": "PLAN", "cta": "ASSEMBLY"} %}
+<header class="wf-bar">
+  <a class="wf-bar__mark" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 21 7v10l-9 5-9-5V7z M12 2v20 M3 7l9 5 9-5"/></svg><span>{{ site.name }}</span></a>
+  <nav class="wf-bar__views" aria-label="Views">
+    {% for e in sections %}{% if e.s.id %}<a href="#{{ e.s.id }}" data-k="{{ loop.index0 }}"><b>{{ "%02d" | format(loop.index) }}</b> {{ VIEWS.get(e.s.type, "DETAIL") }}</a>{% else %}<span class="wf-bar__v" data-k="{{ loop.index0 }}"><b>{{ "%02d" | format(loop.index) }}</b> {{ VIEWS.get(e.s.type, "DETAIL") }}</span>{% endif %}{% endfor %}
+  </nav>
+  <svg class="wf-gizmo" viewBox="-30 -30 60 60" aria-hidden="true"><circle r="27" class="wf-gizmo__ring"/><g class="wf-gizmo__axes"><line class="ax ax-x" x2="18"/><line class="ax ax-y" y2="-18"/><line class="ax ax-z" x2="-10" y2="10"/><text class="t-x" x="21" y="4">X</text><text class="t-y" x="-3" y="-21">Y</text><text class="t-z" x="-17" y="17">Z</text></g></svg>
+</header>
+<div class="wf-probe" aria-hidden="true"><span>PROBE</span><b data-probe>X 0.00 · Z 0.00</b></div>
+<aside class="wf-tblock" aria-label="Title block">
+  <div class="wf-tblock__p"><small>PROJECT</small><b>{{ site.name }}</b></div>
+  <div><small>VIEW</small><b data-tb="view">FRONT 3/4</b></div>
+  <div><small>SCALE</small><b data-tb="scale">1:1</b></div>
+  <div><small>SHEET</small><b data-tb="sheet">1 OF {{ sections | length }}</b></div>
+  <div><small>REV</small><b data-tb="rev">A</b></div>
+  {% if site.nav.cta %}<a class="wf-tblock__cta" href="{{ site.nav.cta.href }}"><small>STATUS · APPROVED FOR BUILD</small><b>{{ site.nav.cta.label }} →</b></a>{% endif %}
+</aside>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}{% endmacro %}

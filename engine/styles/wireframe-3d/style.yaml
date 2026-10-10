@@ -1,19 +1,21 @@
-# Wireframe 3D: tokens and fonts for theme.style: wireframe-3d. See README.md in this folder for the UX contract.
+# Wireframe 3D: tokens and fonts for theme.style: wireframe-3d. See engine/styles/README.md for the contract and
+# docs/styles/styles-01-05.md section 5 for the research.
 label: Wireframe 3D
-about: A wireframe landscape rolls under the copy as you scroll, like an old flight computer.
+about: You fly through the blueprint. One world drawn only in lines, one continuous camera path from station to station; the copy is pinned to the model by leader lines, numbers are dimensions, the features fly apart as an exploded view with a parts list, and the line drawing solidifies into the product before the final assembly is approved for build.
 mode: dark
 colors:
-  bg: '#03070a'
-  bg2: '#071016'
-  ink: '#d8fff4'
-  accent: '#38f2b4'
-  accent2: '#9dffe0'
-  accent_ink: '#021a12'
+  bg: '#0a0a0b'
+  bg2: '#111214'
+  ink: '#d9dde3'
+  accent: '#4da3ff'
+  accent2: '#9cc9ff'
+  accent_ink: '#04101f'
 fonts:
-  display: Space Grotesk
-  body: Space Grotesk
+  display: Archivo
+  body: Archivo
   mono: JetBrains Mono
-display_weight: 500
-radius: 2px
-fx:
-  bg: wireframe
+font_axes:
+  Archivo: "ital,wdth,wght@0,62..125,100..900;1,62..125,100..900"
+  JetBrains Mono: "wght@100..800"
+display_weight: 600
+radius: 0px

@@ -1,0 +1,120 @@
+{# Wireframe 3D: you fly through the blueprint. With JavaScript one three.js world drawn only in lines sits behind the
+   page and every section is a camera STATION on one continuous spline (runtime/src/styles/wireframe-3d.ts); the copy
+   becomes callouts pinned to points of the model by leader lines. Without JavaScript the stations read top to bottom
+   as technical drawing sheets. data-anchor names the 3D point a callout or label is pinned to. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+
+{% macro btns(list) %}{% if list %}<div class="wf-btns">{% for l in list %}<a class="wf-btn{% if loop.first %} wf-btn--hot{% endif %}" href="{{ l.href }}"><span>{{ l.label }}</span></a>{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro tag(no, view) %}<p class="wf-tag"><b>{{ no }}</b><span>{{ view }}</span></p>{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set VIEWS = {"hero": "FRONT 3/4", "intro": "SIDE ELEVATION", "features": "EXPLODED", "product": "RENDER", "stats": "DIMENSIONS", "timeline": "ROUTE", "quote": "REAR · NOTE", "faq": "PLAN · SPEC", "cta": "ASSEMBLY"} %}
+{% set no = "%02d" | format(loop.index) %}
+{% set view = VIEWS.get(b.type, "DETAIL") %}
+{% if b.type == "hero" %}
+<section class="wf-st wf-st--hero" data-wf="hero" data-view="{{ view }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="wf-call wf-call--hero" data-anchor="top">
+    {{ tag(no, view) }}
+    {% if b.badge %}<p class="wf-kicker">{{ b.badge }}</p>{% endif %}
+    {% if e.first %}<h1 class="wf-head wf-plot">{{ b.title | rich }}</h1>{% else %}<h2 class="wf-head wf-plot">{{ b.title | rich }}</h2>{% endif %}
+    {% if b.body %}<p class="wf-body">{{ b.body | rich }}</p>{% endif %}
+    {{ btns(b.buttons) }}
+  </div>
+  {% if b.device %}<figure class="wf-device" data-device>{{ base.phone(b.device, e.screen, e.clip) }}</figure>{% endif %}
+</section>
+
+{% elif b.type == "intro" %}
+<section class="wf-st wf-st--intro" data-wf="intro" data-view="{{ view }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="wf-call" data-anchor="cut">
+    {{ tag(no, view) }}
+    {% if b.kicker %}<p class="wf-kicker">{{ b.kicker }}</p>{% endif %}
+    <h2 class="wf-h2 wf-plot">{{ b.title | rich }}</h2>
+    {% if b.body %}<p class="wf-body">{{ b.body | rich }}</p>{% endif %}
+    {% if b.button %}<div class="wf-btns"><a class="wf-btn" href="{{ b.button.href }}"><span>{{ b.button.label }}</span></a></div>{% endif %}
+  </div>
+</section>
+
+{% elif b.type == "features" %}
+<section class="wf-st wf-st--features" data-wf="features" data-view="{{ view }}" data-n="{{ b.items | length }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="wf-call wf-call--bom" data-anchor="p0">
+    {{ tag(no, view) }}
+    {% if b.kicker %}<p class="wf-kicker">{{ b.kicker }}</p>{% endif %}
+    {% if b.title %}<h2 class="wf-h2 wf-plot">{{ b.title | rich }}</h2>{% endif %}
+    <table class="wf-bom">
+      <caption class="wf-sr">Parts list</caption>
+      <thead><tr><th scope="col">NO.</th><th scope="col">PART</th><th scope="col">QTY</th></tr></thead>
+      <tbody>{% for f in b.items %}<tr data-i="{{ loop.index0 }}"><td><span class="wf-balloon">{{ loop.index }}</span></td><td><b>{{ f.title | rich }}</b>{% if f.body %}<span>{{ f.body | rich }}</span>{% endif %}</td><td>{{ f.tag or "1" }}</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</section>
+
+{% elif b.type == "product" %}
+<section class="wf-st wf-st--product" data-wf="product" data-view="{{ view }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="wf-call" data-anchor="screen">
+    {{ tag(no, view) }}
+    {% if b.kicker %}<p class="wf-kicker">{{ b.kicker }}</p>{% endif %}
+    <h2 class="wf-h2 wf-plot">{{ b.title | rich }}</h2>
+    {% if b.body %}<p class="wf-body">{{ b.body | rich }}</p>{% endif %}
+    {% if b.stats %}<dl class="wf-spec">{% for st in b.stats %}<div><dt>{{ st.label }}</dt><dd>{{ st.value }}{% if st.unit %} {{ st.unit }}{% endif %}</dd></div>{% endfor %}</dl>
+    {% elif b.tags %}<dl class="wf-spec">{% for t in b.tags %}<div><dt>TARGET {{ "%02d" | format(loop.index) }}</dt><dd>{{ t }}</dd></div>{% endfor %}</dl>{% endif %}
+    {{ btns(b.buttons) }}
+    {% if b.note %}<p class="wf-note">{{ b.note | rich }}</p>{% endif %}
+  </div>
+  {% if e.img %}<figure class="wf-photo"><img src="{{ e.img }}" alt="" loading="lazy"></figure>{% endif %}
+  {% if b.device %}<figure class="wf-device" data-device>{{ base.phone(b.device, e.screen, e.clip) }}</figure>{% endif %}
+</section>
+
+{% elif b.type == "stats" %}
+<section class="wf-st wf-st--stats" data-wf="stats" data-view="{{ view }}" data-n="{{ b.items | length }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="wf-call wf-call--dims">
+    {{ tag(no, view) }}
+    <ul class="wf-dims">
+      {% for st in b.items %}<li class="wf-dim" data-anchor="d{{ loop.index0 }}" data-v="{{ st.value | replace(',', '') }}"><b class="wf-dim__v">{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</b><span class="wf-dim__l">{{ st.label }}</span></li>{% endfor %}
+    </ul>
+  </div>
+</section>
+
+{% elif b.type == "timeline" %}
+<section class="wf-st wf-st--timeline" data-wf="timeline" data-view="{{ view }}" data-n="{{ b.items | length }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="wf-call wf-call--route" data-anchor="w0">
+    {{ tag(no, view) }}
+    {% if b.kicker %}<p class="wf-kicker">{{ b.kicker }}</p>{% endif %}
+    {% if b.title %}<h2 class="wf-h2 wf-plot">{{ b.title | rich }}</h2>{% endif %}
+    <ol class="wf-steps">
+      {% for t in b.items %}<li data-i="{{ loop.index0 }}"><span class="wf-wp" aria-hidden="true">WP{{ "%02d" | format(loop.index) }}</span><div><p class="wf-when">{{ t.when }}</p><h3>{{ t.title | rich }}</h3>{% if t.body %}<p class="wf-body">{{ t.body | rich }}</p>{% endif %}</div></li>{% endfor %}
+    </ol>
+  </div>
+</section>
+
+{% elif b.type == "quote" %}
+<section class="wf-st wf-st--quote" data-wf="quote" data-view="{{ view }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <figure class="wf-call wf-call--note" data-anchor="bump">
+    {{ tag(no, view) }}
+    <p class="wf-kicker">REVISION NOTE</p>
+    <blockquote class="wf-quote">{{ b.text | rich }}</blockquote>
+    {% if b.who %}<figcaption><span>CHECKED</span> {{ b.who }}</figcaption>{% endif %}
+  </figure>
+</section>
+
+{% elif b.type == "faq" %}
+<section class="wf-st wf-st--faq" data-wf="faq" data-view="{{ view }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="wf-call wf-call--spec" data-anchor="plan">
+    {{ tag(no, view) }}
+    {% if b.kicker %}<p class="wf-kicker">{{ b.kicker }}</p>{% endif %}
+    <h2 class="wf-h2 wf-plot">{{ b.title | rich }}</h2>
+    <div class="wf-faq">{% for it in b.items %}<details{% if loop.first %} open{% endif %}><summary><b>Q-{{ "%02d" | format(loop.index) }}</b><span>{{ it.q | rich }}</span></summary><p>{{ it.a | rich }}</p></details>{% endfor %}</div>
+  </div>
+</section>
+
+{% elif b.type == "cta" %}
+<section class="wf-st wf-st--cta" data-wf="cta" data-view="{{ view }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="wf-call wf-call--cta" data-anchor="top">
+    {{ tag(no, view) }}
+    {% if b.kicker %}<p class="wf-kicker">{{ b.kicker }}</p>{% endif %}
+    <h2 class="wf-head wf-plot">{{ b.title | rich }}</h2>
+    <div class="wf-approve"><span class="wf-approve__l">STATUS</span><span class="wf-approve__s">APPROVED FOR BUILD</span>{% if b.button %}<a class="wf-btn wf-btn--hot" href="{{ b.button.href }}"><span>{{ b.button.label }}</span></a>{% endif %}</div>
+  </div>
+</section>
+{% endif %}
+{% endmacro %}
