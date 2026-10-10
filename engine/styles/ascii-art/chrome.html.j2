@@ -1,0 +1,42 @@
+{# ASCII art chrome: a tmux-style status bar (the nav: one window per section with a nav label), the render pane on
+   wide screens (an ASCII rendering of the product that turns as you scroll) and the end of the buffer. #}
+{% macro top(site, sections, nav_links) %}
+{% set bin = site.name | lower | replace(" ", "-") %}
+<div class="tx-env" data-bin="{{ bin }}" hidden></div>
+<style>:root { --tx-bin: "{{ bin | replace('"', '') }}"; }</style>
+<aside class="tx-pane" aria-hidden="true">
+  <div class="tx-pane__box">
+    <p class="tx-pane__title"><span>render</span><span class="tx-pane__file">{{ bin }}.obj</span></p>
+    <pre class="tx-render"></pre>
+    <pre class="tx-stat"></pre>
+  </div>
+</aside>
+<nav class="tx-bar" aria-label="Sections">
+  <a class="tx-bar__s" href="#">[{{ bin }}]</a>
+  <span class="tx-bar__w">
+    <a class="tx-win is-on" href="#" data-k="0"><b>0</b>:~</a>
+    {% for l in nav_links %}<a class="tx-win" href="{{ l.href }}" data-k="{{ loop.index }}"><b>{{ loop.index }}</b>:{{ l.label | lower }}</a>{% endfor %}
+  </span>
+  <span class="tx-bar__r">
+    <button type="button" class="tx-kbd" aria-pressed="true" hidden>keys:on</button>
+    <button type="button" class="tx-help-btn" hidden>?:help</button>
+    <span class="tx-clock" aria-hidden="true"></span>
+    {% if site.nav.cta %}<a class="tx-bar__cta" href="{{ site.nav.cta.href }}">[ {{ site.nav.cta.label }} ]</a>{% endif %}
+  </span>
+</nav>
+<div class="tx-help" role="dialog" aria-label="Keyboard shortcuts" hidden>
+  <pre>KEYS
+  j / k      next / previous section
+  0-9        jump to window
+  g / G      top / end of buffer
+  enter      run the last command (the call to action)
+  ?          this help        esc  close</pre>
+</div>
+{% endmacro %}
+
+{% macro bottom(site, sections) -%}
+<div class="tx-eof" aria-hidden="true">
+  {% for i in range(6) %}<p>~</p>{% endfor %}
+  <p class="tx-eof__line"><span>-- EOF --</span><span>{{ site.name | lower | replace(" ", "-") }}/README.md [readonly]</span></p>
+</div>
+{%- endmacro %}

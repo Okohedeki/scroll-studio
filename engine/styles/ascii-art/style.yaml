@@ -1,20 +1,23 @@
-# ASCII art: tokens and fonts for theme.style: ascii-art. See README.md in this folder for the UX contract.
+# ASCII art: tokens and fonts for theme.style: ascii-art. The page is a terminal session on an amber phosphor screen:
+# every section's prompt types a command as you scroll and its output prints line by line, in quantised steps.
 label: ASCII art
-about: A drifting field of characters behind the page; headlines decode letter by letter.
+about: A terminal session. Scrolling types each section's command at the prompt and prints the reply line by line (features as --help flags, numbers as neofetch, steps as a boot log, questions as a man page), with a live ASCII render of the product, a tmux status bar and keyboard shortcuts.
 mode: dark
 colors:
-  bg: '#050505'
-  bg2: '#0b0b0b'
-  ink: '#e9e9e9'
-  accent: '#ffb000'
-  accent2: '#ffd36b'
-  accent_ink: '#1a1200'
+  bg: '#0d0a04'
+  bg2: '#140f06'
+  ink: '#ffb000'
+  ink2: '#e8a33a'
+  ink3: '#c98a14'
+  accent: '#ffd27a'
+  accent2: '#ffd27a'
+  accent_ink: '#0d0a04'
+  line: 'rgba(255, 176, 0, .28)'
 fonts:
   display: JetBrains Mono
   body: JetBrains Mono
   mono: JetBrains Mono
-display_weight: 600
+font_axes:
+  JetBrains Mono: "wght@400;700;800"
+display_weight: 700
 radius: 0px
-fx:
-  bg: ascii
-  text: scramble

@@ -1,0 +1,158 @@
+{# ASCII art blocks: each section is a command at a prompt and its printed output. The runtime types the command and
+   prints the output lines (.tx-l) as the section scrolls in; without JavaScript everything is already printed.
+   <span class="tx-bin"> is the program name (the site's name, filled in by the runtime; CSS shows it otherwise). #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+
+{% macro slug(t) %}{{ (t or "") | striptags | lower | replace("&amp;", "and") | replace(",", "") | replace(".", "") | replace("'", "") | replace("?", "") | replace("!", "") | replace(":", "") | replace(";", "") | replace("(", "") | replace(")", "") | replace("/", "-") | trim | replace(" ", "-") }}{% endmacro %}
+{% macro bin() %}<span class="tx-bin"></span>{% endmacro %}
+
+{% macro prompt(cmd, n, label) %}
+<p class="tx-rule" aria-hidden="true"><span>[{{ "%02d" | format(n) }}]</span><span>{{ label }}</span></p>
+<p class="tx-prompt"><span class="tx-ps1" aria-hidden="true"><span class="tx-bin"></span>:~$</span> <kbd class="tx-cmd">{{ cmd }}</kbd></p>
+{% endmacro %}
+
+{% macro btns(list) %}{% if list %}<p class="tx-l tx-btns">{% for l in list %}<a class="tx-btn{% if loop.first %} tx-btn--hot{% endif %}" href="{{ l.href }}">[ {{ l.label }} ]</a>{% endfor %}</p>{% endif %}{% endmacro %}
+
+{% macro tuiphone(d) %}
+<div class="tx-l tx-phone" aria-label="App screen">
+  <div class="tx-phone__bar"><span>{{ d.time }}</span><span aria-hidden="true">▂▄▆ ▮▮▯</span></div>
+  {% if d.app %}<p class="tx-phone__app">{{ d.app }}</p>{% endif %}
+  {% if d.title %}<p class="tx-phone__title">{{ d.title }}</p>{% endif %}
+  {% if d.label %}<p class="tx-phone__label">{{ d.label | upper }}</p>{% endif %}
+  {% if d.note %}<p class="tx-phone__note">{{ d.note }}</p>{% endif %}
+  {% for o in d.options %}<p class="tx-phone__opt{% if o.selected %} is-on{% endif %}"><span aria-hidden="true">{{ "(•)" if o.selected else "( )" }}</span> <b>{{ o.title }}</b>{% if o.body %}<small>{{ o.body }}</small>{% endif %}</p>{% endfor %}
+  {% if d.button %}<p class="tx-phone__btn">[ {{ d.button }} ]</p>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set h = "h1" if e.first else "h2" %}
+{% set n = loop.index0 %}
+<section class="tx-sec tx-sec--{{ b.type }}" data-n="{{ n }}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+
+{% if b.type == "hero" %}
+  {{ prompt("cat README.md", n, "~") }}
+  <div class="tx-out">
+    <pre class="tx-l tx-banner" aria-hidden="true"></pre>
+    {% if b.badge %}<p class="tx-l tx-dim">{{ b.badge }}</p>{% endif %}
+    <{{ h }} class="tx-l tx-h tx-h--1"><span class="tx-hash" aria-hidden="true"># </span>{{ b.title | rich }}</{{ h }}>
+    {% if b.body %}<p class="tx-l tx-p">{{ b.body | rich }}</p>{% endif %}
+    {{ btns(b.buttons) }}
+    {% if b.device %}{{ tuiphone(b.device) }}{% endif %}
+    {% if e.img %}<figure class="tx-l tx-img"><img src="{{ e.img }}" alt=""></figure>{% endif %}
+  </div>
+
+{% elif b.type == "intro" %}
+  {{ prompt("cat " ~ (slug(b.kicker or b.nav_label) or "notes") ~ ".md", n, (b.nav_label or b.kicker or "intro") | lower) }}
+  <div class="tx-out">
+    {% if b.kicker %}<p class="tx-l tx-dim">&lt;!-- {{ b.kicker }} --&gt;</p>{% endif %}
+    <{{ h }} class="tx-l tx-h"><span class="tx-hash" aria-hidden="true">## </span>{{ b.title | rich }}</{{ h }}>
+    {% if b.body %}<p class="tx-l tx-p">{{ b.body | rich }}</p>{% endif %}
+    {% if b.button %}{{ btns([b.button]) }}{% endif %}
+  </div>
+
+{% elif b.type == "features" %}
+  <p class="tx-rule" aria-hidden="true"><span>[{{ "%02d" | format(n) }}]</span><span>{{ (b.nav_label or b.kicker or "features") | lower }}</span></p>
+  <p class="tx-prompt"><span class="tx-ps1" aria-hidden="true"><span class="tx-bin"></span>:~$</span> <kbd class="tx-cmd">{{ bin() }} --help</kbd></p>
+  <div class="tx-out">
+    <p class="tx-l tx-dim">Usage: {{ bin() }} [options]</p>
+    {% if b.title %}<{{ h }} class="tx-l tx-h"><span class="tx-hash" aria-hidden="true">## </span>{{ b.title | rich }}</{{ h }}>{% endif %}
+    {% if b.kicker %}<p class="tx-l tx-dim">{{ b.kicker }}</p>{% endif %}
+    <p class="tx-l tx-dim">Options:</p>
+    <ul class="tx-flags">
+      {% for f in b.items %}{% set t = (f.tag or "") | trim %}
+      <li class="tx-l tx-flag" tabindex="0">
+        <h3 class="tx-flag__n"><span aria-hidden="true"><span class="tx-flag__s">-{{ t[-1:] if t and t[-1:] in "0123456789" else ((f.title | striptags)[:1] | lower) }},</span> --{{ slug(f.title) }}</span><span class="tx-sr">{{ f.title | striptags }}</span></h3>
+        <p class="tx-flag__d">{% if f.body %}{{ f.body | rich }}{% else %}{{ f.title | rich }}{% endif %}{% if f.meter is not none %} <span class="tx-meter">[{{ "█" * ((f.meter * 12) | round | int) }}{{ "░" * (12 - (f.meter * 12) | round | int) }}] {{ (f.meter * 100) | round | int }}%</span>{% endif %}</p>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+{% elif b.type == "product" %}
+  <p class="tx-rule" aria-hidden="true"><span>[{{ "%02d" | format(n) }}]</span><span>{{ (b.nav_label or b.kicker or "app") | lower }}</span></p>
+  <p class="tx-prompt"><span class="tx-ps1" aria-hidden="true"><span class="tx-bin"></span>:~$</span> <kbd class="tx-cmd">{{ bin() }} open --{{ slug(b.kicker) or "app" }}</kbd></p>
+  <div class="tx-out tx-split tx-side--{{ b.side }}">
+    <div class="tx-split__copy">
+      {% if b.kicker %}<p class="tx-l tx-dim">&lt;!-- {{ b.kicker }} --&gt;</p>{% endif %}
+      <{{ h }} class="tx-l tx-h"><span class="tx-hash" aria-hidden="true">## </span>{{ b.title | rich }}</{{ h }}>
+      {% if b.body %}<p class="tx-l tx-p">{{ b.body | rich }}</p>{% endif %}
+      {% if b.stats %}{% for st in b.stats %}<p class="tx-l tx-kv"><span>{{ st.label }}</span><b>{{ st.value }}{% if st.unit %} {{ st.unit }}{% endif %}</b></p>{% endfor %}
+      {% elif b.tags %}<p class="tx-l tx-tags"><span class="tx-dim">platforms:</span> {% for t in b.tags %}<span class="tx-tag">{{ t }}</span>{% endfor %}</p>{% endif %}
+      {{ btns(b.buttons) }}
+      {% if b.note %}<p class="tx-l tx-dim">{{ b.note | rich }}</p>{% endif %}
+    </div>
+    {% if b.device %}<div class="tx-split__media">{{ tuiphone(b.device) }}</div>
+    {% elif e.img %}<figure class="tx-l tx-img tx-split__media"><img src="{{ e.img }}" alt="" loading="lazy"></figure>{% endif %}
+  </div>
+
+{% elif b.type == "stats" %}
+  {{ prompt("neofetch", n, "stats") }}
+  <div class="tx-out tx-neo">
+    <pre class="tx-l tx-neo__logo" aria-hidden="true"></pre>
+    <div class="tx-neo__info">
+      <p class="tx-l tx-neo__host">{{ bin() }}@scroll-studio</p>
+      <p class="tx-l tx-dim" aria-hidden="true">-----------------------</p>
+      <dl class="tx-neo__list">
+        {% for st in b.items %}
+        <div class="tx-l tx-kv"><dt>{{ st.label }}</dt><dd><span class="tx-num">{{ st.value }}</span>{% if st.unit %} {{ st.unit }}{% endif %}</dd></div>
+        {% endfor %}
+      </dl>
+      <p class="tx-l tx-swatch" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></p>
+    </div>
+  </div>
+
+{% elif b.type == "timeline" %}
+  <p class="tx-rule" aria-hidden="true"><span>[{{ "%02d" | format(n) }}]</span><span>{{ (b.nav_label or b.kicker or "steps") | lower }}</span></p>
+  <p class="tx-prompt"><span class="tx-ps1" aria-hidden="true"><span class="tx-bin"></span>:~$</span> <kbd class="tx-cmd">{{ bin() }} setup --verbose</kbd></p>
+  <div class="tx-out">
+    {% if b.kicker %}<p class="tx-l tx-dim">&lt;!-- {{ b.kicker }} --&gt;</p>{% endif %}
+    {% if b.title %}<{{ h }} class="tx-l tx-h"><span class="tx-hash" aria-hidden="true">## </span>{{ b.title | rich }}</{{ h }}>{% endif %}
+    <ol class="tx-boot">
+      {% for t in b.items %}
+      <li class="tx-l tx-boot__l"><span class="tx-ok" aria-hidden="true">[  OK  ]</span> <span class="tx-boot__w">{{ t.when }}</span> <h3>{{ t.title | rich }}</h3>{% if t.body %} <span class="tx-dim">— {{ t.body | rich }}</span>{% endif %}</li>
+      {% endfor %}
+    </ol>
+    <p class="tx-l tx-dim">Reached target {{ bin() }}.target. {{ b.items | length }} units started.</p>
+  </div>
+
+{% elif b.type == "quote" %}
+  {% set who = (b.who or "a reader").split(",")[0] %}
+  {{ prompt("cat reviews/" ~ (slug(who) or "review") ~ ".eml", n, "review") }}
+  <div class="tx-out">
+    <p class="tx-l tx-dim">From: {{ b.who or "a reader" }}</p>
+    <p class="tx-l tx-dim">Subject: Re: {{ bin() }}</p>
+    <blockquote class="tx-l tx-mail">{{ b.text | rich }}</blockquote>
+    {% if b.who %}<p class="tx-l tx-sig">-- {{ b.who }}</p>{% endif %}
+  </div>
+
+{% elif b.type == "faq" %}
+  <p class="tx-rule" aria-hidden="true"><span>[{{ "%02d" | format(n) }}]</span><span>{{ (b.nav_label or "man") | lower }}</span></p>
+  <p class="tx-prompt"><span class="tx-ps1" aria-hidden="true"><span class="tx-bin"></span>:~$</span> <kbd class="tx-cmd">man {{ bin() }}</kbd></p>
+  <div class="tx-out tx-man">
+    <p class="tx-l tx-man__head" aria-hidden="true"><span><span class="tx-bin tx-up"></span>(1)</span><span>User Manual</span><span><span class="tx-bin tx-up"></span>(1)</span></p>
+    <{{ h }} class="tx-l tx-man__sec">{{ b.title | striptags | upper }}</{{ h }}>
+    {% if b.kicker %}<p class="tx-l tx-man__ind">{{ b.kicker }}</p>{% endif %}
+    <dl class="tx-man__list">
+      {% for it in b.items %}
+      <div class="tx-l tx-man__item"><dt>{{ it.q | rich }}</dt><dd>{{ it.a | rich }}</dd></div>
+      {% endfor %}
+    </dl>
+  </div>
+
+{% elif b.type == "cta" %}
+  <p class="tx-rule" aria-hidden="true"><span>[{{ "%02d" | format(n) }}]</span><span>{{ (b.nav_label or "start") | lower }}</span></p>
+  <p class="tx-prompt"><span class="tx-ps1" aria-hidden="true"><span class="tx-bin"></span>:~$</span> <kbd class="tx-cmd">{{ bin() }} start</kbd></p>
+  <div class="tx-out">
+    <div class="tx-l tx-box">
+      {% if b.kicker %}<p class="tx-box__t">{{ b.kicker }}</p>{% endif %}
+      <{{ h }} class="tx-h tx-h--cta"><span class="tx-hash" aria-hidden="true"># </span>{{ b.title | rich }}</{{ h }}>
+      <p class="tx-copy" hidden><span class="tx-copy__cmd"></span><button type="button" class="tx-btn tx-copy__btn">[ copy ]</button></p>
+      {% if b.button %}<p class="tx-enter"><a class="tx-btn tx-btn--hot tx-go" href="{{ b.button.href }}">[ {{ b.button.label }} ]</a> <span class="tx-dim tx-enter__hint" aria-hidden="true">or press ENTER</span><span class="tx-caret" aria-hidden="true"></span></p>{% endif %}
+      <p class="tx-done" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+{% endif %}
+
+</section>
+{% endmacro %}
