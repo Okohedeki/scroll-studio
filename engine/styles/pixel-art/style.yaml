@@ -1,0 +1,17 @@
+# Pixel art: tokens and fonts for theme.style: pixel-art. See README.md in this folder for the UX contract.
+label: Pixel art
+about: Chunky pixel type, stepped borders and 8-bit buttons.
+mode: dark
+colors:
+  bg: '#1b1035'
+  bg2: '#241548'
+  ink: '#fff8e7'
+  accent: '#ffd23f'
+  accent2: '#3ee089'
+  accent_ink: '#1b1035'
+fonts:
+  display: Press Start 2P
+  body: Pixelify Sans
+  mono: Pixelify Sans
+display_weight: 400
+radius: 0px

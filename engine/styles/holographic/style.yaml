@@ -1,0 +1,19 @@
+# Holographic: tokens and fonts for theme.style: holographic. See README.md in this folder for the UX contract.
+label: Holographic
+about: Iridescent foil on the headlines and cards, shifting with the scroll and the pointer.
+mode: dark
+colors:
+  bg: '#08080c'
+  bg2: '#101018'
+  ink: '#f4f4fb'
+  accent: '#9f8cff'
+  accent2: '#7ff0e0'
+  accent_ink: '#0b0820'
+fonts:
+  display: Unbounded
+  body: Inter
+  mono: JetBrains Mono
+display_weight: 500
+radius: 18px
+fx:
+  pointer: true

@@ -1,0 +1,17 @@
+# Glassmorphism: tokens and fonts for theme.style: glassmorphism. See README.md in this folder for the UX contract.
+label: Glassmorphism
+about: Frosted panels floating over bright colour fields.
+mode: dark
+colors:
+  bg: '#0d1030'
+  bg2: '#141846'
+  ink: '#ffffff'
+  accent: '#ffd166'
+  accent2: '#ffe39f'
+  accent_ink: '#231a00'
+fonts:
+  display: Plus Jakarta Sans
+  body: Plus Jakarta Sans
+  mono: DM Mono
+display_weight: 700
+radius: 22px

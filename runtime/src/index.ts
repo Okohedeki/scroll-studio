@@ -13,6 +13,10 @@ document.documentElement.classList.add("js");
 // a style whose numbers arrive their own way (split-flap, decoding) takes over from the count-ups
 const fxText = (() => { try { return JSON.parse(document.documentElement.dataset.fx || "{}").text as string | undefined; } catch { return undefined; } })();
 if (document.documentElement.dataset.fx) startFx();
+// A style's own experience (runtime/src/styles/<style>.ts): its scroll mechanics, transitions and interactions.
+const EXPERIENCES = import.meta.glob<{ default: () => void }>("./styles/[a-z]*.ts");
+const styleName = document.documentElement.dataset.style;
+if (styleName && EXPERIENCES[`./styles/${styleName}.ts`]) EXPERIENCES[`./styles/${styleName}.ts`]().then((m) => m.default());
 
 const PLAYERS: Record<string, () => Promise<{ default: PlayerFactory }>> = {
   film: () => import("./players/video"),

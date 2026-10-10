@@ -1,0 +1,9 @@
+# 2D anime intro: tokens and fonts for theme.style: anime-intro. See README.md in this folder for the UX contract.
+label: Anime intro
+about: Your scroll is the playhead of an anime opening, cut by cut, with title-card smashes, speed lines and freeze frames.
+mode: dark
+colors: { bg: "#0d0d14", bg2: "#16161f", ink: "#fff7ee", accent: "#ff3b5c", accent2: "#ffd23f", accent_ink: "#ffffff" }
+fonts: { display: "Dela Gothic One", body: "M PLUS 1p", mono: "M PLUS 1 Code" }
+font_axes: { "Dela Gothic One": "", "M PLUS 1p": "wght@400;500;700;800", "M PLUS 1 Code": "wght@400;700" }
+display_weight: 400
+radius: 0px

@@ -1,0 +1,18 @@
+# Gradient mesh: tokens and fonts for theme.style: gradient-mesh. See README.md in this folder for the UX contract.
+label: Gradient mesh
+about: Slow, breathing fields of colour melting behind serif headlines.
+mode: light
+colors:
+  bg: '#fbf6f1'
+  bg2: '#f3ebe3'
+  ink: '#1f1530'
+  accent: '#e8503a'
+  accent2: '#f59a7f'
+  accent_ink: '#ffffff'
+fonts:
+  display: Instrument Serif
+  body: Manrope
+  mono: DM Mono
+display_weight: 400
+em_italic: true
+radius: 999px

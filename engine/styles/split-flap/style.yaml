@@ -1,0 +1,19 @@
+# Split-flap: tokens and fonts for theme.style: split-flap. See README.md in this folder for the UX contract.
+label: Split-flap
+about: A departures board, where numbers and headlines clatter through the alphabet before they settle.
+mode: dark
+colors:
+  bg: '#111214'
+  bg2: '#18191c'
+  ink: '#f2f2ee'
+  accent: '#ffcc00'
+  accent2: '#ffe066'
+  accent_ink: '#1a1500'
+fonts:
+  display: Oswald
+  body: Inter
+  mono: Space Mono
+display_weight: 500
+radius: 4px
+fx:
+  text: flap

@@ -1,0 +1,17 @@
+# Liquid morph: tokens and fonts for theme.style: liquid-morph. See README.md in this folder for the UX contract.
+label: Liquid morph
+about: Soft blobs that melt into each other behind the page, buttons that wobble like a drop.
+mode: dark
+colors:
+  bg: '#0b0614'
+  bg2: '#140b22'
+  ink: '#f6efff'
+  accent: '#ff5fa2'
+  accent2: '#ffa0c8'
+  accent_ink: '#1a0610'
+fonts:
+  display: Syne
+  body: Manrope
+  mono: DM Mono
+display_weight: 700
+radius: 999px

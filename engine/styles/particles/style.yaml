@@ -1,0 +1,19 @@
+# Particles: tokens and fonts for theme.style: particles. See README.md in this folder for the UX contract.
+label: Particles
+about: A slow field of connected points drifting behind the copy; the field stirs when you scroll.
+mode: dark
+colors:
+  bg: '#06070d'
+  bg2: '#0c0e18'
+  ink: '#eef1ff'
+  accent: '#7aa2ff'
+  accent2: '#b8ccff'
+  accent_ink: '#050816'
+fonts:
+  display: Sora
+  body: Inter
+  mono: JetBrains Mono
+display_weight: 500
+radius: 999px
+fx:
+  bg: particles

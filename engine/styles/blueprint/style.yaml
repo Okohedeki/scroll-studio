@@ -1,0 +1,17 @@
+# Blueprint: tokens and fonts for theme.style: blueprint. See README.md in this folder for the UX contract.
+label: Blueprint
+about: White line on cyanotype blue, a drafting grid and dimension marks around the headlines.
+mode: dark
+colors:
+  bg: '#0d3b78'
+  bg2: '#0f4386'
+  ink: '#eaf3ff'
+  accent: '#ffffff'
+  accent2: '#bfe0ff'
+  accent_ink: '#0d3b78'
+fonts:
+  display: IBM Plex Sans
+  body: IBM Plex Sans
+  mono: IBM Plex Mono
+display_weight: 500
+radius: 0px

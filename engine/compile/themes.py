@@ -10,7 +10,6 @@ import yaml
 from ..spec import Theme
 
 THEMES_FILE = Path(__file__).resolve().parent.parent / "themes.yaml"
-STYLES_FILE = Path(__file__).resolve().parent.parent / "styles.yaml"
 STYLES_DIR = Path(__file__).resolve().parent.parent / "styles"
 
 # Google Fonts css2 axis specs (verified). Unknown families fall back to regular + bold.
@@ -65,12 +64,22 @@ def presets() -> dict:
 
 @lru_cache(maxsize=1)
 def styles() -> dict:
-    with open(STYLES_FILE, encoding="utf-8") as f:
-        return yaml.safe_load(f)
+    """Every engine/styles/<name>/style.yaml, by name (label, about, mode, colors, fonts, font_axes, radius, fx...)."""
+    out = {}
+    for f in sorted(STYLES_DIR.glob("*/style.yaml")):
+        with open(f, encoding="utf-8") as fh:
+            out[f.parent.name] = yaml.safe_load(fh)
+    return out
+
+
+def style_dir(name: str) -> Path:
+    """engine/styles/<name>/: style.css, and optionally blocks.html.j2 (its own markup for some block types),
+    chrome.html.j2 (page furniture around the sections) and scenes.html.j2."""
+    return STYLES_DIR / name
 
 
 def style_css(name: str) -> str:
-    return (STYLES_DIR / f"{name}.css").read_text(encoding="utf-8")
+    return (style_dir(name) / "style.css").read_text(encoding="utf-8")
 
 
 def _hex_rgb(h: str) -> str:
@@ -96,6 +105,7 @@ def resolve(theme: Theme) -> dict:
     fonts = dict(base["fonts"], **theme.fonts)
     return {
         "style": theme.style,
+        "font_axes": st.get("font_axes", {}),
         "fx": st.get("fx", {}),
         "mode": theme.mode or base.get("mode", "dark"),
         "colors": colors,
@@ -235,6 +245,6 @@ def font_links(t: dict) -> list[str]:
         if fam in seen:
             continue
         seen.add(fam)
-        axes = FONT_AXES.get(fam, "wght@400;700")
+        axes = t.get("font_axes", {}).get(fam, FONT_AXES.get(fam, "wght@400;700"))
         links.append(f"https://fonts.googleapis.com/css2?family={quote_plus(fam)}{':' + axes if axes else ''}&display=swap")
     return links

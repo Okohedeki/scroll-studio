@@ -1,0 +1,17 @@
+# Comic book: tokens and fonts for theme.style: comic-book. See README.md in this folder for the UX contract.
+label: Comic book
+about: Inked outlines, halftone dots, speech-bubble labels and a POW on the buttons.
+mode: light
+colors:
+  bg: '#fff7e0'
+  bg2: '#ffe9a8'
+  ink: '#111111'
+  accent: '#e8202a'
+  accent2: '#1f6fe5'
+  accent_ink: '#ffffff'
+fonts:
+  display: Bangers
+  body: Comic Neue
+  mono: Space Mono
+display_weight: 400
+radius: 6px

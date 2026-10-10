@@ -1,0 +1,19 @@
+# Retro VHS: tokens and fonts for theme.style: retro-vhs. See README.md in this folder for the UX contract.
+label: Retro VHS
+about: Scanlines, colour bleed and a tape counter; the picture wobbles when you scroll fast.
+mode: dark
+colors:
+  bg: '#0c0a14'
+  bg2: '#14111f'
+  ink: '#f4f0ff'
+  accent: '#ff4f8b'
+  accent2: '#5ce1ff'
+  accent_ink: '#16020a'
+fonts:
+  display: VT323
+  body: Space Mono
+  mono: VT323
+display_weight: 400
+radius: 0px
+fx:
+  vhs: true

@@ -1,0 +1,17 @@
+# Neo-brutalism: tokens and fonts for theme.style: neo-brutalism. See README.md in this folder for the UX contract.
+label: Neo-brutalism
+about: Flat loud colour, thick black borders, hard shadows and buttons that press in.
+mode: light
+colors:
+  bg: '#ffc8e8'
+  bg2: '#ffe14d'
+  ink: '#000000'
+  accent: '#00d1ff'
+  accent2: '#7bff5c'
+  accent_ink: '#000000'
+fonts:
+  display: Archivo Black
+  body: Space Grotesk
+  mono: Space Mono
+display_weight: 400
+radius: 8px

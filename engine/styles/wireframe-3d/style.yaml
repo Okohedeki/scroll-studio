@@ -1,0 +1,19 @@
+# Wireframe 3D: tokens and fonts for theme.style: wireframe-3d. See README.md in this folder for the UX contract.
+label: Wireframe 3D
+about: A wireframe landscape rolls under the copy as you scroll, like an old flight computer.
+mode: dark
+colors:
+  bg: '#03070a'
+  bg2: '#071016'
+  ink: '#d8fff4'
+  accent: '#38f2b4'
+  accent2: '#9dffe0'
+  accent_ink: '#021a12'
+fonts:
+  display: Space Grotesk
+  body: Space Grotesk
+  mono: JetBrains Mono
+display_weight: 500
+radius: 2px
+fx:
+  bg: wireframe

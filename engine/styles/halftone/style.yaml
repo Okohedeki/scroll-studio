@@ -1,0 +1,17 @@
+# Halftone: tokens and fonts for theme.style: halftone. See README.md in this folder for the UX contract.
+label: Halftone
+about: Newsprint dot screens, duotone pictures and heavy grotesk headlines.
+mode: light
+colors:
+  bg: '#f4f1ea'
+  bg2: '#e9e4d8'
+  ink: '#141414'
+  accent: '#0057ff'
+  accent2: '#5b8cff'
+  accent_ink: '#ffffff'
+fonts:
+  display: Archivo Black
+  body: Archivo
+  mono: Space Mono
+display_weight: 400
+radius: 0px

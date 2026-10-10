@@ -1,0 +1,17 @@
+# Neon glow: tokens and fonts for theme.style: neon-glow. See README.md in this folder for the UX contract.
+label: Neon glow
+about: Tubes of light on a dark wall; headlines buzz on as they arrive.
+mode: dark
+colors:
+  bg: '#07040d'
+  bg2: '#0e0818'
+  ink: '#fbeaff'
+  accent: '#ff2bd6'
+  accent2: '#3df5ff'
+  accent_ink: '#16031a'
+fonts:
+  display: Tilt Neon
+  body: Outfit
+  mono: Space Mono
+display_weight: 400
+radius: 999px

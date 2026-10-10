@@ -1,0 +1,17 @@
+# Bauhaus: tokens and fonts for theme.style: bauhaus. See README.md in this folder for the UX contract.
+label: Bauhaus
+about: Primary colours, circles, squares and triangles, everything on the grid.
+mode: light
+colors:
+  bg: '#f2ede1'
+  bg2: '#e8e1d0'
+  ink: '#111111'
+  accent: '#d7262b'
+  accent2: '#1d4fc4'
+  accent_ink: '#ffffff'
+fonts:
+  display: Josefin Sans
+  body: Josefin Sans
+  mono: Space Mono
+display_weight: 700
+radius: 0px

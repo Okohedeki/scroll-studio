@@ -1,0 +1,20 @@
+# ASCII art: tokens and fonts for theme.style: ascii-art. See README.md in this folder for the UX contract.
+label: ASCII art
+about: A drifting field of characters behind the page; headlines decode letter by letter.
+mode: dark
+colors:
+  bg: '#050505'
+  bg2: '#0b0b0b'
+  ink: '#e9e9e9'
+  accent: '#ffb000'
+  accent2: '#ffd36b'
+  accent_ink: '#1a1200'
+fonts:
+  display: JetBrains Mono
+  body: JetBrains Mono
+  mono: JetBrains Mono
+display_weight: 600
+radius: 0px
+fx:
+  bg: ascii
+  text: scramble

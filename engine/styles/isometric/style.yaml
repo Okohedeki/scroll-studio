@@ -1,0 +1,17 @@
+# Isometric: tokens and fonts for theme.style: isometric. See README.md in this folder for the UX contract.
+label: Isometric
+about: Cards and buttons extruded into isometric blocks on a 30-degree grid.
+mode: light
+colors:
+  bg: '#eef2f8'
+  bg2: '#e2e8f2'
+  ink: '#16213a'
+  accent: '#4f6bff'
+  accent2: '#8fa2ff'
+  accent_ink: '#ffffff'
+fonts:
+  display: Outfit
+  body: Outfit
+  mono: DM Mono
+display_weight: 700
+radius: 4px

@@ -8,7 +8,7 @@ import shutil
 from pathlib import Path
 from typing import Callable, Optional
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+from jinja2 import ChoiceLoader, Environment, FileSystemLoader, PrefixLoader, select_autoescape
 from markupsafe import Markup
 
 from ..config import STATIC
@@ -20,8 +20,12 @@ from . import fonts, themes
 TEMPLATES = Path(__file__).resolve().parent / "templates"
 
 
-def _env() -> Environment:
-    env = Environment(loader=FileSystemLoader(TEMPLATES), autoescape=select_autoescape(["html", "j2"]),
+def _env(style_dir: Optional[Path] = None) -> Environment:
+    # a style's own templates are reachable as "style/<file>" (see themes.style_dir)
+    loaders = [FileSystemLoader(TEMPLATES)]
+    if style_dir is not None:
+        loaders.append(PrefixLoader({"style": FileSystemLoader(style_dir)}))
+    env = Environment(loader=ChoiceLoader(loaders), autoescape=select_autoescape(["html", "j2"]),
                       trim_blocks=True, lstrip_blocks=True)
     # Copy fields allow a little inline markup (<em>, <br>, <b>, <i>); everything else is escaped.
     allowed = re.compile(r"&lt;(/?)(em|b|i|br|strong)\s*/?&gt;")
@@ -237,7 +241,8 @@ def build_site(project: Project, log: Callable[[str], None] = print,
 
     links = themes.font_links(theme)
     font_css = fonts.vendor(links, dist, log)
-    env = _env()
+    sdir = themes.style_dir(theme["style"]) if theme["style"] else None
+    env = _env(sdir)
     css_vars = themes.css_vars(theme, log)
     page_links = [{"label": p.title, "href": f"{p.slug}/"} for p in site.pages]
     nav = nav_links(site) + [l for l, p in zip(page_links, site.pages) if p.nav]
@@ -246,6 +251,9 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         font_css=font_css, font_links=[] if font_css else links, nav_links=nav, page_links=page_links, credits=credits,
         configs={e["s"].id: e["config"] for e in sections if e["scene"]},
         style_css=themes.style_css(theme["style"]) if theme["style"] else "", fx=json.dumps(theme["fx"]),
+        style_blocks=bool(sdir and (sdir / "blocks.html.j2").exists()),
+        style_chrome=bool(sdir and (sdir / "chrome.html.j2").exists()),
+        style_scenes=bool(sdir and (sdir / "scenes.html.j2").exists()),
         runtime=runtime_href or "runtime/", looks=looks, icon=favicon(site, theme),
     )
     if link_base:

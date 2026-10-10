@@ -1,0 +1,17 @@
+# Art deco: tokens and fonts for theme.style: art-deco. See README.md in this folder for the UX contract.
+label: Art deco
+about: Gold on black, sunbursts, stepped frames and tall elegant capitals.
+mode: dark
+colors:
+  bg: '#0d0b08'
+  bg2: '#15120c'
+  ink: '#f3e7c9'
+  accent: '#d4af37'
+  accent2: '#f0d27a'
+  accent_ink: '#1a1406'
+fonts:
+  display: Limelight
+  body: Josefin Sans
+  mono: Josefin Sans
+display_weight: 400
+radius: 0px

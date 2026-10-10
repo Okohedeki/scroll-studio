@@ -1,0 +1,19 @@
+# Kinetic type: tokens and fonts for theme.style: kinetic-type. See README.md in this folder for the UX contract.
+label: Kinetic type
+about: Huge condensed headlines whose letters rise one by one and lean into a fast scroll.
+mode: light
+colors:
+  bg: '#f1efe9'
+  bg2: '#e6e2d8'
+  ink: '#111111'
+  accent: '#ff3d00'
+  accent2: '#ff7a4d'
+  accent_ink: '#ffffff'
+fonts:
+  display: Anton
+  body: Inter
+  mono: JetBrains Mono
+display_weight: 400
+radius: 0px
+fx:
+  text: kinetic

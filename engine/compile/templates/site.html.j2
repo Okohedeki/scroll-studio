@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ site.lang }}"{% if theme.style %} data-fx='{{ fx }}'{% endif %} class="mode-{{ theme.mode }} layout-{{ site.layout }}{% if theme.style %} style-{{ theme.style }}{% endif %}{% if sections and sections[0].s.type == 'hero' and (sections[0].img or sections[0].video) %} hero-media{% endif %}">
+<html lang="{{ site.lang }}"{% if theme.style %} data-style="{{ theme.style }}" data-fx='{{ fx }}'{% endif %} class="mode-{{ theme.mode }} layout-{{ site.layout }}{% if theme.style %} style-{{ theme.style }}{% endif %}{% if sections and sections[0].s.type == 'hero' and (sections[0].img or sections[0].video) %} hero-media{% endif %}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -137,6 +137,10 @@
 {% endif %}
 {% import "blocks.html.j2" as blocks %}
 {% import "scene.html.j2" as scene %}
+{# A style can bring its own markup for some block or scene types (`types` in its template) and page chrome. #}
+{% if style_blocks %}{% import "style/blocks.html.j2" as sblocks %}{% set btypes = sblocks.types %}{% else %}{% set btypes = [] %}{% endif %}
+{% if style_scenes %}{% import "style/scenes.html.j2" as sscenes %}{% set stypes = sscenes.types %}{% else %}{% set stypes = [] %}{% endif %}
+{% if style_chrome %}{% import "style/chrome.html.j2" as chrome %}{% endif %}
 
 <header class="ss-nav" id="ss-nav"><div class="ss-nav__in">
   <a class="ss-wordmark" href="#">
@@ -147,16 +151,18 @@
   {% if site.nav.cta %}<a class="ss-btn" href="{{ site.nav.cta.href }}">{{ site.nav.cta.label }} <span class="ss-arrow">→</span></a>{% else %}<span></span>{% endif %}
 </div></header>
 
+{% if style_chrome %}{{ chrome.top(site, sections, nav_links) }}{% endif %}
 <main>
 {% set stack = site.layout == "stack" %}
 {% for e in sections %}
 {% set surface = (" ss-surface-" ~ e.s.surface) if e.s.surface else "" %}
 {% if stack %}<div class="ss-panel{{ surface }}{% if e.s.type == 'hero' %} ss-panel--hero{% endif %}{% if e.backdrop %} ss-backdrop{% endif %}"{% if e.backdrop %} style="background-image: url({{ e.backdrop }})"{% endif %}>
 {% elif e.backdrop %}<div class="ss-backdrop{{ surface }}" style="background-image: url({{ e.backdrop }})">{% endif %}
-{% if e.scene %}{{ scene.render(e.s, e.config, e.sdata) }}{% else %}{{ blocks.render(e.s, e) }}{% endif %}
+{% if e.scene %}{% if e.s.type in stypes %}{{ sscenes.render(e.s, e.config, e.sdata, scene) }}{% else %}{{ scene.render(e.s, e.config, e.sdata) }}{% endif %}{% elif e.s.type in btypes %}{{ sblocks.render(e.s, e, blocks, loop) }}{% else %}{{ blocks.render(e.s, e) }}{% endif %}
 {% if stack or e.backdrop %}</div>{% endif %}
 {% endfor %}
 </main>
+{% if style_chrome %}{{ chrome.bottom(site, sections) }}{% endif %}
 
 <footer class="ss-footer"><div class="ss-wrap ss-footer__in">
   <span>{{ (site.footer.left or ("© " ~ site.name)) | rich }}</span>

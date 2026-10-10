@@ -8,7 +8,7 @@
     "noImplicitAny": false,
     "skipLibCheck": true,
     "isolatedModules": true,
-    "types": []
+    "types": ["vite/client"]
   },
   "include": ["src"]
 }

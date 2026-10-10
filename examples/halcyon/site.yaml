@@ -1,4 +1,4 @@
-# Halcyon: one spec, twenty looks. A plain product page (no generated media, builds in seconds) used to show the
+# Halcyon: one spec, twenty-one experiences. A plain product page (no generated media, builds in seconds) used to show the
 # styles: `theme: { style: <name> }` changes the whole look, fonts and colours included. Build every look with
 #   studio looks examples/halcyon
 # which writes dist/looks/<style>/ for each style, a switcher bar on every page, and a gallery at dist/looks/.
@@ -30,13 +30,6 @@ sections:
       - { tag: "01", title: Focus first, body: "Your deep-work blocks go in before anyone else's meetings, every week." }
       - { tag: "02", title: Smart batching, body: "Calls are grouped into afternoons, so the day isn't cut into twenty-minute scraps." }
       - { tag: "03", title: Polite no, body: "Halcyon suggests a better slot instead of declining, and the other side picks with one tap." }
-  - type: type
-    id: words
-    length: 2.6
-    mode: swap
-    size: display
-    text: "Halcyon keeps your"
-    words: [mornings, Fridays, evenings, weekends]
   - type: product
     id: app
     kicker: The app
