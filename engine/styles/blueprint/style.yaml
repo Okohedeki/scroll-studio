@@ -1,17 +1,24 @@
-# Blueprint: tokens and fonts for theme.style: blueprint. See README.md in this folder for the UX contract.
+# Blueprint: tokens and fonts for theme.style: blueprint. See engine/styles/README.md for the contract and
+# docs/styles/styles-16-21.md section 3 for the research.
 label: Blueprint
-about: White line on cyanotype blue, a drafting grid and dimension marks around the headlines.
+about: One living drawing sheet. A plotter pen at constant speed drafts the product as you scroll (construction lines, outlines, dimensions whose values are the claims, leaders to a bill of materials) while the camera pans from view to view; the title block counts the sheets and the finale is an APPROVED stamp.
 mode: dark
 colors:
-  bg: '#0d3b78'
-  bg2: '#0f4386'
-  ink: '#eaf3ff'
-  accent: '#ffffff'
-  accent2: '#bfe0ff'
-  accent_ink: '#0d3b78'
+  bg: '#11427a'
+  bg2: '#0e3a6b'
+  ink: '#e8f1ff'
+  accent: '#7fe3ff'
+  accent2: '#ff8a6b'
+  accent_ink: '#0b2f57'
 fonts:
-  display: IBM Plex Sans
-  body: IBM Plex Sans
+  display: Barlow Condensed
+  body: IBM Plex Sans Condensed
   mono: IBM Plex Mono
-display_weight: 500
+  hand: Architects Daughter
+font_axes:
+  Barlow Condensed: "wght@400;500;600;700"
+  IBM Plex Sans Condensed: "ital,wght@0,400;0,500;0,600;1,400"
+  IBM Plex Mono: "ital,wght@0,400;0,500;1,400"
+  Architects Daughter: ""
+display_weight: 600
 radius: 0px

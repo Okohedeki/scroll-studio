@@ -1,0 +1,207 @@
+{# Blueprint: every section is a VIEW on one drawing sheet (general arrangement, section A-A, exploded assembly with
+   BOM, detail, dimensions, revision block, redline, general notes, approval). Without JavaScript the views stack as
+   finished drawings; with it they are laid out on one large sheet that a constant-speed plotter pen draws in step with
+   the scroll while the camera pans from view to view (runtime/src/styles/blueprint.ts).
+   data-pen on a drawable sets its place in the drafting order: 0 construction, 1 lettering, 2 visible outline,
+   3 hidden, 4 centre lines, 5 dimensions, 6 leaders and balloons, 7 hatching, 8 notes, 9 title fields. #}
+{% set types = ["hero", "intro", "features", "product", "stats", "timeline", "quote", "faq", "cta"] %}
+
+{% macro btns(list) %}{% if list %}<div class="bp-btns" data-pen="8">{% for l in list %}<a class="bp-btn{% if loop.first %} bp-btn--hot{% endif %}" href="{{ l.href }}"><span>{{ l.label }}</span></a>{% endfor %}</div>{% endif %}{% endmacro %}
+
+{% macro vhead(no, title, scale) %}<p class="bp-vtitle"><span class="bp-vtitle__no">{{ no }}</span><span class="bp-vtitle__t">{{ title }}</span><span class="bp-vtitle__s">{{ scale }}</span></p>{% endmacro %}
+
+{# front elevation of a phone, drawn in drafting line weights; anchors give leaders somewhere to land #}
+{% macro elevation(rows=3) %}
+<svg class="bp-svg bp-elev" viewBox="-30 -30 260 460" aria-hidden="true">
+  <g data-pen="0" class="bp-cons"><line x1="-30" y1="10" x2="230" y2="10"/><line x1="-30" y1="390" x2="230" y2="390"/><line x1="10" y1="-30" x2="10" y2="430"/><line x1="190" y1="-30" x2="190" y2="430"/></g>
+  <g data-pen="2" class="bp-vis">
+    <rect x="10" y="10" width="180" height="380" rx="30"/>
+    <rect x="22" y="36" width="156" height="328" rx="14"/>
+    <line x1="80" y1="22" x2="120" y2="22"/>
+    <path d="M190 104 h4 v40 h-4"/><path d="M190 160 h4 v24 h-4"/><path d="M10 120 h-4 v54 h4"/>
+  </g>
+  <g data-pen="3" class="bp-hid"><rect x="34" y="60" width="132" height="200" rx="6"/><circle cx="60" cy="300" r="14"/></g>
+  <g data-pen="4" class="bp-ctr"><line x1="100" y1="-24" x2="100" y2="424"/><line x1="-24" y1="200" x2="224" y2="200"/></g>
+  <g data-pen="2" class="bp-thin">
+    <line x1="36" y1="62" x2="110" y2="62"/><line x1="36" y1="82" x2="150" y2="82"/>
+    {% for i in range(rows) %}<rect x="36" y="{{ 110 + i * 52 }}" width="128" height="40" rx="4"/>{% endfor %}
+    <rect x="36" y="318" width="128" height="30" rx="15"/>
+  </g>
+  <circle class="bp-anchor" data-anchor="top" cx="150" cy="10" r="0"/>
+  <circle class="bp-anchor" data-anchor="screen" cx="164" cy="130" r="0"/>
+  <circle class="bp-anchor" data-anchor="edge" cx="190" cy="250" r="0"/>
+</svg>
+{% endmacro %}
+
+{% macro render(b, e, base, loop) %}
+{% set no = "%02d" | format(loop.index) %}
+{% if b.type == "hero" %}
+<section class="bp-view bp-view--hero" data-view="GENERAL ARRANGEMENT"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="bp-notes">
+    {% if b.badge %}<p class="bp-field" data-pen="9"><b>DWG TITLE</b> {{ b.badge }}</p>{% endif %}
+    {% if e.first %}<h1 class="bp-title bp-letter" data-pen="1" data-leader="top">{{ b.title | rich }}</h1>{% else %}<h2 class="bp-title bp-letter" data-pen="1" data-leader="top">{{ b.title | rich }}</h2>{% endif %}
+    {% if b.body %}<p class="bp-note bp-letter" data-pen="8"><b>NOTE 1.</b> {{ b.body | rich }}</p>{% endif %}
+    {{ btns(b.buttons) }}
+  </div>
+  <figure class="bp-draw">{% if b.device %}<div class="bp-device">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% else %}{{ elevation(3) }}{% endif %}</figure>
+  {{ vhead(no, "GENERAL ARRANGEMENT", "SCALE 1:1") }}
+</section>
+
+{% elif b.type == "intro" %}
+<section class="bp-view bp-view--intro" data-view="SECTION A-A"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="bp-notes">
+    {% if b.kicker %}<p class="bp-field" data-pen="9"><b>SUBJECT</b> {{ b.kicker }}</p>{% endif %}
+    <h2 class="bp-title bp-title--m bp-letter" data-pen="1">{{ b.title | rich }}</h2>
+    {% if b.body %}<p class="bp-note bp-letter" data-pen="8" data-leader="cut"><b>NOTE 2.</b> {{ b.body | rich }}</p>{% endif %}
+    {% if b.button %}<div class="bp-btns" data-pen="8"><a class="bp-btn bp-btn--hot" href="{{ b.button.href }}"><span>{{ b.button.label }}</span></a></div>{% endif %}
+  </div>
+  <figure class="bp-draw bp-draw--section">
+    <svg class="bp-svg bp-cut" viewBox="-20 -60 700 300" aria-hidden="true">
+      <defs><clipPath id="bp-cutclip-{{ loop.index }}"><rect x="0" y="0" width="640" height="150"/></clipPath></defs>
+      <g data-pen="0" class="bp-cons"><line x1="-20" y1="0" x2="680" y2="0"/><line x1="-20" y1="150" x2="680" y2="150"/><line x1="0" y1="-50" x2="0" y2="230"/><line x1="640" y1="-50" x2="640" y2="230"/></g>
+      <g data-pen="2" class="bp-vis">
+        <path d="M30 0 H610 Q640 0 640 30 V120 Q640 150 610 150 H30 Q0 150 0 120 V30 Q0 0 30 0 Z"/>
+        <path d="M14 14 H626 V30 H14 Z"/><path d="M14 30 H626 V46 H14 Z"/>
+        <path d="M30 58 H330 V112 H30 Z"/><path d="M350 58 H610 V112 H350 Z"/>
+        <path d="M14 124 H626 V136 H14 Z"/>
+      </g>
+      <g data-pen="4" class="bp-ctr"><line x1="320" y1="-40" x2="320" y2="200"/><line x1="-14" y1="75" x2="654" y2="75"/></g>
+      <g data-pen="7" class="bp-hatch" clip-path="url(#bp-cutclip-{{ loop.index }})">
+        {% for i in range(0, 34) %}<line x1="{{ 30 + i * 9 }}" y1="112" x2="{{ 30 + i * 9 - 54 }}" y2="58"/>{% endfor %}
+        {% for i in range(0, 32) %}<line x1="{{ 350 + i * 9 }}" y1="58" x2="{{ 350 + i * 9 + 54 }}" y2="112"/>{% endfor %}
+        {% for i in range(0, 72) %}<line x1="{{ 14 + i * 9 }}" y1="136" x2="{{ 14 + i * 9 - 12 }}" y2="124"/>{% endfor %}
+      </g>
+      <g data-pen="5" class="bp-thin"><path d="M0 200 H640"/><path d="M0 192 V208 M640 192 V208"/></g>
+      <text class="bp-svgtext" x="320" y="225" text-anchor="middle" data-pen="5">A — A</text>
+      <circle class="bp-anchor" data-anchor="cut" cx="180" cy="58" r="0"/>
+    </svg>
+  </figure>
+  {{ vhead(no, "SECTION A-A", "SCALE 4:1") }}
+</section>
+
+{% elif b.type == "features" %}
+{% set n = b.items | length %}
+{% set dx = [92, 440 / ([n - 1, 1] | max)] | min %}
+<section class="bp-view bp-view--features" data-view="EXPLODED ASSEMBLY"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="bp-notes">
+    {% if b.kicker %}<p class="bp-field" data-pen="9"><b>ASSEMBLY</b> {{ b.kicker }}</p>{% endif %}
+    {% if b.title %}<h2 class="bp-title bp-title--m bp-letter" data-pen="1">{{ b.title | rich }}</h2>{% endif %}
+    <table class="bp-bom" data-pen="8">
+      <caption class="bp-sr">Bill of materials</caption>
+      <thead><tr><th scope="col">ITEM</th><th scope="col">DESCRIPTION</th></tr></thead>
+      <tbody>
+        {% for f in b.items %}<tr data-i="{{ loop.index0 }}"><td class="bp-bom__i"><span class="bp-balloon">{{ loop.index }}</span></td><td><b class="bp-letter" data-pen="8">{{ f.title | rich }}</b>{% if f.body %}<span class="bp-letter" data-pen="8">{{ f.body | rich }}</span>{% endif %}{% if f.tag %}<small>PART {{ f.tag }}</small>{% endif %}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <figure class="bp-draw bp-draw--explode">
+    <svg class="bp-svg bp-explode" viewBox="-50 -60 {{ 230 + (n - 1) * dx + 30 }} {{ 500 + (n - 1) * 34 }}" aria-hidden="true" data-dx="{{ dx }}" data-dy="34">
+      <line data-pen="4" class="bp-ctr" x1="20" y1="{{ 430 + (n - 1) * 34 }}" x2="{{ 200 + (n - 1) * dx }}" y2="-10"/>
+      {% for f in b.items | reverse %}{% set i = n - loop.index %}{% set k = i % 5 %}
+      <g class="bp-part" data-i="{{ i }}" transform="translate({{ i * dx }} {{ (n - 1 - i) * 34 }})">
+        <g data-pen="2" class="bp-vis" data-hot="{{ i }}">
+          {% if k == 4 %}<rect x="0" y="0" width="150" height="300" rx="24"/>{% else %}<rect x="0" y="0" width="150" height="300" rx="{{ [24, 18, 10, 6][k] }}"/>{% endif %}
+        </g>
+        <g data-pen="2" class="bp-thin" data-hot="{{ i }}">
+          {% if k == 0 %}<line x1="18" y1="60" x2="60" y2="18"/><line x1="18" y1="84" x2="84" y2="18"/>
+          {% elif k == 1 %}<rect x="12" y="20" width="126" height="260" rx="10"/><line x1="60" y1="10" x2="90" y2="10"/>
+          {% elif k == 2 %}<rect x="20" y="30" width="46" height="46"/><rect x="80" y="30" width="50" height="22"/><rect x="80" y="60" width="50" height="16"/><circle cx="43" cy="120" r="12"/><path d="M20 160 H130 M20 176 H110 M20 192 H124"/>
+          {% elif k == 3 %}<rect x="24" y="40" width="102" height="220" rx="4"/><path d="M68 140 h14 M75 133 v14 M68 170 h14"/>
+          {% else %}<circle cx="34" cy="34" r="14"/><circle cx="34" cy="70" r="14"/><circle cx="64" cy="34" r="5"/>{% endif %}
+        </g>
+        <g data-pen="6" class="bp-leader" data-hot="{{ i }}"><path d="M30 0 L8 -26 H-2"/><circle class="bp-ball" cx="-16" cy="-26" r="14"/></g>
+        <text class="bp-svgtext bp-balltext" x="-16" y="-21" text-anchor="middle" data-pen="6" data-hot="{{ i }}">{{ i + 1 }}</text>
+      </g>
+      {% endfor %}
+    </svg>
+  </figure>
+  {{ vhead(no, "EXPLODED ASSEMBLY", "SCALE 1:2") }}
+</section>
+
+{% elif b.type == "product" %}
+<section class="bp-view bp-view--product bp-view--{{ b.side }}" data-view="DETAIL B"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="bp-notes">
+    {% if b.kicker %}<p class="bp-field" data-pen="9"><b>DETAIL</b> {{ b.kicker }}</p>{% endif %}
+    <h2 class="bp-title bp-title--m bp-letter" data-pen="1">{{ b.title | rich }}</h2>
+    {% if b.body %}<p class="bp-note bp-letter" data-pen="8" data-leader="pick" data-term="dot"><b>NOTE 3.</b> {{ b.body | rich }}</p>{% endif %}
+    {% if b.stats %}<ul class="bp-spec" data-pen="8">{% for st in b.stats %}<li><span>{{ st.label }}</span><b>{{ st.value }}{% if st.unit %} {{ st.unit }}{% endif %}</b></li>{% endfor %}</ul>
+    {% elif b.tags %}<ul class="bp-spec" data-pen="8"><li class="bp-spec__h"><span>COMPATIBILITY</span><b>SPEC</b></li>{% for t in b.tags %}<li><span>{{ "%02d" | format(loop.index) }}</span><b>{{ t }}</b></li>{% endfor %}</ul>{% endif %}
+    {{ btns(b.buttons) }}
+    {% if b.note %}<p class="bp-field" data-pen="9">{{ b.note | rich }}</p>{% endif %}
+  </div>
+  <figure class="bp-draw bp-draw--detail">
+    {% if e.img %}<div class="bp-photo" data-pen="2"><span class="bp-photo__l">PHOTO REF</span><img src="{{ e.img }}" alt="" loading="lazy"></div>{% endif %}
+    {% if b.device %}<div class="bp-device" data-anchor-host>{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
+    <span class="bp-detail-circle" aria-hidden="true"><i>B</i></span>
+  </figure>
+  {{ vhead(no, "DETAIL B", "SCALE 2:1") }}
+</section>
+
+{% elif b.type == "stats" %}
+<section class="bp-view bp-view--stats" data-view="DIMENSIONS"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="bp-notes bp-notes--wide">
+    <p class="bp-field" data-pen="9"><b>CLAIMS</b> DIMENSIONED AS MEASURED · ALL VALUES NOMINAL</p>
+    <ul class="bp-dims">
+      {% for st in b.items %}
+      <li class="bp-dim" data-v="{{ st.value | replace(',', '') }}"><span class="bp-dim__v bp-count" data-pen="5">{{ st.value }}{% if st.unit %}<small>{{ st.unit }}</small>{% endif %}</span><span class="bp-dim__l bp-letter" data-pen="8">{{ st.label }}</span></li>
+      {% endfor %}
+    </ul>
+  </div>
+  {{ vhead(no, "DIMENSIONS AND TOLERANCES", "SCALE 1:1") }}
+</section>
+
+{% elif b.type == "timeline" %}
+<section class="bp-view bp-view--timeline" data-view="REVISION BLOCK"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="bp-notes bp-notes--wide">
+    {% if b.kicker %}<p class="bp-field" data-pen="9"><b>REVISIONS</b> {{ b.kicker }}</p>{% endif %}
+    {% if b.title %}<h2 class="bp-title bp-title--m bp-letter" data-pen="1">{{ b.title | rich }}</h2>{% endif %}
+    <table class="bp-revs" data-pen="8">
+      <caption class="bp-sr">Revision history</caption>
+      <thead><tr><th scope="col">REV</th><th scope="col">DESCRIPTION</th><th scope="col">DATE</th><th scope="col">APPD</th></tr></thead>
+      <tbody>
+        {% for t in b.items %}<tr><td><span class="bp-tri" data-pen="6">{{ "ABCDEFGHJKLMNPRSTUVWXYZ"[loop.index0 % 23] }}</span></td><td><b class="bp-letter" data-pen="8">{{ t.title | rich }}</b>{% if t.body %} <span class="bp-letter" data-pen="8">{{ t.body | rich }}</span>{% endif %}</td><td class="bp-letter" data-pen="8">{{ t.when }}</td><td class="bp-appd" data-pen="9">✓</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ vhead(no, "REVISION BLOCK", "NTS") }}
+</section>
+
+{% elif b.type == "quote" %}
+<section class="bp-view bp-view--quote" data-view="REDLINE"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <figure class="bp-redline">
+    <blockquote class="bp-red bp-letter" data-pen="8" data-cloud>{{ b.text | rich }}</blockquote>
+    {% if b.who %}<figcaption class="bp-field" data-pen="9"><b>CHECKED</b> {{ b.who }}</figcaption>{% endif %}
+  </figure>
+  {{ vhead(no, "REVIEWER'S MARKUP", "NTS") }}
+</section>
+
+{% elif b.type == "faq" %}
+<section class="bp-view bp-view--faq" data-view="GENERAL NOTES"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="bp-notes bp-notes--wide">
+    {% if b.kicker %}<p class="bp-field" data-pen="9"><b>NOTES</b> {{ b.kicker }}</p>{% endif %}
+    <h2 class="bp-title bp-title--m bp-letter" data-pen="1">{{ b.title | rich }}</h2>
+    <ol class="bp-gnotes" data-pen="8">
+      {% for it in b.items %}<li><details{% if loop.first %} open{% endif %}><summary><b>{{ loop.index }}.</b> <span>{{ it.q | rich }}</span></summary><p>{{ it.a | rich }}</p></details></li>{% endfor %}
+    </ol>
+  </div>
+  {{ vhead(no, "GENERAL NOTES", "") }}
+</section>
+
+{% elif b.type == "cta" %}
+<section class="bp-view bp-view--cta" data-view="APPROVAL"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  <div class="bp-approve">
+    <div class="bp-approve__title">
+      {% if b.kicker %}<p class="bp-field" data-pen="9"><b>RELEASE</b> {{ b.kicker }}</p>{% endif %}
+      <h2 class="bp-title bp-letter" data-pen="1">{{ b.title | rich }}</h2>
+    </div>
+    <dl class="bp-approve__grid" data-pen="9">
+      <div><dt>DRAWN</dt><dd>SCROLL STUDIO</dd></div>
+      <div><dt>CHECKED</dt><dd>YOU</dd></div>
+      <div><dt>STATUS</dt><dd class="bp-status">FOR APPROVAL</dd></div>
+      <div class="bp-approve__sign"><dt>APPROVED FOR PRODUCTION</dt><dd>{% if b.button %}<a class="bp-btn bp-btn--hot bp-btn--approve" href="{{ b.button.href }}"><span>{{ b.button.label }}</span></a>{% endif %}<span class="bp-stamp" aria-hidden="true">APPROVED</span></dd></div>
+    </dl>
+  </div>
+  {{ vhead(no, "APPROVAL", "") }}
+</section>
+{% endif %}
+{% endmacro %}

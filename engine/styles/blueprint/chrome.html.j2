@@ -1,0 +1,24 @@
+{# Blueprint page furniture: a drawing-list bar (sheet-zone references as nav), rulers on the top and left edges, a CAD
+   crosshair with live coordinates, and the title block in the bottom-right corner (SHEET n OF N, REV, SCALE). #}
+{% macro top(site, sections, nav_links) %}
+{% set dwg = (site.name | upper | replace(" ", ""))[:3] ~ "-0" ~ (sections | length) ~ "1" %}
+<header class="bp-bar">
+  <a class="bp-bar__mark" href="#"><b>{{ site.name }}</b><span>DWG NO. {{ dwg }}</span></a>
+  <nav class="bp-bar__zones" aria-label="Views">{% for l in nav_links %}<a href="{{ l.href }}"><i class="bp-zone" data-zone-for="{{ l.href }}"></i>{{ l.label }}</a>{% endfor %}</nav>
+  {% if site.nav.cta %}<a class="bp-btn bp-btn--hot bp-bar__cta" href="{{ site.nav.cta.href }}"><span>{{ site.nav.cta.label }}</span></a>{% endif %}
+</header>
+<div class="bp-rule bp-rule--x" aria-hidden="true"></div>
+<div class="bp-rule bp-rule--y" aria-hidden="true"></div>
+<div class="bp-cross" aria-hidden="true"><i class="bp-cross__x"></i><i class="bp-cross__y"></i><span class="bp-cross__xy">X 0.0 &nbsp;Y 0.0</span></div>
+<aside class="bp-tblock" aria-label="Title block">
+  <div class="bp-tblock__name"><small>TITLE</small><b>{{ site.name }}</b></div>
+  <div class="bp-tblock__dwg"><small>DWG NO.</small><b>{{ dwg }}</b></div>
+  <div class="bp-tblock__view"><small>VIEW</small><b data-tb="view">GENERAL ARRANGEMENT</b></div>
+  <div class="bp-tblock__rev"><small>REV</small><b data-tb="rev">A</b></div>
+  <div class="bp-tblock__scale"><small>SCALE</small><b data-tb="scale">1:1</b></div>
+  <div class="bp-tblock__sheet"><small>SHEET</small><b data-tb="sheet">1 OF {{ sections | length }}</b></div>
+  <div class="bp-tblock__pen"><small>PEN</small><b data-tb="pen">0%</b></div>
+</aside>
+{% endmacro %}
+
+{% macro bottom(site, sections) %}{% endmacro %}
