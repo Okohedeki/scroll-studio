@@ -251,11 +251,10 @@ html.px-game .px-sec--cta.is-menu .px-continue, html.px-game .px-sec--cta.is-men
 html.px-game .px-clear__big { animation: px-blink .5s steps(1) 4; }
 
 /* the banner that names each world as you enter it */
-.px-banner { position: fixed; z-index: 7; left: 50%; top: calc(var(--hud-h) + 26px); transform: translateX(-50%); font: 400 18px/1 "Press Start 2P", monospace; text-transform: uppercase; color: var(--W);
+.px-banner { position: fixed; z-index: 4; left: 24px; bottom: calc(var(--px-ground) + var(--px-s, 4) * 6px); font: 400 18px/1 "Press Start 2P", monospace; text-transform: uppercase; color: var(--W);
   text-shadow: 4px 4px 0 var(--K); visibility: hidden; pointer-events: none; white-space: nowrap; }
 .px-banner.is-on { animation: px-ban 1.4s steps(1) both; }
 @keyframes px-ban { 0% { visibility: visible; } 100% { visibility: hidden; } }
-html.px-game .px-sec.is-on ~ .px-banner { display: none; }
 html.px-game .px-credits { position: relative; z-index: 6; }
 
 /* sections without their own markup (and scenes, which switch the page to the manual) */
@@ -289,3 +288,13 @@ html.style-pixel-art .ss-btn { border-radius: 0; font-family: "Press Start 2P", 
   html.px-game .px-clear__big, html.px-game .px-node.is-on .px-node__dot { animation: none !important; }
 }
 html:not(.px-game) .px-sec { scroll-margin-top: calc(var(--hud-h) + 24px); }
+
+/* sections without their own markup, shown as a sign's window in the game */
+.px-generic { width: min(980px, 100%); }
+.px-generic .ss-wrap { max-width: none; }
+html.px-game .px-sec--other.ss-block { padding: 0 24px; background: none; box-shadow: none; margin: 0; }
+html.px-game .px-generic .ss-gallery { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+html.px-game .px-generic .ss-orbit__stage { max-height: 50vh; }
+/* a hero further down the page is a level title card */
+html.px-game .px-sec--hero ~ .px-sec--hero .px-logo { font-size: clamp(22px, 3.6vw, 44px); }
+html.px-page .px-hud__stat, html:not(.px-game) .px-again { display: none !important; }

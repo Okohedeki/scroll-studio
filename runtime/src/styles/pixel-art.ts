@@ -99,6 +99,17 @@ export default function start() {
   const pauseEl = $<HTMLElement>("#px-pause")!;
   const banner = $(".px-banner")!;
 
+  // sections this style has no own markup for (gallery, strip, orbit...) become signs with a window
+  if (!hasScenes) sections.forEach((el) => {
+    if (el.classList.contains("px-sec")) return;
+    el.classList.add("px-sec", "px-sec--other");
+    el.dataset.zone = "other";
+    const win = document.createElement("div");
+    win.className = "px-win px-generic";
+    while (el.firstChild) win.appendChild(el.firstChild);
+    el.appendChild(win);
+  });
+
   // ------------------------------------------------ sprites for the DOM (item icons, portraits)
   $$(".px-icon").forEach((el) => {
     const k = [...el.classList].find((c) => c.startsWith("px-icon--"))?.slice(9) || "star";
@@ -164,6 +175,7 @@ export default function start() {
         else if (type === "faq") { z.objs.push({ kind: "sage", x: x + 120 }); z.trig = x + 90; travel = 102; lock = Math.max(1, n(".px-qa__i")); }
         else if (type === "cta") { z.objs.push({ kind: "pole", x: x + 150 }, { kind: "castle", x: x + 200 }); z.trig = x + 150; travel = 150; lock = 2; }
         else { z.objs.push({ kind: "sign", x: x + 90 }); z.trig = x + 60; travel = 150; }
+        if (idx === 0) z.trig = x - 1;   // no title screen: the first stop is open from the start
         z.x1 = x + travel;
         z.yT = y + travel * K;
         z.steps = lock;
@@ -189,7 +201,7 @@ export default function start() {
     return zones.length ? zones[zones.length - 1].x1 : 0;
   }
   const zoneAtScroll = (y: number) => { let k = 0; zones.forEach((z, i) => { if (y >= z.y0) k = i; }); return k; };
-  const stopY = (z: Zone) => (z.type === "hero" ? 0 : z.y0 + (z.trig + 4 - z.x0) * K);
+  const stopY = (z: Zone) => (z.type === "hero" && z.idx === 0 ? 0 : z.y0 + (z.trig + 4 - z.x0) * K);
 
   // ------------------------------------------------ canvas
   const g = canvas.getContext("2d")!;
@@ -448,7 +460,7 @@ export default function start() {
       active = i;
       activeSub = -99;
       const z = zones[i];
-      if (z && z.type !== "hero") {
+      if (z && !(z.type === "hero" && z.idx === 0)) {
         banner.textContent = `World 1-${z.idx}`;
         banner.classList.remove("is-on"); void banner.offsetWidth; banner.classList.add("is-on");
         $(".px-hud__world b", hud!)!.textContent = `1-${z.idx}`;
@@ -527,7 +539,8 @@ export default function start() {
     if (!pauseEl.hidden && pauseEl.contains(a)) closePause();
     if (!game) return;
     if (href === "#") { if (a.closest(".px-hud, .px-pause")) { e.preventDefault(); e.stopPropagation(); goTo(0); } return; }
-    const t = document.querySelector(href);
+    let t: Element | null = null;
+    try { t = document.querySelector(href); } catch { return; }
     const z = t && zoneForEl(t);
     if (!z) return;
     e.preventDefault(); e.stopPropagation();
@@ -538,7 +551,7 @@ export default function start() {
   function stops() {
     const out: number[] = [0];
     zones.forEach((z) => {
-      if (z.type === "hero") return;
+      if (z.type === "hero" && z.idx === 0) return;
       if (z.type === "features" || z.type === "timeline") z.objs.forEach((o) => out.push(z.y0 + (o.x - z.x0 + (z.type === "features" ? 4 : 2)) * K));
       else out.push(stopY(z));
       for (let s = 1; s <= z.steps; s++) out.push(Math.min(z.y1 - 1, z.yT + s * 130 - 60));
@@ -617,14 +630,15 @@ export default function start() {
   root.classList.toggle("px-page", !game);
   modeBtn.textContent = game ? "Read as page" : "Play";
   if (game && location.hash.length > 1) {
-    const t = document.querySelector(location.hash);
+    let t: Element | null = null;
+    try { t = document.querySelector(location.hash); } catch { /* not an element id */ }
     const z = t && zoneForEl(t);
     if (z) scrollTo({ top: stopY(z), behavior: "instant" as ScrollBehavior });
   }
   addEventListener("resize", () => { size(); if (game) layoutZones(); });
 
   const itemsEl = $(".px-hud__items b", hud)!, scoreEl = $(".px-hud__score b", hud)!, timeEl = $(".px-hud__time b", hud)!;
-  let lastRender = 0;
+  let lastRender = 0, jumpT = -1e9;
   onFrame(({ y, t }) => {
     if (!game) return;
     const now = performance.now();
@@ -632,7 +646,7 @@ export default function start() {
     if (firstFrame) { px = target; firstFrame = false; }
     // the player walks at a constant speed to where the scroll says (no easing, no momentum); far jumps teleport
     const d = target - px;
-    if (Math.abs(d) > 260) px = target;
+    if (Math.abs(d) > 260) { px = target; jumpT = now; }
     else if (Math.abs(d) >= 1) { px += Math.sign(d) * Math.min(Math.abs(d), 2.4); face = Math.sign(d); }
     else px = target;
     walking = Math.abs(target - px) >= 1;
@@ -640,7 +654,7 @@ export default function start() {
     if (Math.abs(y - lastY) > 30) { finishTyping(); lastY = y; }
 
     // what the player has reached
-    const instant = performance.now() - (start as any).__t0 < 600 || reduced;
+    const instant = now - (start as any).__t0 < 600 || now - jumpT < 700 || reduced;
     // blocks hit and flags passed anywhere behind the player (a fresh load mid-level has already played them)
     for (const z of zones) {
       if (z.type !== "features" && z.type !== "timeline") continue;
@@ -653,7 +667,7 @@ export default function start() {
     }
     let zi = -1, sub = -1;
     zones.forEach((z, i) => {
-      if (z.type === "hero") { if (y < TITLE_SCROLL * 0.6) zi = i; return; }
+      if (z.type === "hero" && z.idx === 0) { if (y < TITLE_SCROLL * 0.6) zi = i; return; }
       if (px >= z.trig && px <= z.x1 + 60 && y >= z.y0 - 1) zi = i;
     });
     if (zi >= 0) {

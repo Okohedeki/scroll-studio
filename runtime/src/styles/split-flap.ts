@@ -25,6 +25,11 @@ tpl.innerHTML = '<span class="fc-t"><i> </i></span><span class="fc-b"><i> </i></
 
 let soundOn = false;
 let BOARD_H = 0;
+// A jump the visitor did not make (a page opened at a position, a scripted scroll) shows the board as it stands
+// instead of replaying every departure in between.
+let JUMP_T = -1e9, lastInput = -1e9;
+const instantNow = () => performance.now() - JUMP_T < 700;
+for (const ev of ["wheel", "touchstart", "keydown", "pointerdown"]) addEventListener(ev, () => { lastInput = performance.now(); }, { passive: true, capture: true });
 let clicks = 0;
 
 class Cell {
@@ -155,6 +160,7 @@ class Line {
     if (align === "right") t = " ".repeat(pad) + t;
     else if (align === "center") t = " ".repeat(Math.floor(pad / 2)) + t;
     t = t.padEnd(this.n, " ");
+    if (instantNow()) { this.cells.forEach((c, i) => c.instant(t[i])); return; }
     this.cells.forEach((c, i) => aim(c, t[i], delay + i * stagger + Math.random() * jitter));
   }
   now(text: string) {
@@ -250,6 +256,9 @@ function flapify(el: HTMLElement, fixedCols?: number, set = CHARS): Multi {
 // ---------------------------------------------------------------- the hall
 type Dep = { time: string; mins: number; dest: string; head: string; sub: string; gate: string; type: string; scene: boolean; el: HTMLElement | null; desk: HTMLElement | null };
 
+/** An in-page link target; a href that is not a valid selector simply has none. */
+const safeQ = (sel: string) => { try { return document.querySelector<HTMLElement>(sel); } catch { return null; } };
+
 export default function start() {
   const root = document.documentElement;
   const boardQ = $("#sf-board");
@@ -266,7 +275,7 @@ export default function start() {
     const el = sectionEls[i] || null;
     return {
       time: tr.dataset.time || "", mins: h * 60 + m, dest: tr.dataset.dest || "", head: tr.dataset.head || "", sub: tr.dataset.sub || "",
-      gate: tr.dataset.gate || "", type: tr.dataset.type || "", scene: !!tr.dataset.scene, el,
+      gate: tr.dataset.gate || "", type: tr.dataset.type || "", scene: !!tr.dataset.stow, el,
       desk: el ? (el.matches(".sf-desk") ? el : el.querySelector<HTMLElement>(".sf-desk")) : null,
     };
   });
@@ -421,8 +430,10 @@ export default function start() {
     return { out, subRow };
   }
 
+  let paintSeq = 0;
   function paintBoard(k: number, mode: "now" | "cascade" | "refresh") {
     const d = deps[k];
+    const seq = ++paintSeq;
     const { out, subRow } = displayText(k);
     const st = override ? { t: override.status, tone: "board" } : statusFor(k, k);
     dStatWrap.dataset.tone = st.tone;
@@ -430,7 +441,7 @@ export default function start() {
     const rowsTxt = rows.map((_, r) => {
       const i = k + 1 + r;
       const dep = deps[i];
-      if (!dep) return i === deps.length ? { i: -1, time: "", dest: "", via: "NO FURTHER DEPARTURES", gate: "", status: { t: "", tone: "" } } : null;
+      if (!dep) return i === deps.length ? { i: -1, time: "", dest: "CLOSED", via: "NO FURTHER DEPARTURES", gate: "", status: { t: "", tone: "" } } : null;
       return { i, time: dep.time, dest: dep.dest, via: dep.head, gate: dep.gate, status: statusFor(i, k) };
     });
     if (mode === "now" || reduced) {
@@ -464,7 +475,7 @@ export default function start() {
         const txt = t ? (f.key === "status" ? t.status.t : (t as any)[f.key]) : "";
         f.line!.set(txt, rowDelay + col * 9, 9, 90);
         col += f.n;
-        if (f.key === "status") setTimeout(() => { f.wrap!.dataset.tone = t ? t.status.tone : ""; }, rowDelay + col * 12);
+        if (f.key === "status") setTimeout(() => { if (seq === paintSeq) f.wrap!.dataset.tone = t ? t.status.tone : ""; }, rowDelay + col * 12);
       });
     });
   }
@@ -528,7 +539,7 @@ export default function start() {
     const id = a.getAttribute("href")!;
     if (id.length < 2) return;
     a.addEventListener("click", () => {
-      const t = document.querySelector(id);
+      const t = safeQ(id);
       if (!t) return;
       const i = deps.findIndex((d) => d.el === t || d.el?.contains(t));
       if (i >= 0 && Math.abs(i - current) > 1) pendingRefresh = true;
@@ -562,10 +573,12 @@ export default function start() {
     if (t - measureT > 1.5) { measureT = t; const h = board.offsetHeight; if (h !== boardH) measure(); else docEnd = Math.max(1, document.documentElement.scrollHeight - innerHeight); }
     const k = boardingAt(y);
     if (k !== current) {
+      if (Math.abs(k - current) > 2 && !pendingRefresh && performance.now() - lastInput > 1500) JUMP_T = performance.now();
       const jump = Math.abs(k - current) > 1 && pendingRefresh;
       current = k;
       override = null;
-      if (jump) { clearWave(); paintBoard(k, "refresh"); } else paintBoard(k, "cascade");
+      if (instantNow()) paintBoard(k, "now");
+      else if (jump) { clearWave(); paintBoard(k, "refresh"); } else paintBoard(k, "cascade");
       pendingRefresh = false;
       deps.forEach((d, i) => d.desk?.classList.toggle("is-boarding", i === k));
       const stowed = deps[k].scene;
@@ -637,7 +650,8 @@ function initDesk(deps: Dep[], board: (i: number, head: string, sub: string, sta
     const target = parseFloat(raw.replace(/,/g, ""));
     const decimals = (raw.split(".")[1] || "").length;
     onSeen(el, () => {
-      if (reduced || !digitsOnly || !isFinite(target)) { cells.forEach((c, i) => aim(c, text[i], i * 90, 40)); return; }
+      if (reduced || instantNow()) { cells.forEach((c, i) => c.instant(text[i])); return; }
+      if (!digitsOnly || !isFinite(target)) { cells.forEach((c, i) => aim(c, text[i], i * 90, 40)); return; }
       const t0 = performance.now(), D = 1300 + Math.min(900, target * 4);
       const step = () => {
         const f = Math.min(1, (performance.now() - t0) / D);
@@ -662,7 +676,7 @@ function initDesk(deps: Dep[], board: (i: number, head: string, sub: string, sta
     shutter.setAttribute("aria-hidden", "true");
     for (let i = 0; i < n; i++) { const s = document.createElement("i"); s.style.setProperty("--i", String(i)); shutter.appendChild(s); }
     bz.appendChild(shutter);
-    onSeen(bz, () => shutter.classList.add("is-open"), 0.35);
+    onSeen(bz, () => { if (instantNow()) shutter.remove(); else shutter.classList.add("is-open"); }, 0.35);
   });
 
   // timeline: CALLING AT, statuses flip as the train passes each stop

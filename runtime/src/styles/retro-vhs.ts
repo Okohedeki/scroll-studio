@@ -16,6 +16,9 @@ const fmt = (s: number) => {
   return `${Math.floor(s / 3600)}:${String(Math.floor(s / 60) % 60).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 };
 
+/** An in-page link target; a href that is not a valid selector simply has none. */
+const safeQ = (sel: string) => { try { return document.querySelector<HTMLElement>(sel); } catch { return null; } };
+
 export default function start() {
   const root = document.documentElement;
   const main = $("main");
@@ -122,7 +125,7 @@ export default function start() {
     $$(".vhs-recbtn").forEach((b) => b.classList.add("is-rec"));
     const href = a.getAttribute("href") || "";
     if (href.length > 1 && href.startsWith("#")) {
-      const t = document.querySelector(href);
+      const t = safeQ(href);
       const i = t ? progs.findIndex((p) => p === t || p.contains(t)) : -1;
       if (i >= 0 && i !== current) setTimeout(() => channel(i), 500);
     } else if (href && href !== "#") setTimeout(() => { location.href = a.href; }, reduced ? 0 : 900);
@@ -138,7 +141,7 @@ export default function start() {
     if (!href.startsWith("#")) return;
     let i = -1;
     if (href === "#") i = a.closest(".vhs-label") ? 0 : -1;
-    else { const t = document.querySelector(href); if (t) i = progs.findIndex((p) => p === t || p.contains(t)); }
+    else { const t = safeQ(href); if (t) i = progs.findIndex((p) => p === t || p.contains(t)); }
     if (i < 0) return;
     e.preventDefault(); e.stopPropagation();
     channel(i);

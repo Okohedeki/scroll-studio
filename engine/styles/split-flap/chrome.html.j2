@@ -31,7 +31,7 @@
     {% for e in sections %}
       {% set ns.t = ns.t + gaps[loop.index0 % (gaps | length)] %}
       {% set is_cta = e.s.type == "cta" %}
-      <tr data-time="{{ "%02d:%02d" | format(ns.t // 60, ns.t % 60) }}" data-dest="{{ dest(e, site) }}" data-head="{{ headline(e, site) }}" data-sub="{{ sub(e, site) }}" data-gate="{% if is_cta %}1{% else %}{{ "%d" | format(loop.index + 1) }}{% endif %}" data-type="{{ e.s.type }}"{% if e.scene %} data-scene="1"{% endif %}>
+      <tr data-time="{{ "%02d:%02d" | format(ns.t // 60, ns.t % 60) }}" data-dest="{{ dest(e, site) }}" data-head="{{ headline(e, site) }}" data-sub="{{ sub(e, site) }}" data-gate="{% if is_cta %}1{% else %}{{ "%d" | format(loop.index + 1) }}{% endif %}" data-type="{{ e.s.type }}"{% if e.scene %} data-stow="1"{% endif %}>
         <td>{{ "%02d:%02d" | format(ns.t // 60, ns.t % 60) }}</td>
         <td>{% if e.s.id %}<a href="#{{ e.s.id }}">{{ dest(e, site) }}</a>{% else %}{{ dest(e, site) }}{% endif %}</td>
         <td class="sf-c-via">{{ headline(e, site) }}</td>

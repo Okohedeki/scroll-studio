@@ -44,6 +44,9 @@ function rasterText(text: string, px: number, weight: number, mode: "blocks" | "
   return rows.map((r) => r.slice(left).replace(/\s+$/, ""));
 }
 
+/** An in-page link target; a href that is not a valid selector simply has none. */
+const safeQ = (sel: string) => { try { return document.querySelector<HTMLElement>(sel); } catch { return null; } };
+
 export default function start() {
   const root = document.documentElement;
   root.classList.add("tx-live");
@@ -148,9 +151,19 @@ export default function start() {
   else secs.forEach((s) => { showChars(s, 0); showLines(s, 0); s.typed = 0; s.printed = 0; });
   const resetSec = (s: Sec) => { if (reduced) return; s.typed = 0; s.printed = 0; showChars(s, 0); showLines(s, 0); };
 
-  let lastCursorHost: HTMLElement | null = null;
+  let lastCursorHost: HTMLElement | null = null, lastInput = -1e9, lastSessY = scrollY, jumpT = -1e9;
+  for (const ev of ["wheel", "touchstart", "keydown", "pointerdown"]) addEventListener(ev, () => { lastInput = performance.now(); }, { passive: true, capture: true });
   function runSession(now: number, y: number) {
     const trig = y + innerHeight * 0.9;
+    // a jump the visitor did not make (a page opened mid-way, a scripted scroll) prints what is already above at once
+    if (Math.abs(y - lastSessY) > innerHeight && now - lastInput > 1500) jumpT = now;
+    lastSessY = y;
+    if (now - jumpT < 700) for (const s of secs) {
+      if (s.pTop >= trig) continue;
+      s.typed = s.cmd.length; showChars(s, s.typed);
+      let n = 0; s.lTops.forEach((t, i) => { if (t < trig) n = i + 1; });
+      if (n > s.printed) { s.printed = n; showLines(s, n); }
+    }
     let latest: HTMLElement | null = null;
     for (const s of secs) {
       if (s.pTop > trig + innerHeight && s.typed === 0) continue;
@@ -178,7 +191,7 @@ export default function start() {
 
   // ------------------------------------------------ status bar: windows, clock, keys
   const wins = $$<HTMLAnchorElement>(".tx-win");
-  const winTargets = wins.map((a) => { const h = a.getAttribute("href") || "#"; return h.length > 1 ? document.querySelector<HTMLElement>(h) : null; });
+  const winTargets = wins.map((a) => { const h = a.getAttribute("href") || "#"; return h.length > 1 ? safeQ(h) : null; });
   const clockEl = $(".tx-clock");
   const kbdBtn = $<HTMLButtonElement>(".tx-kbd"), helpBtn = $<HTMLButtonElement>(".tx-help-btn"), help = $<HTMLElement>(".tx-help");
   let kbdOn = true;
@@ -214,7 +227,7 @@ export default function start() {
     if (!href.startsWith("#")) return;
     if (a.classList.contains("tx-go")) return;   // the CTA handles itself
     if (href === "#") { if (a.closest(".tx-bar")) { e.preventDefault(); e.stopPropagation(); jump(null); } return; }
-    const t = document.querySelector<HTMLElement>(href);
+    const t = safeQ(href);
     if (!t) return;
     e.preventDefault(); e.stopPropagation();
     jump(t);
@@ -281,7 +294,7 @@ export default function start() {
     go?.addEventListener("click", (e) => {
       if (done) done.textContent = `> ${go.textContent?.replace(/[[\]]/g, "").trim().toLowerCase()} ... [ OK ]`;
       if (href === "#") e.preventDefault();
-      else if (href.startsWith("#")) { e.preventDefault(); jump(document.querySelector(href)); }
+      else if (href.startsWith("#")) { e.preventDefault(); jump(safeQ(href)); }
     });
   });
 

@@ -55,8 +55,8 @@ html.style-split-flap .ss-nav { display: none; }
 .sf-board { --pad: clamp(12px, 2.4vw, 34px); position: relative; z-index: 60; background: var(--housing); color: var(--glyph);
   padding: 0 var(--pad) 16px; font-family: "Barlow Condensed", var(--font-display);
   background-image: linear-gradient(180deg, rgba(255, 255, 255, .035), transparent 60px); }
-html.sf-live .sf-board { position: fixed; top: 0; left: 0; right: 0; box-shadow: 0 1px 0 #000, 0 22px 40px -22px rgba(0, 0, 0, .55); transition: transform .6s cubic-bezier(.3, .7, .2, 1); }
-html.sf-live .sf-board.is-stowed { transform: translateY(calc(-100% + 52px)); }
+html.sf-live .sf-board { position: fixed; top: 0; left: 0; right: 0; box-shadow: 0 1px 0 #000, 0 22px 40px -22px rgba(0, 0, 0, .55); clip-path: inset(0 0 -60px 0); transition: clip-path .5s steps(6); }
+html.sf-live .sf-board.is-stowed { clip-path: inset(0 0 calc(100% - 52px) 0); }
 html.sf-live main { padding-top: var(--sf-board-h, 0px); }
 html.sf-live .sf-table { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .sf-board.is-fade { animation: sf-fade .25s linear; }
@@ -71,7 +71,7 @@ html.sf-live .sf-table { position: absolute; width: 1px; height: 1px; overflow: 
 .sf-nav { display: flex; gap: 4px; margin-left: 6px; }
 .sf-nav a { position: relative; padding: 6px 10px 5px; background: var(--flap-t); border-radius: 2px; font-size: 14px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: #d9d6ce;
   background-image: linear-gradient(var(--flap-t) 0 50%, var(--flap-b) 50%); box-shadow: 0 1px 0 #000; }
-.sf-nav a::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #000; }
+.sf-nav a::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(0, 0, 0, .45); }
 .sf-nav a:hover, .sf-nav a:focus-visible { color: #151000; background-image: linear-gradient(#ffbe2e 0 50%, var(--st-board) 50%); }
 .sf-spacer { flex: 1; }
 .sf-sound { display: inline-flex; align-items: center; gap: 8px; border: 1px solid #333338; background: transparent; color: #c9c6be; font: 500 12px/1 var(--font-mono); letter-spacing: .1em; text-transform: uppercase; padding: 7px 10px; border-radius: 2px; cursor: pointer; }
@@ -222,7 +222,7 @@ html.sf-live .sf-on-board .sf-h { position: absolute; width: 1px; height: 1px; o
 .sf-words { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 26px; }
 .sf-word { position: relative; padding: 7px 11px 6px; border-radius: 2px; background-image: linear-gradient(var(--flap-t) 0 50%, var(--flap-b) 50%); color: var(--glyph);
   font: 600 16px/1 "Barlow Condensed", var(--font-display); letter-spacing: .1em; }
-.sf-word::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: #000; }
+.sf-word::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px; background: rgba(0, 0, 0, .45); }
 .sf-bezel { position: relative; display: grid; place-items: center; padding: clamp(26px, 4vw, 46px) 20px; border-radius: 8px; overflow: hidden;
   background: radial-gradient(120% 80% at 50% 0%, #2a2a2e, #101012 70%); box-shadow: inset 0 0 0 10px var(--housing), inset 0 0 0 11px #2c2c30, 0 30px 50px -30px rgba(0, 0, 0, .7); }
 .sf-bezel .ss-phone { width: min(260px, 70%); }
