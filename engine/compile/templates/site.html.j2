@@ -170,7 +170,8 @@
 </div></footer>
 
 <script>window.__ssScroll = { speed: {{ site.scroll.speed }} };</script>
-<script type="module" src="{{ runtime }}index.js"></script>
+{% if art %}<script type="application/json" id="ss-art">{{ art | tojson }}</script>
+{% endif %}<script type="module" src="{{ runtime }}index.js"></script>
 {% if looks %}
 <nav class="ss-looks" aria-label="Looks">
   {% set i = looks["index"] %}{% set n = looks["items"] | length %}

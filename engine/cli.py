@@ -88,6 +88,13 @@ def looks(name: str, styles: Optional[str] = typer.Option(None, help="Comma-sepa
     project = Project(resolve(name))
     if not (project.dist / "runtime" / "index.js").exists():
         build_site(project)   # the looks share the main build's runtime
+    else:
+        # ...kept current with the engine's, so a looks-only rebuild never runs a stale runtime
+        import shutil
+        from .config import STATIC
+        rt = project.dist / "runtime"
+        shutil.rmtree(rt)
+        shutil.copytree(STATIC / "runtime", rt)
     all_styles = themes.styles()
     names = [s.strip() for s in styles.split(",")] if styles else list(all_styles)
     for n in names:

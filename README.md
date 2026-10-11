@@ -198,6 +198,28 @@ studio looks examples/halcyon            # dist/looks/<style>/ for every style, 
 studio looks my-site --styles split-flap,comic-book,anime-intro
 ```
 
+### Art in the style's own medium
+
+`theme.art` gives a style a picture to draw in its own medium. Describe it and it is generated locally (Z-Image); add
+`motion:` and LTX-2.3 animates it into a seamless loop. `ascii-art` prints it in characters in the hero and plays it
+in the render pane; `particles` fills the whole first screen with it as a field of points that drifts apart as you
+scroll.
+
+```yaml
+theme:
+  style: ascii-art
+  art:
+    prompt: "a basketball player dribbling on an empty court, side view, black background, strong rim light"
+    motion: "he dribbles the ball low and steady, the camera stays still"
+    label: "dribbling, frame by frame"
+    seconds: 3          # 1-8 seconds of motion
+    frames: 36          # frames kept for the loop
+    width: 220          # detail of the sheet the runtime draws from
+```
+
+Use `file:` instead of `prompt:` to start from your own image. Plain, high-contrast subjects on a dark or light
+background read best. Animation needs ComfyUI running (docs/INSTALL.md); a still needs only the image model.
+
 A style is a folder (`engine/styles/<name>/`: tokens, stylesheet, its own block markup and page chrome) plus a
 runtime module (`runtime/src/styles/<name>.ts`) with its scroll controller; the contract is in
 [engine/styles/README.md](engine/styles/README.md) and the research behind each one in [docs/styles](docs/styles/).

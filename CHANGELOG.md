@@ -3,7 +3,23 @@
 What changed in each version of Scroll Studio, newest first. Versions follow the project's milestones; each lists the
 commits it spans so you can check out any earlier state (`git checkout <commit>`).
 
-## 3.0.0 (current) · 2026-10-10
+## Unreleased
+
+### Added
+- `theme.art`: a prompt (or `file:`) becomes artwork a style draws in its own medium, generated locally with Z-Image
+  and, with `motion:`, animated by LTX-2.3 into a seamless loop. `ascii-art` prints it in characters in the hero and
+  the render pane; `particles` turns it into a full-screen field of points.
+
+### Changed
+- `particles`: the hero is a field that fills the whole screen (the art, when there is one) and drifts apart as you
+  scroll into the first formation.
+- `blueprint`: next, next, next. The pen starts on the next view while the camera is still moving there, construction
+  lines take less scroll, and moves between views are short, so no screen is empty paper.
+
+### Fixed
+- `studio looks` refreshes the site's runtime, so rebuilding only the looks never runs a stale one.
+
+## 3.0.0 · 2026-10-10
 
 Commits `34dd0c5` to the latest commit on `main`.
 

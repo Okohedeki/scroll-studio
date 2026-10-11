@@ -243,6 +243,12 @@ def build_site(project: Project, log: Callable[[str], None] = print,
     font_css = fonts.vendor(links, dist, log)
     sdir = themes.style_dir(theme["style"]) if theme["style"] else None
     env = _env(sdir)
+    # theme.art: frames a style renders in its own medium (style templates see it as `art`)
+    art_cfg = None
+    if site.theme.art:
+        from .. import art as art_mod
+        art_cfg = art_mod.build(project, site.theme.art, dist, log)
+    env.globals["art"] = art_cfg
     css_vars = themes.css_vars(theme, log)
     page_links = [{"label": p.title, "href": f"{p.slug}/"} for p in site.pages]
     nav = nav_links(site) + [l for l, p in zip(page_links, site.pages) if p.nav]

@@ -4,7 +4,15 @@
 # which writes dist/looks/<style>/ for each style, a switcher bar on every page, and a gallery at dist/looks/.
 name: Halcyon
 description: The calendar that guards your mornings. One page, built in twenty styles by Scroll Studio.
-theme: { preset: night, style: neo-brutalism }
+theme:
+  preset: night
+  style: neo-brutalism
+  # artwork a style renders in its own medium: ascii-art prints it in characters, particles fills the screen with it
+  art:
+    prompt: A white ceramic cup of black coffee on a dark table, thick curling steam rising from it, pure black background, dramatic soft side light, high contrast, photoreal
+    motion: steam curls and rises slowly from the coffee, the cup stays still
+    label: morning coffee, steam rising
+    seconds: 4
 nav:
   cta: { label: Get Halcyon, href: "#get" }
 sections:

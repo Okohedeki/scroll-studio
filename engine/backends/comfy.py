@@ -216,6 +216,41 @@ def build_graph(cfg, guide_video, first_image, frames, width, height, fps, prefi
     return g
 
 
+def build_i2v_graph(cfg, first_image, frames, width, height, fps, prompt, negative, seed, prefix):
+    """LTX-2.3 image-to-video without a guide: animate one still into a short clip (theme.art motion)."""
+    return {
+        "ckpt": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": cfg["checkpoint"]}},
+        "te": {"class_type": "LTXAVTextEncoderLoader", "inputs": {
+            "text_encoder": cfg["text_encoder"], "ckpt_name": cfg["checkpoint"], "device": "default"}},
+        "avae": {"class_type": "LTXVAudioVAELoader", "inputs": {"ckpt_name": cfg["checkpoint"]}},
+        "pos": {"class_type": "CLIPTextEncode", "inputs": {"text": prompt, "clip": ["te", 0]}},
+        "neg": {"class_type": "CLIPTextEncode", "inputs": {"text": negative, "clip": ["te", 0]}},
+        "cond": {"class_type": "LTXVConditioning", "inputs": {
+            "positive": ["pos", 0], "negative": ["neg", 0], "frame_rate": float(fps)}},
+        "first": {"class_type": "LoadImage", "inputs": {"image": first_image}},
+        "latent": {"class_type": "EmptyLTXVLatentVideo", "inputs": {
+            "width": width, "height": height, "length": frames, "batch_size": 1}},
+        "i2v": {"class_type": "LTXVImgToVideoConditionOnly", "inputs": {
+            "vae": ["ckpt", 2], "image": ["first", 0], "latent": ["latent", 0], "strength": 1.0, "bypass": False}},
+        "alat": {"class_type": "LTXVEmptyLatentAudio", "inputs": {
+            "frames_number": frames, "frame_rate": int(fps), "batch_size": 1, "audio_vae": ["avae", 0]}},
+        "av": {"class_type": "LTXVConcatAVLatent", "inputs": {"video_latent": ["i2v", 0], "audio_latent": ["alat", 0]}},
+        "guider": {"class_type": "CFGGuider", "inputs": {
+            "model": ["ckpt", 0], "positive": ["cond", 0], "negative": ["cond", 1], "cfg": 1.0}},
+        "sampler": {"class_type": "KSamplerSelect", "inputs": {"sampler_name": cfg.get("sampler", "euler_cfg_pp")}},
+        "sigmas": {"class_type": "ManualSigmas", "inputs": {"sigmas": DISTILLED_SIGMAS}},
+        "noise": {"class_type": "RandomNoise", "inputs": {"noise_seed": seed}},
+        "sample": {"class_type": "SamplerCustomAdvanced", "inputs": {
+            "noise": ["noise", 0], "guider": ["guider", 0], "sampler": ["sampler", 0],
+            "sigmas": ["sigmas", 0], "latent_image": ["av", 0]}},
+        "split": {"class_type": "LTXVSeparateAVLatent", "inputs": {"av_latent": ["sample", 0]}},
+        "decode": {"class_type": "LTXVTiledVAEDecode", "inputs": {
+            "vae": ["ckpt", 2], "latents": ["split", 0], "horizontal_tiles": 2, "vertical_tiles": 2,
+            "overlap": 6, "last_frame_fix": False, "working_device": "auto", "working_dtype": "auto"}},
+        "save": {"class_type": "SaveImage", "inputs": {"images": ["decode", 0], "filename_prefix": prefix}},
+    }
+
+
 def build_upscale_graph(cfg, video, frames, fps, prompt, prefix):
     """Second-stage upscale of a finished clip: encode -> 2x latent upsampler -> short refine -> decode.
 

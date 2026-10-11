@@ -18,6 +18,7 @@ interface Item {
   num?: { node: Text; text: string; v: number; dec: number };
 }
 interface View { el: HTMLElement; items: Item[]; ink: number; x: number; y: number; w: number; h: number; title: string; zone: string; overlay?: SVGSVGElement; lastS: number; draw: number }
+const PRE = 0.25;   // share of a view inked during the pan that arrives at it (construction lines first, so the title lands as you arrive)
 interface Seg { kind: "pan" | "draw" | "dwell" | "zoom" | "hold"; v: number; y0: number; len: number }
 
 const SVGNS = "http://www.w3.org/2000/svg";
@@ -93,7 +94,7 @@ export default function start() {
       const len = (p as SVGPathElement).getTotalLength();
       if (/ red| dot|k5h/.test(" " + cls)) { add(cat, near, sub, p, "show", CAT_LEN.show, hot); return p; }
       p.setAttribute("pathLength", "1");
-      add(cat, near, sub, p, "path", Math.max(8, cls === "k0" ? len * 0.3 : len), hot);
+      add(cat, near, sub, p, "path", Math.max(8, cls === "k0" ? len * (index ? 0.05 : 0.3) : len), hot);
       return p;
     };
     const arrow = (x: number, y: number, ang: number, cat: number, near: Element | null, sub: number) => {
@@ -397,7 +398,7 @@ export default function start() {
     $$<HTMLElement>(".bp-btn", document).forEach((b) => b.setAttribute("data-w", (b.offsetWidth / 4).toFixed(1)));
     if (!flow && sheet) {
       sheet.style.transform = "none";
-      const cols = mobile ? 2 : 3, G = Math.round(vw * (mobile ? 0.18 : 0.12)), M = Math.round(Math.max(48, vw * 0.06));
+      const cols = mobile ? 2 : 3, G = Math.round(vw * (mobile ? 0.06 : 0.04)), M = Math.round(Math.max(48, vw * 0.06));
       views.forEach((v) => { v.el.style.width = vw + "px"; v.el.style.minHeight = vh + "px"; v.el.style.left = "0px"; v.el.style.top = "0px"; });
       const heights = views.map((v) => Math.max(vh, v.el.offsetHeight));
       let rowTop = M;
@@ -421,16 +422,17 @@ export default function start() {
       // the scroll timeline: pen ink converts to scroll at one constant rate, so the pen speed never changes
       const inks = views.map((v) => v.ink);
       const median = [...inks].sort((a, b) => a - b)[Math.floor(inks.length / 2)] || 1;
-      const rate = (vh * 1.5) / median;
+      const rate = (vh * 0.75) / median;   // next, next, next: about a screen of scroll per view
       segs = []; let y = 0;
       views.forEach((v, i) => {
-        if (i > 0) { const p = views[i - 1]; const len = (Math.abs(v.x - p.x) + Math.abs(v.y - p.y)) * 0.32; segs.push({ kind: "pan", v: i, y0: y, len }); y += len; }
-        v.draw = clamp(v.ink * rate, vh * 0.8, vh * 2.8) + Math.max(0, v.h - vh) * 0.6;
+        if (i > 0) { const p = views[i - 1]; const len = clamp((Math.abs(v.x - p.x) + Math.abs(v.y - p.y)) * 0.12, vh * 0.12, vh * 0.3); /* a quick move between views */ segs.push({ kind: "pan", v: i, y0: y, len }); y += len; }
+        // the pen starts on the next view while the camera is still travelling, so no screen is ever empty paper
+        v.draw = (clamp(v.ink * rate, vh * 0.4, vh * 1.3) + Math.max(0, v.h - vh) * 0.35) * (i > 0 ? 1 - PRE : 1);
         segs.push({ kind: "draw", v: i, y0: y, len: v.draw }); y += v.draw;
-        segs.push({ kind: "dwell", v: i, y0: y, len: vh * 0.3 }); y += vh * 0.3;
+        segs.push({ kind: "dwell", v: i, y0: y, len: vh * 0.1 }); y += vh * 0.1;
       });
-      segs.push({ kind: "zoom", v: views.length - 1, y0: y, len: vh * 1.1 }); y += vh * 1.1;
-      segs.push({ kind: "hold", v: views.length - 1, y0: y, len: vh * 0.5 }); y += vh * 0.5;
+      segs.push({ kind: "zoom", v: views.length - 1, y0: y, len: vh * 0.7 }); y += vh * 0.7;
+      segs.push({ kind: "hold", v: views.length - 1, y0: y, len: vh * 0.3 }); y += vh * 0.3;
       total = y;
       spacer!.style.height = total + vh + "px";
       (window as any).__bpSegs = segs;
@@ -482,7 +484,8 @@ export default function start() {
     const vi = seg.v, v = views[vi];
     // pen positions for every view: earlier views complete, later ones blank
     views.forEach((w, i) => {
-      let s = i < vi ? 1e12 : i > vi ? 0 : seg.kind === "pan" ? 0 : seg.kind === "draw" ? k * w.ink : 1e12;
+      const pre = vi > 0 ? PRE : 0;
+      let s = i < vi ? 1e12 : i > vi ? 0 : seg.kind === "pan" ? k * PRE * w.ink : seg.kind === "draw" ? (pre + (1 - pre) * k) * w.ink : 1e12;
       if (i === 0) s = Math.max(s, introPen);
       setPen(w, s);
     });
@@ -495,7 +498,7 @@ export default function start() {
       camX = split > 0 ? p.x + dxv * clamp(k / split) : v.x;
       camY = split < 1 ? pY + dyv * clamp((k - split) / (1 - split)) : pY;
       camZ = 1;
-    } else if (seg.kind === "draw") { camX = v.x; camY = v.y + follow(v, k * v.ink); camZ = 1; }
+    } else if (seg.kind === "draw") { camX = v.x; camY = v.y + follow(v, ((vi > 0 ? PRE : 0) + (1 - (vi > 0 ? PRE : 0)) * k) * v.ink); camZ = 1; }
     else if (seg.kind === "dwell") { camX = v.x; camY = v.y + follow(v, v.ink); camZ = 1; }
     else {
       const fit = Math.min((vw * 0.92) / sheetW, ((vh - 70) * 0.9) / sheetH);

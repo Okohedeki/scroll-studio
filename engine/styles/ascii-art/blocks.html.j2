@@ -34,6 +34,8 @@
   {{ prompt("cat README.md", n, "~") }}
   <div class="tx-out">
     <pre class="tx-l tx-banner" aria-hidden="true"></pre>
+    {% if art and e.first %}<pre class="tx-l tx-artwork" role="img" aria-label="ASCII art: {{ art.label }}"></pre>
+    <p class="tx-l tx-dim tx-artwork__cap">// {{ art.label }}{% if art.frames > 1 %} · {{ art.frames }} frames, looping{% endif %}</p>{% endif %}
     {% if b.badge %}<p class="tx-l tx-dim">{{ b.badge }}</p>{% endif %}
     <{{ h }} class="tx-l tx-h tx-h--1"><span class="tx-hash" aria-hidden="true"># </span>{{ b.title | rich }}</{{ h }}>
     {% if b.body %}<p class="tx-l tx-p">{{ b.body | rich }}</p>{% endif %}

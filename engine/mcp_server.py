@@ -195,7 +195,7 @@ def record(project: str, section: Optional[str] = None, seconds: float = 12.0) -
 
 @mcp.tool()
 def list_styles() -> list[dict]:
-    """The twenty looks a site can take with theme.style (name, label, what it looks like)."""
+    """The twenty-one looks a site can take with theme.style (name, label, what it looks like)."""
     from .compile import themes
     return [{"name": k, "label": v["label"], "about": v.get("about", "")} for k, v in themes.styles().items()]
 

@@ -558,6 +558,24 @@ SCENE_TYPES = ("film", "artwork", "scene3d", "sequence", "parallax", "type", "ve
 
 # ---------------------------------------------------------------- site
 
+class Art(Model):
+    """Artwork a style renders in its own medium: ascii-art prints it in characters, particles fills the screen with
+    it in points. Generated locally from a prompt (or taken from a file), optionally animated into a short loop."""
+    prompt: Optional[str] = Field(None, description="Generate the image locally (Z-Image), e.g. 'a basketball player "
+                                                    "dribbling, black background'. Plain backgrounds and strong "
+                                                    "silhouettes read best in characters and points")
+    file: Optional[str] = Field(None, description="Use this image (project file or URL) instead of a prompt")
+    motion: Optional[str] = Field(None, description="Animate it with LTX-2.3 (needs ComfyUI), e.g. 'dribbles the "
+                                                    "ball between his legs'. Omit for a still")
+    seconds: float = Field(3.0, ge=1, le=8, description="Length of the animated loop")
+    size: tuple[int, int] = Field((1024, 768), description="Generated image size (the loop keeps its aspect)")
+    seed: int = 7
+    frames: int = Field(36, ge=1, le=96, description="Frames shipped to the page (sampled evenly from the loop)")
+    width: int = Field(220, ge=40, le=480, description="Sampling width in pixels of the shipped frames: characters "
+                                                       "and points are drawn from these")
+    label: Optional[str] = Field(None, description="Short name shown with the art (defaults to the prompt)")
+
+
 class Theme(Model):
     preset: str = Field("night", description="night, brass, paper, lab, cosmos, studio, dusk, ink, blueprint, clinic (see engine/themes.yaml)")
     style: Optional[str] = Field(
@@ -577,6 +595,8 @@ class Theme(Model):
         None, description="Pin the display face's optical size (variable fonts such as Fraunces or Newsreader grow "
                           "more expressive at large sizes; 36-48 keeps headlines calm)")
     radius: Optional[str] = None
+    art: Optional[Art] = Field(None, description="Artwork the style renders in its own medium (ascii-art: characters, "
+                                                  "particles: points). A prompt or a file, optionally animated")
 
 
 class Nav(Model):

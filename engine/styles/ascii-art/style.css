@@ -43,6 +43,14 @@ pre .tx-cursor, .tx-banner .tx-cursor { display: none; }
 .tx-h--1 { text-transform: uppercase; letter-spacing: .02em; }
 .tx-hash { color: var(--dim); }
 .tx-p { max-width: 72ch; }
+/* theme.art in characters: a smaller, square-ish cell so the picture has detail */
+.tx-artwork { font: 400 8px/1 "JetBrains Mono", monospace; letter-spacing: 0; color: var(--hi); white-space: pre; overflow: hidden;
+  font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0;
+  margin: .5lh 0 .25lh; min-height: 8lh; max-width: 100%; }
+.tx-artwork__cap { margin-bottom: 1lh; }
+html.tx-has-art .tx-render { font-size: 8px; line-height: 1; letter-spacing: 0; }
+@media (max-width: 760px) { .tx-artwork { font-size: 5.5px; } }
+.tx-render { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
 .tx-banner { letter-spacing: -.06em; font: 400 var(--tx-size)/.96 "JetBrains Mono", monospace; color: var(--hi); white-space: pre; overflow: hidden; margin: .5lh 0 1lh; }
 .tx-banner:empty { display: none; }
 

@@ -6,6 +6,7 @@
  * Reduced motion: everything is printed at once.
  */
 import { $, $$, onFrame, reduced, chars } from "./_kit";
+import { loadArt, asciiFrame, rowsFor, type ArtFrames } from "./_art";
 
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const RAMP = " .:-=+*#%@";
@@ -308,6 +309,37 @@ export default function start() {
   const velHist: number[] = Array(14).fill(0);
   let lastRender = 0, lastKey = "";
 
+  // ------------------------------------------------ theme.art: printed in characters in the hero and played in the pane
+  let art: ArtFrames | null = null, artClock = 0, artLast = "";
+  const artPre = $(".tx-artwork");
+  const cellOf = (el: HTMLElement) => {
+    const s = document.createElement("span");
+    s.textContent = "MMMMMMMMMM";
+    s.style.cssText = "position:absolute;visibility:hidden;white-space:pre";
+    el.appendChild(s);
+    const r = s.getBoundingClientRect();
+    s.remove();
+    return { w: r.width / 10 || 6, h: r.height || 10 };
+  };
+  let artCell = { w: 6, h: 10 }, paneCell = { w: chW, h: lineH };
+  loadArt().then((a) => {
+    art = a;
+    if (!a) return;
+    root.classList.add("tx-has-art");   // the pane switches to small cells for the picture
+    if (artPre) artCell = cellOf(artPre);
+    if (pre) paneCell = cellOf(pre);
+    const file = $(".tx-pane__file");
+    if (file) file.textContent = a.n > 1 ? "art.mp4 --ascii" : "art.png --ascii";
+    addEventListener("resize", () => { if (artPre) artCell = cellOf(artPre); if (pre) paneCell = cellOf(pre); artLast = ""; lastKey = ""; });
+  });
+  const artFrameAt = (now: number, v: number) => {
+    if (!art || reduced || art.n < 2) return 0;
+    artClock += (artLastNow ? now - artLastNow : 0) / 1000 * art.fps * (1 + Math.min(3, Math.abs(v) / 25));   // scrolling fast fast-forwards
+    artLastNow = now;
+    return Math.floor(artClock) % art.n;
+  };
+  let artLastNow = 0;
+
   // ------------------------------------------------ the frame loop
   let lastWin = -1, measureT = 0, lastDoc = 0;
   onFrame(({ y, v, t }) => {
@@ -322,6 +354,18 @@ export default function start() {
     if (w !== lastWin) { lastWin = w; wins.forEach((a, i) => { a.classList.toggle("is-on", i === w); if (i === w) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); }); }
     if (clockEl) { const d = new Date(); const c = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; if (clockEl.textContent !== c) clockEl.textContent = c; }
 
+    // theme.art in the hero, at the art's own frame rate, only while it is on screen
+    if (art && artPre) {
+      const r = artPre.getBoundingClientRect();
+      const f = artFrameAt(now, v);
+      if (r.bottom > 0 && r.top < innerHeight && artPre.getClientRects().length) {
+        const cols = Math.max(16, Math.floor(artPre.clientWidth / artCell.w));
+        const rows = rowsFor(art, cols, artCell.w, artCell.h);
+        const key = [f, cols, rows].join(",");
+        if (key !== artLast) { artLast = key; artPre.textContent = asciiFrame(art, f, cols, rows); }
+      }
+    }
+
     // the render pane at 12 frames a second, only when something changed
     if (pane && pre && pane.getClientRects().length && now - lastRender > 83) {
       lastRender = now;
@@ -332,7 +376,20 @@ export default function start() {
       const cols = Math.max(20, Math.floor(pre.clientWidth / chW));
       const rows = Math.max(10, Math.floor(pre.clientHeight / lineH));
       const key = [step, cols, rows, Math.round(mxp), Math.round(myp)].join(",");
-      if (key !== lastKey) { lastKey = key; pre.textContent = renderModel(pts, cols, rows, (step / 96) * Math.PI * 2.5 + 0.6, chW / lineH, mxp, myp); }
+      if (art) {
+        // the pane plays the art too, fitted inside it and centred
+        const pc = Math.max(20, Math.floor(pre.clientWidth / paneCell.w)), pr = Math.max(10, Math.floor(pre.clientHeight / paneCell.h));
+        let ac = pc, ar = rowsFor(art, ac, paneCell.w, paneCell.h);
+        if (ar > pr) { ac = Math.max(10, Math.floor(pc * pr / ar)); ar = rowsFor(art, ac, paneCell.w, paneCell.h); }
+        const f = artFrameAt(now, 0);
+        const akey = ["art", f, pc, pr].join(",");
+        if (akey !== lastKey) {
+          lastKey = akey;
+          const pad = " ".repeat(Math.max(0, Math.floor((pc - ac) / 2)));
+          const top = "\n".repeat(Math.max(0, Math.floor((pr - ar) / 2)));
+          pre.textContent = top + asciiFrame(art, f, ac, ar).split("\n").map((l) => pad + l).join("\n");
+        }
+      } else if (key !== lastKey) { lastKey = key; pre.textContent = renderModel(pts, cols, rows, (step / 96) * Math.PI * 2.5 + 0.6, chW / lineH, mxp, myp); }
       if (statPre) {
         const sec = order().filter((c) => c.getBoundingClientRect().top < innerHeight * 0.5).length;
         const bar = Math.round(p * 14);

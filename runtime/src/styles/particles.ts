@@ -7,6 +7,8 @@
  * scenes change by a short crossfade.
  */
 import { $, $$, onFrame, reduced } from "./_kit";
+import { loadArt, artConfig, type ArtFrames } from "./_art";
+const artInvert = () => !!artConfig()?.invert;
 import { clamp, rng } from "../lib/util";
 
 const TAU = Math.PI * 2;
@@ -26,6 +28,7 @@ type Scene = {
   path: Float32Array | null; pathStep: number; nodeLen: number[];
   items: HTMLElement[]; vals: { el: HTMLElement; n: number; dec: number; shown: string }[];
   well: HTMLElement | null; wellC: Pt; wellR: number;
+  full?: boolean;   // the hero as a full-screen field (no halo relax)
 };
 
 export default function start() {
@@ -36,7 +39,7 @@ export default function start() {
   const bailout = setTimeout(() => { if (!ready) root.classList.remove("px-live"); }, 4000);
 
   const mobile = innerWidth < 760;
-  const N = mobile ? 7000 : 16000;
+  const N = mobile ? 16000 : 42000;   // enough matter to fill the whole screen as an image
   const R = rng(20240917);
   // per-particle constants
   const rA = new Float32Array(N), rB = new Float32Array(N), rC = new Float32Array(N), rD = new Float32Array(N), z = new Float32Array(N);
@@ -158,6 +161,44 @@ export default function start() {
       if (s.well) { const r = rel(s.well); s.wellC = { x: r.x + r.w / 2, y: r.y + r.h / 2 }; s.wellR = r.w / 2; }
       else { s.wellC = { x: W / 2, y: H / 2 }; s.wellR = 60; }
       s.form = dustForm(0.3, true, W, H);
+      return;
+    }
+    if (s.type === "hero" && !s.stage.querySelector("[data-form='image'], [data-form='box']")) {
+      start();
+      if (heroArt) {
+        // the art, cover-fitted to the whole stage as a stipple: on a light page points gather where the picture is
+        // dark (ink on paper), on a dark page where it is bright, so the screen fills and the subject reads in tone
+        const a = heroArt, m = a.mask[0], tile = document.createElement("canvas");
+        const inv = (artInvert() ? 1 : 0), light = root.classList.contains("mode-light");
+        tile.width = a.w; tile.height = a.h;
+        const tctx = tile.getContext("2d")!, id = tctx.createImageData(a.w, a.h);
+        for (let i = 0; i < m.length; i++) {
+          const lum = inv ? 1 - m[i] : m[i];
+          id.data[i * 4 + 3] = Math.round(255 * (0.03 + 0.97 * Math.pow(light ? 1 - lum : lum, 1.3)));
+        }
+        tctx.putImageData(id, 0, 0);
+        const sc = Math.max(W / a.w, H / a.h), dw = a.w * sc, dh = a.h * sc;
+        wctx.imageSmoothingEnabled = true;
+        wctx.drawImage(tile, (W - dw) / 2, (H - dh) / 2, dw, dh);
+      } else {
+        // no art: an even field over the whole stage, a little denser toward the edges
+        const g = wctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * 0.1, W / 2, H / 2, Math.max(W, H) * 0.7);
+        g.addColorStop(0, "rgba(0,0,0,0.5)"); g.addColorStop(1, "rgba(0,0,0,0.9)");
+        wctx.fillStyle = g; wctx.fillRect(0, 0, W, H);
+      }
+      // carve the copy out of the field so it reads in clear space
+      wctx.save();
+      wctx.globalCompositeOperation = "destination-out";
+      wctx.filter = "blur(14px)";
+      wctx.fillStyle = "#000";
+      $$<HTMLElement>("h1, h2, p, .ss-btns, .px-badge, .ss-badge", s.stage).forEach((el) => {
+        const r = rel(el);
+        if (r.w < 2 || r.h < 2) return;
+        wctx.fillRect(r.x - 22, r.y - 16, r.w + 44, r.h + 32);
+      });
+      wctx.restore();
+      s.form = sample(S, 0.985, 0.4);
+      s.full = true;
       return;
     }
     start();
@@ -376,7 +417,19 @@ export default function start() {
       }
       return;
     }
-    // static formation, relaxing into a soft halo once its crisp HTML layer has resolved over it
+    if (s.type === "hero" && heroDis > 0.001) {
+      const e = heroDis * heroDis * (3 - 2 * heroDis), cx = vw / 2, cy = vh / 2;
+      for (let i = 0; i < N; i++) {
+        const x0 = f.x[i], y0 = f.y[i], dx = x0 - cx, dy = y0 - cy;
+        const th = rC[i] * TAU, drift = e * (60 + 260 * rD[i]);
+        o.x[i] = x0 + dx * 0.55 * e + Math.cos(th) * drift + Math.sin(T * 0.7 + rB[i] * 6.3 + y0 * 0.01) * 24 * e + offx;
+        o.y[i] = y0 + dy * 0.55 * e + Math.sin(th) * drift - e * 140 * rA[i] + Math.cos(T * 0.6 + rA[i] * 6.3 + x0 * 0.01) * 24 * e + offy;
+        o.a[i] = f.a[i] * (1 - 0.82 * e); o.h[i] = f.h[i]; o.w[i] = f.w[i] + 6 * e;
+      }
+      return;
+    }
+    // static formation, relaxing into a soft halo once its crisp HTML layer has resolved over it (not a full field)
+    if (s.full) relax = 0;
     const rx = relax * 9;
     for (let i = 0; i < N; i++) {
       o.x[i] = f.x[i] + offx + (rx ? Math.cos(rC[i] * TAU) * rx * rD[i] : 0);
@@ -386,6 +439,7 @@ export default function start() {
   }
   const wellAng = new Float32Array(N);
   let wellPull = 0, wellHot = false, dtNow = 0.016;
+  let heroArt: ArtFrames | null = null, heroDis = 0;
 
   // ---------------------------------------------------------------- pointer, taps, bursts
   let mx = -1e4, my = -1e4, pvx = 0, pvy = 0, lmx = 0, lmy = 0, pointerOn = false;
@@ -464,6 +518,7 @@ export default function start() {
     if (!ready) return;
     if (t0 < 0) t0 = t;
     T = t; dtNow = dt || 0.016;
+    heroDis = reduced || scenes[0].type !== "hero" ? 0 : clamp(y / (vh * 0.85));
     // which formations are in play
     let a = 0;
     while (a < scenes.length - 1 && y > scenes[a].h1) a++;
@@ -586,7 +641,10 @@ export default function start() {
     clearTimeout(bailout);
   };
   const fontsReady = document.fonts ? document.fonts.ready : Promise.resolve();
-  Promise.race([fontsReady, new Promise((r) => setTimeout(r, 2500))]).then(go).catch(() => root.classList.remove("px-live"));
+  Promise.all([
+    Promise.race([fontsReady, new Promise((r) => setTimeout(r, 2500))]),
+    Promise.race([loadArt().then((a) => { heroArt = a; }), new Promise((r) => setTimeout(r, 3000))]),
+  ]).then(go).catch(() => root.classList.remove("px-live"));
   let rt = 0, lastW = innerWidth;
   addEventListener("resize", () => {
     clearTimeout(rt);

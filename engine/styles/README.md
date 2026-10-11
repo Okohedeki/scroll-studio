@@ -51,6 +51,13 @@ replaces them.
 style. Use `runtime/src/styles/_kit.ts`: `onFrame` (scroll y, eased velocity, time), `through(el)`, `pinned(track)`,
 `pinSequence(section, steps, onStep)`, `chars(el)`, `typeTo(spans, k)`, `onSeen(el, fn)`, `css(text)`, `reduced`.
 
+### theme.art
+
+When the site sets `theme.art`, templates see `art` (`label`, `frames`, `w`, `h`, `fps`, `sheet`) and the page carries
+it as `<script id="ss-art">`. `runtime/src/styles/_art.ts` gives the runtime `loadArt()` (each frame as a 0..1 subject
+mask, background 0 whichever way the image was lit), `asciiFrame(art, frame, cols, rows)` and `rowsFor(...)`. Draw
+the art in your style's own medium; keep it decorative (`role="img"` with the label) so the page still reads without it.
+
 ## Rules
 
 1. **The page works without JavaScript.** All content is real HTML text in reading order; the first heading on the
