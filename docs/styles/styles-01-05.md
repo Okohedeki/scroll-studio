@@ -1,3 +1,5 @@
+> Style research from Scroll Studio by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
+
 # Scroll Studio style research, part 1: Particles, Liquid morph, Holographic, Neon glow, Wireframe 3D
 
 Purpose: give each style its own UX (what scrolling does, what the pointer does, how content is contained and how sections hand over), not just its own skin. Each brief ends with a "UX signature" that no other style may use.

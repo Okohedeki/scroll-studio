@@ -19,7 +19,7 @@ import typer
 
 from .config import ROOT, settings
 
-app = typer.Typer(add_completion=False, help="Scroll Studio: build scroll-driven sites from any inputs.")
+app = typer.Typer(add_completion=False, help="Scroll Studio: build scroll-driven sites from any inputs.\n\nScroll Studio by Edeki Okoh: https://github.com/Okohedeki/scroll-studio (GNU AGPL-3.0, see NOTICE.md). Sites you build are yours under the Scroll Studio Output Exception.")
 
 STARTER = """name: My Site
 description: A scroll-driven site built with Scroll Studio.

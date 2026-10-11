@@ -40,6 +40,8 @@ select { cursor: pointer; }
 .side nav a:hover, .side-list a:hover { background: var(--bg-2); color: var(--ink); }
 .side nav a.on, .side-list a.on { background: var(--bg-3); color: var(--ink); }
 .side-label { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-3); padding: 20px 10px 6px; }
+.side-legal { margin-top: auto; padding: 18px 10px 6px; line-height: 1.5; }
+.side-legal a { color: inherit; text-decoration: underline; }
 .main { overflow-y: auto; min-width: 0; }
 .banner { padding: 10px 18px; border-bottom: 1px solid var(--line); background: #2a1416; }
 

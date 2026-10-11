@@ -1,7 +1,7 @@
 {
   "name": "scroll-studio",
   "private": true,
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "workspaces": ["runtime", "ui"],
   "scripts": {
     "build": "npm run build -w runtime && npm run build -w ui",

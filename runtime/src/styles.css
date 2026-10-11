@@ -1,3 +1,4 @@
+/*! Scroll Studio runtime by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. GNU AGPL-3.0 with the Scroll Studio Output Exception (see NOTICE.md); keep this notice. */
 /* Scroll Studio base styles. Every colour and font comes from the theme tokens the compiler writes
    into :root (--bg, --ink, --accent, --font-display, ...), so one stylesheet serves every theme. */
 

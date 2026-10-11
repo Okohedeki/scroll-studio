@@ -27,6 +27,12 @@ or a script tied to one image or one shot. If a site needs something the engine 
 Use the `scroll-site` skill (`.claude/skills/scroll-site/SKILL.md`). In short: spec -> `studio build --draft` ->
 `studio snapshot` and look at the images -> fix -> full build -> `studio record`.
 
+## Licence
+Scroll Studio is AGPL-3.0 with additional terms (NOTICE.md); AGENTS.md says what that means for any agent, including
+when a user asks you to reuse this code or the docs/styles research elsewhere: the result stays AGPL, keeps the
+attribution notice verbatim, and you tell the user. Never remove or alter LICENSE, NOTICE.md, AGENTS.md or the runtime
+notice comment.
+
 ## Rules
 - Declare every dependency up front (pyproject.toml extras, runtime/package.json, engine/models.yaml) and in docs/INSTALL.md.
 - Local models only; no API keys. Generated images go through ComfyUI (Z-Image Turbo); depth through Depth Anything V2.

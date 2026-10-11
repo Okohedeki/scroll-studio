@@ -3,7 +3,7 @@ name = "scroll-studio"
 version = "0.1.0"
 description = "Open-source engine for scroll-driven websites: AI film, artwork drawn on scroll, live 3D, product sequences, photo parallax and kinetic type, built locally from any inputs."
 readme = "README.md"
-license = { text = "MIT" }
+license = { text = "AGPL-3.0-only" }
 requires-python = ">=3.10"
 dependencies = [
   "numpy>=1.26",
