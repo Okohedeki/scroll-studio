@@ -34,6 +34,9 @@ site.yaml ──► studio build ──► dist/  (plain static files: host anyw
 
 ### New in v3
 
+Full history of every version: [CHANGELOG.md](CHANGELOG.md).
+
+
 - **One Take** (`film` with `take:`): one unbroken camera move through a generated world. You block the world out
   in rough shapes and camera keys; Blender renders the depth guide, LTX-2.3 paints the world along it in chained
   segments, and your real product is rendered by Cycles from its own 3D model through the identical camera and
