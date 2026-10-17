@@ -109,7 +109,34 @@ def sample_points(objs, cap=40000):
     return pts
 
 
-pts = sample_points(focus)
+FOCUS = bool(V.get("part") or V.get("region"))   # a detail: frame and aim at part of the product
+normal_sum = Vector((0, 0, 0))
+if V.get("region"):
+    # a box in 0-1 of the product's bounds (as PartMaterial.region): the vertices inside it, and the faces' normals
+    r = V["region"]
+    size = Vector((max(hi.x - lo.x, 1e-9), max(hi.y - lo.y, 1e-9), max(hi.z - lo.z, 1e-9)))
+    deps = bpy.context.evaluated_depsgraph_get()
+    pts = []
+    for o in focus:
+        M = o.evaluated_get(deps).matrix_world
+        N = M.to_3x3().inverted_safe().transposed()
+        for poly in o.data.polygons:
+            c = M @ poly.center
+            u = [(c[i] - lo[i]) / size[i] for i in range(3)]
+            if all(r[i] <= u[i] <= r[i + 3] for i in range(3)):
+                pts += [M @ o.data.vertices[v].co for v in poly.vertices]
+                normal_sum += (N @ poly.normal).normalized() * poly.area
+    if not pts:
+        raise SystemExit(f"no faces in region {r}")
+else:
+    pts = sample_points(focus)
+    if FOCUS:
+        deps = bpy.context.evaluated_depsgraph_get()
+        for o in focus:
+            M = o.evaluated_get(deps).matrix_world
+            N = M.to_3x3().inverted_safe().transposed()
+            for poly in o.data.polygons[::max(1, len(o.data.polygons) // 4000)]:
+                normal_sum += (N @ poly.normal).normalized() * poly.area
 flo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
 fhi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
 
@@ -169,10 +196,14 @@ if ENV:      # the backdrop's own light, for every ray type
     nt.links.new(env.outputs["Color"], nt.nodes["Background"].inputs["Color"])
     nt.nodes["Background"].inputs["Strength"].default_value = float(ENV.get("strength", 1.0))
 
-if V.get("aim") and V.get("part"):   # detail: look at the part from the side it faces out of
-    d = (fhi + flo) / 2 - (hi + lo) / 2
-    V.setdefault("yaw", math.degrees(math.atan2(d.x, -d.y)) if math.hypot(d.x, d.y) > 0.05 else -30)
-    V.setdefault("pitch", 12 if d.z < 0.6 else 35)
+if V.get("aim") and FOCUS:   # detail: look at the part from the way its surfaces face
+    n = normal_sum.normalized() if normal_sum.length > 1e-9 else ((fhi + flo) / 2 - (hi + lo) / 2).normalized()
+    if n.z > 0.8:          # facing up: from above and a little in front, so it keeps its perspective
+        V.setdefault("yaw", -22)
+        V.setdefault("pitch", 52)
+    else:
+        V.setdefault("yaw", math.degrees(math.atan2(n.x, -n.y)) + 18)
+        V.setdefault("pitch", max(10.0, min(60.0, math.degrees(math.asin(max(-1.0, min(1.0, n.z)))) + 14)))
 yaw = math.radians(float(V.get("yaw", -35)))
 pitch = math.radians(float(V.get("pitch", 20)))
 # the lights follow the camera's yaw, so every view is lit from its front-left like a product shoot
@@ -231,16 +262,16 @@ if V.get("low"):
     target.z = flo.z + (fhi.z - flo.z) * 0.6
 dirv = Vector((math.sin(yaw) * math.cos(pitch), -math.cos(yaw) * math.cos(pitch), math.sin(pitch)))
 # the product's silhouette fills about two thirds of the frame (a detail view's part a little more)
-fill = min(0.98, (0.74 if V.get("part") else 0.68) * float(V.get("zoom", 1) or 1))
+fill = min(0.98, (0.74 if FOCUS else 0.68) * float(V.get("zoom", 1) or 1))
 
 
 def exit_distance():
     """How far along the view ray the camera must be to stand outside the whole product's bounds."""
-    t = 0.0
+    t = 1e3      # the ray leaves the box through the first face it crosses
     for i in range(3):
         if abs(dirv[i]) > 1e-6:
-            t = max(t, min(max((lo[i] - target[i]) / dirv[i], (hi[i] - target[i]) / dirv[i]), 1e3))
-    return t * 1.02 + 0.02
+            t = min(t, max((lo[i] - target[i]) / dirv[i], (hi[i] - target[i]) / dirv[i]))
+    return max(t, 0.0) * 1.02 + 0.02
 
 
 def place(dist):
@@ -265,7 +296,7 @@ if len(pts) > 4000:
     pts = pts[::len(pts) // 4000]
 if len(focus) > 1:      # thinning must never lose a part's extremes: add every part's own bounds
     pts += [o.matrix_world @ Vector(c) for o in focus for c in o.bound_box]
-near, far = (exit_distance() if V.get("part") else 0.05), 60.0
+near, far = (exit_distance() if FOCUS else 0.05), 60.0
 for _ in range(36):
     mid = (near + far) / 2
     place(mid)
@@ -278,10 +309,11 @@ place(far)
 x0, x1, y0, y1 = extent()
 # centre the product with lens shift (keeps the perspective of the chosen angle)
 k = max(W, H)
-cam_data.shift_x = ((x0 + x1) / 2 - 0.5) * W / k
-cam_data.shift_y = ((y0 + y1) / 2 - 0.5) * H / k
+px, py = V.get("place") or (0.5, 0.5)    # where the product's centre sits in the frame (x right, y down)
+cam_data.shift_x = ((x0 + x1) / 2 - float(px)) * W / k
+cam_data.shift_y = ((y0 + y1) / 2 - (1 - float(py))) * H / k
 
-fstop = V.get("fstop") or (8.0 if V.get("part") and V.get("aim") else None)
+fstop = V.get("fstop") or (8.0 if FOCUS and V.get("aim") else None)
 if fstop:
     cam_data.dof.use_dof = True
     cam_data.dof.focus_distance = (target - cam.location).length

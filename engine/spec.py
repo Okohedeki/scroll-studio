@@ -123,6 +123,12 @@ class ProductShot(Model):
     samples: int = Field(128, ge=4, le=4096, description="Cycles samples (denoised)")
     shadow: bool = Field(True, description="A soft contact shadow under the product")
     exposure: float = Field(0.0, ge=-4, le=4, description="Exposure in stops (-0.7 tames a pale metal lid in a bright scene)")
+    region: Optional[tuple[float, float, float, float, float, float]] = Field(
+        None, description="detail: frame this box of the product instead of a part, x0 y0 z0 x1 y1 z1 in 0-1 of its "
+                          "bounds (as in parts.region): a button or a port on a one-piece body")
+    place: Optional[tuple[float, float]] = Field(None, description="Where the product's centre sits in the frame, 0-1 "
+                                                                   "(x from the left, y from the top); default the "
+                                                                   "middle. [0.68, 0.55] leaves the left for a headline")
     fstop: Optional[float] = Field(None, gt=0, description="Depth of field, focused on the product (or `part`); "
                                                           "detail views default to f/8, a macro look")
     scene: Optional[str] = Field(None, description="Render the product into a generated scene instead of the studio: "

@@ -222,13 +222,14 @@ def product_still(project: Project, product: Optional[Product] = None, view: str
         raise BuildError(f"unknown product view {view!r} (have: {', '.join(VIEWS)})")
     glb, report = _prepare(project, product, log)
     cam = dict(VIEWS[view])
-    for k in ("yaw", "pitch", "zoom", "explode", "lens", "part", "fstop"):
+    for k in ("yaw", "pitch", "zoom", "explode", "lens", "part", "fstop", "place", "region"):
         if shot.get(k) is not None:
             cam[k] = shot[k]
     if shot.get("exposure"):
         cam["exposure"] = float(shot["exposure"])
-    if view == "detail" and not cam.get("part"):
-        raise BuildError("the detail view needs `part`: a glob on a part name (studio product <project> --parts)")
+    if view == "detail" and not (cam.get("part") or cam.get("region")):
+        raise BuildError("the detail view needs `part` (a glob on a part name, see studio product <project> --parts) "
+                         "or `region` (a box of the product's bounds)")
     if cam.get("explode"):
         n = len(json.loads(report.read_text(encoding="utf-8"))["parts"])
         if n < 2:
@@ -388,7 +389,7 @@ def scene_still(project: Project, product: Optional[Product], view: str, size: t
     glb, report = _prepare(project, product, log)
     w, h = (int(size[0]) // 16 * 16, int(size[1]) // 16 * 16)
     cam_v = dict(VIEWS.get(view, VIEWS["three-quarter"]))
-    for k in ("yaw", "pitch", "explode", "lens", "part", "fstop"):
+    for k in ("yaw", "pitch", "explode", "lens", "part", "fstop", "place", "region"):
         if shot.get(k) is not None:
             cam_v[k] = shot[k]
     if shot.get("exposure"):

@@ -1,0 +1,217 @@
+# Flipper Zero: a concept product page built by Scroll Studio from the maker's own open 3D model (GPL-3.0).
+# Everything is a spec: the STEP body is downloaded from Flipper Devices' repository, converted with OpenCascade and
+# given its materials by region (a one-piece body: the screen window, the D-pad panel and the orange-lit LCD are
+# painted on by `parts`); the hero and the product block are Cycles stills composited into Z-Image scenes; the take is
+# a generated room (LTX-2.3 at 1920x1088, restored by SeedVR2) with the real model rendered through the same camera.
+# Not affiliated with Flipper Devices; no logos. Facts from the maker's product page.
+# Build: studio build examples/flipper-zero (ComfyUI with LTX-2.3, Z-Image, Qwen-Image-Edit and SeedVR2; Blender;
+# a 24 GB GPU). Trailer: studio trailer examples/flipper-zero.
+name: Flipper Zero
+description: A portable multi-tool for pentesters and geeks in a toy-like body.
+theme:
+  preset: night
+  colors: { accent: "#ff8200", accent2: "#ffb066", accent_ink: "#1a0c00" }
+nav:
+  cta: { label: See it at Flipper, href: "https://flipper.net/products/flipper-zero" }
+product:
+  name: Flipper Zero
+  maker: Flipper Devices
+  url: https://flipper.net/products/flipper-zero
+  model: https://github.com/flipperdevices/flipperzero-3d-models/raw/master/flipper-zero/body-3d/flipper-zero-body-3d.stp
+  licence: GPL-3.0
+  credit: "Flipper Zero body 3D model by Flipper Devices"
+  concept: true
+  rotation: [-90, 0, -90]          # lying on its back, screen up, D-pad on the right
+  parts:
+    - { match: "*", color: "#ecebe6", roughness: 0.5 }
+    # the recessed panel around the D-pad and back button
+    - { match: "*", region: [0.64, 0.0, 0.5, 0.97, 0.97, 0.992], facing: top, color: "#74777b", roughness: 0.42 }
+    # the screen window and its orange-backlit LCD
+    - { match: "*", region: [0.235, 0.28, 0.65, 0.62, 0.85, 1.0], facing: top, color: "#111214", roughness: 0.05 }
+    - { match: "*", region: [0.27, 0.37, 0.65, 0.585, 0.77, 1.0], facing: top, color: "#ff8c1a", emission: "#ff7a12", emission_strength: 1.0, roughness: 0.15 }
+sections:
+  - type: hero
+    id: top
+    align: left
+    badge: Concept page
+    title: A multi-tool <em>for geeks.</em>
+    body: A portable multi-tool for pentesters and geeks in a toy-like body. Radio, NFC, RFID and infrared in your pocket.
+    buttons:
+      - { label: See it at Flipper, href: "https://flipper.net/products/flipper-zero" }
+      - { label: Watch it come alive, href: "#take" }
+    image:
+      product: { view: three-quarter, yaw: -24, pitch: 34, zoom: 0.85, place: [0.66, 0.56] }
+      scene: a dark desk at night lit by the cool glow of two monitors with lines of green terminal text, a mechanical keyboard and coiled cables blurred behind, a soldering iron on a stand, moody cinematic light
+      size: [1920, 1088]
+      seed: 11
+
+  - id: take
+    type: film
+    layout: overlay
+    length: 6
+    cue: Scroll in
+    gop: 6
+    take:
+      duration: 10
+      fps: 24
+      sky: "#0b1020"
+      light: [0.1, 0.8, 0.6]            # the monitors behind the desk
+      ground: { kind: plane, at: [0, 0, 0], size: [14, 14, 1], color: "#2b2a2c" }
+      objects:
+        # a small room: back wall with a window over the city, a side wall of shelves
+        - { kind: box, name: BackWall, at: [0, 1.25, 1.5], size: [7, 0.2, 3], color: "#3a3d46" }
+        - { kind: box, name: Window, at: [0.9, 1.14, 1.75], size: [1.8, 0.02, 1.1], color: "#141c33" }
+        - { kind: box, name: SideWall, at: [-2.2, -0.5, 1.5], size: [0.2, 4, 3], color: "#34363e" }
+        - { kind: box, name: Shelf1, at: [-2.0, 0.0, 1.2], size: [0.3, 1.6, 0.03], color: "#5a4a3a" }
+        - { kind: box, name: Shelf2, at: [-2.0, 0.0, 1.6], size: [0.3, 1.6, 0.03], color: "#5a4a3a" }
+        - { kind: scatter, name: Gear, count: 14, seed: 3, area: [-2.12, -0.75, -1.9, 0.75], height: [0.08, 0.22], footprint: [0.06, 0.18], color: "#55585f" }
+        # the desk: two monitors, a keyboard, a lamp; the product sits front right on the bare desktop
+        - { kind: box, name: Desk, at: [0, 0.35, 0.73], size: [1.8, 0.8, 0.04], color: "#1d1c1f" }
+        - { kind: box, name: LegL, at: [-0.85, 0.35, 0.36], size: [0.05, 0.7, 0.72], color: "#151517" }
+        - { kind: box, name: LegR, at: [0.85, 0.35, 0.36], size: [0.05, 0.7, 0.72], color: "#151517" }
+        - { kind: box, name: MonitorL, at: [-0.36, 0.62, 1.05], size: [0.62, 0.04, 0.38], rotation: [0, 0, 10], color: "#2f4b5c" }
+        - { kind: box, name: MonitorR, at: [0.36, 0.62, 1.05], size: [0.62, 0.04, 0.38], rotation: [0, 0, -10], color: "#2f4b5c" }
+        - { kind: box, name: StandL, at: [-0.36, 0.66, 0.8], size: [0.06, 0.06, 0.12], color: "#18181a" }
+        - { kind: box, name: StandR, at: [0.36, 0.66, 0.8], size: [0.06, 0.06, 0.12], color: "#18181a" }
+        - { kind: box, name: Keyboard, at: [-0.12, 0.26, 0.765], size: [0.44, 0.14, 0.03], color: "#29292c" }
+        - { kind: cylinder, name: Lamp, at: [-0.75, 0.55, 0.95], radius: 0.05, depth: 0.4, color: "#3a3a3a" }
+        - { kind: box, name: Chair, at: [-0.3, -0.6, 0.5], size: [0.5, 0.5, 0.08], color: "#202022" }
+      camera:
+        - { t: 0, at: [-1.55, -2.5, 1.75], look: [0.05, 0.45, 0.95] }
+        - { t: 4.5, at: [-0.6, -1.2, 1.25], look: [0.1, 0.3, 0.9] }
+        - { t: 8, at: [-0.1, -0.45, 0.95], look: [0.13, 0.05, 0.8] }
+        - { t: 10, at: [0.02, -0.21, 0.835], look: [0.13, 0.07, 0.815] }
+      lens: 45
+      product:                          # the site's product, lit by the plate itself
+        at: [0.13, 0.02, 0.75]
+        rotation: [0, 0, -14]
+        sun_strength: 0.8
+        fstop: 5.6
+      preview_res: [1280, 720]
+      keyframes:
+        control_strength: 0.7
+        res: [1920, 1088]
+        seed: 5
+        frames:
+          - name: room
+            t: 0
+            strength: 1.0
+            prompt: Photograph of a small dark bedroom workshop at night, a desk with two glowing monitors showing lines of green terminal code, a mechanical keyboard, coiled cables, shelves of electronics on the left wall, a window behind the desk with distant city lights, cool blue monitor glow and a warm orange accent light, cinematic, photoreal, crisp detail, high dynamic range.
+          - name: desk
+            t: 10
+            strength: 0.85
+            prompt: Close photograph of the bare front edge of a dark matte desk at night, nothing on the desktop in the foreground, the corner of a mechanical keyboard and two glowing monitors with green terminal text softly out of focus behind, cool blue glow and a faint warm orange light on the desk surface, shallow depth of field, photoreal, crisp detail.
+      ltx:
+        res: [1920, 1088]
+        seed: 17
+        guide_strength: 1.0
+        guide_blur: 1.5
+        sampler: euler_cfg_pp
+        negative_prompt: cuts, jump cuts, flicker, warped shapes, text, watermark, logo, blur, people
+        segments:
+          - id: door
+            range: [0, 2.5]
+            prompt: One continuous slow dolly shot into a small dark room at night, a desk with two glowing monitors showing green terminal code, shelves of electronics on the left, a window with city lights behind, cool monitor glow, photoreal, steady, no cuts.
+          - id: room
+            range: [2.5, 5]
+            prompt: One continuous slow camera glide toward a dark desk at night, two monitors glowing with lines of green code, a mechanical keyboard, cables, a lamp, city lights in the window, photoreal, steady, no cuts.
+          - id: desk
+            range: [5, 7.5]
+            prompt: One continuous slow shot lowering toward the front edge of a dark desk at night, the keyboard and glowing monitors in soft focus behind, cool blue light on the matte desktop, the front of the desk empty, photoreal, steady, no cuts.
+          - id: close
+            range: [7.5, 10]
+            prompt: One continuous slow close shot settling over the bare front corner of a dark matte desk at night, monitors softly glowing behind out of focus, faint orange light on the surface, shallow depth of field, photoreal, steady, no cuts.
+      restore: 1080
+    steps:
+      - kicker: Flipper Zero
+        title: For the <em>curious.</em>
+        at: [0.02, 0.24]
+        intro: true
+      - kicker: After hours
+        title: Every signal <em>in the room.</em>
+        at: [0.32, 0.58]
+      - kicker: 100.3 x 40.1 x 25.6 mm
+        title: Pocket-sized. <em>Toy-like.</em>
+        at: [0.7, 0.98]
+
+  - id: live
+    type: showroom
+    nav_label: Live
+    layout: cards
+    lighting: studio
+    keys:
+      - { t: 0, yaw: -28, pitch: 34, zoom: 1.0 }
+      - { t: 0.5, yaw: 35, pitch: 52, zoom: 1.12 }
+      - { t: 1, yaw: 160, pitch: 24, zoom: 1.0 }
+    steps:
+      - { kicker: The real model, title: Turn it <em>over.</em>, body: "The same body Flipper Devices publish as open 3D files, live in your browser." }
+      - { title: A 1.4" screen <em>that glows orange.</em>, body: "A 128x64 monochrome LCD with an orange backlight, readable in sunlight and in the dark." }
+      - { title: Ports on the edges, body: "USB-C for charging and updates, GPIO pins along the top for your own modules." }
+
+  - type: features
+    id: features
+    nav_label: Inside
+    kicker: What it reads and sends
+    title: One device, <em>many radios.</em>
+    items:
+      - { tag: Sub-GHz, title: Sub-1 GHz radio, body: "A CC1101 transceiver for garage remotes, gates, sensors and the other sub-GHz devices around you." }
+      - { tag: NFC, title: NFC, body: "Read, save and emulate the high-frequency cards used for access, transit and payment." }
+      - { tag: RFID, title: 125 kHz RFID, body: "The low-frequency proximity cards and tags still used in many buildings." }
+      - { tag: IR, title: Infrared, body: "Learn and send infrared remote signals, with a universal remote built in." }
+
+  - type: product
+    id: controls
+    kicker: The controls
+    title: A D-pad your thumb <em>already knows.</em>
+    body: Five-way navigation and a back button on a recessed panel beside the screen, built to be used one-handed.
+    image:
+      product: { view: detail, region: [0.64, 0.0, 0.85, 0.97, 0.97, 1.0] }
+      size: [1400, 1000]
+    side: right
+    tags: [STM32WB55, 1.4" 128x64 LCD, Orange backlight]
+
+  - type: product
+    id: screen
+    kicker: The screen
+    title: Monochrome, <em>orange-lit.</em>
+    body: A 1.4 inch 128x64 LCD behind a glass window, lit orange, readable in daylight and kind to your eyes at night.
+    image:
+      product: { view: detail, region: [0.2, 0.2, 0.6, 0.65, 0.9, 1.0] }
+      size: [1400, 1000]
+    side: left
+    tags: [128x64 pixels, Low power]
+
+  - type: stats
+    items:
+      - { value: "102", unit: g, label: Weight }
+      - { value: "2100", unit: mAh, label: Battery }
+      - { value: "28", unit: days, label: "Battery life, up to" }
+      - { value: "1.4", unit: in, label: "LCD, 128x64" }
+
+  - type: product
+    id: order
+    kicker: Flipper Zero
+    title: Always <em>in your pocket.</em>
+    body: STM32WB55 inside, sub-GHz radio, NFC, 125 kHz RFID and infrared, a 2100 mAh battery that lasts up to 28 days. $169 from the maker.
+    tags: [100.3 x 40.1 x 25.6 mm, 102 g, $169]
+    buttons:
+      - { label: See it at Flipper, href: "https://flipper.net/products/flipper-zero" }
+    note: A concept page made with Scroll Studio. Not affiliated with Flipper Devices.
+    image:
+      product: { view: hero-low, yaw: -30, zoom: 0.9 }
+      scene: a workbench at night under a warm desk lamp, a cutting mat with a few electronic components and a small circuit board, cables, soft orange and blue light, shallow depth of field
+      size: [1400, 1088]
+      seed: 21
+    side: left
+
+  - type: cta
+    id: buy
+    kicker: From the maker
+    title: See it <em>at Flipper.</em>
+    button: { label: See it at Flipper, href: "https://flipper.net/products/flipper-zero" }
+    background: "scene:take"
+
+trailer: { embed: true }
+footer:
+  left: "Flipper Zero is a product of Flipper Devices. This is an independent concept page."
+  right: World generated locally with LTX-2.3; the device is rendered from its open 3D model
