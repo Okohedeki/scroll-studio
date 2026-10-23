@@ -3,7 +3,7 @@
 label: Anime intro
 about: Your scroll is the playhead of an anime opening. A silent cold open, a title card that smashes in, then hard cuts from shot to shot, freeze frames with vertical name cards, a VS split and an eyecatch, ending on the full-cast pose and a NEXT EPISODE card.
 mode: dark
-colors: { bg: "#0a0a12", bg2: "#14141f", ink: "#fff7ee", accent: "#ff2b55", accent2: "#ffe600", accent_ink: "#ffffff" }
+colors: { bg: "#0a0a12", bg2: "#14141f", ink: "#fff7ee", accent: "#ff2b55", accent2: "#ffe600", accent_ink: '#000000' }
 fonts: { display: "Dela Gothic One", body: "M PLUS 1p", mono: "M PLUS 1 Code", card: "Anton", title: "Shippori Mincho B1" }
 font_axes: { "Dela Gothic One": "", "M PLUS 1p": "wght@400;500;700;800", "M PLUS 1 Code": "wght@400;700", "Anton": "", "Shippori Mincho B1": "wght@800" }
 display_weight: 400

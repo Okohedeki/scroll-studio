@@ -113,6 +113,7 @@ The whole workflow is in the [guide](docs/guide.md).
 | Making a site | [Guide](docs/guide.md): direction boards, storyboards, client copy decks, trailers, Claude |
 | Why it exists | [Local only, 10 to 30 times fewer tokens](docs/why.md) |
 | How it works | [Engine](docs/ENGINE.md) · [Style research](docs/styles/) · [Roadmap](docs/directions.md) |
+| Contributing | [How to contribute](CONTRIBUTING.md) · [Code of conduct](CODE_OF_CONDUCT.md) · [Security](SECURITY.md) |
 | Releases | [What's new](docs/whats-new.md) · [Changelog](CHANGELOG.md) · [1.5 milestone](https://github.com/Okohedeki/scroll-studio/milestone/1) |
 
 ## Licence

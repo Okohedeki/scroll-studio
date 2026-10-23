@@ -1,0 +1,44 @@
+name: Style proposal
+description: Propose a new style (theme.style), an experience with its own scroll mechanic.
+labels: [enhancement, style]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A style is an experience, not a skin: its own scroll mechanic, layout, transitions and pointer behaviour. One that
+        shares those with an existing style is a reskin and won't be merged. Read the
+        [style contract](https://github.com/Okohedeki/scroll-studio/blob/main/engine/styles/README.md) and the
+        [consistency rules](https://github.com/Okohedeki/scroll-studio/blob/main/CONTRIBUTING.md#consistency-rules) first.
+  - type: input
+    id: name
+    attributes:
+      label: Name
+      placeholder: "e.g. risograph"
+    validations:
+      required: true
+  - type: textarea
+    id: origin
+    attributes:
+      label: Where it comes from
+      description: The medium, movement or craft it is based on, with references.
+    validations:
+      required: true
+  - type: textarea
+    id: experience
+    attributes:
+      label: The experience
+      description: What scrolling does, how content is laid out and arrives, how sections hand over, what the pointer does.
+    validations:
+      required: true
+  - type: textarea
+    id: different
+    attributes:
+      label: Why it is not a reskin
+      description: Which existing style is closest, and what is different in mechanic, layout and transitions.
+    validations:
+      required: true
+  - type: textarea
+    id: fallbacks
+    attributes:
+      label: Phones and reduced motion
+      description: How it works at 390 px wide, and how it stays recognisable with motion off.

@@ -263,6 +263,15 @@ def _notes(sec) -> list[str]:
     return notes
 
 
+def page_html(site: Site) -> str:
+    """The whole page of a loaded spec, rendered with stand-ins for every render (the conformance tests draw every
+    style with every block type this way)."""
+    from . import themes
+    theme = themes.resolve(site.theme)
+    cuts_cfg = _cuts(site, theme)
+    return _page(site, _entries(site, cuts_cfg), theme, cuts_cfg)
+
+
 # ---------------------------------------------------------------- the snapshot
 
 def layout_snapshot(site_yaml_path) -> dict:

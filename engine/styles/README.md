@@ -60,6 +60,11 @@ the art in your style's own medium; keep it decorative (`role="img"` with the la
 
 ## Rules
 
+`tests/test_conformance.py` checks the folder, the tokens (colour roles, mode, contrast), the block types, the
+docs and that every style renders a page holding every block type; the full list is in
+[CONTRIBUTING.md](../../CONTRIBUTING.md#consistency-rules).
+
+
 1. **The page works without JavaScript.** All content is real HTML text in reading order; the first heading on the
    page is the `<h1>`. JavaScript adds the experience; it never holds content hostage (no text that only exists after
    an animation).

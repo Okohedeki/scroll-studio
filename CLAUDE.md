@@ -45,4 +45,7 @@ notice comment.
 - After changing `runtime/src`, run `npm run build:runtime` (the built bundle in engine/compile/static is committed).
 - After changing the UI, run `npm run build:ui`.
 - Check visual changes with `studio snapshot` and read the sheet; judge quality on the images, not the logs.
-- Commit and push after each working unit.
+- `main` is protected: every change goes through a pull request with the `tests` check green (no direct pushes, no
+  force-push). Work on a branch, push it after each working unit, open a PR, merge when green.
+- Keep the consistency rules in CONTRIBUTING.md; `tests/test_conformance.py` checks every theme preset and style, and
+  `tests/test_layout_snapshots.py` every example's layout (re-record on purpose with `UPDATE_LAYOUT_SNAPSHOTS=1`).

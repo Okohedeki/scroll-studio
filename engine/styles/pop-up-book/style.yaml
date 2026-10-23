@@ -10,7 +10,7 @@ colors:
   ink: '#f4ecdc'
   accent: '#e0553a'
   accent2: '#f0b54a'
-  accent_ink: '#fffaf0'
+  accent_ink: '#000000'
 fonts:
   display: Caprasimo
   body: Literata

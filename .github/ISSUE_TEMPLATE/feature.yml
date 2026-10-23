@@ -1,0 +1,36 @@
+name: Feature or scene
+description: A new engine capability, scene type, spec field or command.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Scroll Studio grows by engine features, never one-off pages, and runs local models only (no API keys). See the
+        [ground rules](https://github.com/Okohedeki/scroll-studio/blob/main/CONTRIBUTING.md#ground-rules) and the
+        [milestones](https://github.com/Okohedeki/scroll-studio/milestones) for what is planned.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What a site needs that the engine can't do
+    validations:
+      required: true
+  - type: textarea
+    id: spec
+    attributes:
+      label: How it would look in site.yaml
+      description: The spec field(s) you have in mind.
+      render: yaml
+  - type: textarea
+    id: how
+    attributes:
+      label: How it could work
+      description: Builder, runtime, models (local only) and how it would be tested without a GPU.
+  - type: checkboxes
+    id: rules
+    attributes:
+      label: Ground rules
+      options:
+        - label: It is an engine feature every site can use, not a page for one project.
+          required: true
+        - label: It runs with local models only, without API keys.
+          required: true

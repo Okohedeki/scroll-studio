@@ -60,7 +60,7 @@ dusk:         # warm dark: resorts, real estate, food and wine
 
 ink:          # high-contrast type-first: agencies, events, manifestos
   mode: light
-  colors: { bg: "#f2f0e9", bg2: "#e7e4da", ink: "#0d0d0c", accent: "#ff3d00", accent2: "#ff7a45", accent_ink: "#ffffff" }
+  colors: { bg: "#f2f0e9", bg2: "#e7e4da", ink: "#0d0d0c", accent: "#ff3d00", accent2: "#ff7a45", accent_ink: "#000000" }
   fonts: { display: "Archivo", body: "Archivo", mono: "Space Mono" }
   display_weight: 800
   em_italic: false

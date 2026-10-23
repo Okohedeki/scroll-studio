@@ -9,8 +9,8 @@ colors:
   ink: '#f4e6c8'
   accent: '#d2561f'
   accent2: '#e0a526'
-  accent_ink: '#fff6e4'
-  accent_text: '#a8381f'
+  accent_ink: '#000000'
+  accent_text: '#d2561f'
 fonts:
   display: Fredoka
   body: Jost

@@ -1,0 +1,34 @@
+name: Bug
+description: Something builds wrong, renders wrong or breaks.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead. Pictures help for anything visual.
+    validations:
+      required: true
+  - type: textarea
+    id: spec
+    attributes:
+      label: The smallest site.yaml that shows it
+      description: Cut your spec down to the section that breaks. Remove anything private.
+      render: yaml
+  - type: textarea
+    id: log
+    attributes:
+      label: Build output or error
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: Scroll Studio version or commit
+      placeholder: "1.4.0, or git rev-parse --short HEAD"
+    validations:
+      required: true
+  - type: textarea
+    id: machine
+    attributes:
+      label: Machine
+      description: OS, GPU, and what `studio doctor` says is available (for render problems).

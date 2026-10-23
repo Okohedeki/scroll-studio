@@ -10,7 +10,7 @@ colors:
   ink: '#141414'
   accent: '#ff4d2e'
   accent2: '#e8401f'
-  accent_ink: '#ffffff'
+  accent_ink: '#000000'
 fonts:
   display: Inter Tight
   body: Inter Tight

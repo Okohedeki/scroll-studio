@@ -8,7 +8,7 @@ colors:
   ink: '#141414'
   accent: '#ec008c'
   accent2: '#00aeef'
-  accent_ink: '#ffffff'
+  accent_ink: '#000000'
   accent_text: '#141414'
 fonts:
   display: Playfair Display

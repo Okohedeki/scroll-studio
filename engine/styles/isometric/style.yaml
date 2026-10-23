@@ -9,7 +9,7 @@ colors:
   ink: '#1d2b3a'
   accent: '#d24a28'
   accent2: '#21998e'
-  accent_ink: '#ffffff'
+  accent_ink: '#000000'
 fonts:
   display: Sora
   body: Sora
