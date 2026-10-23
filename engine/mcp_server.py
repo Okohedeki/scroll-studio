@@ -1,3 +1,4 @@
+import os
 """MCP server: lets Claude (Claude Code, Claude Desktop, any MCP client) build scroll sites with the engine.
 
   python -m engine.mcp_server          (registered for Claude Code in .mcp.json at the repo root)
@@ -418,6 +419,7 @@ def cinemagraphs(project: str, only: Optional[str] = None, force: bool = False, 
     return jobs.submit("cinemagraph", p.name, "cinemagraph", run).public(tail=5)
 
 
+@mcp.tool()
 def world_check(project: str, section: Optional[str] = None, frames: int = 6) -> dict:
     """Check the in-world type of a built film (steps with `place: {kind: behind | surface | sky}`, see the field docs of
     `place`): per title, how steady the track is (jitter in pixels of a 960-wide frame), how much of its window the type is on
