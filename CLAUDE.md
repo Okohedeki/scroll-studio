@@ -44,7 +44,10 @@ notice comment.
   placeholders like `/path/to/models`; configure machines in studio.toml or env vars). `tests/test_no_local_paths.py` enforces it.
 - Declare every dependency up front (pyproject.toml extras, runtime/package.json, engine/models.yaml) and in docs/INSTALL.md.
 - Local models only; no API keys. Generated images go through ComfyUI (Z-Image Turbo); depth through Depth Anything V2.
-- After changing `runtime/src`, run `npm run build:runtime` (the built bundle in engine/compile/static is committed).
+- After changing `runtime/src`, run `npm run build:runtime` and commit the bundle in engine/compile/static (CI rebuilds
+  it and fails on any difference).
+- Run `ruff check .` before committing. Coverage floors in `tests/coverage_floors.json` never go down; raise one when a
+  change beats it by 2 points. A tracked data file under `engine/` must be in package-data (`tests/test_packaging.py`).
 - After changing the UI, run `npm run build:ui`.
 - Check visual changes with `studio snapshot` and read the sheet; judge quality on the images, not the logs.
 - `main` is protected: every change goes through a pull request with the required checks green (no direct pushes, no

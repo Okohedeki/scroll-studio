@@ -222,10 +222,23 @@ those with an existing one is a reskin and is not merged. The full contract is
 
 ## The checks
 
-Every pull request runs the [tests workflow](.github/workflows/tests.yml) on Linux without a GPU, and `main` only
-accepts changes that pass it:
+Every pull request runs these without a GPU, and `main` only accepts changes that pass the required ones
+([repository settings](docs/maintainers/repo-settings.md)):
 
-- **The whole suite**, `python -m pytest -q`: spec validation, planners, builders with stand-ins, the compiler.
+- **Lint** (`lint` job): `ruff check .` (syntax errors, undefined names, unused imports, redefinitions and unused
+  variables) and the repository hygiene tests (`tests/test_repo_hygiene.py`: no file over 10 MB, media only in
+  `examples/*/inputs`, `examples/*/proof`, `examples/showcase`, `docs/media` and the built runtime, no `.env`, keys,
+  `studio.toml` or `settings.local.json`). `pre-commit install` runs the same checks on each commit.
+- **The whole suite** (`tests` job), `python -m pytest -q`: spec validation, planners, builders with stand-ins, the
+  compiler, with coverage. CI fails when the total or an area in `tests/coverage_floors.json` drops below its floor;
+  new code needs tests, and when a change lifts an area by 2 points or more, raise its floor in the same pull request.
+  Floors only go up.
+- **Platforms** (`platforms` job): the suite on Python 3.10 and 3.13, Windows and macOS.
+- **Install** (`install` job): the wheel and sdist are built, installed in a clean environment, and every example
+  compiles from the installed package. A new kind of data file under `engine/` must be listed in
+  `[tool.setuptools.package-data]` (`tests/test_packaging.py` fails otherwise).
+- **Runtime** (`runtime` job): `npm run build:runtime` must reproduce the committed `engine/compile/static/runtime/`
+  exactly, so a change to `runtime/src` commits its rebuilt bundle. The runtime and the UI are type-checked.
 - **Conformance** (`tests/test_conformance.py`): every preset and style against the rules above.
 - **Layout snapshots** (`tests/test_layout_snapshots.py`): what every example compiles to (sections, captions, windows,
   block classes). If your change moves something **on purpose**, re-record and commit the snapshots, and say why in the
@@ -234,6 +247,13 @@ accepts changes that pass it:
   ```bash
   UPDATE_LAYOUT_SNAPSHOTS=1 python -m pytest tests/test_layout_snapshots.py
   ```
+
+- **Public surface** (`tests/test_public_surface.py`): the `site.yaml` schema, the CLI and the MCP tools. Re-record a
+  deliberate change with `UPDATE_SURFACE_SNAPSHOTS=1`; anything removed is a breaking change
+  ([compatibility](docs/compatibility.md)).
+- **Old specs** (`tests/test_old_specs.py`): every example spec from every release still validates and compiles.
+- **Policy, security and licences**: `pr-policy` (title, linked issue, changelog fragment), the CLA, and the security
+  checks (dependency vulnerabilities and licences, secrets, workflow linting, CodeQL).
 
 ## Pull requests
 
