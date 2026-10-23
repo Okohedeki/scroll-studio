@@ -1,0 +1,49 @@
+# FORM/26: a design conference. Scene type `type`: kinetic typography (scale, reveal, swap, stack modes).
+name: FORM/26
+description: A two-day conference about type, motion and the web. Lisbon, 14–15 May.
+theme: { preset: ink }
+nav:
+  cta: { label: Get a ticket, href: "#tickets" }
+sections:
+  - id: hello
+    type: type
+    mode: scale
+    text: FORM/26
+    length: 2.6
+  - id: manifesto
+    type: type
+    nav_label: Manifesto
+    mode: reveal
+    text: "The web moves. Type should too. Two days about letters that <em>breathe</em>, layouts that <em>listen</em> and pages that <em>answer back</em> when you scroll."
+    length: 2.8
+  - id: who
+    type: type
+    nav_label: Speakers
+    mode: swap
+    text: "Built for"
+    words: [designers., developers., typographers., motion people., the curious.]
+    length: 3.0
+  - type: features
+    kicker: Speakers
+    title: Twelve talks, <em>no slides you can skim.</em>
+    items:
+      - { tag: Day 1 · 10:00, title: Variable everything, body: How variable fonts let one family carry a whole brand. }
+      - { tag: Day 1 · 14:00, title: Scroll as a timeline, body: "Designing for the scrollbar: pacing, sticky scenes and story." }
+      - { tag: Day 2 · 11:00, title: Letters in 3D, body: "Extruded, lit and rendered in the browser, at sixty frames a second." }
+  - id: dates
+    type: type
+    mode: stack
+    text: "Lisbon / 14–15 May / Two days / One room"
+    length: 2.6
+  - type: stats
+    items:
+      - { value: "12", label: Talks }
+      - { value: "4", label: Workshops }
+      - { value: "600", label: Seats }
+      - { value: "1", label: "Track, no clashes" }
+  - type: cta
+    id: tickets
+    kicker: Early bird until March
+    title: Save your <em>seat.</em>
+    button: { label: Get a ticket, href: "#" }
+footer: { left: "© FORM/26. A concept site." }

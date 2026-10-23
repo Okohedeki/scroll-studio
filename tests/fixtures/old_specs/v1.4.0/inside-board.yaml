@@ -1,0 +1,80 @@
+# Inside the Framework mainboard: the product as the set. A concept page built by Scroll Studio from Framework Computer's
+# own open 3D model of the Framework Laptop 12 mainboard (CC BY 4.0, github.com/FrameworkComputer/Framework-Laptop-12).
+# The camera flies into the board and the page happens inside it: every feature is a stop at a named part, with its copy
+# arriving there. Everything is a spec: the STEP assembly is downloaded and converted by the engine (OpenCascade keeps every
+# part and its name), the materials are painted on by part name, the route is planned from the part boxes, Cycles draws the
+# frames (macro lens, a lamp that travels with the camera, a rim light behind the part), and parts that stand between the
+# camera and the stop (the fan cover, the cold plate, the heat pipe over the processor) dissolve while the camera is behind them.
+# Not affiliated with Framework Computer Inc; no logos. Dimensions in the copy are read from the model.
+# Build: studio build examples/inside-board (Blender 4.2+, no ComfyUI; a CPU or GPU render of a few hundred frames).
+# Look at the route first: studio inside examples/inside-board --still all   (a contact sheet of every stop in minutes).
+name: Inside the Framework mainboard
+description: A macro flight through the open-hardware Framework Laptop 12 mainboard, one stop per part.
+theme:
+  preset: night
+  colors: { accent: "#e8924f", accent2: "#f4c28f", accent_ink: "#1d0e04" }
+nav:
+  cta: { label: The open files, href: "https://github.com/FrameworkComputer/Framework-Laptop-12" }
+product:
+  name: Framework Laptop 12 mainboard
+  maker: Framework Computer Inc
+  url: https://github.com/FrameworkComputer/Framework-Laptop-12
+  model: "https://github.com/FrameworkComputer/Framework-Laptop-12/raw/main/Mainboard/FRAMEWORK_LAPTOP_12_MAINBOARD_V01.stp"
+  licence: CC BY 4.0
+  credit: "Framework Laptop 12 mainboard 3D model by Framework Computer Inc"
+  concept: true
+  parts:                  # later rules win; the STEP file carries no colours, so every material is painted by part name
+    - { match: "*", color: "#2b2c30", metallic: 0.3, roughness: 0.45 }
+    - { match: "LFR20_MB", color: "#0e3b2d", roughness: 0.32 }                        # the board: solder-mask green
+    - { match: "MB_COMPONENT", color: "#202226", metallic: 0.45, roughness: 0.38 }    # every small component, one mesh
+    # cooling: copper pipe and fins, aluminium fan housing, black impeller
+    - { match: "SF-HP*", color: "#c97a3f", metallic: 1.0, roughness: 0.28 }
+    - { match: "*CU_FIN*", color: "#d08650", metallic: 1.0, roughness: 0.3 }
+    - { match: "SUNFLOWER-TOOLING-FRAME*", color: "#b9bdc4", metallic: 1.0, roughness: 0.34 }
+    - { match: "SUNFLOWER-TOOLING-COVER*", color: "#a9adb4", metallic: 1.0, roughness: 0.38 }
+    - { match: "SUNFLOWER-TOOLING-BASE*", color: "#8e929a", metallic: 1.0, roughness: 0.4 }
+    - { match: "IMP_*", color: "#17181c", metallic: 0.0, roughness: 0.42 }
+    - { match: "MQ4_*", color: "#c0c3c9", metallic: 1.0, roughness: 0.25 }
+    - { match: "FRAME_1_*", color: "#1c1d21", roughness: 0.5 }
+    - { match: "SF_PLATE*", color: "#b99a78", metallic: 1.0, roughness: 0.3 }
+    - { match: "SF_CLIP*", color: "#9da1a8", metallic: 1.0, roughness: 0.3 }
+    # the processor package
+    - { match: "LFR20_M64266*", color: "#141518", roughness: 0.35 }
+    - { match: "*DIE*", color: "#39445a", metallic: 0.7, roughness: 0.18 }
+    - { match: "LFR20_PCBA_CPU_BRK*", color: "#b0b3b9", metallic: 1.0, roughness: 0.4 }
+    - { match: "KM64266_STIFFENER*", color: "#c9a24a", metallic: 1.0, roughness: 0.3 }
+    # memory, storage, radio
+    - { match: "PHO16_DDR5_CARD*", color: "#103c30", roughness: 0.3 }
+    - { match: "LFR20_SP07001WP00*", color: "#15161a", roughness: 0.45 }
+    - { match: "*MYLAR*", color: "#94581f", roughness: 0.25 }                          # amber polyimide film
+    - { match: "HFW30_*", color: "#262a31", metallic: 0.2, roughness: 0.3 }
+    - { match: "LFR20_IFGP6_WLAN*", color: "#0f3a2d", roughness: 0.3 }
+    - { match: "LFR20_WLAN_COVER*", color: "#aeb2b9", metallic: 1.0, roughness: 0.35 }
+    # ports and fasteners
+    - { match: "LFR20_AUSBA331*", color: "#c6c9cf", metallic: 1.0, roughness: 0.28 }
+    - { match: "*STANDOFF*", color: "#c9a24a", metallic: 1.0, roughness: 0.3 }
+    - { match: "RUBBER*", color: "#0c0c0d", roughness: 0.85 }
+    - { match: "*SPONGE*", color: "#0c0c0d", roughness: 0.9 }
+sections:
+  - id: inside
+    type: inside
+    size: [1600, 900]
+    samples: 64
+    ambient: 0.4
+    exposure: 0.3
+    steps:
+      - { intro: true, kicker: "Framework Laptop 12 · open hardware", title: "Go <em>inside</em> the mainboard.", body: "A macro flight through the 3D model Framework publishes for anyone to build on.", hint: Scroll in }
+      - { kicker: "01  The board", title: "A computer on a card.", body: "Processor, memory, storage, radio and four ports, on one board that lifts out of the laptop." }
+      - { kicker: "02  The road out", title: "Heat has a way to leave.", body: "A copper heat pipe, 136 mm long, carries it from the processor to the fins." }
+      - { kicker: "03  The fan", title: "One blower, <em>53 mm</em> across.", body: "It pushes air through the copper fins, and the cover is only a lid." }
+      - { kicker: "04  The memory", title: "Memory in a socket.", body: "A DDR5 module in a standard socket, under a strip of amber film." }
+      - { kicker: "05  The storage", title: "A drive the size of a stamp.", body: "An M.2 2230 SSD, 22 mm by 30 mm, one small step from the edge." }
+      - { kicker: "06  The ports", title: "Four ports. Your choice.", body: "A USB-C connector in every corner takes an expansion card." }
+      - { kicker: Open hardware, title: "The whole board, <em>open.</em>", body: "The model is CC BY 4.0: take it apart, print a case for it, or build something on it.", button: { label: The files on GitHub, href: "https://github.com/FrameworkComputer/Framework-Laptop-12" } }
+    stops:
+      - { part: "MB_COMPONENT", label: The board, aim: [0.22, 0.32, 1.0], span: 70, lens: 50, pitch: 16, yaw: -28 }
+      - { part: "SF-HP*", label: Heat pipe, aim: [0.55, 0.5, 1.0], span: 52, pitch: 20 }
+      - { part: "IMP_*", label: Fan, span: 96, pitch: 22, yaw: 20, roll: 3 }
+      - { part: "PHO16_DDR5_CARD*", label: Memory, aim: [0.25, 0.5, 1.0], span: 60, pitch: 14, yaw: 15 }
+      - { part: "HFW30_PM991A_M2_2230", label: Storage, span: 44, pitch: 30, yaw: 55 }
+      - { part: "LFR20_AUSBA331_0710_B_3.001", label: USB-C port, span: 34, yaw: 78, pitch: 14 }

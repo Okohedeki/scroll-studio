@@ -1,0 +1,70 @@
+# Hale & Rowe: an architecture practice. Scene type `artwork` on a building photo: construction lines, then the
+# contour drawing, then shading, then the finished photograph. `stages` skips the painterly underpainting.
+name: Hale & Rowe
+description: Architects of quiet houses in difficult places.
+theme: { preset: blueprint }
+nav:
+  cta: { label: Start a project, href: "#contact" }
+sections:
+  - id: drawing
+    type: artwork
+    nav_label: Process
+    layout: split
+    side: right
+    image:
+      generate: Architectural photograph of a modern concrete and timber house cantilevered over a forested hillside, large glass walls, flat roof, warm interior lights at dusk, clean lines, mist in the valley below, photorealistic, wide angle, shot for an architecture magazine
+      size: [1536, 1152]
+      seed: 12
+    stages: [guides, lines, value, colour]
+    paper: "#f4f6f8"
+    underpaint: "#3b5a7a"
+    hud: { kind: progress, scales: [Site survey] }
+    steps:
+      - intro: true
+        kicker: Hale & Rowe Architects
+        title: Every house starts as <em>a few lines.</em>
+        body: "Scroll through how we design: from the first construction lines on the site to the finished building at dusk."
+        hint: Scroll to draw
+        length: 1.0
+      - kicker: 01 / 04
+        title: Read the site
+        body: Before any building, the slope, the light and the view. We set the axis, the horizon and where the house will sit.
+        fact: The hillside here falls 1 in 3. The house reaches out instead of digging in.
+        length: 1.1
+      - kicker: 02 / 04
+        title: Draw the idea
+        body: "One clear line: a concrete base anchored to the rock, a timber box that floats out over the trees."
+        fact: We still draw the first sketches by hand.
+        length: 1.8
+      - kicker: 03 / 04
+        title: Shape the light
+        body: Shadow studies for every hour of the year decide the overhangs, the glazing and where you will want to sit.
+        fact: Deep eaves keep summer sun off the glass; winter sun comes in low.
+        length: 1.4
+      - kicker: 04 / 04
+        title: Build it <em>well.</em>
+        body: Local timber, board-marked concrete, and a builder we have worked with for fifteen years.
+        length: 1.6
+  - type: intro
+    id: practice
+    nav_label: Practice
+    kicker: The practice
+    title: Small team, <em>difficult sites.</em>
+    body: Eight architects in a converted boathouse. We take on four houses a year, mostly on land other people said couldn't be built on.
+  - type: timeline
+    kicker: How a project runs
+    title: Two years, <em>start to keys.</em>
+    items:
+      - { when: Month 0, title: Site visit, body: "We walk the land with you, in all weathers if we can." }
+      - { when: Month 3, title: Concept, body: "Sketches, models and a cost plan you can trust." }
+      - { when: Month 9, title: Permission, body: "Planning and building approvals, handled for you." }
+      - { when: Month 24, title: Handover, body: "Keys, a manual for the house, and a visit a year later." }
+  - type: quote
+    text: They listened to the hill before they listened to us. <em>That's why it works.</em>
+    who: A client, Glen Affric house
+  - type: cta
+    id: contact
+    kicker: Taking on projects for next year
+    title: Got a difficult site? <em>Good.</em>
+    button: { label: Start a project, href: "#" }
+footer: { left: "© Hale & Rowe. A concept site; the photograph is generated locally with Z-Image Turbo." }

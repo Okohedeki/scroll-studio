@@ -1,0 +1,117 @@
+# Tern House: a nine-room hotel on a tidal estuary, and the example for cinemagraphs (`cinemagraph:` on an image input).
+#
+#   studio new tern --example tern-house
+#   studio build tern                    # makes the stills (Z-Image Turbo), then a cinemagraph of each (a video model, minutes each)
+#   studio cinemagraph tern              # the same builds, with a report on each loop: the seam, how much moves, what is held
+#   studio cinemagraph tern --check      # in Chrome: is everything but the moving part truly still? does the loop hitch?
+#
+# Every image here is a still in which ONE thing moves: the curtain, the steam, a candle flame, smoke, the water. Everything
+# else is held perfectly still: the page lays a small video of only the moving part over the photograph, through a soft mask.
+# Plain images (no `cinemagraph:`) are untouched. `moves` must be something the still shows; `motion` says how it moves.
+name: Tern House
+description: Nine rooms on a tidal estuary in Suffolk. Open October to March, for the weather.
+theme: { preset: dusk }
+nav:
+  cta: { label: Ask about a room, href: "#stay" }
+sections:
+  - type: hero
+    badge: Open October to March
+    title: Nine rooms, <em>and the tide.</em>
+    body: A quiet house on the estuary. The curtains move with the weather and nothing else asks you to.
+    buttons:
+      - { label: Ask about a room, href: "#stay" }
+      - { label: The breakfast room, href: "#cafe" }
+    align: left
+    image:
+      generate: A quiet hotel room at morning, a tall open window with a long sheer white linen curtain, an unmade bed with white linens, pale light, a small wooden chair, calm and minimal, editorial interior photograph
+      size: [1920, 1088]
+      seed: 5
+      cinemagraph:
+        moves: the sheer linen curtains beside the window
+        motion: lifting and settling slowly in a soft breeze, the cloth rippling gently
+        seconds: 5
+        loop: pingpong
+        strength: 0.9
+
+  - type: intro
+    kicker: The house
+    title: A house that is <em>mostly weather.</em>
+    body: The estuary comes in twice a day and the light comes in with it. We have kept the rooms plain so that you notice.
+
+  - type: product
+    id: cafe
+    kicker: Breakfast room
+    title: Coffee at the window, <em>until eleven.</em>
+    body: Bread from the village, eggs from the farm up the lane, and coffee that is allowed to be too hot to drink for a while.
+    tags: [Eight until eleven, Guests and neighbours]
+    buttons: [{ label: See the breakfast menu, href: "#" }]
+    note: Weekends, until noon
+    side: right
+    knockout: false
+    image:
+      generate: A white ceramic cup of hot black coffee on a worn oak café table beside a window, a thin plume of steam rising from the cup into soft morning light, a croissant on a small plate, blurred café interior behind, shallow depth of field, warm tones, photographed on film
+      size: [1600, 1088]
+      seed: 14
+      cinemagraph:
+        moves: the steam rising from the coffee cup
+        motion: slowly curling upward and thinning out
+        seconds: 4
+        loop: seamless
+
+  - type: strip
+    kicker: After dark
+    title: Three small things, <em>kept alive.</em>
+    body: The candle, the incense and the pool. We leave them going.
+    items:
+      - image:
+          generate: A single lit white candle on a dark wooden table, a warm glow, a glass of red wine and an open book beside it, dark moody interior, shallow depth of field, photographed on film
+          size: [1024, 1280]
+          seed: 3
+          cinemagraph: { moves: the small flame on the wick, pick: smallest, motion: "the flame wavers and flickers noticeably, leaning left then right in a draught, growing and shrinking", seconds: 3, loop: seamless, strength: 1.4 }
+        caption: The library, a candle at nine.
+      - image:
+          generate: A thin curl of smoke rising from a stick of incense on a small stone dish, dark background, a single warm side light, still life, shallow depth of field, photographed on film
+          size: [1024, 1280]
+          seed: 8
+          cinemagraph: { moves: the smoke rising from the incense, motion: drifting upward in slow curling ribbons, seconds: 4, loop: seamless }
+        caption: Incense in the stairwell.
+      - image:
+          generate: A still blue swimming pool in a walled courtyard at dusk, sunlight shimmering on the water, a white lounger and a stone wall, calm, architectural photograph
+          size: [1024, 1280]
+          seed: 21
+          cinemagraph: { moves: the water in the pool, motion: gentle ripples and shimmering light, seconds: 4, loop: pingpong }
+        caption: The courtyard pool, heated.
+
+  - type: features
+    kicker: Staying
+    title: Plain rooms, <em>good weather.</em>
+    items:
+      - { tag: Nine rooms, title: Estuary rooms, body: "Big windows, linen curtains and nothing on the walls." }
+      - { tag: Evenings, title: The long table, body: "One menu, eight o'clock, whoever is staying." }
+      - { tag: By the water, title: Walks, body: "The sea wall at low tide, a flask, and the door left unlocked." }
+
+  - type: quote
+    text: "I have never slept so well in a room where nothing was trying to impress me."
+    who: A guest in March
+
+  - type: cta
+    id: stay
+    kicker: October to March
+    title: Come when <em>it is quiet.</em>
+    button: { label: Ask about a room, href: "#" }
+    surface: dark
+    backdrop:
+      generate: A wide tidal estuary at dusk, still water shimmering with the last warm light, a wooden jetty, reeds, a pale sky, calm, atmospheric landscape photograph
+      size: [1920, 1088]
+      seed: 30
+      cinemagraph:
+        moves: the water of the estuary
+        box: [0.28, 0.6, 0.74, 0.88]       # a stretch of the water, not all of it: a cinemagraph moves one thing
+        motion: soft ripples and shimmering reflections
+        seconds: 5
+        loop: pingpong
+        strength: 0.8
+
+footer:
+  left: "© Tern House. A concept site: the house, the guests and the weather are fictional."
+  right: Photographs generated locally with Z-Image Turbo; their one moving part by LTX-2.3

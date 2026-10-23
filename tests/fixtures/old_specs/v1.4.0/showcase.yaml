@@ -1,0 +1,78 @@
+# The Scroll Studio showcase: every example site, built by the engine. Tiles link to each example's dist/,
+# so serve the examples/ folder (studio's examples server, or publish it as one static site).
+# Previews are made locally with:  studio previews examples/<name> ... --out examples/showcase/previews
+name: Scroll Studio
+description: An open-source engine for scroll-driven websites. Every site below was built from one YAML file.
+theme:
+  preset: night
+  colors: { accent: "#ff7a3d", accent2: "#ffa071" }
+  fonts: { display: "Bricolage Grotesque", body: "Inter", mono: "JetBrains Mono" }
+nav:
+  links:
+    - { label: New in 1.4, href: "#new" }
+    - { label: Every scene, href: "#examples" }
+    - { label: Story, href: ../feel/dist/index.html }
+    - { label: Concepts, href: ../concepts/dist/index.html }
+  cta: { label: GitHub, href: "https://github.com/Okohedeki/scroll-studio" }
+sections:
+  - id: hello
+    type: type
+    mode: reveal
+    text: "Give it a <em>brief</em>, a <em>photo</em>, a <em>painting</em>, a <em>3D model</em> or a <em>CSV</em>. Scroll Studio builds the site, and scrolling plays it."
+    length: 2.4
+  - type: gallery
+    id: new
+    nav_label: New in 1.4
+    kicker: New in 1.4
+    title: Nine new ways <em>to move through a page.</em>
+    items:
+      - { title: The one-take page, kicker: "journey · Fenmoor, a farmhouse stay", href: ../recordings/journey.mp4, image: previews/journey.jpg, video: previews/journey.mp4, body: "The whole page is one camera journey through one world: door, hall, hearth, library, table, window, moor. Each section waits at its stop." }
+      - { title: Cinemagraphs, kicker: "cinemagraph · Tern House, a coastal hotel", href: ../recordings/cinemagraphs.mp4, image: previews/cinemagraphs.jpg, video: previews/cinemagraphs.mp4, body: "Stills where only one thing moves: steam, a curtain, incense. Everything else is held pixel for pixel." }
+      - { title: Light as the scroll, kicker: "light · Quay House, a harbour town", href: ../recordings/light.mp4, image: previews/light.jpg, video: previews/light.mp4, body: "One place relit from dawn to night as you scroll. Windows and lamps come on one by one at dusk." }
+      - { title: Inside the product, kicker: "inside · the Framework Laptop 12 mainboard", href: ../recordings/inside.mp4, image: previews/inside.jpg, video: previews/inside.mp4, body: "A macro camera flies into the product's own 3D model: heat pipe, fan, memory, storage, ports. Each feature is a stop." }
+      - { title: Miniature worlds, kicker: "diorama · Harbourlight, port software", href: ../recordings/diorama.mp4, image: previews/diorama.jpg, video: previews/diorama.mp4, body: "A tilt-shift diorama you orbit and dive into, live in the browser. Every section lives at a place on it." }
+      - { title: Film cuts, kicker: "transition · Halo Coffee", href: ../recordings/film-cuts.mp4, image: previews/film-cuts.jpg, video: previews/film-cuts.mp4, body: "Sections join like a film: a match cut from a ring logo to the sun, irises, wipes, whips and carried headlines." }
+      - { title: Type in the world, kicker: "place · Stillwater and Casa Alta", href: ../recordings/type-world.mp4, image: previews/type-world.jpg, video: previews/type-world.mp4, body: "Headlines that live inside the scene: behind a tree, painted on a deck, set in the haze." }
+      - { title: Direction boards, kicker: "studio directions · Kiln & Kettle", href: ../recordings/directions-board.png, image: previews/directions.jpg, body: "One brief in, six art directions out, side by side as storyboards. Pick one and it becomes the spec." }
+      - { title: Six new styles, kicker: "theme.style · Halcyon", href: ../halcyon/dist/looks/index.html, image: previews/halcyon.jpg, video: previews/halcyon.mp4, body: "Stop-motion, paper cut-out, scratch film, Spider-Verse smears, paint on glass and Disney's multiplane: thirty-two styles in all." }
+  - type: gallery
+    id: examples
+    nav_label: Every scene
+    kicker: Every scene, live
+    title: One engine, <em>every kind of scroll.</em>
+    items:
+      - { title: One take, kicker: "film + take · Stillwater, consumer product", href: ../one-take/dist/index.html, image: previews/one-take.jpg, video: previews/one-take.mp4, body: "One unbroken take from a mountain ridge to a lakeside table. The bottle is its real 3D model, never generated." }
+      - { title: Gaussian splat, kicker: "splat · Hollis House, real estate", href: ../hollis-house/dist/index.html, image: previews/hollis-house.jpg, video: previews/hollis-house.mp4, body: "A walk through a real house, rebuilt as a Gaussian splat." }
+      - { title: Charts from the data, kicker: "chart · Pelorus, research", href: ../pelorus/dist/index.html, image: previews/pelorus.jpg, video: previews/pelorus.mp4, body: "The renewables story with every figure read from the source data at build time." }
+      - { title: Thirty-two styles, kicker: "theme.style · Halcyon, software", href: ../halcyon/dist/looks/index.html, image: previews/halcyon.jpg, video: previews/halcyon.mp4, body: "One product page as a departures board, a comic, a zoetrope, a stop-motion set, a paper theatre, a painting on glass and twenty-six more experiences." }
+      - { title: Story film, kicker: "film · Lodestar Orbital, aerospace", href: ../lodestar-orbital/dist/index.html, image: previews/lodestar-orbital.jpg, video: previews/lodestar-orbital.mp4, body: "A rocket launch to orbit, generated locally with LTX-2.3." }
+      - { title: Product sequence, kicker: "sequence · Fischer & Vale, luxury goods", href: ../fischer-vale/dist/index.html, image: previews/fischer-vale.jpg, video: previews/fischer-vale.mp4, body: "A glass chess set rendered in Blender lifts off its board." }
+      - { title: Artwork, kicker: "artwork · Atelier Sfumato, education", href: ../atelier-sfumato/dist/index.html, image: previews/atelier-sfumato.jpg, video: previews/atelier-sfumato.mp4, body: "The Mona Lisa, drawn and painted in five lessons." }
+      - { title: Live 3D, kicker: "scene3d · Cellwright Bio, biotech", href: ../cellwright-bio/dist/index.html, image: previews/cellwright-bio.jpg, video: previews/cellwright-bio.mp4, body: "From tissue to a molecule docking on DNA, live in three.js." }
+      - { title: Cosmic zoom, kicker: "scene3d · Northstar Observatory, astronomy", href: ../northstar-observatory/dist/index.html, image: previews/northstar-observatory.jpg, video: previews/northstar-observatory.mp4, body: "A fall from the whole galaxy to one living planet." }
+      - { title: Map journey, kicker: "map · Tidewater Lines, logistics", href: ../tidewater-lines/dist/index.html, image: previews/tidewater-lines.jpg, video: previews/tidewater-lines.mp4, body: "Shanghai to Rotterdam, port by port, on a live map." }
+      - { title: Data story, kicker: "chart · Daybreak Institute, research", href: ../daybreak-institute/dist/index.html, image: previews/daybreak-institute.jpg, video: previews/daybreak-institute.mp4, body: "Fifteen years of real solar data told as a story." }
+      - { title: Vector line art, kicker: "vector · Wunderkammer, museum", href: ../wunderkammer/dist/index.html, image: previews/wunderkammer.jpg, video: previews/wunderkammer.mp4, body: "Dürer's Rhinoceros, re-cut line by line." }
+      - { title: Aerial film, kicker: "film · Meridian, private aviation", href: ../meridian/dist/index.html, image: previews/meridian.jpg, video: previews/meridian.mp4, body: "A jet descends through cloud over London." }
+      - { title: Kinetic type, kicker: "type · FORM/26, events", href: ../form-conference/dist/index.html, image: previews/form-conference.jpg, video: previews/form-conference.mp4, body: "A conference site told in kinetic type." }
+      - { title: Photo parallax, kicker: "parallax · Casa Alta, hospitality", href: ../casa-alta/dist/index.html, image: previews/casa-alta.jpg, video: previews/casa-alta.mp4, body: "A cliff hotel's photos, given depth and a slow camera move." }
+      - { title: Stacked panels, kicker: "stack layout · Hushwell, healthcare", href: ../hushwell/dist/index.html, image: previews/hushwell.jpg, video: previews/hushwell.mp4, body: "Full-screen panels that slide over each other, with a phone, a photo strip and an orbit." }
+  - type: features
+    kicker: How it works
+    title: One spec in, <em>one static site out.</em>
+    items:
+      - { tag: 01 · Describe, title: Write site.yaml, body: "Sections, copy, theme and inputs: files, URLs, or images generated locally from a prompt. Or ask Claude to write it." }
+      - { tag: 02 · Build, title: studio build, body: "Each scene type renders what it needs: Blender, LTX-2.3, depth maps, vector traces, data. Cached stage by stage." }
+      - { tag: 03 · Ship, title: Upload dist/, body: "Plain HTML, CSS and JS with the media. Host it anywhere; no server, no API keys." }
+      - { tag: 04 · Make it yours, title: "Your pictures, your brand", body: "Nothing here is a template to copy. Give it your own photos, footage, 3D models, logo and copy, or a brief, and the same scenes come out as your site." }
+  - type: stats
+    items:
+      - { value: "15", label: Scene types }
+      - { value: "12", label: Content blocks }
+      - { value: "32", label: Styles }
+      - { value: "0", label: API keys }
+  - type: cta
+    kicker: Open source (AGPL-3.0) · local models only, no API keys
+    title: Build one <em>tonight.</em>
+    button: { label: Get Scroll Studio, href: "https://github.com/Okohedeki/scroll-studio" }
+footer: { left: "Scroll Studio · AGPL-3.0", right: "Every example on this page is a concept site." }

@@ -1,0 +1,79 @@
+# Little Harbour: a miniature world. The page is a tilt-shift diorama of a tiny port that you orbit and dive into;
+# each section of the pitch is a place on it (a lighthouse, a windmill, a crane, a customs house, a market stall).
+# Scene type `diorama`: the world is described once and laid out by the engine, drawn live in the page with three.js, and
+# the camera is driven by scroll: it sweeps round the whole port, dives to the place whose step is on screen, lifts out
+# and travels on. No people, no video: places and objects. Runs in the browser on any GPU; nothing to render.
+#
+#   studio build examples/little-harbour
+#   studio record examples/little-harbour --section harbour
+name: Harbourlight
+description: "Port operations software, shown as the port itself: a tiny harbour you can hold in your hand."
+theme: { preset: paper, colors: { accent: "#d9503a", accent2: "#2f8a9d" } }
+nav:
+  cta: { label: Book a demo, href: "#demo" }
+sections:
+  - id: harbour
+    type: diorama
+    layout: cards
+    side: right
+    shade: none
+    cue: Scroll to sail in
+    world: { kind: harbour, seed: 7 }
+    camera: { orbit: ccw }
+    look: { sun: golden, tilt_shift: 1.0 }
+    places:
+      - { name: Lighthouse, kind: lighthouse }
+      - { name: Wind farm, kind: windmill }
+      - { name: Container yard, kind: crane }
+      - { name: Customs house, kind: office }
+      - { name: Fish market, kind: stall }
+    steps:
+      - kicker: Harbourlight
+        title: "Run a whole <em>port</em> from one screen."
+        body: Berths, boxes, boats and paperwork, in the one place you can see them all.
+        intro: true
+        hint: Scroll to sail in
+        length: 1.5
+      - kicker: "01 · Visibility"
+        title: "See every ship, <em>from the horizon in.</em>"
+        body: Live arrivals from the first radar echo to the last mooring line. A delay shows up while there is still time to move a berth.
+        fact: Positions refresh every 4 seconds
+        length: 1.4
+      - kicker: "02 · Power"
+        title: "The berth runs on <em>the wind.</em>"
+        body: Shore power and crane draw are scheduled around what the turbines are giving you, so a calm afternoon never catches the quay by surprise.
+        fact: Typical fuel saved at berth, 31%
+        length: 1.4
+      - kicker: "03 · The yard"
+        title: "Every box, <em>exactly where it is.</em>"
+        body: Crane moves, stack heights and reefer plugs on one map. The next lift is always the right lift.
+        fact: Moves per crane hour, up 18%
+        length: 1.4
+      - kicker: "04 · Customs"
+        title: "Paperwork that <em>clears itself.</em>"
+        body: Manifests, declarations and holds reconcile while the ship is still sailing in, so the officer sees exceptions, not forms.
+        fact: Median clearance, 11 minutes
+        length: 1.4
+      - kicker: "05 · The quay"
+        title: "A port that is <em>good to live next to.</em>"
+        body: Noise, trucks and light are planned around the neighbours. The fish market gets a calendar, not a complaint.
+        length: 1.4
+      - kicker: Harbourlight
+        title: "All hands, <em>one screen.</em>"
+        length: 1.2
+
+  - type: stats
+    items:
+      - { value: "42", label: Ports on the platform }
+      - { value: "11", unit: min, label: Median customs clearance }
+      - { value: "31", unit: "%", label: Less fuel burned at berth }
+      - { value: "4", unit: s, label: Between position updates }
+
+  - type: quote
+    text: "We used to run the port from six screens and a whiteboard. Now the whiteboard is a keepsake."
+    who: A harbourmaster, Northern Europe
+
+  - type: cta
+    id: demo
+    kicker: Thirty minutes, your port
+    title: "Come aboard. <em>We will bring the map.</em>"

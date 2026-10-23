@@ -1,0 +1,176 @@
+# Fenmoor: a farmhouse to stay in on the North York Moors, and the example for the one-take page (`journey:`).
+#
+#   studio journey examples/fenmoor            # the plan: every move and hold, the film seconds and scroll each gets
+#   studio build examples/fenmoor --plan       # what it costs (a take: one world, about an hour on an RTX 4090)
+#   studio build examples/fenmoor              # render, then the page
+#
+# The whole landing page is ONE camera move through ONE generated house. Every section is a place in it: the door, the
+# hearth room, the library, the table, the window, the view. The camera travels between them without a cut and rests at
+# each while its content is read; the blocks are set on the calmest part of the picture, in lettering that clears
+# WCAG AA against it. With reduced motion (or no JavaScript) the page is the six places as stills with their words.
+#
+# The house is described once, as rough shapes: a long hall of whitewashed walls with an arch between its rooms and a
+# window at the far end. Blender renders their depth along the camera path; each stop's picture is painted over that depth
+# (Z-Image Turbo) and the video model paints the world between the stops (LTX-2.3). A concept page: the house and the
+# prices are fictional.
+name: Fenmoor
+description: A stone farmhouse to stay in on the North York Moors. Four rooms, one long table, no signal.
+theme:
+  preset: dusk
+  colors: { accent: "#e9a15a", accent2: "#f3c48e", accent_ink: "#1b0f05" }
+  fonts: { display: Newsreader, body: Inter Tight, mono: IBM Plex Mono }
+  display_weight: 300
+  display_em: bold
+  display_optical_size: 48
+nav:
+  cta: { label: Reserve, href: "#view" }
+loader: { label: Fenmoor }
+imagery:
+  medium: 35mm film photograph, Kodak Portra 400, fine grain, natural colour
+  light: low cold blue dawn light through small windows against warm firelight
+  lens: 28mm, eye level, one-point perspective
+  mood: still, unhurried, quiet
+  palette: whitewash, slate blue, oak brown and ember orange
+sections:
+  - id: stay
+    type: film
+    cue: Scroll to come in
+    journey:
+      world: The inside of a centuries-old stone farmhouse on a northern moor at dawn, uneven limewashed plaster and rough stone, hand-hewn black oak beams, worn flagstones, plank doors with iron latches, small deep-set windows, firelight and cold blue daylight, nothing modern, no electric light, nobody in it
+      seed: 4
+      restore: 1080
+      blockout:
+        segment: 9
+        keyframe_strength: 0.6
+        ground: { kind: plane, at: [0, 150, -0.1], size: [600, 500, 1], color: "#6d7560" }
+        sky: "#b9cde0"
+        lens: 28
+        objects:
+          # the hall, 4 m wide, from the front door (y -1) to the far window (y 17)
+          - { kind: box, name: Floor, at: [0, 8, 0.05], size: [4.4, 19, 0.1], color: "#7d776c" }
+          - { kind: box, name: WallL, at: [-2.2, 8, 1.5], size: [0.4, 19, 3.0], color: "#d8d1c2" }
+          - { kind: box, name: WallR, at: [2.2, 8, 1.5], size: [0.4, 19, 3.0], color: "#d8d1c2" }
+          - { kind: box, name: Ceiling, at: [0, 8, 3.1], size: [4.8, 19, 0.2], color: "#4a3623" }
+          - { kind: box, name: Beam1, at: [0, 1.5, 2.85], size: [4.0, 0.28, 0.3], color: "#6a4a2c" }
+          - { kind: box, name: Beam2, at: [0, 6.0, 2.85], size: [4.0, 0.28, 0.3], color: "#6a4a2c" }
+          - { kind: box, name: Beam3, at: [0, 10.5, 2.85], size: [4.0, 0.28, 0.3], color: "#6a4a2c" }
+          - { kind: box, name: Beam4, at: [0, 15.0, 2.85], size: [4.0, 0.28, 0.3], color: "#6a4a2c" }
+          # the front door (a gap in the wall, its leaf open against the left side) and the two arches
+          - { kind: box, name: FrontL, at: [-1.425, -1.0, 1.5], size: [1.15, 0.4, 3.0], color: "#d8d1c2" }
+          - { kind: box, name: FrontR, at: [1.425, -1.0, 1.5], size: [1.15, 0.4, 3.0], color: "#d8d1c2" }
+          - { kind: box, name: FrontTop, at: [0, -1.0, 2.725], size: [1.7, 0.4, 0.55], color: "#d8d1c2" }
+          - { kind: box, name: DoorLeaf, at: [-0.85, 0.3, 1.05], size: [0.1, 1.4, 2.1], color: "#6a4a2c" }
+          - { kind: box, name: Arch1L, at: [-1.45, 4.3, 1.5], size: [1.1, 0.4, 3.0], color: "#d8d1c2" }
+          - { kind: box, name: Arch1R, at: [1.45, 4.3, 1.5], size: [1.1, 0.4, 3.0], color: "#d8d1c2" }
+          - { kind: box, name: Arch1Top, at: [0, 4.3, 2.725], size: [1.8, 0.4, 0.55], color: "#d8d1c2" }
+          - { kind: box, name: Arch2L, at: [-1.45, 9.0, 1.5], size: [1.1, 0.4, 3.0], color: "#d8d1c2" }
+          - { kind: box, name: Arch2R, at: [1.45, 9.0, 1.5], size: [1.1, 0.4, 3.0], color: "#d8d1c2" }
+          - { kind: box, name: Arch2Top, at: [0, 9.0, 2.725], size: [1.8, 0.4, 0.55], color: "#d8d1c2" }
+          # the far wall with its window
+          - { kind: box, name: FarSill, at: [0, 17.1, 0.45], size: [4.0, 0.7, 0.9], color: "#d8d1c2" }
+          - { kind: box, name: WindowSeat, at: [0, 16.3, 0.5], size: [2.1, 0.6, 0.5], color: "#6a4a2c" }
+          - { kind: box, name: FarHead, at: [0, 17.1, 2.7], size: [4.0, 0.7, 0.6], color: "#d8d1c2" }
+          - { kind: box, name: FarL, at: [-1.55, 17.1, 1.6], size: [0.9, 0.7, 1.6], color: "#d8d1c2" }
+          - { kind: box, name: FarR, at: [1.55, 17.1, 1.6], size: [0.9, 0.7, 1.6], color: "#d8d1c2" }
+          # the hearth room, the library, the table
+          - { kind: box, name: Fireplace, at: [-1.75, 2.1, 0.75], size: [0.7, 1.9, 1.5], color: "#8c877d" }
+          - { kind: box, name: Breast, at: [-1.85, 2.1, 2.0], size: [0.5, 1.6, 1.5], color: "#8c877d" }
+          - { kind: box, name: Settle, at: [1.5, 3.3, 0.5], size: [0.6, 1.6, 1.0], color: "#6a4a2c" }
+          - { kind: box, name: Shelves, at: [1.8, 6.6, 1.5], size: [0.4, 3.4, 3.0], color: "#6a4a2c" }
+          - { kind: box, name: Chair, at: [0.6, 5.7, 0.45], size: [0.7, 0.7, 0.9], color: "#6b4b4b" }
+          - { kind: box, name: Table, at: [0, 12.8, 0.78], size: [1.1, 3.6, 0.07], color: "#6a4a2c" }
+          - { kind: box, name: TableLegA, at: [0, 11.2, 0.4], size: [0.9, 0.1, 0.8], color: "#4a3623" }
+          - { kind: box, name: TableLegB, at: [0, 14.4, 0.4], size: [0.9, 0.1, 0.8], color: "#4a3623" }
+          - { kind: box, name: BenchL, at: [-0.95, 12.8, 0.45], size: [0.3, 3.4, 0.07], color: "#6a4a2c" }
+          - { kind: box, name: BenchR, at: [0.95, 12.8, 0.45], size: [0.3, 3.4, 0.07], color: "#6a4a2c" }
+          # outside the window: hills, a tor, mist
+          - { kind: blob, name: HillA, at: [-60, 120, 0], size: [90, 40, 24], color: "#59614f" }
+          - { kind: blob, name: HillB, at: [50, 160, 0], size: [110, 50, 30], color: "#4f5748" }
+          - { kind: blob, name: Tor, at: [0, 200, 0], size: [120, 40, 40], color: "#5a5f55" }
+          - { kind: blob, name: Mist, at: [0, 110, 2], size: [160, 40, 3], color: "#dde4ea", soft: true }
+      stops:
+        - id: door
+          label: The door
+          place: the front of the farmhouse seen from the doorstep, its heavy oak door standing open and the whole length of the long hall visible through it, flagstones, black beams, deep arched doorways one behind another, and a small bright window at the very end
+          pose: { at: [0.3, -4.2, 1.6], look: [0, 12, 1.3] }
+          seconds: 3
+          hold: 1.6
+          focus: [0.5, 0.5]
+          blocks:
+            - type: hero
+              badge: Four rooms · North York Moors
+              title: Come in. <em>The door is open.</em>
+              body: A stone farmhouse eleven miles from the nearest road. One long hall, four rooms, a table for everyone, and no signal at all.
+              buttons:
+                - { label: Reserve a night, href: "#view" }
+                - { label: Come in and look round, href: "#hearth" }
+        - id: hearth
+          label: The hearth room
+          place: a stone fireplace with a low fire burning in the foreground on the left, an oak settle, flagstones, and an arched doorway to the next room ahead, cold blue light against the warm firelight
+          pose: { at: [0.9, 1.4, 1.5], look: [-1.0, 6.0, 1.35] }
+          move: { seconds: 5, path: [{ at: [0.2, -1.0, 1.6], look: [0, 6.0, 1.4] }, { at: [0.5, 0.5, 1.55], look: [-0.5, 5.0, 1.4] }], motion: "the camera glides through the open door into the hall and the fire comes into view on the left" }
+          blocks:
+            - type: features
+              kicker: The hearth room
+              title: Rooms that <em>keep the morning.</em>
+              items:
+                - { title: A fire laid for you, body: "Oak and ash from the estate, lit an hour before you arrive and never let go out." }
+                - { title: Walls a metre thick, body: "Quiet at night, cool in July, and warm in January without trying." }
+                - { title: "Wool, oak and slate", body: "Nothing in the house is newer than the beams." }
+        - id: library
+          label: The library
+          place: a small library with floor-to-ceiling oak shelves full of old books on the right, a worn armchair, an arched doorway ahead, cold blue light
+          pose: { at: [-1.2, 5.2, 1.5], look: [0.8, 10.0, 1.3] }
+          move: { seconds: 5, path: [{ at: [0.0, 4.3, 1.55], look: [0.0, 9.0, 1.4] }], motion: "the camera passes through the arch and the shelves come into view on the right" }
+          blocks:
+            - type: quote
+              text: "We came for a weekend and read three books, slept ten hours, and did not once look at a phone."
+              who: Guest book, October
+            - type: stats
+              items:
+                - { value: "4", label: Rooms }
+                - { value: "1,200", label: Books }
+                - { value: "0", label: Signal bars }
+        - id: table
+          label: The table
+          place: a long oak table with benches in the farmhouse dining room, a loaf of bread, a bowl and a lantern on the table, a small bright window at the far end onto a misty moor
+          pose: { at: [0, 10.0, 1.55], look: [0, 13.5, 0.85] }
+          move: { seconds: 5, path: [{ at: [0.0, 8.8, 1.55], look: [0, 13.0, 1.1] }], motion: "the camera passes the arch and settles above the table" }
+          blocks:
+            - type: product
+              kicker: From the larder
+              title: The <em>Fenmoor Larder Box.</em>
+              body: The loaf, the butter, the damson jam and the tea from the table, packed in oak and sent to your door when the weekend is over.
+              tags: [Sourdough, Cultured butter, Damson jam, Moorland tea]
+              buttons:
+                - { label: Order a box, href: "#view" }
+              note: £48 · delivered in two days · the crate comes back to us
+        - id: window
+          label: The window
+          place: the far end of the dining room, a deep stone window with a wide oak sill and a window seat, cold daylight and a misty moor beyond the glass
+          pose: { at: [-1.3, 14.3, 1.55], look: [0.2, 17, 1.5] }
+          move: { seconds: 6, path: [{ at: [-1.4, 12.0, 1.6], look: [-0.5, 15.5, 1.4] }], motion: "the camera slides along the table and comes to the window" }
+          blocks:
+            - type: features
+              kicker: Rates
+              title: Priced by the night, <em>never by the head.</em>
+              items:
+                - { tag: Sun to Thu, title: The long weekday, body: "Two rooms, breakfast and the fire included. From £190." }
+                - { tag: Fri and Sat, title: The weekend, body: "All four rooms and the table laid for supper. From £260." }
+                - { tag: Any night, title: The whole house, body: "Eight guests, nobody else for eleven miles. £720." }
+        - id: view
+          label: The view
+          world: The North York Moors at dawn seen through a farmhouse window, heather, dry-stone walls, layers of hills, mist, soft gold light, nobody in it
+          seed: 9
+          side: top
+          place: looking out over a wide misty moor, only open moorland, no house and no roof in view, hills in layers, soft gold light on the heather, a dry-stone wall running away into the distance
+          pose: { at: [0, 20.5, 1.7], look: [0, 80, 6] }
+          move: { seconds: 5, path: [{ at: [-0.4, 16.0, 1.6], look: [0, 30, 2.5] }, { at: [0, 17.0, 1.65], look: [0, 60, 4] }], motion: "the camera moves through the open window and out over the moor" }
+          blocks:
+            - type: cta
+              kicker: Open from March
+              title: Come for the <em>light.</em>
+              button: { label: Reserve your nights, href: "#" }
+footer:
+  left: "© Fenmoor. A concept site; the house, the larder box and the prices are fictional."
+  right: The house was generated locally from a blockout and shot as one continuous take

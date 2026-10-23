@@ -1,0 +1,158 @@
+# Halo Coffee: a page edited like a film. Every join between sections is film grammar instead of a fade
+# (`transition:` on a section, into the next): scroll slowly through the page and watch the cuts.
+#
+#   match cut   a round logo becomes the sun becomes the rim of a cup: the shapes are found and aligned (the engine scales
+#               and moves each picture until the two coincide) and the picture swaps on the shape. The second and third
+#               pictures are *designed* to match: `image: {match: ...}` redraws the previous section's last frame
+#               (Qwen-Image-Edit) with the shape becoming something else in the same place at the same size
+#   whip pan    a fast directional blur-pan from the cup into the roastery
+#   iris        the roastery irises open from where the phone is
+#   carry       a figure travels from its place in the app section into its place in the numbers
+#   wipe        a soft diagonal wipe into the quote
+#   dissolve    a held cross-dissolve into the steps
+#   hard cut    an instant cut on the beat into the last screen, with a beat of hold either side
+#
+#   studio build examples/film-cuts     (needs ComfyUI with Z-Image and Qwen-Image-Edit; about 15 minutes on an RTX 4090)
+#   studio cuts examples/film-cuts --strip     frame strips around every cut, to look at them
+name: Halo Coffee
+description: Coffee roasted at first light. A landing page edited like a film.
+theme:
+  preset: night
+  colors: { bg: "#0c0a0b", accent: "#ff9a4d", accent2: "#ffc08a" }
+  fonts: { display: Fraunces, body: Inter, mono: JetBrains Mono }
+  display_weight: 500
+  display_italic_em: true
+nav:
+  cta: { label: Order a bag, href: "#order" }
+sections:
+  # 1. the mark: a ring. It becomes the sun.
+  - type: hero
+    id: mark
+    align: left
+    title: Halo.
+    body: Coffee, roasted at first light.
+    buttons:
+      - { label: Scroll slowly, href: "#sun" }
+    image:
+      generate: "A single flat graphic logo emblem on a deep navy blue background: one small perfect white circle ring with a thick clean outline, exactly in the centre of the frame, its diameter about one quarter of the image width, lots of empty navy blue space all around it, minimalist graphic design, flat colours"
+      seed: 3
+    transition:
+      type: match
+      shape: the white ring
+      becomes: the sun
+
+  # 2. the sun, drawn to sit exactly where the ring was. It becomes the rim of a cup.
+  - type: hero
+    id: sun
+    align: left
+    title: It starts before the sun.
+    body: Every batch is roasted in the dark and ready when the light comes in.
+    image:
+      match:
+        section: mark
+        shape: the white ring
+        becomes: a glowing orange sun disc
+        prompt: a calm dark sea at dusk under a deep orange and purple sky, one single big sun low over the horizon in the middle of the frame, no other sun
+    transition:
+      type: match
+      shape: the sun disc
+      becomes: the rim of a coffee cup
+
+  # 3. the cup, drawn to sit exactly where the sun was. Then a whip pan out of the kitchen.
+  - type: hero
+    id: cup
+    align: left
+    title: And ends in a cup.
+    body: One origin, one roast, one slow pour.
+    image:
+      match:
+        section: sun
+        shape: the sun disc
+        becomes: the round white rim of a coffee cup seen from directly above, full of black coffee
+        prompt: a wooden table in warm morning light, the cup in the middle of the table with a saucer and a spoon
+    transition: { type: whip, direction: left }
+
+  # 4. the roastery: photos with a slow camera through depth. An iris opens from the left, where the phone comes next.
+  - type: parallax
+    id: roastery
+    nav_label: The roastery
+    layout: cards
+    moves: [dolly, rise]
+    steps:
+      - intro: true
+        kicker: The roastery
+        title: Small batches, <em>slow heat.</em>
+        body: Twelve kilos at a time in a copper drum older than the building.
+        image:
+          generate: "Interior photograph of a small coffee roastery at dawn, a copper roasting drum with a glowing amber flame, burlap sacks of green beans, warm light through tall windows, soft haze, photorealistic, editorial"
+          size: [1920, 1088]
+          seed: 5
+      - kicker: The cooling tray
+        title: Out at the first <em>crack.</em>
+        body: The beans fall onto the tray at the moment the roast is finished, not a second after.
+        image:
+          generate: "Close photograph of freshly roasted coffee beans pouring from a copper cooling tray, warm backlight, shallow depth of field, steam, photorealistic"
+          size: [1920, 1088]
+          seed: 8
+    transition: { type: iris, origin: [0.2, 0.5], soft: 0.03 }
+
+  # 5. the app. One of its figures travels into the numbers section.
+  - type: product
+    id: app
+    side: left
+    kicker: The subscription
+    title: A bag at your door, <em>before you wake.</em>
+    body: Tell Halo how many cups you drink and it roasts to match, so a bag is never old.
+    stats:
+      - { value: "38", unit: "%", label: Less waste }
+      - { value: "12", unit: h, label: Roast to door }
+    device:
+      app: Halo
+      title: Your next bag
+      label: Roasting tonight
+      note: "Ethiopia, light roast. At your door by 7:30."
+      options:
+        - { title: "Tuesday", body: "Ethiopia, light", selected: true }
+        - { title: "Friday", body: "Colombia, medium" }
+      button: Skip a week
+    transition:
+      type: carry
+      carry: { from: ".ss-product__stats .ss-stat:first-child .ss-v", to: ".ss-stat:first-child .ss-v", via: dissolve }
+
+  # 6. the numbers
+  - type: stats
+    id: numbers
+    items:
+      - { value: "38", unit: "%", label: Less waste than shop-bought beans }
+      - { value: "12", unit: h, label: From roast to your door }
+      - { value: "4", label: Small batches a day }
+      - { value: "0", label: Beans older than a week }
+    transition: { type: wipe, angle: 20, soft: 0.12 }
+
+  # 7. the quote
+  - type: quote
+    id: words
+    text: "I did not know coffee could taste like the morning it was made for."
+    who: "Marta O., a subscriber since March"
+    transition: dissolve
+
+  # 8. how it works
+  - type: timeline
+    id: how
+    kicker: How it works
+    title: Tonight we roast, <em>tomorrow you wake.</em>
+    items:
+      - { when: "Evening", title: You choose, body: "Pick a roast, or let Halo pick." }
+      - { when: "Night", title: We roast, body: "Small batch, cooled and bagged by hand." }
+      - { when: "Dawn", title: It arrives, body: "At your door before your alarm." }
+    transition: cut
+
+  # 9. the last screen
+  - type: cta
+    id: order
+    kicker: First bag free
+    title: Wake up to <em>something good.</em>
+    button: { label: Order a bag, href: "#" }
+footer:
+  left: "Halo Coffee is fictional. The page is a demonstration of edited-like-a-film transitions."
+  right: Built with Scroll Studio

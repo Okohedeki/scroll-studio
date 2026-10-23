@@ -1,0 +1,67 @@
+# Quay House: light as the scroll. Scene type `light`: one harbour, relit from dawn to night as you scroll. The place is a
+# single picture (generated here with Z-Image Turbo; any photo works: `world: {file: inputs/harbour.jpg}`); each time of
+# day is that same picture relit with Qwen-Image-Edit, measured against the world and warped back onto its geometry, then
+# played by a WebGL shader that carries the light between times (a front of new light from the sun, shadows sweeping,
+# windows and lamps coming on one by one) with a slow 2.5D drift. Each step of the section sits at a time of day.
+name: Quay House
+description: Five rooms above the harbour at Vela. Come for one day; watch the light do all of it.
+theme: { preset: dusk, fonts: { display: Fraunces, body: Instrument Sans } }
+nav:
+  cta: { label: Reserve a room, href: "#reserve" }
+sections:
+  - id: day
+    type: light
+    nav_label: One day
+    world:
+      generate: >-
+        Wide photograph of a small stone harbour town curving around a calm bay, terracotta roofs and whitewashed houses
+        stepping up a hillside, wooden shutters and many windows, fishing boats moored along a stone quay, iron street lamps
+        along the waterfront, a little lighthouse at the end of the breakwater, still water, clear sky, even bright daylight,
+        photorealistic, sharp detail, no people
+      size: [1920, 1088]
+      seed: 3
+    world_time: noon
+    times: [dawn, morning, noon, golden-hour, blue-hour, { preset: night, strength: 0.96 }]
+    lamps:
+      - prompt: the street lamps and the lit windows
+    steps:
+      - kicker: Quay House · Vela
+        title: The harbour <em>wakes first.</em>
+        body: Mist on the water, the quay lamps still burning, one boat already out. Five rooms, all facing it.
+        intro: true
+        hint: Scroll to run the day
+      - kicker: Morning
+        title: Coffee on the quay, <em>before anyone.</em>
+        body: The sun clears the hill and reaches the stone steps first. Breakfast is bread, figs and whatever came in on the boat.
+      - kicker: Noon
+        title: The water is <em>for swimming.</em>
+        body: Walk down the steps and into the bay. The stone keeps its cool until three, and the shutters stay closed on the south side.
+      - kicker: Golden hour
+        title: The whole town <em>turns to brass.</em>
+        body: The light comes in low from the west and lies along the quay. Every room has a window for it.
+      - kicker: Blue hour
+        title: Then the lamps <em>come on, one by one.</em>
+        body: Window by window, lamp by lamp, until the water holds the whole town upside down.
+      - kicker: Night
+        title: Stay for the part <em>after dark.</em>
+        body: The harbour keeps its lights on all night. So do we, for you.
+        button: { label: Reserve a room, href: "#reserve" }
+  - type: intro
+    id: rooms
+    kicker: The house
+    title: Five rooms, <em>one view.</em>
+    body: A house on the quay with a stair, a kitchen and a boat. We close in January so the harbour can rest.
+  - type: features
+    items:
+      - { tag: "Harbour room · 24 m²", title: Quay rooms, body: "A window seat over the water and shutters that fold flat." }
+      - { tag: "Loft · 38 m²", title: The Lantern, body: "Under the roof, with the lighthouse in the window all night." }
+      - { tag: Whole house, title: Take the quay, body: "All five rooms, the kitchen and the boat, March to December." }
+  - type: cta
+    id: reserve
+    kicker: Rooms from 190 a night, breakfast on the quay included
+    title: Come for <em>one day.</em>
+    background: scene:day
+    button: { label: Reserve a room, href: "mailto:stay@example.com" }
+footer:
+  left: Quay House, Vela
+  right: A concept page

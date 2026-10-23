@@ -1,0 +1,85 @@
+# Kiln & Kettle: a ceramics studio and tea room, and the example for `studio directions`.
+#
+#   studio new kiln --example kiln-and-kettle
+#   studio directions kiln                 # six art directions as side-by-side boards (needs ComfyUI for the stills)
+#   studio directions kiln --pick c        # write the one you like into this file: theme, style, fonts, imagery
+#   studio storyboard kiln                 # every image now redraws in that direction's imagery
+#
+# The `directions:` block below is the brief a client would give a studio. The copy is theirs and is never touched by a
+# pick. The look (theme, imagery, pace) is what the boards propose and what a pick writes. Before a pick, the site has
+# only a plain preset.
+name: Kiln & Kettle
+description: A ceramics studio and tea room in Bristol. Wheel-thrown bowls, cups and teapots, and a table to drink from them.
+theme: { preset: paper }
+nav:
+  cta: { label: Book a seat, href: "#visit" }
+directions:
+  brief: "Quiet and handmade, never precious: people should want to touch it. We are a working studio, not a gallery. Keep the name and every word of copy; show us several really different ways it could feel, from calm to a little loud."
+  count: 6
+  seed: 4
+  moods: [handmade, warm, calm]
+  styles: { avoid: [pixel-art, ascii-art, retro-vhs, wireframe-3d] }
+  fonts: { avoid: [Press Start 2P, VT323] }
+  palettes: { avoid: [pink] }
+  stills: 4
+sections:
+  - type: hero
+    badge: Open Wednesday to Sunday
+    title: Made by hand, <em>poured by hand.</em>
+    body: A working ceramics studio with a tea room in the front. Everything you drink from is thrown, glazed and fired about ten metres from where you sit.
+    buttons:
+      - { label: Book a seat, href: "#visit" }
+      - { label: See the studio, href: "#studio" }
+    image:
+      generate: A wheel-thrown stoneware teapot and two cups on a worn oak table in a bright ceramics studio, shelves of unglazed bowls behind, steam rising from the spout, window light
+      size: [1920, 1088]
+      seed: 12
+
+  - type: intro
+    id: studio
+    kicker: The studio
+    title: Clay is a slow material.
+    body: We throw on Monday, trim on Tuesday, glaze on Thursday and fire on Friday. A cup you hold on Sunday has been in nine pairs of hands.
+
+  - type: strip
+    kicker: This week on the shelves
+    title: Seven days, seven kinds of cup.
+    body: Small runs, never repeated exactly. When a glaze is gone it is gone.
+    items:
+      - image: { generate: "A stack of speckled oatmeal stoneware bowls on a wooden shelf, soft daylight", size: [1024, 1280], seed: 3 }
+        caption: Oatmeal bowls, speckled.
+      - image: { generate: "A celadon green tea cup with a thumb dent held over a table, steam, soft daylight", size: [1024, 1280], seed: 8 }
+        caption: Celadon cups, pressed with a thumb.
+      - image: { generate: "A row of dark iron-glazed teapots cooling on a kiln shelf, small glowing embers behind", size: [1024, 1280], seed: 21 }
+        caption: Iron teapots, straight from the kiln.
+      - image: { generate: "A hand-painted blue and white plate drying on a rack in a sunlit workshop", size: [1024, 1280], seed: 14 }
+        caption: Blue plates, one brushstroke each.
+
+  - type: features
+    kicker: In the tea room
+    title: Sit down and use it.
+    items:
+      - { tag: "Every day", title: "Tea, by the pot", body: "Eleven teas from two small growers, served in the teapot you are looking at." }
+      - { tag: "Wednesdays", title: "Wheel evenings", body: "Two hours, a bag of clay and someone to tell you when to stop pushing." }
+      - { tag: "First Sunday", title: Open kiln, body: "We unload the firing with the door open and sell what comes out, warm, before it is priced." }
+
+  - type: stats
+    items:
+      - { value: "9", label: Pairs of hands per cup }
+      - { value: "1260", unit: °C, label: Top of the firing }
+      - { value: "11", label: Teas on the list }
+      - { value: "3", unit: days, label: "To cool, before we open the kiln" }
+
+  - type: quote
+    text: "I came for one cup and left having made a bad bowl and a good friend."
+    who: A Wednesday regular
+
+  - type: cta
+    id: visit
+    kicker: Wednesday to Sunday, ten until five
+    title: Come for tea. <em>Stay for the clay.</em>
+    button: { label: Book a seat, href: "#" }
+
+footer:
+  left: "© Kiln & Kettle. A concept site: the studio, the teas and the people are fictional."
+  right: Photographs generated locally with Z-Image Turbo

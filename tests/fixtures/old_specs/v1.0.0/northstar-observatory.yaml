@@ -1,0 +1,65 @@
+# Northstar Observatory: a public observatory. Scene type `scene3d` with the space presets:
+# a spiral galaxy -> one star system -> a living planet with clouds, city lights and a moon.
+name: Northstar Observatory
+description: A public observatory and planetarium. Three hundred billion stars, one evening.
+theme: { preset: cosmos }
+nav:
+  logo: "M12 2v4M12 18v4M2 12h4M18 12h4M5 5l2.5 2.5M16.5 16.5L19 19M5 19l2.5-2.5M16.5 7.5L19 5"
+  cta: { label: Book a night, href: "#visit" }
+sections:
+  - id: zoom
+    type: scene3d
+    nav_label: The view
+    layout: cards
+    style: glow
+    zoom: 9
+    bloom: [0.7, 0.55, 0.05]
+    dust: "#b8b0ff"
+    levels:
+      - { preset: galaxy, params: { arms: 4, stars: 70000, radius: 15, core: "#ffd7a0", arm: "#8aa8ff", hot: "#d6b8ff" } }
+      - { preset: star-system, params: { sun: "#ffb860", planet: "#6fc3ff", orbit: "#a98bff" } }
+      - { preset: planet, params: { ocean: "#0a2a5e", land: "#4f6f35", desert: "#b39461", atmosphere: "#6fb8ff", city: "#ffbe6b", satellites: 18 } }
+    hud:
+      kind: scale
+      scales: ["100,000 ly", "40 AU", "12,700 km"]
+    steps:
+      - intro: true
+        kicker: Northstar Observatory
+        title: Three hundred billion stars. <em>One evening.</em>
+        body: "Our telescopes reach across the galaxy. Scroll down and fall with them: from the whole Milky Way to a single world."
+        hint: Scroll to fall inward
+      - { kicker: 01 · The galaxy, title: "You are <em>somewhere in here.</em>", length: 1.5,
+          body: "A barred spiral a hundred thousand light-years across. Our Sun sits two-thirds of the way out, in a quiet arm.",
+          fact: "Light from the far side left before humans painted caves." }
+      - { kicker: 02 · One star, title: "A small, <em>steady sun.</em>", length: 1.5,
+          body: "Eight planets, a belt of rubble and a long tail of ice. The third orbit is the one that matters to us.",
+          fact: "One astronomical unit: 150 million kilometres." }
+      - { kicker: 03 · Home, title: "Clouds, oceans, <em>city lights.</em>", length: 1.6,
+          body: "On the night side, the lights of eight billion people. Above them, a ring of satellites you can see from our roof.",
+          fact: "On a clear night we track twenty satellites an hour by eye." }
+  - type: intro
+    id: visit
+    nav_label: Visit
+    kicker: Evenings at Northstar
+    title: Look up, <em>with company.</em>
+    body: "Our astronomers run the big telescope every clear night from dusk until midnight. Planetarium shows run rain or shine."
+    button: { label: Book a night, href: "#" }
+  - type: timeline
+    kicker: A night at the observatory
+    title: From dusk to <em>deep sky.</em>
+    items:
+      - { when: "19:30", title: Planetarium, body: "Tonight's sky, projected and explained." }
+      - { when: "20:30", title: First light, body: "The Moon and planets through the 1 m reflector." }
+      - { when: "21:30", title: Deep sky, body: "Nebulae, clusters and galaxies once it is properly dark." }
+      - { when: "23:00", title: Satellite watch, body: "Count the ISS and the rest from the roof terrace." }
+  - type: stats
+    items:
+      - { value: "1", unit: m, label: Main mirror }
+      - { value: "220", unit: nights, label: Clear skies a year }
+      - { value: "40", unit: k, label: Visitors a year }
+      - { value: "12", unit: M ly, label: Farthest galaxy you can see }
+  - type: cta
+    kicker: Clear skies forecast
+    title: Come and see <em>for yourself.</em>
+    button: { label: Book a night, href: "#" }
+footer: { left: "© Northstar Observatory. A concept site.", right: Rendered live in your browser with three.js }

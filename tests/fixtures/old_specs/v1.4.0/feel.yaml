@@ -1,0 +1,206 @@
+# Feel: what a landing page can be. A story film told in beats (each a Z-Image still brought to life by LTX-2.3 on a
+# local GPU), every sentence its own shot: joy, ache, love, curiosity, longing. It ends on the showcase.
+#   studio build examples/feel        (needs ComfyUI with Z-Image and LTX-2.3; about 5 minutes a beat on an RTX 4090)
+name: Scroll Studio
+description: A landing page is the door to a world. Scroll Studio makes the ones people feel.
+theme:
+  preset: night
+  colors: { bg: "#070707", accent: "#ff7a3d", accent2: "#ffb27a" }
+  fonts: { display: Fraunces, body: Inter, mono: JetBrains Mono }
+  display_weight: 500
+  display_italic_em: true
+nav:
+  cta: { label: The showcase, href: ../showcase/dist/index.html }
+sections:
+- id: story
+  type: film
+  layout: overlay
+  length: 26
+  beat_res:
+  - 1920
+  - 1088
+  beat_restore: 1088
+  beats:
+  - id: door
+    seconds: 6
+    seed: 17
+    prompt: 'Cinematic wide shot, perfectly centred symmetrical composition: a tall old wooden door in a simple wooden frame
+      standing alone on the crest of a vast golden desert dune at golden hour, the door is swung wide open and the doorway
+      is a portal completely filled with a lush green oasis, through the doorway only vivid green grass, palm trees, ferns
+      and a sparkling waterfall pool in bright daylight, no sand at all inside the doorway, long shadows across rippled sand
+      outside, dramatic towering clouds lit orange and pink, epic sense of scale, anamorphic lens, photoreal'
+    motion: the closed wooden door slowly swings open toward the camera, revealing a lush green oasis with palm trees and
+      a waterfall through the doorway, warm daylight spilling out onto the sand, the camera pushes gently in
+    image: &id002
+      edit:
+        source: &id001
+          generate: 'Cinematic wide shot, perfectly centred symmetrical composition: a tall old wooden door in a simple wooden
+            frame standing alone on the crest of a vast golden desert dune at golden hour, the door is swung wide open and
+            the doorway is a portal completely filled with a lush green oasis, through the doorway only vivid green grass,
+            palm trees, ferns and a sparkling waterfall pool in bright daylight, no sand at all inside the doorway, long shadows
+            across rippled sand outside, dramatic towering clouds lit orange and pink, epic sense of scale, anamorphic lens,
+            photoreal'
+          seed: 11
+        seed: 9
+        instruction: 'Swing the door shut. The wooden door panel now sits closed inside its frame, covering the entire doorway,
+          with its handle on the right. Nothing is visible through the doorway: no sky, no light, no oasis, only the closed
+          wooden door. Keep the frame, the desert, the dunes, the sky, the light and the shadows the same.'
+    end_image: *id001
+  - id: enter
+    seconds: 5
+    seed: 17
+    prompt: Through an open wooden doorway standing in the desert into a lush green oasis with a waterfall, palm trees and
+      ferns, bright daylight, photoreal
+    motion: the camera moves steadily forward through the open wooden doorway, the door frame slides past and out of view
+      on both sides, and we emerge inside the lush green oasis with the waterfall ahead, sunbeams through the palms, butterflies
+      drifting
+    image: *id001
+    end_image:
+      generate: Cinematic wide shot standing inside a lush green oasis in bright golden daylight, a sparkling waterfall pouring
+        into a clear turquoise pool in the centre, tall palm trees and giant ferns framing it on both sides, vivid green grass
+        in the foreground, warm sunbeams through the leaves, butterflies, paradise, no desert, no sand, anamorphic lens, photoreal
+      seed: 47
+  - id: book
+    seconds: 4
+    prompt: An old open book lying on a wooden desk by a tall window, soft morning light, dust floating in the light beams,
+      the pages slightly lifting at the edges, shallow depth of field, cinematic, photoreal
+    motion: the pages flutter, tear free one by one and rise into the air, turning into a flock of white birds that fly up
+      and out of the frame, the camera tilts up following them
+    end_image:
+      edit:
+        source:
+          generate: An old open book lying on a wooden desk by a tall window, soft morning light, dust floating in the light
+            beams, the pages slightly lifting at the edges, shallow depth of field, cinematic, photoreal
+          seed: 7
+        seed: 5
+        instruction: The pages of the book have torn free and turned into a flock of highly detailed white doves with crisp
+          individual feathers and spread wings, flying up from the open book across the room toward the window. Keep the room,
+          the desk, the book and the light the same.
+  - id: laugh
+    seconds: 4
+    seed: 11
+    prompt: A fluffy golden retriever puppy in a sunny backyard mid-pounce into a huge pile of orange autumn leaves, ears
+      flopping, tongue out, joyful, warm afternoon light, shallow depth of field, photoreal
+    motion: the puppy leaps into the leaf pile, tumbles over clumsily onto its back and pops up again with a leaf stuck on
+      its head, tail wagging, leaves flying everywhere
+  - id: hurt
+    seconds: 5
+    prompt: An elderly man sitting alone at a small kitchen table at night, rain streaking the window behind him, two teacups
+      on the table, the one across from him untouched in front of an empty chair, a single warm lamp, quiet grief, cinematic,
+      photoreal
+    motion: he slowly reaches across the table and rests his hand beside the untouched teacup, then lowers his head, rain
+      runs down the window, the camera stays almost still
+  - id: love
+    seconds: 5
+    prompt: An elderly couple slow dancing barefoot in a warm living room at golden hour, foreheads touching, eyes closed,
+      soft sunlight through sheer curtains, a record player in the background, tender, cinematic, photoreal
+    motion: they sway slowly together and he gently turns her, she smiles with her eyes closed, the curtains drift in the
+      breeze, the camera circles slowly around them
+    image:
+      edit:
+        source:
+          generate: An elderly couple slow dancing barefoot in a warm living room at golden hour, foreheads touching, eyes
+            closed, soft sunlight through sheer curtains, a record player in the background, tender, cinematic, photoreal
+          seed: 7
+        seed: 5
+        instruction: Remove the record player and the cabinet it sits on, leaving plain wall and floor there. Keep the couple,
+          the room, the curtains and the light exactly the same.
+  - id: curious
+    seconds: 5
+    seed: 11
+    prompt: 'Electron microscope style cinematic macro of a synapse between two neurons in the brain: a glowing nerve ending
+      releasing a stream of tiny luminous amber caffeine molecules across a narrow dark gap onto the membrane of the next
+      neuron, which is covered in receptor sites lighting up electric blue where the molecules land, fine fibrous textures,
+      dendrites branching into deep black, shallow depth of field, photoreal scientific visualisation, no brain shape'
+    motion: glowing amber caffeine molecules drift across the gap and lock onto the neuron's receptors one by one, each receptor
+      flares electric blue, then a bright pulse of blue light races out along the neuron's branches, the camera drifts slowly
+      closer
+    trim: 2.0
+  - id: feel
+    seconds: 4
+    seed: 9
+    prompt: A dark cinema audience lit only by the flickering glow of the screen, rows of faces, a young woman in the centre
+      with tears on her cheeks and a small smile, holding a plain red and white striped paper popcorn bucket with no logo
+      and no text, cinematic, photoreal
+    motion: the light from the screen flickers across the faces, she wipes a tear and laughs softly, the camera pushes in
+      slowly toward her
+  - id: missing
+    seconds: 5
+    prompt: A lone young man standing perfectly still on a crowded subway platform at night while commuters rush past him,
+      he looks up at a huge glowing billboard of a vast turquoise ocean under a bright sky, cold fluorescent light, cinematic,
+      photoreal
+    motion: commuters stream past him in motion blur, he stays perfectly still looking up at the glowing ocean, the light
+      of the billboard on his face, the camera pushes slowly toward him
+  - id: screen
+    seconds: 5
+    seed: 17
+    prompt: A person seen from behind sitting at a wooden desk in a dark room at night, a laptop in front of them glowing
+      with a vivid image of a tall wooden door standing open on a golden desert dune with a lush green valley visible through
+      it, the warm light of the screen spilling onto their face, hands and the desk, everything else in darkness, cosy and
+      cinematic, shallow depth of field, photoreal
+    motion: the picture on the laptop screen stays perfectly still and unchanged, the same closed door and the same words,
+      only the camera slowly pulls back revealing more of the dark room, the person's fingers move gently on the trackpad,
+      the warm glow of the screen on their face
+    image:
+      edit:
+        source:
+          generate: A person seen from behind sitting at a wooden desk in a dark room at night, a laptop in front of them
+            glowing with a vivid image of a tall wooden door standing open on a golden desert dune with a lush green valley
+            visible through it, the warm light of the screen spilling onto their face, hands and the desk, everything else
+            in darkness, cosy and cinematic, shallow depth of field, photoreal
+          seed: 17
+        refs:
+        - *id002
+        instruction: Replace the picture on the laptop screen with the second image, fitted exactly to the screen, glowing,
+          with the words 'A landing page is a door.' in elegant white serif type over the left side of the picture. Keep the
+          person, the room, the desk, the laptop and the lighting the same.
+        seed: 17
+  steps:
+  - title: A landing page is <em>a door.</em>
+    intro: true
+    state:
+      beat: door
+      part:
+      - 0
+      - 0.5
+  - title: Make it open onto <em>a world.</em>
+    state:
+      beat: door
+      part:
+      - 0.5
+      - 1
+  - title: Don't hand them a page. <em>Tell them a story.</em>
+    state:
+      beat: book
+  - title: Make them feel <em>joy.</em>
+    state:
+      beat: laugh
+  - title: Make it <em>ache.</em>
+    state:
+      beat: hurt
+  - title: Make them fall <em>in love.</em>
+    state:
+      beat: love
+  - title: Make them <em>curious.</em>
+    state:
+      beat: curious
+  - title: Make them feel something <em>they didn't expect.</em>
+    state:
+      beat: feel
+  - title: Show them <em>what's missing.</em>
+    state:
+      beat: missing
+  - title: That's what <em>Scroll Studio</em> does.
+    state:
+      beat: screen
+- type: cta
+  kicker: Every frame above was made on one local GPU and built from one file
+  title: See what it <em>can do.</em>
+  button:
+    label: Open the showcase
+    href: ../showcase/dist/index.html
+# Launch trailer: `studio trailer examples/feel` cuts a 16:9 and a 9:16 film from the beats, captioned with the steps.
+trailer: {}
+footer:
+  left: Scroll Studio · AGPL-3.0
+  right: Made with Scroll Studio

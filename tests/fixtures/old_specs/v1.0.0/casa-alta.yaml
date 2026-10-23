@@ -1,0 +1,73 @@
+# Casa Alta: a cliffside hotel. Scene type `parallax`: each photo gets a depth map (Depth Anything V2) and
+# becomes a slow 2.5D camera move as you scroll. The photos are generated locally with Z-Image Turbo
+# (`generate:`); swap any of them for your own with `file: inputs/your-photo.jpg`.
+name: Casa Alta
+description: Twelve rooms on a cliff above the Atlantic.
+theme: { preset: dusk }
+nav:
+  cta: { label: Reserve, href: "#reserve" }
+sections:
+  - id: stay
+    type: parallax
+    nav_label: The house
+    layout: cards
+    depth_model: large
+    moves: [dolly, pan, rise, orbit]
+    steps:
+      - intro: true
+        kicker: Casa Alta · Costa Vicentina
+        title: Twelve rooms <em>above the Atlantic.</em>
+        body: A whitewashed house on the cliffs of southern Portugal, with nothing between you and the sea but a pool and the evening.
+        hint: Scroll to look around
+        image:
+          generate: Architectural photograph of a small whitewashed boutique hotel on a rugged cliff above the Atlantic ocean in southern Portugal at golden hour, infinity pool on a stone terrace in the foreground, dry grasses and agave plants, waves breaking on dark rocks far below, warm low sunlight, photorealistic, shot on a medium format camera, 35mm lens
+          size: [1920, 1088]
+          seed: 21
+      - kicker: The terrace
+        title: Breakfast <em>at the edge.</em>
+        body: Coffee, figs and warm bread served on the terrace from eight until the sun clears the cliff.
+        length: 1.4
+        image:
+          generate: Photograph of a sunlit stone terrace with a rustic wooden table set for breakfast, linen napkins, figs and bread, terracotta pots with olive trees, the deep blue Atlantic ocean and a rocky coastline behind, morning light, soft shadows, photorealistic, editorial travel photography
+          size: [1920, 1088]
+          seed: 4
+      - kicker: The rooms
+        title: Lime walls, <em>cool floors.</em>
+        body: Every room faces the water. Shutters, linen, a deep stone bath and a window seat big enough to sleep in.
+        length: 1.4
+        image:
+          generate: Interior photograph of a minimalist Mediterranean hotel bedroom with whitewashed lime plaster walls, a large arched window open to the ocean, white linen bed, terracotta tile floor, a woven chair, soft afternoon light and sheer curtains, photorealistic, architectural magazine style
+          size: [1920, 1088]
+          seed: 9
+      - kicker: The evening
+        title: The pool <em>at blue hour.</em>
+        body: Lanterns on the steps, the last light on the water, dinner when you are ready for it.
+        length: 1.6
+        image:
+          generate: Photograph of an infinity pool on a cliff at blue hour with warm lanterns along stone steps, a whitewashed house with glowing windows, the Atlantic ocean fading into dusk, first stars, calm water reflections, photorealistic, cinematic travel photography
+          size: [1920, 1088]
+          seed: 33
+  - type: intro
+    id: house
+    kicker: The house
+    title: Small on purpose.
+    body: Twelve rooms, one kitchen and a staff who learn your name by the second morning. We close in winter so the house can rest.
+    button: { label: See the rooms, href: "#reserve" }
+  - type: features
+    items:
+      - { tag: "Sea room · 28 m²", title: Ocean Rooms, body: "Window seat, stone bath, the sound of the sea all night." }
+      - { tag: "Suite · 45 m²", title: Cliff Suites, body: "A private terrace and an outdoor shower facing west." }
+      - { tag: Whole house, title: Take the house, body: "All twelve rooms for weddings and long weekends, March to November." }
+  - type: stats
+    items:
+      - { value: "12", label: Rooms }
+      - { value: "60", unit: m, label: Above the water }
+      - { value: "300", unit: days, label: Of sun a year }
+      - { value: "1", label: "Kitchen, cooking what the boats bring in" }
+  - type: cta
+    id: reserve
+    kicker: Open March to November
+    title: Come for a week. <em>Stay for the light.</em>
+    button: { label: Reserve, href: "#" }
+    background: scene:stay
+footer: { left: "© Casa Alta. A concept site; photographs generated locally with Z-Image Turbo." }
