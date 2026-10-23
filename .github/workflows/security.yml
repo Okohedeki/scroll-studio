@@ -1,0 +1,85 @@
+# Supply-chain checks on every pull request (docs/security/threat-model.md#supply-chain):
+# - dependency-review: blocks dependencies with known vulnerabilities (moderate or worse) or licences that can't be
+#   combined with the AGPL-3.0;
+# - secrets: gitleaks over the pull request's commits, on top of GitHub's secret scanning and push protection;
+# - workflows: zizmor and actionlint over .github/workflows.
+# CodeQL runs as GitHub's default setup (repository settings) and Scorecard in scorecard.yml.
+name: security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  merge_group:
+
+permissions: {}
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: moderate
+          # Licences that can be combined with the AGPL-3.0. Anything else needs a maintainer's decision.
+          allow-licenses: >-
+            MIT, MIT-0, BSD-2-Clause, BSD-3-Clause, 0BSD, ISC, Apache-2.0, PSF-2.0, Python-2.0, Python-2.0.1,
+            Unlicense, CC0-1.0, Zlib, BlueOak-1.0.0, MPL-2.0, LGPL-2.1-or-later, LGPL-3.0-only,
+            LGPL-3.0-or-later, GPL-3.0-only, GPL-3.0-or-later, AGPL-3.0-only, AGPL-3.0-or-later, HPND, CC-BY-4.0,
+            BSL-1.0, Unicode-3.0, Unicode-DFS-2016, OFL-1.1
+          comment-summary-in-pr: never
+
+  secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITLEAKS_ENABLE_COMMENTS: "false"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+
+  workflows:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Install the linters
+        run: python -m pip install zizmor==1.31.1 actionlint-py==1.7.12.25
+      - name: zizmor
+        run: zizmor --offline --format github .github/workflows/
+      - name: actionlint
+        run: actionlint -color

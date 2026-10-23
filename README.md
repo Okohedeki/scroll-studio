@@ -13,6 +13,8 @@
   <p>
     <a href="https://github.com/Okohedeki/scroll-studio/releases/latest"><img src="https://img.shields.io/github/v/release/Okohedeki/scroll-studio" alt="Latest release" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="AGPL-3.0" /></a>
+    <a href="https://github.com/Okohedeki/scroll-studio/actions/workflows/tests.yml"><img src="https://github.com/Okohedeki/scroll-studio/actions/workflows/tests.yml/badge.svg" alt="Tests" /></a>
+    <a href="https://scorecard.dev/viewer/?uri=github.com/Okohedeki/scroll-studio"><img src="https://api.scorecard.dev/projects/github.com/Okohedeki/scroll-studio/badge" alt="OpenSSF Scorecard" /></a>
     <img src="https://img.shields.io/badge/models-local%20only-ff7a3d" alt="Local models only" />
     <img src="https://img.shields.io/badge/MCP-ready-8a5cff" alt="MCP ready" />
   </p>
