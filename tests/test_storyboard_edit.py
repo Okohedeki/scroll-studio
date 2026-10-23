@@ -365,7 +365,7 @@ def test_revert_goes_back_to_the_previous_image(project):
 def test_http_save_validation_conflict_and_lock(project):
     from fastapi.testclient import TestClient
     from engine.storyboard.edit.api import make_app
-    c = TestClient(make_app(project))
+    c = TestClient(make_app(project), base_url="http://127.0.0.1:8971")
     name = project.name
     st = c.get(f"/api/sb/{name}/state").json()
     assert [s["id"] for s in st["shots"]] == ["a", "b", "c"]
@@ -447,7 +447,7 @@ def test_notes_lifecycle_and_changes_attach_to_the_working_note(project):
 def test_notes_http_and_the_page_state(project):
     from fastapi.testclient import TestClient
     from engine.storyboard.edit.api import make_app
-    c = TestClient(make_app(project))
+    c = TestClient(make_app(project), base_url="http://127.0.0.1:8971")
     n = project.name
     r = c.post(f"/api/sb/{n}/notes", json={"shot": "b", "text": "less grain"})
     assert r.status_code == 200 and r.json()["note"]["status"] == "open"
@@ -486,7 +486,7 @@ def test_play_info_and_files(project):
     # the files are served, with ranges (a video seeks), and so is the built page
     (project.dist).mkdir(exist_ok=True)
     (project.dist / "index.html").write_text("<html>built</html>")
-    c = TestClient(make_app(project))
+    c = TestClient(make_app(project), base_url="http://127.0.0.1:8971")
     r = c.get(f"/sb/{project.name}/files/animatic.mp4", headers={"Range": "bytes=0-99"})
     assert r.status_code == 206 and len(r.content) == 100
     assert "built" in c.get(f"/sb/{project.name}/dist/index.html").text

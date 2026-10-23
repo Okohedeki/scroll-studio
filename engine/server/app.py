@@ -21,6 +21,7 @@ from ..config import ROOT, settings
 from ..project import BuildError, Project, child, safe_name
 from ..spec import SCENE_TYPES, Site
 from .jobs import JobQueue, logger
+from .local_only import UI_DEV_PORTS, LocalOnly
 
 # Windows can map .js to text/plain from the registry, which breaks module scripts in the preview.
 for ext, typ in ((".js", "text/javascript"), (".mjs", "text/javascript"), (".css", "text/css"), (".webp", "image/webp"),
@@ -28,6 +29,7 @@ for ext, typ in ((".js", "text/javascript"), (".mjs", "text/javascript"), (".css
     mimetypes.add_type(typ, ext)
 
 app = FastAPI(title="Scroll Studio")
+app.add_middleware(LocalOnly, extra_ports=UI_DEV_PORTS)    # Host and Origin checks: see local_only.py
 jobs = JobQueue()
 PROJECTS = Path(settings()["projects"])
 EXAMPLES = ROOT / "examples"

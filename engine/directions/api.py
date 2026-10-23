@@ -22,6 +22,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from pydantic import BaseModel
 
 from ..project import BuildError, Project
+from ..server.local_only import LocalOnly
 from . import board, run
 
 PORTS = range(8981, 8990)
@@ -127,6 +128,7 @@ def free_port(preferred: Optional[int] = None) -> int:
 
 def make_app(project: Project) -> FastAPI:
     app = FastAPI(title="Scroll Studio: direction boards")
+    app.add_middleware(LocalOnly)
 
     def resolve(name: str) -> Project:
         if name != project.name:

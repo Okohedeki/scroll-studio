@@ -28,6 +28,7 @@ from pydantic import BaseModel
 
 from ...project import BuildError, Project
 from ...server.jobs import JobQueue
+from ...server.local_only import LocalOnly
 from . import images, specdoc, variants
 from .workspace import Workspace
 
@@ -245,6 +246,7 @@ def free_port(preferred: Optional[int] = None) -> int:
 
 def make_app(project: Project) -> FastAPI:
     app = FastAPI(title="Scroll Studio: storyboard editor")
+    app.add_middleware(LocalOnly)
     jobs = JobQueue()
 
     def resolve(name: str) -> Project:

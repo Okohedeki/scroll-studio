@@ -6,6 +6,12 @@ import sys
 
 import threading
 
+try:
+    from .server.local_only import host_allowed
+except ImportError:      # run as a plain script (python engine/serve.py dist 5173)
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from engine.server.local_only import host_allowed
+
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     root = "."
@@ -20,6 +26,22 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def log_message(self, *a):
         pass
+
+    def _local(self) -> bool:
+        """Only requests really addressed to this machine (127.0.0.1, localhost, [::1] and this port): a page on another
+        site that rebinds its DNS name to 127.0.0.1 sends its own name as Host and gets a 400."""
+        if host_allowed(self.headers.get("Host"), self.server.server_address[1]):
+            return True
+        self.send_error(400, "Host not allowed: this preview only answers to 127.0.0.1, localhost and [::1] on its own port")
+        return False
+
+    def do_GET(self):
+        if self._local():
+            super().do_GET()
+
+    def do_HEAD(self):
+        if self._local():
+            super().do_HEAD()
 
     def end_headers(self):
         self.send_header("Accept-Ranges", "bytes")
