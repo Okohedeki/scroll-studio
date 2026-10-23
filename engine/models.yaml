@@ -1,11 +1,17 @@
 # Every model Scroll Studio can use. ComfyUI models go in ComfyUI's model folders (see docs/INSTALL.md);
 # Hugging Face models download automatically into <model_dir>/hf on first use.
 # Licences belong to the model authors and are NOT covered by Scroll Studio's licence (AGPL-3.0). Check before commercial use.
+#
+# sha256: the SHA-256 of the file (for Hugging Face files, the LFS hash the Hub lists for it). `null` means not pinned yet:
+# the file is still used, with a warning where the engine downloads it. A file the engine downloads itself (see
+# engine/backends/comfy_setup.py) is hashed before it is moved into place and refused on a mismatch; `studio doctor --verify`
+# hashes the files already on disk. Update a hash only after checking the new file at its source.
 
 comfyui:
   - name: LTX-2.3 22B distilled (fp8)
     file: checkpoints/ltx-2.3-22b-distilled-fp8.safetensors
-    source: https://huggingface.co/Lightricks/LTX-2.3
+    source: https://huggingface.co/Lightricks/LTX-2.3-fp8
+    sha256: d9646b6f2d5c42d337b23671634c43bfeece6989644f51b4a3aa088465ccd3b2
     size_gb: 27
     vram_gb: 20
     licence: LTX-2 Community License
@@ -13,18 +19,21 @@ comfyui:
   - name: Gemma 3 12B text encoder (fp8)
     file: text_encoders/gemma_3_12B_it_fp8_scaled.safetensors
     source: https://huggingface.co/Comfy-Org/ltx-2
+    sha256: 60216ce97c01c3a8753c2dfd0a89fc76e16fbe446d1a32ef8f1b528ac8bae466
     size_gb: 13
     licence: Gemma Terms of Use
     used_by: [film, cinemagraph]
   - name: LTX-2.3 IC-LoRA Union Control
     file: loras/ltx-2.3-22b-ic-lora-union-control-ref0.5.safetensors
-    source: https://huggingface.co/Lightricks/LTX-2.3
+    source: https://huggingface.co/Lightricks/LTX-2.3-22b-IC-LoRA-Union-Control
+    sha256: a1b888a87f661d27f08b394ae559e8e1050be33900bcc36a5cdf659e48f88d18
     size_gb: 1.2
     licence: LTX-2 Community License
     used_by: [film]
   - name: LTX-2.3 spatial upscaler x2
     file: latent_upscale_models/ltx-2.3-spatial-upscaler-x2-1.1.safetensors
     source: https://huggingface.co/Lightricks/LTX-2.3
+    sha256: 5f416311fa8172b65af67530758964708d29a317b830d689a51143b7f91913ed
     size_gb: 1
     licence: LTX-2 Community License
     used_by: [film (upscale)]
@@ -37,6 +46,7 @@ comfyui:
     file: diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors
     wan: i2v_high
     source: https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/blob/main/split_files/diffusion_models/wan2.2_i2v_high_noise_14B_fp8_scaled.safetensors
+    sha256: 6122e79d55e0f235698d11d657f3b196c5273c830da00b2b013c5a048d5e6a42
     size_gb: 14.3
     vram_gb: 16
     licence: Apache-2.0
@@ -45,6 +55,7 @@ comfyui:
     file: diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors
     wan: i2v_low
     source: https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/blob/main/split_files/diffusion_models/wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors
+    sha256: 5471a457b6ac404202a5fbe6c11595a3d5641fc766b00f38763f72303fffc21e
     size_gb: 14.3
     vram_gb: 16
     licence: Apache-2.0
@@ -53,6 +64,7 @@ comfyui:
     file: diffusion_models/wan2.2_fun_control_high_noise_14B_fp8_scaled.safetensors
     wan: control_high
     source: https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/blob/main/split_files/diffusion_models/wan2.2_fun_control_high_noise_14B_fp8_scaled.safetensors
+    sha256: aa2f6b6f4cfc8a75a273a075db31730530f93320a996b153b8825205c3a3c498
     size_gb: 14.3
     vram_gb: 16
     licence: Apache-2.0
@@ -61,6 +73,7 @@ comfyui:
     file: diffusion_models/wan2.2_fun_control_low_noise_14B_fp8_scaled.safetensors
     wan: control_low
     source: https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/blob/main/split_files/diffusion_models/wan2.2_fun_control_low_noise_14B_fp8_scaled.safetensors
+    sha256: 0f83c7b1cd6d509ff3504a8f604ca9d9876a8b1ed04f6e05095c4a7ccb9009cd
     size_gb: 14.3
     vram_gb: 16
     licence: Apache-2.0
@@ -71,6 +84,7 @@ comfyui:
     file: model_patches/Wan21_Uni3C_controlnet_fp16.safetensors
     uni3c: true
     source: https://huggingface.co/Kijai/WanVideo_comfy/blob/main/Wan21_Uni3C_controlnet_fp16.safetensors
+    sha256: d7dd1bfe5f34dea607a749d72f206908e76a908b9999cb28c53c3eb167ddd709
     size_gb: 2
     licence: Apache-2.0
     used_by: [film beats (camera.backend uni3c)]
@@ -78,6 +92,7 @@ comfyui:
     file: text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors
     wan: text_encoder
     source: https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/blob/main/split_files/text_encoders/umt5_xxl_fp8_e4m3fn_scaled.safetensors
+    sha256: c3355d30191f1f066b26d93fba017ae9809dce6c627dda5f6a66eaa651204f68
     size_gb: 6.7
     licence: Apache-2.0
     used_by: [video_model wan]
@@ -85,6 +100,7 @@ comfyui:
     file: vae/wan_2.1_vae.safetensors
     wan: vae
     source: https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/blob/main/split_files/vae/wan_2.1_vae.safetensors
+    sha256: 2fc39d31359a4b0a64f55876d8ff7fa8d780956ae2cb13463b0223e15148976b
     size_gb: 0.25
     licence: Apache-2.0
     used_by: [video_model wan]
@@ -92,6 +108,7 @@ comfyui:
     file: loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors
     wan: lora_high
     source: https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/blob/main/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_high_noise.safetensors
+    sha256: d176c808d6fc461999b68e321efcb7501b20b8c3797523ed0df14f7d1deff11e
     size_gb: 1.2
     licence: Apache-2.0
     used_by: [video_model wan (wan.quality fast, the default)]
@@ -99,12 +116,14 @@ comfyui:
     file: loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors
     wan: lora_low
     source: https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged/blob/main/split_files/loras/wan2.2_i2v_lightx2v_4steps_lora_v1_low_noise.safetensors
+    sha256: 024f21de095bc8fad9809ded3e9e49a2e170dcf27075da8145ba7d60d8aab7f9
     size_gb: 1.2
     licence: Apache-2.0
     used_by: [video_model wan (wan.quality fast, the default)]
   - name: Z-Image Turbo (bf16)
     file: diffusion_models/z_image_turbo_bf16.safetensors
     source: https://huggingface.co/Comfy-Org/z_image_turbo
+    sha256: 2407613050b809ffdff18a4ac99af83ea6b95443ecebdf80e064a79c825574a6
     size_gb: 12
     vram_gb: 13
     licence: Apache-2.0
@@ -112,18 +131,21 @@ comfyui:
   - name: Qwen3 4B text encoder (fp8)
     file: text_encoders/qwen_3_4b_fp8_mixed.safetensors
     source: https://huggingface.co/Comfy-Org/z_image_turbo
+    sha256: 72450b19758172c5a7273cf7de729d1c17e7f434a104a00167624cba94f68f15
     size_gb: 5
     licence: Apache-2.0
     used_by: [film, "image `generate:`"]
   - name: Flux VAE (ae)
     file: vae/ae.safetensors
     source: https://huggingface.co/Comfy-Org/z_image_turbo
+    sha256: afc8e28272cd15db3919bacdb6918ce9c1ed22e96cb12c4d5ed0fba823529e38
     size_gb: 0.3
     licence: Apache-2.0
     used_by: [film, "image `generate:`"]
   - name: Z-Image Turbo Fun ControlNet Union 2.1
     file: model_patches/Z-Image-Turbo-Fun-Controlnet-Union-2.1-2602-8steps.safetensors
     source: https://huggingface.co/alibaba-pai/Z-Image-Turbo-Fun-Controlnet-Union-2.1
+    sha256: d1251cc7bc3486bc61d25c3be498ef394c31c85ddf4ee9137d2e933411f4a689
     size_gb: 3
     licence: Apache-2.0
     used_by: [film (keyframes)]
@@ -132,6 +154,7 @@ comfyui:
   - name: SeedVR2 7B sharp (fp8)
     file: SEEDVR2/seedvr2_ema_7b_sharp_fp8_e4m3fn.safetensors
     source: https://huggingface.co/numz/SeedVR2_comfyUI
+    sha256: 4261d18fd9c331f4c8f14b475c9148bd8c3f1512240ace55fe31a179e0a960b0
     size_gb: 8
     vram_gb: 16
     licence: Apache-2.0
@@ -139,6 +162,7 @@ comfyui:
   - name: SeedVR2 VAE (fp16)
     file: SEEDVR2/ema_vae_fp16.safetensors
     source: https://huggingface.co/numz/SeedVR2_comfyUI
+    sha256: 20678548f420d98d26f11442d3528f8b8c94e57ee046ef93dbb7633da8612ca1
     size_gb: 0.5
     licence: Apache-2.0
     used_by: [film (restore, upscale), "frozen moments (freeze.upscale)"]
@@ -150,6 +174,7 @@ comfyui:
   - name: SAM 2.1 Hiera Large (fp16)
     file: sam2/sam2.1_hiera_large-fp16.safetensors
     source: https://huggingface.co/Kijai/sam2-safetensors
+    sha256: 278af5296fcc153aa94645a4981e93fe8b7a936a9fa27dbd71e8c850df6d7038
     size_gb: 0.45
     vram_gb: 4
     licence: Apache-2.0 (Meta)
@@ -158,6 +183,7 @@ comfyui:
   - name: SAM 2.1 Hiera Base+ (fp16)
     file: sam2/sam2.1_hiera_base_plus-fp16.safetensors
     source: https://huggingface.co/Kijai/sam2-safetensors
+    sha256: a2693628452963a5f17e73a70a90b5faa112109307c828dec36e5fb407061005
     size_gb: 0.16
     vram_gb: 3
     licence: Apache-2.0 (Meta)
@@ -166,6 +192,7 @@ comfyui:
   - name: Florence-2 large
     file: LLM/Florence-2-large/model.safetensors
     source: https://huggingface.co/microsoft/Florence-2-large
+    sha256: 4f38ce741c6b71188fe2b3419a55e11917a8a7b321ae2e63c61da0191b0ebad7
     size_gb: 1.5
     vram_gb: 3
     licence: MIT (Microsoft)
@@ -174,6 +201,7 @@ comfyui:
   - name: GFPGAN v1.4
     file: facerestore_models/GFPGANv1.4.pth
     source: https://github.com/TencentARC/GFPGAN/releases/tag/v1.3.4
+    sha256: e2cd4703ab14f4d01fd1383a8a8b266f9a5833dacee8e6a79d3bf21a1b6be5ad
     size_gb: 0.35
     vram_gb: 2
     licence: Apache-2.0 (Tencent ARC)

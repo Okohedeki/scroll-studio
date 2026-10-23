@@ -49,6 +49,7 @@ def checks() -> list[dict]:
     res.extend(wan_checks())
     res.extend(uni3c_checks())
     res.extend(reveal_checks())
+    res.extend(checksum_checks())
     add("Chrome", shutil.which("chrome") or Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe").exists() or s["chrome"],
         "found", "recordings")
     return res
@@ -137,12 +138,44 @@ def reveal_checks() -> list[dict]:
     return out
 
 
-def report() -> None:
+def checksum_checks() -> list[dict]:
+    """How many ComfyUI model files in engine/models.yaml have a pinned SHA-256 (the rest are used unverified)."""
+    from .weights import model_entries
+    entries = model_entries()
+    loose = [m["file"] for m in entries if not m.get("sha256")]
+    detail = (f"{len(entries) - len(loose)} of {len(entries)} model files pinned" +
+              (f"; not pinned yet: {', '.join(loose)}" if loose else "") + ". `studio doctor --verify` hashes the files on disk")
+    return [{"name": "Model checksums", "ok": not loose, "detail": detail, "needed_by": "every model download and install"}]
+
+
+def verify_models() -> list[dict]:
+    """Hash every pinned model file found in ComfyUI's models folder and compare it with models.yaml (slow: some are 15 GB)."""
+    from .backends import comfy_setup
+    from .weights import ChecksumError, check_sha256, model_entries
+    root = comfy_setup.comfy_dir()
+    if root is None:
+        return [{"name": "Model files (SHA-256)", "ok": False, "detail": "ComfyUI folder unknown (set comfy_dir in studio.toml)",
+                 "needed_by": "every model"}]
+    out = []
+    for m in model_entries():
+        path = root / "models" / m["file"]
+        if not path.exists() or not m.get("sha256"):
+            continue
+        try:
+            check_sha256(path, m["sha256"], m["source"])
+            ok, detail = True, f"{m['file']}: matches"
+        except ChecksumError as e:
+            ok, detail = False, str(e)
+        out.append({"name": m["name"], "ok": ok, "detail": detail, "needed_by": ", ".join(m.get("used_by", []))})
+    return out or [{"name": "Model files (SHA-256)", "ok": True, "detail": "no pinned model files found on disk", "needed_by": "every model"}]
+
+
+def report(verify: bool = False) -> None:
     from rich.console import Console
     from rich.table import Table
     t = Table(title="Scroll Studio doctor")
     for c in ("", "Check", "Detail", "Needed by"):
         t.add_column(c)
-    for c in checks():
+    for c in checks() + (verify_models() if verify else []):
         t.add_row("[green]✓[/]" if c["ok"] else "[red]✗[/]", c["name"], str(c["detail"]), c["needed_by"])
     Console().print(t)

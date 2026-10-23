@@ -57,8 +57,14 @@ def read_ply(path: Path) -> dict:
 
 
 def read_gsplat(path: Path) -> dict:
+    import pickle
     import torch
-    ck = torch.load(path, map_location="cpu", weights_only=False)
+    # weights_only: a .pt file is a pickle, which can run code when loaded. A gsplat checkpoint is tensors and numbers only.
+    try:
+        ck = torch.load(path, map_location="cpu", weights_only=True)
+    except pickle.UnpicklingError as e:
+        raise ValueError(f"{path.name} holds more than tensors (the engine will not unpickle arbitrary objects from a "
+                         f"checkpoint): re-save the splats as a .ply, or save only the splat tensors ({e})") from e
     s = ck["splats"] if "splats" in ck else ck
     g = lambda k: s[k].detach().float().cpu().numpy()
     shN = g("shN") if "shN" in s else None

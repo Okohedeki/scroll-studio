@@ -10,11 +10,11 @@ from __future__ import annotations
 
 import shutil
 import subprocess
-import urllib.request
 from pathlib import Path
 from typing import Callable
 
 from ..config import ENGINE, settings
+from ..weights import ChecksumError, check_sha256, download_verified, pinned_sha256
 
 PACKS = {
     "ComfyUI-segment-anything-2": "https://github.com/kijai/ComfyUI-segment-anything-2",
@@ -56,12 +56,17 @@ def install(log: Callable[[str], None] = print, weights: bool = True) -> list[st
     if weights:
         rel, url = GFPGAN
         path = root / "models" / rel
+        want = pinned_sha256(rel)
         if path.exists():
             log(f"  {rel}: already there")
+            if want:
+                try:
+                    check_sha256(path, want, url)
+                except ChecksumError as e:
+                    log(f"  warning: {e} Delete it and run `studio setup-comfy` again to fetch a verified copy.")
         else:
-            path.parent.mkdir(parents=True, exist_ok=True)
             log(f"  {rel}: downloading (~330 MB) from {url}")
-            urllib.request.urlretrieve(url, path)
+            download_verified(url, path, want, log)
             changed.append(rel)
     log("  Restart ComfyUI (when its queue is empty) so it loads the nodes. SAM 2.1 and Florence-2 weights download on first use.")
     return changed

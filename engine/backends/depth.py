@@ -24,7 +24,8 @@ def _load(size: str):
     from transformers import AutoImageProcessor, AutoModelForDepthEstimation
     name = MODELS[size]
     dev = "cuda" if torch.cuda.is_available() else "cpu"
-    model = AutoModelForDepthEstimation.from_pretrained(name).to(dev).eval()
+    # safetensors only: never fall back to a pickled pytorch_model.bin, which can run code when loaded
+    model = AutoModelForDepthEstimation.from_pretrained(name, use_safetensors=True).to(dev).eval()
     return AutoImageProcessor.from_pretrained(name), model, dev
 
 
