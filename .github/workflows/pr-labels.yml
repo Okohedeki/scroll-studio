@@ -1,0 +1,36 @@
+# Area, tier and size labels on every pull request, from the files it changes (.github/scripts/pr_policy.js).
+# pull_request_target so it can label pull requests from forks: it checks out only the base branch's scripts and never
+# runs or reads the pull request's code; it only lists the changed file names through the API.
+name: pr-labels
+
+on:
+  pull_request_target:  # zizmor: ignore[dangerous-triggers] base-branch code only; the pull request is never checked out
+    types: [opened, reopened, synchronize]
+
+permissions: {}
+
+concurrency:
+  group: pr-labels-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            await require("./.github/scripts/pr_policy.js").label({ github, context, core });

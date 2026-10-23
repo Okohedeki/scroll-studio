@@ -1,0 +1,42 @@
+# The required `pr-policy` check (CONTRIBUTING.md#pull-requests): a conventional title, a linked issue a maintainer
+# has accepted (design-approved when the pull request touches a core area), and a changelog fragment where users would
+# notice. The rules live in .github/scripts/pr_policy.js and are loaded from the base branch, never from the pull
+# request. Read-only: it works the same on forks.
+name: pr-policy
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize, labeled, unlabeled, ready_for_review]
+
+permissions: {}
+
+concurrency:
+  group: pr-policy-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const fs = require("fs");
+            if (!fs.existsSync(".github/scripts/pr_policy.js")) {
+              core.notice("The base branch has no pull request policy yet.");
+              return;
+            }
+            await require("./.github/scripts/pr_policy.js").check({ github, context, core });

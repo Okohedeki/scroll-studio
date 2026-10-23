@@ -1,0 +1,92 @@
+# Issue housekeeping (docs/maintainers/triage.md):
+# - a welcome on someone's first issue and first pull request;
+# - when the author answers an issue that was waiting on them, it goes back to triage;
+# - issues waiting on their author (`status: needs-info`) get a reminder after 14 days and close 7 days later.
+#   Nothing else is closed automatically.
+name: triage
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:  # zizmor: ignore[dangerous-triggers] posts a comment only; the pull request is never checked out
+    types: [opened]
+  issue_comment:
+    types: [created]
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  welcome:
+    if: github.event_name == 'issues' || github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d # v3.1.0
+        with:
+          issue_message: |
+            Thank you for opening your first issue in Scroll Studio. A maintainer will triage it within a few days
+            ([how issues are handled](https://github.com/Okohedeki/scroll-studio/blob/main/docs/maintainers/triage.md)).
+            If it's a question, [Discussions](https://github.com/Okohedeki/scroll-studio/discussions) may get you an
+            answer sooner.
+          pr_message: |
+            Thank you for your first pull request to Scroll Studio. Two things before it can be merged:
+            - it needs a linked issue a maintainer has accepted (the `pr-policy` check says what is missing), and
+            - the CLA bot will ask you to sign the Contributor Licence Agreement, once.
+
+            The rules are in [CONTRIBUTING.md](https://github.com/Okohedeki/scroll-studio/blob/main/CONTRIBUTING.md).
+
+  answered:
+    if: >-
+      github.event_name == 'issue_comment' && !github.event.issue.pull_request &&
+      github.event.comment.user.login == github.event.issue.user.login &&
+      contains(github.event.issue.labels.*.name, 'status: needs-info')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.issue.number;
+            for (const name of ["status: needs-info", "status: stale"]) {
+              await github.rest.issues.removeLabel({ owner, repo, issue_number, name }).catch(() => {});
+            }
+            await github.rest.issues.addLabels({ owner, repo, issue_number, labels: ["status: needs-triage"] });
+
+  stale:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      issues: write
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93 # v11.0.0
+        with:
+          only-issue-labels: "status: needs-info"
+          days-before-issue-stale: 14
+          days-before-issue-close: 7
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
+          stale-issue-label: "status: stale"
+          stale-issue-message: >-
+            This issue is waiting on more information and has had no reply for two weeks. It will close in 7 days
+            unless someone answers; it can be reopened any time.
+          close-issue-message: Closed for now, as nobody answered. Reply with the details and it will be reopened.
+          close-issue-reason: not_planned

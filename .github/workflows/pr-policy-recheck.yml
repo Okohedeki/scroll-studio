@@ -1,0 +1,33 @@
+# When a maintainer accepts an issue, re-run the pr-policy check of every open pull request linked to it, so the
+# contributor doesn't have to push again. Runs on the default branch; never touches pull request code.
+name: pr-policy-recheck
+
+on:
+  issues:
+    types: [labeled]
+
+permissions: {}
+
+jobs:
+  recheck:
+    if: >-
+      github.event.label.name == 'status: accepted' || github.event.label.name == 'status: design-approved'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+      contents: read
+      issues: read
+      pull-requests: read
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: .github/scripts
+          persist-credentials: false
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            await require("./.github/scripts/pr_policy.js").recheck({ github, context, core });
