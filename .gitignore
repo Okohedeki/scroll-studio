@@ -40,3 +40,4 @@ examples/*/build.log
 coverage.json
 coverage.xml
 htmlcov/
+build/

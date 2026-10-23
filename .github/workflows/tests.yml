@@ -1,8 +1,8 @@
 # The checks every change to main must pass. Branch protection requires the `tests` job (Linux with coverage floors);
-# the others are `lint` (ruff and the repository hygiene tests, fast) and `platforms` (the suite on Python 3.10 and
-# 3.13, Windows and macOS). No GPU and no models: the suite covers the spec, the planners, the compiler, the layout
-# snapshots of every example and the conformance of every theme preset and style. Tests that need ffmpeg or node run
-# here too; GPU stages are not exercised.
+# the others are `lint`, `platforms` (other Pythons and operating systems) and `install` (the built wheel runs from a
+# clean virtualenv). No GPU and no models: the suite covers the spec, the planners, the compiler, the layout snapshots
+# of every example and the conformance of every theme preset and style. Tests that need ffmpeg or node run here too;
+# GPU stages are not exercised.
 # Every action is pinned to a full commit SHA (the comment is its version); Dependabot raises them in a pull request.
 name: tests
 
@@ -152,3 +152,44 @@ jobs:
         run: npm ci
       - name: Tests
         run: python -m pytest -q -p no:cacheprovider
+
+  install:
+    # What a user gets from `pip install`: the wheel (and sdist) built here, installed into a virtualenv outside the checkout.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: System packages
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1
+      - name: Build the sdist and the wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build
+          ls -l dist
+      - name: Install the wheel into a clean virtualenv
+        run: |
+          python -m venv "$RUNNER_TEMP/clean"
+          "$RUNNER_TEMP/clean/bin/python" -m pip install --upgrade pip
+          "$RUNNER_TEMP/clean/bin/python" -m pip install dist/*.whl
+      - name: The commands run
+        # from outside the checkout, so nothing can be picked up from the source tree
+        working-directory: ${{ runner.temp }}
+        run: |
+          "$RUNNER_TEMP/clean/bin/studio" --help
+          "$RUNNER_TEMP/clean/bin/studio" schema | "$RUNNER_TEMP/clean/bin/python" -c "import json, sys; json.load(sys.stdin)"
+          "$RUNNER_TEMP/clean/bin/studio" doctor
+      - name: Everything is packaged, and every example compiles from the installed package
+        working-directory: ${{ runner.temp }}
+        run: >
+          "$RUNNER_TEMP/clean/bin/python" -I "$GITHUB_WORKSPACE/tools/install_check.py"
+          --checkout "$GITHUB_WORKSPACE" --sdist "$GITHUB_WORKSPACE"/dist/*.tar.gz
