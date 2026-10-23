@@ -131,11 +131,24 @@ nav:
       - How to contribute: contributing/guide.md
       - Build the docs: contributing/building-the-docs.md
       - Code of conduct: contributing/code-of-conduct.md
-      - Security: contributing/security.md
+      - Getting help: project/support.md
+      - Compatibility and deprecation: compatibility.md
+      - Design proposals (RFCs):
+          - rfcs/README.md
+          - RFC template: rfcs/0000-template.md
       - Contributor licence agreement: contributing/cla.md
       - For AI agents: contributing/agents.md
+      - Maintainers:
+          - Triage: maintainers/triage.md
+          - Releasing: maintainers/releasing.md
+          - Repository settings: maintainers/repo-settings.md
   - Project:
       - Why Scroll Studio: why.md
+      - Governance: project/governance.md
+      - Maintainers: project/maintainers.md
+      - Security:
+          - Security policy: contributing/security.md
+          - Threat model: security/threat-model.md
       - What's new: whats-new.md
       - Changelog: project/changelog.md
       - Roadmap: directions.md

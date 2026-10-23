@@ -128,12 +128,16 @@ same day.
 git clone https://github.com/<you>/scroll-studio && cd scroll-studio
 pip install -e ".[dev]"            # add extras you need: .[ml,mesh,cad,...] (see pyproject.toml)
 npm ci                             # the runtime and the Studio UI
-python -m pytest -q                # the whole suite, no GPU needed (about 5 minutes)
+python -m pytest -q                # the whole suite, no GPU needed (about 10 minutes)
 studio doctor                      # what your machine can build
 ```
 
 GPU stages need ComfyUI, Blender and the models: [docs/INSTALL.md](docs/INSTALL.md). You do not need them to work on
 the spec, the compiler, the runtime, styles or docs.
+
+The docs site (https://okohedeki.github.io/scroll-studio/) builds from `docs/` with
+`pip install -e ".[docs]"`, `python -m engine.docsgen docs/reference` and `mkdocs serve`
+([building the docs](docs/contributing/building-the-docs.md)).
 
 How the code is laid out: [CLAUDE.md](CLAUDE.md) (it is written for AI assistants but is the best map of the repo) and
 [docs/ENGINE.md](docs/ENGINE.md).
@@ -171,7 +175,7 @@ A feature is done when every layer that should know about it does:
 | CLI command or option | `engine/cli.py` |
 | MCP tool, when Claude should be able to drive it | `engine/mcp_server.py` |
 | Tests (no GPU: replace renders with stand-ins) | `tests/test_<feature>.py` |
-| Docs | `docs/scenes.md`, `docs/guide.md`, `docs/styles.md` as fits |
+| Docs | `docs/*.md` as fits, and a nav line in `mkdocs.yml` for a new page. Field and command text comes from the spec's descriptions and the commands' docstrings: the references are generated |
 | An example or a showcase spec that uses it | `examples/<name>/site.yaml` |
 | Changelog line | `CHANGELOG.md` |
 
@@ -249,6 +253,8 @@ Every pull request runs these without a GPU, and `main` only accepts changes tha
 - **Runtime** (`runtime` job): `npm run build:runtime` must reproduce the committed `engine/compile/static/runtime/`
   exactly, so a change to `runtime/src` commits its rebuilt bundle. The runtime and the UI are type-checked.
 - **Conformance** (`tests/test_conformance.py`): every preset and style against the rules above.
+- **Docs** ([docs workflow](.github/workflows/docs.yml)): the site builds in strict mode, and every `yaml` snippet in
+  the docs validates against the spec (`tests/test_docs.py`).
 - **Layout snapshots** (`tests/test_layout_snapshots.py`): what every example compiles to (sections, captions, windows,
   block classes). If your change moves something **on purpose**, re-record and commit the snapshots, and say why in the
   pull request; the diff is reviewed like code:

@@ -5,7 +5,7 @@
   <p>
     <a href="https://okohedeki.github.io/scroll-studio-showcase/">Showcase</a> ·
     <a href="#get-started">Get started</a> ·
-    <a href="#documentation">Docs</a> ·
+    <a href="https://okohedeki.github.io/scroll-studio/">Docs</a> ·
     <a href="docs/examples.md">Examples</a> ·
     <a href="https://github.com/Okohedeki/scroll-studio/releases/latest">Releases</a> ·
     <a href="CHANGELOG.md">Changelog</a>
@@ -112,6 +112,7 @@ The whole workflow is in the [guide](docs/guide.md).
 |---|---|
 | Setup | [Install](docs/INSTALL.md) · [What each machine can build](docs/INSTALL.md) |
 | What it can make | [Scenes](docs/scenes.md) · [Styles](docs/styles.md) · [Examples](docs/examples.md) · [Showcase](https://okohedeki.github.io/scroll-studio-showcase/) |
+| Reference | [site.yaml, CLI and MCP reference](https://okohedeki.github.io/scroll-studio/reference/), generated from the engine |
 | Making a site | [Guide](docs/guide.md): direction boards, storyboards, client copy decks, trailers, Claude |
 | Why it exists | [Local only, 10 to 30 times fewer tokens](docs/why.md) |
 | How it works | [Engine](docs/ENGINE.md) · [Style research](docs/styles/) · [Roadmap](docs/directions.md) |
