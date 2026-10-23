@@ -1,7 +1,8 @@
 # The checks every change to main must pass. Branch protection requires the `tests` job (Linux with coverage floors);
-# the others are `lint` (ruff and the repository hygiene tests, fast). No GPU and no models: the suite covers the
-# spec, the planners, the compiler, the layout snapshots of every example and the conformance of every theme preset
-# and style. Tests that need ffmpeg or node run here too; GPU stages are not exercised.
+# the others are `lint` (ruff and the repository hygiene tests, fast) and `platforms` (the suite on Python 3.10 and
+# 3.13, Windows and macOS). No GPU and no models: the suite covers the spec, the planners, the compiler, the layout
+# snapshots of every example and the conformance of every theme preset and style. Tests that need ffmpeg or node run
+# here too; GPU stages are not exercised.
 # Every action is pinned to a full commit SHA (the comment is its version); Dependabot raises them in a pull request.
 name: tests
 
@@ -90,3 +91,64 @@ jobs:
             coverage.xml
           if-no-files-found: ignore
           retention-days: 14
+
+  platforms:
+    # The same suite without the coverage run, on the other Pythons and operating systems. Linux is required (`tests`);
+    # these become required once they are green and stable.
+    name: platforms (${{ matrix.os }}, python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, python: "3.10" }
+          - { os: ubuntu-latest, python: "3.13" }
+          - { os: windows-latest, python: "3.12" }
+          - { os: macos-latest, python: "3.12" }
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: ffmpeg (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg libgl1
+      - name: ffmpeg (macOS)
+        if: runner.os == 'macOS'
+        continue-on-error: true      # the tests that need ffmpeg skip with a reason when it is missing
+        run: brew install ffmpeg
+      - name: ffmpeg (Windows)
+        if: runner.os == 'Windows'
+        continue-on-error: true      # as above
+        run: choco install ffmpeg --no-progress -y
+      - name: Say so when ffmpeg is missing
+        shell: bash
+        run: |
+          command -v ffmpeg >/dev/null || echo "::warning::ffmpeg is not installed on this runner, so the tests that need it are skipped"
+      - name: Python packages (CPU torch)
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            pip install torch --index-url https://download.pytorch.org/whl/cpu
+          else
+            pip install torch
+          fi
+          pip install -e ".[dev]"
+      - name: Node packages
+        run: npm ci
+      - name: Tests
+        run: python -m pytest -q -p no:cacheprovider
