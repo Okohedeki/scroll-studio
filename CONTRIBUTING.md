@@ -39,7 +39,10 @@ These are what make Scroll Studio what it is. A change that breaks one is not me
    The layout snapshots of every example (below) are the proof.
 5. **Declare every dependency up front**, in `pyproject.toml` (an extra for heavy or optional ones),
    `runtime/package.json` or `engine/models.yaml`, and in [docs/INSTALL.md](docs/INSTALL.md).
-6. **Accessible by default.** Real HTML text in reading order, one `<h1>` per page, WCAG AA contrast, reduced-motion
+6. **Nothing from one machine.** No committed file carries a drive-letter path, a home folder, a username or someone's
+   folder layout. Examples use placeholders (`/path/to/models`); a machine is configured in `studio.toml` (not
+   committed) or environment variables. `tests/test_no_local_paths.py` checks every tracked file.
+7. **Accessible by default.** Real HTML text in reading order, one `<h1>` per page, WCAG AA contrast, reduced-motion
    fallbacks, no flashing above three times a second.
 
 ## Set up

@@ -40,6 +40,8 @@ attribution notice verbatim, and you tell the user. Never remove or alter LICENS
 notice comment.
 
 ## Rules
+- This repo is public: never commit machine-specific paths, folder layouts, usernames or machine sizing (use
+  placeholders like `/path/to/models`; configure machines in studio.toml or env vars). `tests/test_no_local_paths.py` enforces it.
 - Declare every dependency up front (pyproject.toml extras, runtime/package.json, engine/models.yaml) and in docs/INSTALL.md.
 - Local models only; no API keys. Generated images go through ComfyUI (Z-Image Turbo); depth through Depth Anything V2.
 - After changing `runtime/src`, run `npm run build:runtime` (the built bundle in engine/compile/static is committed).

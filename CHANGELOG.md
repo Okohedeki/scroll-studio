@@ -29,6 +29,8 @@ Planned: see the [1.5 milestone](https://github.com/Okohedeki/scroll-studio/mile
   are added once and revealed with a gradient instead of being rebuilt every frame.
 
 ### Fixed
+- Example config and docs no longer show machine-specific paths (placeholders instead), and
+  `tests/test_no_local_paths.py` fails any change that commits a drive-letter path or a home folder.
 - Button text on the accent colour now passes WCAG AA in the `ink` preset and seven styles (anime-intro, comic-book,
   halftone, isometric, particles, pop-up-book, stop-motion), and stop-motion's accent text on its paper. These colours
   show where a style falls back to the default markup (scene captions, unstyled blocks).

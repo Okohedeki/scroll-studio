@@ -2,8 +2,8 @@
 
 TRELLIS.2 needs its own Python environment (CUDA extensions, xformers). Point studio.toml at it:
 
-    trellis_python = "D:/tools/trellis/.venv/Scripts/python.exe"
-    trellis_script = "D:/tools/trellis/image_to_mesh.py"
+    trellis_python = "/path/to/trellis/.venv/bin/python"
+    trellis_script = "/path/to/trellis/image_to_mesh.py"
 
 The script is called as `<python> <script> --dir <work dir>` with `<work dir>/object.png` (the cut-out product on a
 transparent background) and must write `<work dir>/mesh.ply`, a vertex-coloured mesh with +z up. Any script with

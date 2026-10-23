@@ -102,8 +102,8 @@ build. The stages need ~4 GB of VRAM and, per frame of film, ~6 MB of system RAM
 its own environment, then tell Scroll Studio how to run it (`studio.toml` or environment variables):
 
 ```toml
-trellis_python = "D:/ai/TRELLIS/venv/Scripts/python.exe"   # TRELLIS_PYTHON
-trellis_script = "D:/ai/TRELLIS/image_to_mesh.py"          # TRELLIS_SCRIPT: --dir <work> reads object.png, writes mesh.ply
+trellis_python = "/path/to/trellis/venv/bin/python"      # TRELLIS_PYTHON
+trellis_script = "/path/to/trellis/image_to_mesh.py"       # TRELLIS_SCRIPT: --dir <work> reads object.png, writes mesh.ply
 ```
 
 A real model (`model:`) always looks better than a reconstruction; use the photo route when there is no model.

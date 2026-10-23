@@ -3,8 +3,8 @@
 # blender = "C:/Program Files/Blender Foundation/Blender 4.3/blender.exe"
 # ffmpeg = "ffmpeg"
 # comfy_url = "http://127.0.0.1:8188"
-# comfy_dir = "D:/ai/ComfyUI"  # ComfyUI's folder: `studio setup-comfy` installs the reveal/faces nodes there (default: <model_dir>/ComfyUI)
-# model_dir = "D:/ai"           # Hugging Face cache for depth / segmentation models goes in <model_dir>/hf
+# comfy_dir = "/path/to/ComfyUI"  # ComfyUI's folder: `studio setup-comfy` installs the reveal/faces nodes there (default: <model_dir>/ComfyUI)
+# model_dir = "/path/to/models"   # Hugging Face cache for depth / segmentation models goes in <model_dir>/hf
 # projects = "projects"
 # video_model = "ltx"          # default video model when a spec doesn't choose one: ltx (LTX-2.3) or wan (Wan 2.2)
 # confirm_over = 30            # minutes: `studio build` asks before a render estimated longer than this (unset: it
