@@ -1,7 +1,7 @@
-# The checks every change to main must pass. Branch protection requires the `tests` job (Linux); the others are `lint`
-# (ruff and the repository hygiene tests, fast). No GPU and no models: the suite covers the spec, the planners, the
-# compiler, the layout snapshots of every example and the conformance of every theme preset and style. Tests that need
-# ffmpeg or node run here too; GPU stages are not exercised.
+# The checks every change to main must pass. Branch protection requires the `tests` job (Linux with coverage floors);
+# the others are `lint` (ruff and the repository hygiene tests, fast). No GPU and no models: the suite covers the
+# spec, the planners, the compiler, the layout snapshots of every example and the conformance of every theme preset
+# and style. Tests that need ffmpeg or node run here too; GPU stages are not exercised.
 # Every action is pinned to a full commit SHA (the comment is its version); Dependabot raises them in a pull request.
 name: tests
 
@@ -73,5 +73,20 @@ jobs:
           pip install -e ".[dev]"
       - name: Node packages
         run: npm ci
-      - name: Tests
-        run: python -m pytest -q -p no:cacheprovider
+      - name: Tests with coverage
+        run: >
+          python -m pytest -q -p no:cacheprovider --cov
+          --cov-report=json:coverage.json --cov-report=xml:coverage.xml --cov-report=term:skip-covered
+      - name: Coverage floors
+        # the total and each area in tests/coverage_floors.json; also written to the job summary
+        run: python tools/check_coverage.py coverage.json --markdown "$GITHUB_STEP_SUMMARY"
+      - name: Upload coverage
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage
+          path: |
+            coverage.json
+            coverage.xml
+          if-no-files-found: ignore
+          retention-days: 14

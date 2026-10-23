@@ -1,0 +1,17 @@
+{
+  "total": 57,
+  "areas": {
+    "engine/compile": 82,
+    "engine/spec.py": 99,
+    "engine/scenes": 25,
+    "engine/backends": 25,
+    "engine/storyboard": 53,
+    "engine/directions": 85,
+    "engine/polish": 68,
+    "engine/diorama": 92,
+    "engine/trailer": 0,
+    "engine/server": 12,
+    "engine/cli.py": 14,
+    "engine/mcp_server.py": 0
+  }
+}

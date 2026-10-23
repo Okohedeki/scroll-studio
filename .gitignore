@@ -33,3 +33,10 @@ examples/showcase/previews/*
 
 examples/_assets/kitchen_test/
 examples/*/build.log
+
+# Coverage
+.coverage
+.coverage.*
+coverage.json
+coverage.xml
+htmlcov/
