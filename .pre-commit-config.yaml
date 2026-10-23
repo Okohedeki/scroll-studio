@@ -1,0 +1,16 @@
+# Optional, for contributors: `pip install pre-commit && pre-commit install` runs the cheap checks before each commit.
+# CI runs the same ones (the `lint` job), so skipping this only moves the failure to the pull request.
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: a27a2e47c7751b639d2b5badf0ef6ff11fee893f  # v0.15.4, the version pinned in pyproject.toml
+    hooks:
+      - id: ruff-check
+  - repo: local
+    hooks:
+      - id: repo-hygiene
+        name: repo hygiene and no machine paths
+        # no machine-specific paths, no big or misplaced files, no secrets (tests/test_repo_hygiene.py, test_no_local_paths.py)
+        entry: python -m pytest -q -p no:cacheprovider tests/test_repo_hygiene.py tests/test_no_local_paths.py
+        language: system
+        pass_filenames: false
+        always_run: true

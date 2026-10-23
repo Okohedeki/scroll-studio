@@ -1,6 +1,28 @@
+# Text is stored with LF and checked out with LF on every platform, so a Windows checkout does not show every file as
+# changed and the built runtime bundle compares byte for byte in CI.
 * text=auto eol=lf
-*.mp4 binary
-*.jpg binary
+
+# Media and model files: never diffed, never line-ending converted.
 *.png binary
+*.jpg binary
+*.jpeg binary
 *.webp binary
+*.gif binary
+*.mp4 binary
+*.webm binary
 *.glb binary
+*.ply binary
+*.spz binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.exr binary
+*.npz binary
+*.bin binary
+
+# The built runtime bundle (npm run build:runtime) is generated: GitHub collapses it in pull request diffs.
+engine/compile/static/runtime/** linguist-generated=true
