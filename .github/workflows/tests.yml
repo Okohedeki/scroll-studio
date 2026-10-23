@@ -33,7 +33,11 @@ jobs:
       - name: System packages
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg libgl1
       - name: Python packages
-        run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+        # the CPU build of torch: the frozen-moment warp, layers and deep zoom run their tests on the CPU
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[dev]"
       - name: Node packages
         run: npm ci
       - name: Tests
