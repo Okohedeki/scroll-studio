@@ -618,7 +618,19 @@
   },
   "doctor": {
    "help": "Check the toolchain and report what each scene type needs.",
-   "params": {}
+   "params": {
+    "verify": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--no-verify",
+      "--verify"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
   },
   "freeze": {
    "help": "Render one frozen-moment beat (deep zoom and layers included), or print its tile plan, or measure its clip.",
