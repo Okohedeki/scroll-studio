@@ -87,33 +87,32 @@ demos plus the two most-requested looks (product turntable, photo parallax). **v
 One file describes a site. The UI edits it, Claude edits it, the CLI builds it.
 
 ```yaml
-# projects/lodestar/site.yaml
-site:
-  name: Lodestar Orbital
-  theme: { preset: night-mission, accent: "#e8742c", fonts: { display: "Sora", body: "Inter", mono: "IBM Plex Mono" } }
-  brand: { logo: inputs/logo.svg, capture_url: null }    # or a URL to pull colours, fonts, logo
-  nav: { links: [Mission, Services, Record], cta: "Talk to mission ops" }
+# projects/lodestar/site.yaml (abridged from examples/lodestar-orbital)
+name: Lodestar Orbital
+theme: { preset: night, colors: { accent: "#e8742c" }, fonts: { display: Sora, body: Inter, mono: IBM Plex Mono } }
+nav:
+  logo: inputs/logo.svg                          # an image file, or inline SVG path data
+  cta: { label: Talk to mission ops, href: "#book" }
 
 sections:
   - id: launch
     type: film
-    length: 9 screens                    # scroll distance
-    inputs:
-      brief: "A slender white two-stage rocket launches at dawn, climbs through clouds, separates, deploys a satellite."
-      subject: "slender white two-stage rocket, plain white body, two thin black bands ..."
-      blockout: { preset: rocket-launch }          # or file: inputs/scene.blend / inputs/scene.glb
-      keyframes: auto                              # or a list of images/prompts at times
-    render: { res: 1920x1088, seconds: 18, segments: 3s, upscale: none }
-    hud: { kind: telemetry, fields: [altitude, velocity], events: [Lift-off, Max-Q, Stage separation] }
+    length: 9                                    # scroll distance, in screen heights
+    shot:
+      blockout: { preset: rocket-launch }        # or a Blender / glTF file in inputs/
+      duration: 18
+      keyframes: { frames: [...] }               # Z-Image stills pinned at times of the film
+    hud:
+      kind: telemetry
+      fields: [{ label: Altitude, unit: km, to: 550 }, { label: Velocity, unit: km/s, to: 7.6 }]
+      events: [{ at: 0.09, label: Lift-off }, { at: 0.3, label: Max-Q }, { at: 0.66, label: Stage separation }]
     steps:
-      - { at: 0.00, kicker: Lodestar Orbital, title: "Every mission starts on the ground." }
-      - { at: 0.30, title: "Through the weather. Past the noise." }
-      - { at: 0.80, title: "Your satellite, exactly where it belongs." }
+      - { at: [0.01, 0.13], kicker: Lodestar Orbital, title: "Every mission starts <em>on the ground.</em>" }
+      - { at: [0.22, 0.4], title: "Through the weather. <em>Past the noise.</em>" }
 
   - id: studio
     type: artwork
-    inputs: { image: inputs/mona_lisa.jpg, focus: auto }          # auto = face/saliency detection
-    stages: [guides, lines, value, underpaint, colour]
+    image: { file: inputs/mona_lisa.jpg }        # focus is detected automatically (faces first)
     steps: [...]
 ```
 

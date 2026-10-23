@@ -1,0 +1,115 @@
+# The docs site (https://okohedeki.github.io/scroll-studio/). Every pull request that touches the docs, the spec, the CLI
+# or the MCP server builds it in strict mode, so a broken link or a bad reference fails the check. Pushes to main build it
+# again and publish it to GitHub Pages. Once a week the external links are checked; that run is the only thing it does and
+# nothing blocks on it. How to build locally: docs/contributing/building-the-docs.md.
+name: docs
+
+on:
+  pull_request:
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "mkdocs_hooks.py"
+      - "engine/spec.py"
+      - "engine/cli.py"
+      - "engine/mcp_server.py"
+      - "engine/docsgen.py"
+      - "tests/test_docs.py"
+      - "pyproject.toml"
+      - "*.md"
+      - ".github/workflows/docs.yml"
+  push:
+    branches: [main]
+  schedule:
+    - cron: "23 5 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    # not on the weekly schedule: that run only checks links
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Install the engine and the docs tools
+        # no torch, no GPU: importing the spec, the CLI and the MCP server needs none of the ml extra
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[docs,dev]"
+      - name: Check the yaml snippets, links and generated pages
+        run: python -m pytest -q -p no:cacheprovider tests/test_docs.py tests/test_no_local_paths.py
+      - name: Generate the references (site.yaml, CLI, MCP tools)
+        run: python -m engine.docsgen docs/reference
+      - name: Build the site, strict (any warning fails)
+        run: mkdocs build --strict
+      - name: Upload the site
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+  links:
+    # external links only (internal ones are checked by the strict build); fails its own run when one is dead, opens nothing
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --no-progress
+            --scheme https --scheme http
+            --max-retries 3 --retry-wait-time 10 --timeout 30
+            --accept '200..=299,429'
+            --exclude '^https?://(localhost|127\.0\.0\.1)'
+            --exclude '^https?://([a-z0-9-]+\.)?example\.(com|org|net)'
+            'docs/**/*.md' '*.md'

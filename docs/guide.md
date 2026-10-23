@@ -183,6 +183,8 @@ take's keyframe prompts repaints only that keyframe. When a shot is right, lock 
 ```yaml
 beats:
   - id: door
+    prompt: ...
+    motion: ...
     locked: true      # never re-rendered by storyboard or build, even if its prompt or settings change
 ```
 
