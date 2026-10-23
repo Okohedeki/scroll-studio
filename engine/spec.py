@@ -13,9 +13,28 @@ from typing import Annotated, Any, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_serializer, model_validator
 
+from .safety import CSS_NAME, FONT_NAME, SAFE_ID, check_url, css_value_ok
+
 
 class Model(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+    @field_validator("*", mode="after", check_fields=False)
+    @classmethod
+    def _untrusted_text(cls, v: Any, info) -> Any:
+        """A spec may come from anyone, so the few fields that end up in a file name, a link or a light name are
+        checked wherever they appear (see engine/safety.py)."""
+        name = info.field_name
+        if v is None or not isinstance(v, str):
+            return v
+        if name == "id" and not SAFE_ID.fullmatch(v):
+            raise ValueError(f"id {v[:40]!r} is not allowed: ids name folders and page anchors, so use letters, digits, '-', '_' "
+                             "and '.', starting with a letter or digit (at most 64 characters)")
+        if name in ("href", "url"):
+            check_url(v, name)
+        if name == "hdri" and not re.fullmatch(r"[A-Za-z0-9_-]{1,40}", v):
+            raise ValueError(f"hdri {v[:40]!r} is not a studio light name: use one of Blender's studio lights, e.g. studio, city, forest")
+        return v
 
 
 # ---------------------------------------------------------------- shared pieces
@@ -2249,6 +2268,29 @@ class Theme(Model):
     art: Optional[Art] = Field(None, description="Artwork the style renders in its own medium (ascii-art: characters, "
                                                   "particles: points). A prompt or a file, optionally animated")
 
+    @field_validator("colors")
+    @classmethod
+    def _colors_are_colors(cls, v: dict[str, str]) -> dict[str, str]:
+        for k, c in v.items():
+            if not CSS_NAME.fullmatch(k.replace("_", "-")) or not css_value_ok(c):
+                raise ValueError(f"colors.{k}: {c[:40]!r} is not a plain CSS colour (use #hex, rgb(...) or a colour name)")
+        return v
+
+    @field_validator("fonts")
+    @classmethod
+    def _fonts_are_families(cls, v: dict[str, str]) -> dict[str, str]:
+        for k, f in v.items():
+            if not CSS_NAME.fullmatch(k) or not FONT_NAME.fullmatch(f):
+                raise ValueError(f"fonts.{k}: {f[:40]!r} is not a Google Fonts family name (letters, digits, spaces and . + & ' -)")
+        return v
+
+    @field_validator("radius")
+    @classmethod
+    def _radius_is_a_length(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and not css_value_ok(v):
+            raise ValueError(f"radius {v[:40]!r} is not a CSS length such as 4px or 0.5rem")
+        return v
+
 
 class Nav(Model):
     logo: Optional[str] = Field(None, description="Inline SVG path data (24x24) or an image file")
@@ -2285,6 +2327,15 @@ class Page(Model):
     source: str = Field(..., description="Markdown file relative to the project folder (pages/privacy.md)")
     summary: Optional[str] = Field(None, description="Meta description for the page")
     nav: bool = Field(False, description="Also link it from the nav, after the section links")
+
+    @field_validator("slug")
+    @classmethod
+    def _slug_is_a_url_path(cls, v: str) -> str:
+        parts = v.strip("/").split("/")
+        if not all(SAFE_ID.fullmatch(p) and not p.startswith(".") for p in parts):
+            raise ValueError(f"slug {v[:40]!r} is not allowed: use letters, digits, '-' and '_', with '/' between folders "
+                             "(no '..', no spaces)")
+        return "/".join(parts)
 
 
 # ---------------------------------------------------------------- launch trailer (`studio trailer`, engine/trailer/)

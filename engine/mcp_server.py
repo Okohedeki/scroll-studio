@@ -18,7 +18,7 @@ from mcp.server.mcpserver import MCPServer
 from pydantic import ValidationError
 
 from .config import ROOT, settings
-from .project import BuildError, Project
+from .project import BuildError, Project, child, safe_name
 from .server.jobs import JobQueue, logger
 from .spec import SCENE_TYPES, Site
 
@@ -39,12 +39,41 @@ PROJECTS = Path(settings()["projects"])
 EXAMPLES = ROOT / "examples"
 
 
+# What add_input will copy into a project: media, models, data and source files. Nothing else (keys, tokens, config files)
+# is a thing a scroll site needs, so a client that asks for one gets a refusal.
+INPUT_SUFFIXES = frozenset(
+    ".png .jpg .jpeg .webp .gif .avif .bmp .tif .tiff .svg .exr .hdr .mp4 .mov .webm .mkv .m4v .mp3 .wav .m4a .ogg .flac "
+    ".glb .gltf .bin .obj .mtl .fbx .stl .ply .step .stp .3mf .blend .usdz .spz .pt .npz .csv .json .md .markdown .txt "
+    ".php .py .ts .tsx .js .jsx .go .rs .rb .java .kt .swift .c .h .cpp .cs .sh .sql .html .css .yml .yaml .toml".split())
+
+
 def _find(name: str) -> Project:
-    for base in (PROJECTS, EXAMPLES, Path(".")):
-        p = Project(base / name)
-        if p.exists():
-            return p
+    try:
+        for base in (PROJECTS, EXAMPLES, Path(".")):
+            p = Project(child(base, name, "project name"))
+            if p.exists():
+                return p
+    except ValueError as e:
+        raise ValueError(f"{e}. Use list_projects or create_project.") from e
     raise ValueError(f"no project '{name}'. Use list_projects or create_project.")
+
+
+def _readable_source(path: str, suffixes: frozenset[str], what: str) -> Path:
+    """A local file a client asks us to read: it must be a real file of a kind a site uses, and not in a hidden folder
+    (.ssh, .aws, .config ...). The client may be steered by text it read elsewhere, so it gets no more than the CLI would need."""
+    src = Path(path).expanduser()
+    if not src.is_file():
+        raise ValueError(f"not a file: {src}")
+    if src.suffix.lower() not in suffixes:
+        raise ValueError(f"{src.name}: {what} takes {', '.join(sorted(suffixes)[:8])} ... files, not {src.suffix or 'files without an extension'}")
+    real = src.resolve()
+    try:
+        below_home = real.relative_to(Path.home().resolve()).parts      # .ssh, .aws, .config ... live straight under it
+    except ValueError:
+        below_home = ()
+    if any(part.startswith(".") for part in below_home):
+        raise ValueError(f"{src}: files in hidden folders are not copied; move it somewhere else first")
+    return src
 
 
 @mcp.tool()
@@ -65,11 +94,14 @@ def list_projects() -> list[dict]:
 def create_project(name: str, example: Optional[str] = None) -> dict:
     """Create a project in the projects folder, empty or copied from an example. Returns its path."""
     from .cli import STARTER
-    dst = PROJECTS / name
+    dst = child(PROJECTS, name, "project name")
+    src = child(EXAMPLES, example, "example name") if example else None
     if dst.exists():
         raise ValueError(f"{dst} already exists")
-    if example:
-        shutil.copytree(EXAMPLES / example, dst, ignore=shutil.ignore_patterns(".build", "dist", "snapshots", "recordings"))
+    if src is not None:
+        if not (src / "site.yaml").exists():
+            raise ValueError(f"no example '{example}'. Use list_projects to see them.")
+        shutil.copytree(src, dst, ignore=shutil.ignore_patterns(".build", "dist", "snapshots", "recordings"))
     else:
         (dst / "inputs").mkdir(parents=True)
         (dst / "site.yaml").write_text(STARTER, encoding="utf-8")
@@ -124,11 +156,9 @@ def list_inputs(project: str) -> list[str]:
 def add_input(project: str, source_path: str) -> str:
     """Copy a local file (image, video, 3D model, .blend) into the project's inputs/. Returns the spec path to use."""
     p = _find(project)
-    src = Path(source_path).expanduser()
-    if not src.is_file():
-        raise ValueError(f"not a file: {src}")
+    src = _readable_source(source_path, INPUT_SUFFIXES, "add_input")
     p.inputs.mkdir(parents=True, exist_ok=True)
-    shutil.copy(src, p.inputs / src.name)
+    shutil.copy(src, child(p.inputs, src.name, "file name"))
     return f"inputs/{src.name}"
 
 
@@ -491,10 +521,11 @@ def record(project: str, section: Optional[str] = None, seconds: float = 12.0) -
     """Start recording a smooth scroll-through MP4 of the built site (background job)."""
     from .record import record as rec
     p = _find(project)
+    stem = safe_name(section or "page", "section")
 
     def run(job):
         log, progress = logger(job)
-        out = p.root / "recordings" / f"{section or 'page'}-{int(time.time())}.mp4"
+        out = p.root / "recordings" / f"{stem}-{int(time.time())}.mp4"
         return {"video": str(rec(p.dist, out, section=section, seconds=seconds, log=log, progress=progress))}
     return jobs.submit("record", p.name, "record", run).public(tail=5)
 
@@ -550,7 +581,7 @@ def apply_copy_deck(project: str, deck_path: str, dry_run: bool = False) -> dict
     """Apply an edited copy deck to site.yaml (comments kept, invalid edits refused). Returns the changed fields."""
     from .brand import import_deck
     p = _find(project)
-    changes = import_deck(p, Path(deck_path).read_text(encoding="utf-8"), dry_run=dry_run)
+    changes = import_deck(p, _readable_source(deck_path, frozenset({".md", ".markdown", ".txt"}), "import_deck").read_text(encoding="utf-8"), dry_run=dry_run)
     return {"changed": [{"key": k, "old": o, "new": n} for k, o, n in changes], "written": bool(changes) and not dry_run}
 
 

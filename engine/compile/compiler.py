@@ -13,6 +13,7 @@ from markupsafe import Markup
 
 from ..config import STATIC
 from ..inputs import credit as image_credit, resolve_image
+from .. import safety
 from ..project import BuildContext, BuildError, Project
 from ..spec import ImageInput, Site, is_scene
 from . import fonts, themes
@@ -28,16 +29,22 @@ def _env(style_dir: Optional[Path] = None) -> Environment:
     env = Environment(loader=ChoiceLoader(loaders), autoescape=select_autoescape(["html", "j2"]),
                       trim_blocks=True, lstrip_blocks=True)
     # Copy fields allow a little inline markup (<em>, <br>, <b>, <i>, <code>); everything else is escaped.
-    allowed = re.compile(r"&lt;(/?)(em|b|i|br|strong|code)\s*/?&gt;")
-    def rich(text):
-        if text is None:
-            return ""
-        esc = str(Markup.escape(text))
-        return Markup(allowed.sub(lambda m: f"<{m.group(1)}{m.group(2)}>", esc))
+    rich = safety.rich
     env.filters["rich"] = rich
     env.filters["vh"] = lambda v: f"{float(v) * 100:.0f}vh"
     env.filters["countable"] = lambda v: bool(re.fullmatch(r"\d+(\.\d+)?", str(v).replace(",", "")))
     return env
+
+
+def markdown_to_html(text: str) -> str:
+    """A page's Markdown as HTML. Raw HTML in the source is shown as text, never passed through (a page's Markdown may
+    come from a shared project); links are limited to safe schemes when the page is written (safety.clean_page_urls)."""
+    import markdown
+    md = markdown.Markdown(extensions=["sane_lists", "smarty", "tables", "fenced_code", "toc"],
+                           extension_configs={"toc": {"permalink": False}})
+    md.preprocessors.deregister("html_block")
+    md.inlinePatterns.deregister("html")
+    return md.convert(text)
 
 
 def _knockout(im):
@@ -404,12 +411,11 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         html = html.replace("</body>", mark + "\n</body>", 1).replace("<head>", '<head>\n<meta name="robots" content="noindex">', 1)
     if link_base:
         html = re.sub(r'(<a\s[^>]*?href=")(?!#|[a-z][a-z0-9+.-]*:|/|\.\./)([^"]*")', lambda m: m.group(1) + link_base + m.group(2), html)
-    (dist / "index.html").write_text(html, encoding="utf-8")
+    (dist / "index.html").write_text(safety.clean_page_urls(html, log), encoding="utf-8")
 
     # Plain pages (privacy policy, support): Markdown set in the site's theme at /<slug>/. They live one
     # level down, so every site-relative link gets the `base` prefix.
     if site.pages:
-        import markdown
         base = "../"
         def rebase(href: str) -> str:
             return href if href.startswith(("http://", "https://", "mailto:", "tel:")) else base + href
@@ -417,8 +423,7 @@ def build_site(project: Project, log: Callable[[str], None] = print,
             src = project.path(p.source)
             if not src.exists():
                 raise BuildError(f"page '{p.slug}': {p.source} not found")
-            body = markdown.markdown(src.read_text(encoding="utf-8"), extensions=["sane_lists", "smarty", "tables", "fenced_code", "toc"],
-                                     extension_configs={"toc": {"permalink": False}})
+            body = markdown_to_html(src.read_text(encoding="utf-8"))
             page_html = env.get_template("page.html.j2").render(
                 site=site, page=p, icon=favicon(site, theme), body=Markup(body), theme=theme, css_vars=css_vars, base=base,
                 concept=concept, product=site.product,
@@ -429,7 +434,7 @@ def build_site(project: Project, log: Callable[[str], None] = print,
             )
             out = dist / p.slug
             out.mkdir(parents=True, exist_ok=True)
-            (out / "index.html").write_text(page_html, encoding="utf-8")
+            (out / "index.html").write_text(safety.clean_page_urls(page_html, log), encoding="utf-8")
             log(f"page -> {out / 'index.html'}")
 
     progress(1.0, "done")

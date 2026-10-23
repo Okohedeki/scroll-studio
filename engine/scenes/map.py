@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 
 from ..project import BuildContext
+from ..safety import angle_escaped
 from ..spec import MapScene
 
 
@@ -35,5 +36,5 @@ def _densify(pts, geodesic):
 def build(sec: MapScene, ctx: BuildContext, theme: dict) -> dict:
     accent = theme["colors"]["accent"]
     routes = [{"id": r.id, "color": r.color or accent, "coords": _densify([list(p) for p in r.points], r.geodesic)} for r in sec.routes]
-    return {"style": sec.style, "dark": sec.dark, "routes": routes, "markers": [m.model_dump() for m in sec.markers],
+    return {"style": sec.style, "dark": sec.dark, "routes": routes, "markers": [dict(m.model_dump(), label=angle_escaped(m.label)) for m in sec.markers],
             "credits": ["Map data © OpenStreetMap contributors, tiles by OpenFreeMap"] if "openfreemap" in sec.style else []}

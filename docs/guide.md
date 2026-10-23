@@ -39,7 +39,7 @@ pin the display face's optical size (`display_optical_size: 40`): variable serif
 expressive at huge sizes, and a pinned size keeps headlines calm.
 
 A site can carry plain pages beside the scroll page, for the privacy policy, support or press: Markdown files set
-in the site's theme, served at `/<slug>/` and linked from the footer (`nav: true` adds them to the nav too).
+in the site's theme, served at `/<slug>/` and linked from the footer (`nav: true` adds them to the nav too). Raw HTML in a page's Markdown is shown as text rather than run, and links must be `http(s)`, `mailto:`, `tel:`, a relative path or a `#anchor`.
 
 ```yaml
 pages:

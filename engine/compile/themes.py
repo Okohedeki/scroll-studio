@@ -7,6 +7,7 @@ from urllib.parse import quote_plus
 
 import yaml
 
+from .. import safety
 from ..spec import Theme
 
 THEMES_FILE = Path(__file__).resolve().parent.parent / "themes.yaml"
@@ -109,6 +110,16 @@ def resolve(theme: Theme) -> dict:
                     colors=dict(base["colors"], **st.get("colors", {})), fonts=dict(base["fonts"], **st.get("fonts", {})))
     colors = dict(base["colors"], **theme.colors)
     fonts = dict(base["fonts"], **theme.fonts)
+    radius = theme.radius or base.get("radius", "4px")
+    # these end up inside the page's <style> block, so none may carry anything but a plain value (engine/safety.py)
+    for k, c in colors.items():
+        if not safety.css_value_ok(c):
+            raise ValueError(f"theme colour {k}: {str(c)[:40]!r} is not a plain CSS colour (use #hex, rgb(...) or a colour name)")
+    for k, f in fonts.items():
+        if not safety.CSS_NAME.fullmatch(str(k)) or not safety.FONT_NAME.fullmatch(str(f)):
+            raise ValueError(f"theme font {k}: {str(f)[:40]!r} is not a Google Fonts family name")
+    if not safety.css_value_ok(radius):
+        raise ValueError(f"theme radius {str(radius)[:40]!r} is not a CSS length such as 4px")
     return {
         "style": theme.style,
         "font_axes": st.get("font_axes", {}),
@@ -120,7 +131,7 @@ def resolve(theme: Theme) -> dict:
         "em": theme.display_em or base.get("display_em", "accent"),
         "labels": theme.labels or base.get("labels", "caps"),
         "display_opsz": theme.display_optical_size or base.get("display_optical_size"),
-        "radius": theme.radius or base.get("radius", "4px"),
+        "radius": radius,
     }
 
 

@@ -13,6 +13,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
+from .. import safety
 from ..inputs import credit, image_key, resolve_image, resolve_path
 from ..project import BuildContext, BuildError, file_key
 from ..spec import VectorScene
@@ -20,6 +21,8 @@ from ..spec import VectorScene
 VERSION = 2
 NS = "http://www.w3.org/2000/svg"
 NUM = re.compile(r"-?\d*\.?\d+(?:e-?\d+)?")
+PATH_DATA = re.compile(r"[MmLlHhVvCcSsQqTtAaZz0-9eE.,+\s-]*")
+TRANSFORM = re.compile(r"[A-Za-z0-9().,+\s-]*")
 
 
 def _vectorise(src: Path, out: Path, sec: VectorScene, log) -> None:
@@ -66,6 +69,11 @@ def _normalise(svg_path: Path, out: Path, sec: VectorScene) -> dict:
         cx = (sum(xs) / max(len(xs), 1)) + tx
         cy = (sum(ys) / max(len(ys), 1)) + ty
         fill = el.get("fill") or (re.search(r"fill:\s*([^;]+)", el.get("style", "")) or [None, "#000"])[1]
+        # the drawing is inlined into the page: only path syntax, transforms and plain colours get through
+        if not PATH_DATA.fullmatch(el.get("d")) or not TRANSFORM.fullmatch(el.get("transform", "")):
+            raise BuildError("the SVG has a path with something other than path data or a transform in it; "
+                             "export a plain SVG (paths, no scripts or markup in attributes)")
+        fill = fill.strip() if safety.css_value_ok(fill.strip()) else "#000"
         paths.append({"d": el.get("d"), "t": el.get("transform", ""), "fill": fill, "cx": cx, "cy": cy,
                       "size": len(el.get("d"))})
     if not paths:

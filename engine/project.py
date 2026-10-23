@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 import subprocess
 import time
@@ -22,6 +23,28 @@ from .spec import Site
 
 class BuildError(RuntimeError):
     pass
+
+
+_BAD_NAME_CHARS = frozenset("/\\:*?\"<>|\x00")
+_NAME = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.-]{0,99}")
+
+
+def safe_name(name: str, what: str = "name") -> str:
+    """A single file or folder name that can be joined onto a folder without leaving it: letters, digits, `_`, `-` and
+    inner dots; no separators, no leading dot, no `..`. Raises ValueError saying what to change."""
+    if not isinstance(name, str) or not _NAME.fullmatch(name) or ".." in name:
+        raise ValueError(f"{what} {name!r} is not allowed: use letters, digits, '-' and '_' only (at most 100 characters)")
+    return name
+
+
+def child(base: str | Path, name: str, what: str = "name") -> Path:
+    """`base/name` for a name that comes from a request, a spec or an AI client: exactly one path component. Folders
+    people already made (spaces and all) still work; separators, `..`, drive letters and hidden names do not."""
+    if (not isinstance(name, str) or not name or name in (".", "..") or name.startswith(".") or name != name.strip()
+            or any(c in _BAD_NAME_CHARS for c in name)):
+        raise ValueError(f"{what} {name!r} is not allowed: it must be a plain folder or file name, with no slashes, '..' "
+                         "or leading dot")
+    return Path(base) / name
 
 
 def file_key(path: Path) -> dict:
@@ -65,9 +88,18 @@ class Project:
             yaml.safe_dump(data, f, sort_keys=False, allow_unicode=True, width=110)
 
     def path(self, rel: str) -> Path:
-        p = (self.root / rel).resolve()
-        if self.root not in p.parents and p != self.root:
-            raise BuildError(f"{rel} is outside the project folder")
+        """A path named in the spec, resolved (links followed) and required to stay inside the project folder. An
+        absolute path, `..` or a symlink pointing out is refused: a spec is a document that may come from anyone."""
+        try:
+            if "\x00" in str(rel):
+                raise ValueError("embedded null character")
+            p = (self.root / rel).resolve()
+        except (OSError, ValueError, RuntimeError) as e:     # NUL bytes, loops, names the OS refuses
+            raise BuildError(f"{rel!r} is not a usable path ({e.__class__.__name__}); use a file inside the project folder, "
+                             "e.g. inputs/photo.jpg") from e
+        if p != self.root and self.root not in p.parents:
+            raise BuildError(f"{rel} is outside the project folder: use a file inside it (e.g. inputs/photo.jpg), "
+                             "not an absolute path, `..` or a link that leads out")
         return p
 
 
