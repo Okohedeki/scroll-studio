@@ -342,7 +342,6 @@ def zoom_beat_key(f, b, *, upscaled_key: str, size, depth_key: str, method: str)
     """What a deep-zoom render is made of, without making it: the settings and every tile's key (so a moved box or
     a changed detail setting re-renders, an unchanged one does not)."""
     from . import zoom, zoom_build
-    from PIL import Image
     from .backends import upscale as up
     d = f.detail
     base_px = up.target_size(size, f.upscale if f.upscale > 1 else 1)[0]

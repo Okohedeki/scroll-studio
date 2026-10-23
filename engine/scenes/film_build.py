@@ -9,7 +9,6 @@ import json
 import os
 import shutil
 import subprocess
-import sys
 
 from ..backends import comfy as ltx_comfy
 from ..config import settings

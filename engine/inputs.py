@@ -187,7 +187,6 @@ def generate_image(project: Project, prompt: str, w: int, h: int, seed: int, log
 def _edit(project: Project, ref: ImageInput, log=print) -> Path:
     """An image made by editing others with Qwen-Image-Edit, cached by the sources' content and the instruction."""
     from .backends import comfy
-    from .project import file_key
     e = ref.edit
     srcs = [resolve_image(project, r, log) for r in [e.source, *e.refs[:2]]]
     out = edit_path(project, ref, srcs)

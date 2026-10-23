@@ -9,7 +9,6 @@ from __future__ import annotations
 import json
 import re
 import textwrap
-from pathlib import Path
 
 import numpy as np
 import pytest

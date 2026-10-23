@@ -232,7 +232,6 @@ def _probe(path: Path) -> dict:
 @needs_ffmpeg
 def test_masks_are_packed_in_an_atlas_video_with_the_films_frame_count_rate_and_gop(tmp_path):
     n, gop = 30, 6
-    rng = np.random.default_rng(1)
     base = np.zeros((n, 540, 960), np.uint8)
     for i in range(n):
         base[i, 100 + i: 300, 200: 500 + 4 * i] = 255

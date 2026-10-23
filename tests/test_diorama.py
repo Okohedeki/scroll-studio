@@ -198,7 +198,6 @@ def test_the_cheapest_sight_line_wins_unless_it_means_a_big_swing():
 def test_a_tall_thing_in_the_way_changes_the_view():
     s = scene("harbour", places=[{"name": "Yard", "kind": "crane"}], steps=[{"title": "x"}])
     plan, tex, w = diorama.build(s, "#fff", True)
-    pl = {"x": 0.0, "z": 0.0}
     clear = P.yaw_options(w, {"x": 0.0, "z": 0.0}, (0.0, 1.0, 0.0), 12.0, 21.0, 0.0, 24.0)
     saved = list(w.props)
     w.props.append({"k": "lighthouse", "x": 0.0, "z": 5.0, "y": 0.0, "r": 0.0, "s": 1.0, "v": 0})

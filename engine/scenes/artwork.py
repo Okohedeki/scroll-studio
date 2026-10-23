@@ -16,7 +16,6 @@ from __future__ import annotations
 
 import json
 import math
-from pathlib import Path
 
 import cv2
 import numpy as np
@@ -237,7 +236,6 @@ def build(sec: ArtworkScene, ctx: BuildContext, theme: dict) -> dict:
     outs = [web / n for n in names]
     key = {"v": VERSION, "img": image_key(sec.image), "file": file_key(src_path), "focus": sec.focus, "w": sec.width,
            "density": sec.line_density, "under": sec.underpaint, "paper": sec.paper}
-    meta = {}
 
     def run():
         src = Image.open(src_path).convert("RGB")
@@ -264,7 +262,6 @@ def build(sec: ArtworkScene, ctx: BuildContext, theme: dict) -> dict:
         ctx.log(f"  {W}x{H}, {len(lines)} strokes")
 
     ctx.stage("layers", key, outs, run)
-    W = sec.width
     with Image.open(web / "final.jpg") as im:
         size = list(im.size)
     cfg = {

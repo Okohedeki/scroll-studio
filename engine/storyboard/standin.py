@@ -13,10 +13,10 @@ import shutil
 from pathlib import Path
 from typing import Callable, Optional
 
-from ..project import BuildContext, Project, ffmpeg, file_key
+from ..project import Project, ffmpeg, file_key
 from ..spec import FilmScene
 from .cards import Card, _digest
-from .motion import Move, Piece, from_text, render, timings
+from .motion import Piece, from_text, render, timings
 
 SIZE = (1280, 720)
 
@@ -70,7 +70,6 @@ def beat_clip(project: Project, sec: FilmScene, b, out: Path, size: tuple[int, i
     size and frame rate, with the slow move its motion text suggests. Not stamped: the full build renders the beat."""
     from ..fidelity import previewing
     from ..inputs import resolve_image
-    from ..spec import ImageInput
     W, H = size
     from ..camera_beats import start_ref
     ref = start_ref(sec, sec.beats.index(b), (W, H))

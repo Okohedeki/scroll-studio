@@ -188,7 +188,6 @@ def test_view_from_transform_roundtrip():
 
 
 def test_people_motion_reads_a_walker_above_the_floor():
-    import cv2
     bg = texture(256, 160, seed=5)
     people = np.zeros((160, 256), np.uint8)
     people[50:120, 100:140] = 255

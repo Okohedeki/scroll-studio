@@ -25,12 +25,15 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Callable, Optional
+from typing import TYPE_CHECKING, Callable, Optional
 
 import numpy as np
 
 from .project import BuildError, file_key
 from .spec import EditRegion
+
+if TYPE_CHECKING:
+    from PIL import Image
 
 VERSION = 1                 # bump when a region would come out differently for the same inputs
 WORK_MAX = 2048             # the long side SAM 2.1 and Florence-2 are shown (both resize internally anyway)

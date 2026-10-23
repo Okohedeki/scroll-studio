@@ -153,7 +153,6 @@ def place_product(p):
             o.matrix_parent_inverse = pivot
     root.location = Vector(p["at"])
     rx, ry, rz = rad(p.get("rotation", (0, 0, 0)))
-    scene = bpy.context.scene
     root.rotation_euler = (rx, ry, rz)
     root.keyframe_insert("rotation_euler", frame=1)
     root.rotation_euler = (rx, ry, rz + math.radians(p.get("spin", 0)))
@@ -402,8 +401,8 @@ frames = a.only or range(1, a.frames + 1)
 for fi in frames:
     scene.frame_set(fi)
     path = os.path.join(a.out, "frames", f"{fi:04d}.png")
-    box = on_screen_box()
-    if box is None:   # too small or off-screen: an empty frame, no render
+    screen_box = on_screen_box()
+    if screen_box is None:   # too small or off-screen: an empty frame, no render
         if blank is None:
             blank = bpy.data.images.new("blank", a.width, a.height, alpha=True)
             blank.pixels[:] = [0.0] * (a.width * a.height * 4)
@@ -414,7 +413,7 @@ for fi in frames:
         continue
     # render only the product's region; the rest of the full-size frame stays transparent
     scene.render.use_border, scene.render.use_crop_to_border = True, False
-    scene.render.border_min_x, scene.render.border_min_y, scene.render.border_max_x, scene.render.border_max_y = box
+    scene.render.border_min_x, scene.render.border_min_y, scene.render.border_max_x, scene.render.border_max_y = screen_box
     scene.render.filepath = path
     bpy.ops.render.render(write_still=True)
     print(f"FRAME {fi}/{a.frames}", flush=True)

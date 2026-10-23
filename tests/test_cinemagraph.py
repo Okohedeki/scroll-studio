@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import json
 import textwrap
-from pathlib import Path
 
 import numpy as np
 import pytest
@@ -257,7 +256,6 @@ def fake(tmp_path, monkeypatch):
     monkeypatch.setattr(region, "find", find)
     monkeypatch.setattr(animate, "animate", anim)
     monkeypatch.setattr(C, "_track", lambda *a, **k: (_ for _ in ()).throw(BuildError("no ComfyUI in tests")))
-    from engine.fidelity import would_render
     return Project(root), calls
 
 
@@ -311,7 +309,7 @@ def test_pingpong_has_no_seam_and_is_twice_as_long(fake):
 # ---------------------------------------------------------------- the page
 
 def test_the_page_marks_the_still_wherever_it_is_shown(tmp_path, monkeypatch):
-    from engine.compile.compiler import build_site, wire_cinemagraphs
+    from engine.compile.compiler import build_site
     root = tmp_path / "site"
     (root / "inputs").mkdir(parents=True)
     Image.fromarray(np.full((200, 300, 3), 120, np.uint8)).save(root / "inputs" / "a.png")

@@ -3,9 +3,7 @@ a frame (each place at rest, the lift, the orbit and the dive between two places
 from __future__ import annotations
 
 import json
-import math
 from pathlib import Path
-from typing import Optional
 
 from ..spec import DioramaScene
 from .plan import build

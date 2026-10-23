@@ -14,7 +14,6 @@ from __future__ import annotations
 import contextlib
 import json
 import math
-import sys
 import threading
 import time
 from pathlib import Path
@@ -24,7 +23,7 @@ from ...project import BuildError, Project
 from ...region import outline_of
 from ...server.jobs import Job, JobQueue, logger
 from . import approvals, images, notes, render, shots, specdoc, variants
-from .shots import Board, Fld, Node, Shot, Slot
+from .shots import Board, Fld, Node
 
 PAGE_LEVEL = "sketch"      # the sheet is rebuilt from what is cached: renders happen per image, on their own buttons
 

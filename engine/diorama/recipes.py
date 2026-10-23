@@ -146,7 +146,6 @@ def paint_rect(w: World, cx, cz, hx, hz, rot_deg, color, keep=True, stripes=None
     if stripes:
         t = math.radians(rot_deg)
         u = (w.X - cx) * math.cos(t) + (w.Z - cz) * math.sin(t)
-        v = -(w.X - cx) * math.sin(t) + (w.Z - cz) * math.cos(t)
         lines = smoothstep(0.045, 0.02, np.abs(np.mod(u + stripes / 2, stripes) - stripes / 2)) * smoothstep(0.0, -0.4, sdf + 0.3)
         w.blend(lines * m, "#f4ead0", 0.75)
     if keep:
@@ -222,7 +221,6 @@ def snap_free(w: World, x: float, z: float, rad: float, water_ok: bool = False) 
     """Nudge a wanted position to open ground: out of the water, off the road, inside the base."""
     if w.free(x, z, rad, water=water_ok, margin=0.2):
         return x, z
-    best = None
     for r in np.linspace(0.4, w.R * 0.9, 18):
         for a in np.linspace(0, 2 * math.pi, 24, endpoint=False):
             px, pz = x + r * math.cos(a), z + r * math.sin(a)
@@ -261,7 +259,6 @@ def D(w: World, pl: dict, items):
 
 def dress_harbour(w: World, pl: dict, pal, rng):
     k = pl["kind"]
-    wall = lambda: WALLS[int(rng.integers(0, len(WALLS)))]
     roof = lambda: pal[int(rng.integers(0, len(pal)))]
     if k == "lighthouse":
         D(w, pl, [("house", 3.6, -0.6, 0.5, 0.85, roof(), 0, 1.5), ("rock", -2.3, 0.9, 0, 1.2), ("rock", -3.0, -0.2, 1, 1.6),
@@ -293,9 +290,8 @@ def dress_harbour(w: World, pl: dict, pal, rng):
 # ---------------------------------------------------------------- the harbour
 
 def harbour(w: World, pal, spec_world):
-    R, k = w.R, w.R / 15.0
+    k = w.R / 15.0
     P = lambda x, z: (x * k, z * k)
-    rng = w.rng
     X, Z = w.X, w.Z
 
     # --- heights: a bay with a channel to the front edge, a headland hill for the lighthouse, a low rise behind

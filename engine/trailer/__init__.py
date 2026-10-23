@@ -301,7 +301,7 @@ def build_trailer(project: Project, formats: Optional[list[str]] = None, force: 
     tracks = take_tracks(project, site, ctx)
     planner = Planner(project, site, t, log, tracks={k: fr.load_track(v) for k, v in tracks.items()})
     shots = planner.plan()
-    fps, beat = t.fps, 60.0 / t.bpm
+    fps = t.fps
     cuts = cut_frames(shots, t.bpm, fps)
     seconds = cuts[-1][1] / fps
     _log_cut(shots, cuts, t, log)

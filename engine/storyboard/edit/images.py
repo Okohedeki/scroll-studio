@@ -11,7 +11,7 @@ from typing import Optional
 
 from ...fidelity import WouldRender, planning
 from ...project import BuildContext, BuildError, Project
-from .shots import Node, Shot
+from .shots import Node
 
 _QUIET = lambda m: None
 _LOCK = threading.Lock()

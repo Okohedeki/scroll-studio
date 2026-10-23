@@ -9,7 +9,7 @@ import numpy as np
 
 from . import recipes, recipes2
 from .recipes import HERO, WATER_KINDS, dress, pal_of, resolve_where, snap_free, face_default
-from .world import GRID, World, forward, yaw_of
+from .world import GRID, World
 
 VERSION = 1
 DEFAULT_SIZE = {"harbour": 30.0, "town": 30.0, "desk": 22.0, "factory": 26.0, "studio": 22.0}

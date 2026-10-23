@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from typing import Callable, Optional
 
-from .spec import CUT_TYPES, Site, Transition, is_scene
+from .spec import CUT_TYPES, Site, Transition, is_scene  # noqa: F401  (CUT_TYPES is read as cuts.CUT_TYPES)
 
 # screens of scroll each kind of cut takes when `length` is not set
 DEFAULT_LENGTH = {"cut": 0.8, "dissolve": 1.2, "wipe": 1.3, "iris": 1.4, "whip": 1.1, "match": 1.5, "carry": 1.5}

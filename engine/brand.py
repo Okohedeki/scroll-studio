@@ -208,7 +208,7 @@ def _hex(c) -> str:
 
 def brand_colors(logo: Path, mode: str = "light") -> dict:
     import colorsys
-    from .compile.themes import _lum, _mix, contrast
+    from .compile.themes import contrast
     pal = _palette(logo)
 
     def chroma(c):

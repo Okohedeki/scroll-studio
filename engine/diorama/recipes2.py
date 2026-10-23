@@ -6,9 +6,9 @@ import math
 
 import numpy as np
 
-from .fields import box_sdf, hex_rgb, mix, segment_sdf, smoothstep
-from .recipes import (WALLS, D, local, paint_cobbles, paint_grass, paint_path, paint_rect, paint_shore_ring, paint_water_bed)
-from .world import Spot, World, forward, yaw_of
+from .fields import box_sdf, hex_rgb, segment_sdf, smoothstep
+from .recipes import (WALLS, D, paint_cobbles, paint_grass, paint_path, paint_rect, paint_water_bed)
+from .world import Spot, World, yaw_of
 
 EDGES = {
     "harbour": None, "town": None,
@@ -57,8 +57,6 @@ def paint_wood(w: World, base="#c58f56", plank=3.0, dark=0.82):
     seam = smoothstep(0.045, 0.01, np.abs(np.mod(w.Z + w.R, plank) - 0.0)) + smoothstep(0.045, 0.01, np.abs(np.mod(w.Z + w.R, plank) - plank))
     col = hex_rgb(base) * (0.9 + 0.14 * g[..., None] + 0.08 * g2[..., None] + (tone[..., None] - 0.5) * 0.12)
     col = col * (1 - np.clip(seam, 0, 1)[..., None] * (1 - dark))
-    # a butt joint here and there
-    joint = (np.mod(np.floor((w.X + w.R) / (plank * 3.4) + tone * 5.0), 1.0) < 0.0).astype(np.float32)
     w.col = col.astype(np.float32)
 
 
@@ -85,7 +83,7 @@ def _rect_keep(w: World, cx, cz, hx, hz, pad=0.3):
 # ---------------------------------------------------------------- town
 
 def town(w: World, pal, spec_world):
-    R, k = w.R, w.R / 15.0
+    k = w.R / 15.0
     P = lambda x, z: (x * k, z * k)
     X, Z = w.X, w.Z
     # a river from the west edge, curving to the front edge; a hill with the windmill behind

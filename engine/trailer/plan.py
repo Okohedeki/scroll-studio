@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Callable, Optional
 
 from ..project import BuildError, Project, probe
-from ..spec import FilmScene, Site, Trailer, TrailerShot, is_scene
+from ..spec import FilmScene, Site, Trailer, is_scene
 
 ALLOWED = re.compile(r"&lt;(/?)(em|b|i|br|strong)\s*/?&gt;")
 

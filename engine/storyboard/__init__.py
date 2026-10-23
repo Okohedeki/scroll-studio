@@ -21,7 +21,6 @@ means the full build starts from it. Re-running after an edit redoes only the sh
 from __future__ import annotations
 
 import time
-from pathlib import Path
 from typing import Callable, Iterable, Optional
 
 from ..fidelity import LEVELS, previewing
@@ -29,7 +28,7 @@ from ..plan import fmt, plan_build
 from ..project import BuildError, Project
 from ..spec import is_scene
 from . import record
-from .cards import Card, Maker
+from .cards import Maker
 
 STAND_IN = ("film", "sequence", "inside")                       # scenes that render heavily: shown by their frames until rendered
 STAND_IN_SKETCH = ("artwork", "parallax", "vector")   # image scenes: at sketch their images may not exist yet

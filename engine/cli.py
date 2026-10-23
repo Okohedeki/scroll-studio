@@ -56,7 +56,6 @@ sections:
 
 
 def resolve(name: str) -> Path:
-    from .project import Project
     for cand in (Path(name), Path(settings()["projects"]) / name, ROOT / "examples" / name):
         if (cand / "site.yaml").exists():
             return cand.resolve()

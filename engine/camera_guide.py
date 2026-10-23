@@ -22,7 +22,6 @@ against the pure-camera render of the first frame and reports how far the view i
 """
 from __future__ import annotations
 
-import json
 import math
 import shutil
 import time
@@ -662,7 +661,6 @@ def join_report(prev: list[np.ndarray], cur: list[np.ndarray], prev_plan: Camera
     o_prev, o_cur = prev_plan.at(0.0), plan.at(0.0)
     tail_w = [None if v is None else world_view(v, o_prev) for v in tail]
     head_w = [None if v is None else world_view(v, o_cur) for v in head]
-    secs = lambda p: len(p) / fps
     key_before = (math.log(prev_plan.at(1.0).w) - math.log(prev_plan.at(1.0 - 1.0 / max(len(prev) - 1, 1)).w)) * (len(prev) - 1) * fps / len(prev)
     key_after = (math.log(plan.at(1.0 / max(len(cur) - 1, 1)).w) - math.log(plan.at(0.0).w)) * (len(cur) - 1) * fps / len(cur)
     return {"frame_diff": float(np.abs(a - b).mean()), "brightness_step": float(b.mean() - a.mean()),

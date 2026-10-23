@@ -60,7 +60,7 @@ def cached(project: Project, art: Art, site_video_model: str | None = None, site
 
 def build(project: Project, art: Art, dist: Path, log: Callable[[str], None] = print,
           site_video_model: str | None = None, site_wan: dict | None = None) -> dict:
-    from PIL import Image, ImageOps
+    from PIL import Image
     if not art.prompt and not art.file:
         raise BuildError("theme.art needs a `prompt` (generated locally) or a `file`")
     digest, work, vwork, model, wan = _paths(project, art, log, site_video_model, site_wan)
@@ -70,7 +70,8 @@ def build(project: Project, art: Art, dist: Path, log: Callable[[str], None] = p
         from .fidelity import would_render
         would_render("art", (art.prompt or art.file or "")[:60])
         work.mkdir(parents=True, exist_ok=True)
-        still = src if art.file else resolve_image(project, ImageInput(generate=art.prompt, size=art.size, seed=art.seed), log)
+        still = (resolve_path(project, art.file, log) if art.file
+                 else resolve_image(project, ImageInput(generate=art.prompt, size=art.size, seed=art.seed), log))
         if art.motion:
             paths = sorted((vwork / "frames").glob("*.png"))
             if not paths:

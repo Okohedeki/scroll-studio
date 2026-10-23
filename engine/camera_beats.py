@@ -21,7 +21,7 @@ import numpy as np
 
 from . import camera_guide as cg
 from .animate import FPS
-from .freeze_beats import _cached, digest, read_rgb
+from .freeze_beats import _cached, digest
 from .project import BuildError
 
 RAMP = 12                        # frames over which a continued beat fades its plate grading in (frame 0 stays the previous last frame)

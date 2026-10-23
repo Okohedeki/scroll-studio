@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import json
 import textwrap
-from pathlib import Path
 
 import pytest
 import yaml
@@ -323,7 +322,6 @@ def test_pick_writes_the_recipe_and_restores_the_cache(project):
     ws = Workspace(project)
     node = shots.build(project).shot("c").slots[0].nodes[0]
     key = node.key
-    old_seed = node.recipe()["seed"]
     # an earlier render of this shot's still with seed 555, from before the cache was cleaned
     ref = with_recipe(node, dict(node.recipe(), seed=555))
     cache = generated_path(project, ref)

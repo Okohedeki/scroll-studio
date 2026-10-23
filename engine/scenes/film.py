@@ -357,7 +357,6 @@ def beats_film(sec: FilmScene, ctx: BuildContext) -> Path:
     from PIL import Image, ImageOps
     from ..animate import FPS, animate, video_model, wan_settings
     from ..inputs import resolve_image
-    from ..spec import ImageInput
     from ..camera_beats import start_ref
     from .. import imagery
     W, H = sec.beat_res[0] // 32 * 32, sec.beat_res[1] // 32 * 32

@@ -21,7 +21,7 @@ def write_timeline(project: Project, out: Path, total: float, shots: list[dict])
     import time
     sigs, rev = {}, None
     try:
-        from .edit import shots as shots_mod, specdoc
+        from .edit import shots as shots_mod
         board = shots_mod.build(project)
         sigs, rev = {s.id: s.sig() for s in board.shots}, board.rev
     except Exception:
@@ -33,7 +33,6 @@ def write_timeline(project: Project, out: Path, total: float, shots: list[dict])
 def build(project: Project, site, cards: list[Card], out: Path, log: Callable[[str], None] = print,
           progress: Callable[[float, str], None] = lambda f, m="": None) -> Path:
     import cv2
-    import numpy as np
     from PIL import Image
     from ..compile import themes
     from ..spec import Trailer

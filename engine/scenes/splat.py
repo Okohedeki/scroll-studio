@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 from ..inputs import resolve_path
 from ..project import BuildContext, BuildError, file_key

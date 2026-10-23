@@ -22,12 +22,8 @@ frame), and it is deterministic, so a re-render is byte-for-byte what the stage 
 """
 from __future__ import annotations
 
-import hashlib
-import json
 import math
-import shutil
 import subprocess
-import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Iterator, Optional

@@ -3,7 +3,6 @@ lands, how it flies, where the copy sits on the scroll), the per-frame cache key
 replaced by a writer of tiny PNGs). No Blender, GPU or browser is needed."""
 from __future__ import annotations
 
-import math
 from pathlib import Path
 
 import numpy as np
@@ -194,7 +193,6 @@ def test_the_camera_lands_softly_slow_at_each_stop_fast_between():
     for w in plan.windows:
         i = int(round(w["arrive"] * (len(plan.frames) - 1)))
         assert speed[max(i - 2, 0):i + 1].max() < 0.25 * speed.max()                 # decelerated into the stop
-    mid = len(speed) // 2
     assert speed.max() > 5 * speed[plan.windows[0]["frame"]]
 
 

@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Callable, Optional
 
 from ...inputs import edit_path, generated_path, resolve_image
-from ...fidelity import WouldRender, planning
+from ...fidelity import planning
 from ...project import BuildContext, BuildError, Project
 from . import images, shots, specdoc, variants
 from .shots import Board, Node, Shot, Slot
@@ -101,10 +101,8 @@ def run_image(project: Project, key: str, mode: str, seed: Optional[int] = None,
         recipe["seed"] = seed if seed is not None else fresh_seed(variants.used_seeds(project, key) | {recipe0.get("seed")})
     progress(0.02, "looking up the current image")
     register_current(project, board, node)
-    wrote = False
     if node.kind == "keyframe":
         path, cache = _keyframe(project, board, node, recipe, recipe0, mode, log, progress)
-        wrote = mode == "regenerate"
     else:
         ref = with_recipe(node, recipe)
         progress(0.05, "rendering")

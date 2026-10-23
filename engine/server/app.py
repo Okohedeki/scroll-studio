@@ -9,7 +9,7 @@ import mimetypes
 import shutil
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Optional
 
 import yaml
 from fastapi import FastAPI, File, HTTPException, UploadFile

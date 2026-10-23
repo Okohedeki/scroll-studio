@@ -3,7 +3,6 @@ the subjects are given (not found by Florence-2), the plate is filled smoothly, 
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from engine import layers as L
 from engine import zoom_render
@@ -143,7 +142,6 @@ def test_layered_render_has_no_fringe_of_the_old_background_on_a_moving_subject(
 # ---------------------------------------------------------------- a layered pyramid, end to end (no ComfyUI)
 
 def test_layered_deep_zoom_builds_tiles_with_planes_and_renders(tmp_path, monkeypatch):
-    import cv2
     from engine import zoom_build
     from engine.backends import comfy
     from engine.spec import Freeze
@@ -170,7 +168,6 @@ def test_layered_deep_zoom_builds_tiles_with_planes_and_renders(tmp_path, monkey
 
 
 def test_harmonize_matches_the_plates_tone_to_the_frame_at_the_hole_edge():
-    import cv2
     H, W = 120, 160
     frame = np.tile(np.linspace(100, 200, W, dtype=np.float32), (H, 1))[..., None].repeat(3, axis=2).astype(np.uint8)
     hole = np.zeros((H, W), np.float32)

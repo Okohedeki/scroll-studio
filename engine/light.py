@@ -24,8 +24,6 @@ The pipeline (engine/scenes/light.py runs it, cached per stage):
 """
 from __future__ import annotations
 
-import hashlib
-import json
 import math
 from pathlib import Path
 from typing import Optional

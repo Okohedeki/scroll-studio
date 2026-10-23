@@ -20,7 +20,7 @@ from typing import Optional
 import numpy as np
 
 from ..project import Project, file_key
-from ..reveal import WORK, amounts_at, composite, region_keys
+from ..reveal import amounts_at, composite, region_keys
 
 
 def mask_files(project: Project, sec_id: str, rv) -> Optional[dict]:

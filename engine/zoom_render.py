@@ -32,8 +32,6 @@ def _renderer_class():
 
         def __init__(self, rgb, depth, size, tiles: Sequence[TileImage], device=None, layers=None):
             super().__init__(rgb, depth, size, device)
-            torch = self.torch
-            F = torch.nn.functional
             self.layers = layers
             self.tiles = []
             for t in sorted(tiles, key=lambda t: t.level):
@@ -190,8 +188,6 @@ def _renderer_class():
 
         def _layered(self, c, s, w, e, f, shifting, active, base_texels, tex):
             """Planes back to front: the background, then each subject plane over it."""
-            from .layers import estimate_foreground
-            torch = self.torch
             B = self.base
             u = self._positions(c, s, w, e, f, shifting, active, B["bgdepth"], lambda g: g["bgdepth"])
             out = self._compose(u, self._sample_mips(B["bg"], self._grid(u), base_texels), active, lambda g: g["bg"], tex)

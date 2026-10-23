@@ -17,7 +17,7 @@ from pydantic import ValidationError
 
 from engine import light, light_presets
 from engine.scenes import light as scene
-from engine.spec import LightScene, Site
+from engine.spec import Site
 
 
 def site(**over) -> Site:
@@ -332,7 +332,6 @@ def make_project(tmp_path: Path, extra: str = "") -> Path:
 
 def test_build_runs_every_stage_caches_and_reports(tmp_path, monkeypatch):
     from engine.project import BuildContext, Project
-    from engine.compile.compiler import build_site
     root = make_project(tmp_path)
     world = place(1280, 720)
     calls = []

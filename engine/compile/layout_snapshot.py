@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from ..project import Project
-from ..spec import ImageInput, Site, is_scene
+from ..spec import Site, is_scene
 
 SDATA_FIELDS = {"hud", "steps", "layout", "length"}      # what the compiler embeds per scene (`.ss-section`)
 TEXT_CHARS = 40                                          # how much of a kicker / title is kept

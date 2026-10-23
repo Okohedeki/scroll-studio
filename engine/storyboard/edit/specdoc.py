@@ -24,7 +24,7 @@ import os
 import re
 import threading
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
 
@@ -271,7 +271,7 @@ def _splice_one(text: str, op: Op) -> str:
     if op.delete:
         return _splice_delete(text, op)
     root = _compose(text)
-    node, parent, pk = root, None, None
+    node = root
     path = list(op.path)
     for i, key in enumerate(path[:-1]):
         node, _k = _child(node, key)

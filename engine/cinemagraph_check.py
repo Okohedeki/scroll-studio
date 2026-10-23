@@ -16,13 +16,12 @@ from __future__ import annotations
 
 import base64
 import io
-import json
 import shutil
 import subprocess
 import tempfile
 import time
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Callable
 
 import numpy as np
 

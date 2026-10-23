@@ -3,12 +3,12 @@ recipes use to lay a world out (see recipes.py)."""
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Callable, Optional
 
 import numpy as np
 
-from .fields import hex_rgb, mix, smoothstep, value_noise
+from .fields import hex_rgb, smoothstep, value_noise
 
 TEX_FULL, TEX_DRAFT = 2048, 1024
 GRID = 129                      # height samples across the base

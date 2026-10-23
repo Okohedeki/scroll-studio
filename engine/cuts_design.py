@@ -11,7 +11,6 @@ A match cut found by luck needs two pictures that happen to share a shape. This 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Optional
 
 from .project import BuildError, Project
 from .spec import FrameMatch, ImageEdit, ImageInput

@@ -263,7 +263,6 @@ def resolve(sec: InsideScene, info: dict, stops: Optional[list[InsideStop]] = No
                      f"({', '.join(s.label or s.part for s in specs)})")
     out: list[Resolved] = []
     prev_yaw = WIDE_VIEW[0]
-    prev_aim = (lo + hi) / 2
     for i, st in enumerate(specs):
         what = f"inside '{sec.id}' stop {i + 1}"
         explode = float(st.explode if st.explode is not None else sec.explode)
@@ -302,7 +301,7 @@ def resolve(sec: InsideScene, info: dict, stops: Optional[list[InsideStop]] = No
         cam = aim + direction(yaw, pitch) * dist
         out.append(Resolved(i, label, st, hit, focus_parts, slo, shi, aim, focus, span, lens, fstop, float(st.roll), explode,
                             float(yaw), float(pitch), dist, cam, float(st.hold), float(st.travel)))
-        prev_yaw, prev_aim = float(yaw), aim
+        prev_yaw = float(yaw)
     return Resolution(out, parts, lo, hi, notes)
 
 

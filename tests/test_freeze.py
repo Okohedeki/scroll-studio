@@ -12,8 +12,8 @@ from pydantic import ValidationError
 
 from engine import freeze as fz
 from engine import freeze_beats as fb
-from engine.project import BuildContext, Project
-from engine.spec import Beat, ImageInput, Site
+from engine.project import Project
+from engine.spec import Beat, ImageInput
 
 needs_ffmpeg = pytest.mark.skipif(shutil.which("ffmpeg") is None, reason="ffmpeg is not installed")
 
@@ -332,7 +332,7 @@ def test_freeze_takes_the_sharpest_of_the_last_frames_of_a_generated_beat(projec
 @needs_ffmpeg
 def test_pick_last_takes_the_very_last_frame(project):
     from PIL import Image
-    bdir = _fake_walk_clip(project)
+    _fake_walk_clip(project)
     spec = yaml.safe_load((project.root / "site.yaml").read_text())
     spec["sections"][0]["beats"][1]["freeze"]["pick"] = "last"
     project.save(spec)
@@ -361,7 +361,6 @@ def test_beat_frame_gives_the_frozen_beats_last_frame_and_follows_a_rerender(pro
 def test_beat_frame_of_a_beat_that_is_not_rendered(project):
     from engine.inputs import resolve_image
     from engine.project import BuildError
-    sec = project.load().sections[0]
     ref = ImageInput(beat_frame={"beat": "walk"})
     with pytest.raises(BuildError, match="not rendered"):
         resolve_image(project, ref, lambda m: None)

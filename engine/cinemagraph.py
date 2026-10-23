@@ -29,13 +29,12 @@ import hashlib
 import json
 import shutil
 import subprocess
-import time
 from pathlib import Path
 from typing import Callable, Optional
 
 import numpy as np
 
-from .project import BuildContext, BuildError, ffmpeg, file_key, probe
+from .project import BuildContext, BuildError, file_key, probe
 from .spec import Cinemagraph, EditRegion, ImageInput
 
 VERSION = 1

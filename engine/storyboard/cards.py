@@ -26,7 +26,7 @@ from ..inputs import image_key, resolve_image
 from ..plan import IMAGES, Plan, image_refs, section_locked
 from ..project import BuildContext, BuildError, Project, file_key
 from ..spec import FilmScene, ImageInput, Site, is_scene
-from .motion import STILL, Move, Piece, from_camera, from_text
+from .motion import Move, Piece, from_camera, from_text
 
 PREVIEW_SIZE = (512, 288)      # --motion: the tiny LTX preview per shot
 PREVIEW_SECONDS = 2.0
@@ -616,7 +616,6 @@ class Maker:
         if self.nogen:
             self.reuse(c)
         elif not ((c.locked or not self.selected(c.id, sec.id)) and self.reuse(c)):
-            from ..compile import themes
             lvl = "sketch" if self.level == "sketch" or not self.selected(c.id, sec.id) else "stills"
             with previewing(lvl):
                 info, glb, res, plan = ins.route(sec, self.project, self.log)
