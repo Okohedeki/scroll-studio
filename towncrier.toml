@@ -1,0 +1,46 @@
+# Changelog fragments (changes/README.md). At release time `towncrier build --version X.Y.Z` turns the fragments in
+# changes/ into a section of CHANGELOG.md and deletes them (docs/maintainers/releasing.md).
+[tool.towncrier]
+name = "Scroll Studio"
+directory = "changes"
+filename = "CHANGELOG.md"
+start_string = "<!-- towncrier release notes start -->\n"
+title_format = "## {version} · {project_date}"
+issue_format = "[#{issue}](https://github.com/Okohedeki/scroll-studio/issues/{issue})"
+orphan_prefix = "+"
+wrap = false
+
+[[tool.towncrier.type]]
+directory = "breaking"
+name = "Breaking changes"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "added"
+name = "Added"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "changed"
+name = "Changed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "deprecated"
+name = "Deprecated"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "removed"
+name = "Removed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "fixed"
+name = "Fixed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "security"
+name = "Security"
+showcontent = true

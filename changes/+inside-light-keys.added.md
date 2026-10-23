@@ -1,0 +1,1 @@
+Inside flights take `light:` keys over the scroll (exposure, ambient, lamp, rim, lamp colour, eased between keys), so the light can change as the page goes: evening to lamplight to lights out. Frames are only redrawn where the light changes.

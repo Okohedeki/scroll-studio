@@ -1,0 +1,23 @@
+name: Docs
+description: Something in the docs is wrong, missing or unclear.
+labels: ["type: docs", "area: docs", "status: needs-triage"]
+body:
+  - type: input
+    id: page
+    attributes:
+      label: Page
+      description: The docs page or file, with a link if you have one.
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What is wrong or missing
+      description: What you were trying to do, what the page says, and what you expected it to say.
+    validations:
+      required: true
+  - type: textarea
+    id: fix
+    attributes:
+      label: Suggested wording
+      description: Optional. If you'd like to fix it yourself, say so and a maintainer will accept the issue.

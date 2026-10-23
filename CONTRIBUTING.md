@@ -6,6 +6,7 @@ every change keeps, so the engine stays consistent as more people work on it.
 
 - [Before you start](#before-you-start)
 - [Ground rules](#ground-rules)
+- [Rules per area: core, standard and trivial](#rules-per-area)
 - [Set up](#set-up)
 - [Making a change](#making-a-change)
 - [What a complete feature includes](#what-a-complete-feature-includes)
@@ -17,12 +18,22 @@ every change keeps, so the engine stays consistent as more people work on it.
 
 ## Before you start
 
-- **Small fixes** (a typo, a broken link, a clear bug with an obvious fix): open a pull request directly.
-- **Anything bigger** (a new scene type, a new style, a new spec field, a change to how layouts or themes work): open
-  an issue first, or comment on the one in the [milestones](https://github.com/Okohedeki/scroll-studio/milestones),
-  and agree the design before writing code. The current plan is in [docs/design/](docs/design/) and
-  [docs/directions.md](docs/directions.md).
-- Be kind and specific. The [code of conduct](CODE_OF_CONDUCT.md) applies everywhere in the project.
+**Every pull request starts with an issue**, for everyone, maintainers included. A check on every pull request fails
+until it links an issue that a maintainer has accepted, so nobody spends time on work that won't be merged:
+
+1. **Find or open the issue.** Search the [issues](https://github.com/Okohedeki/scroll-studio/issues) and the
+   [milestones](https://github.com/Okohedeki/scroll-studio/milestones) first. Questions belong in
+   [Discussions](https://github.com/Okohedeki/scroll-studio/discussions) ([SUPPORT.md](SUPPORT.md)).
+2. **Wait for `status: accepted`.** A maintainer triages new issues within a few days
+   ([docs/maintainers/triage.md](docs/maintainers/triage.md)). Small fixes (a typo, a broken link, a clear bug) are
+   accepted quickly.
+3. **Core changes need the design agreed first** (`status: design-approved`): a design section in the issue, or an
+   [RFC](docs/rfcs/README.md) for anything large. See [rules per area](#rules-per-area).
+4. **Say you're working on it** in a comment, so two people don't build the same thing.
+
+The current plan is in [docs/design/](docs/design/) and [docs/directions.md](docs/directions.md); how decisions are
+made is in [GOVERNANCE.md](GOVERNANCE.md). Be kind and specific: the [code of conduct](CODE_OF_CONDUCT.md) applies
+everywhere in the project.
 
 ## Ground rules
 
@@ -44,6 +55,63 @@ These are what make Scroll Studio what it is. A change that breaks one is not me
    committed) or environment variables. `tests/test_no_local_paths.py` checks every tracked file.
 7. **Accessible by default.** Real HTML text in reading order, one `<h1>` per page, WCAG AA contrast, reduced-motion
    fallbacks, no flashing above three times a second.
+
+<a id="rules-per-area"></a>
+## Rules per area: core, standard and trivial
+
+Not every file carries the same risk. The runtime ships inside every site anyone has ever built with Scroll Studio; a
+change to it reaches all of their visitors. A typo in a guide reaches nobody. So the rules depend on what a pull request
+touches. The labeler marks pull requests that touch a core path `tier: core`, and the `pr-policy` check holds them to
+the core rules.
+
+### Core
+
+| Area | Paths | Why it is core |
+|---|---|---|
+| Runtime | `runtime/` (except `runtime/src/styles/`), `engine/compile/static/runtime/` | Ships in every built site |
+| Spec | `engine/spec.py` | The public `site.yaml` contract; the UI and MCP tools are generated from it |
+| Compiler and themes | `engine/compile/` (templates, theme derivation, page assembly), `engine/themes.yaml` | Decides what every page is made of |
+| Style contract | `engine/styles/README.md` | Every style is written against it |
+| Commands | `engine/cli.py`, `engine/mcp_server.py` | Public surface: scripts and AI clients depend on it |
+| What runs on the builder's machine | `engine/backends/`, `engine/models.yaml`, `engine/server/`, `engine/serve.py` | Downloads, model loading and local servers ([threat model](docs/security/threat-model.md)) |
+| Project infrastructure | `.github/`, `pyproject.toml`, `package.json`, `package-lock.json` | CI, security and releases |
+| Licence | `LICENSE`, `NOTICE.md`, `CLA.md`, `AGENTS.md`, the runtime notice comment | Legal terms |
+
+A core pull request needs **all** of:
+
+1. **A design-approved issue** (`status: design-approved`): the design written down and accepted before the code
+   (a design section in the issue, or an [RFC](docs/rfcs/README.md)). A pull request that arrives first is labelled
+   `needs-issue` and waits; it is not reviewed as code until the design is agreed.
+2. **A code owner's approval** ([CODEOWNERS](.github/CODEOWNERS), [MAINTAINERS.md](MAINTAINERS.md)).
+3. **The area's extra checks**, all green:
+
+   | Area | Extra checks |
+   |---|---|
+   | Runtime | The bundle rebuilt and committed (CI rebuilds it and fails on any difference); the runtime type check; the browser rendering tests for every style and preset; the size budgets; a before-and-after recording for anything visible, on desktop and on a phone, with and without reduced motion |
+   | Spec | Every field has a person-readable `description`; the schema snapshot updated; the generated reference and the guides updated; old specs still validate |
+   | Compiler and themes | Layout snapshots unchanged (or re-recorded and every change explained); conformance tests; the rendering tests |
+   | Commands | CLI and MCP snapshots updated; docs updated |
+   | Models, servers and downloads | The [threat model](docs/security/threat-model.md) updated if anything it describes changes; checksums for new downloads; servers stay on `127.0.0.1` |
+   | Project infrastructure | Workflows pass zizmor and actionlint; actions pinned to commit SHAs; least-privilege permissions; [repo settings](docs/maintainers/repo-settings.md) updated |
+
+4. **Compatibility**: if anything an existing spec, built site, command or tool does would change, the pull request is
+   labelled `breaking-change` and follows the [compatibility and deprecation policy](docs/compatibility.md):
+   deprecate with a warning first, and write a migration note in the changelog fragment.
+
+A small, contained fix in a core area (a crash, a wrong value) still follows these rules, but its design can be a few
+lines in the issue: what is wrong, what the fix changes, and how it is tested.
+
+### Standard
+
+Scene builders and planners (`engine/scenes/`, `engine/*.py` outside the core paths), styles (`engine/styles/<name>/`,
+`runtime/src/styles/`, `docs/styles/`), examples, tests and docs. A standard pull request needs an issue labelled
+`status: accepted`, the tests and docs for the change, and green checks. New styles also follow the
+[consistency rules](#consistency-rules).
+
+### Trivial
+
+Typos, broken links, wording. Still linked to an issue (it keeps the history findable); a maintainer accepts these the
+same day.
 
 ## Set up
 
@@ -69,8 +137,11 @@ How the code is laid out: [CLAUDE.md](CLAUDE.md) (it is written for AI assistant
    `engine/compile/static/runtime/`. If you changed the UI: `npm run build:ui`.
 4. Run `python -m pytest -q`. For anything visual, build an example and look at it: `studio build examples/<name>` and
    `studio snapshot` (judge the images, not the logs).
-5. Add a line under `## Unreleased` in [CHANGELOG.md](CHANGELOG.md) for anything a user would notice.
-6. Open a pull request against `main` and fill in the template.
+5. For anything a user would notice, add a changelog fragment: a file `changes/<issue>.<kind>.md` holding a sentence
+   or two written for users ([changes/README.md](changes/README.md)). Don't edit CHANGELOG.md; fragments are
+   assembled into it at release time, so pull requests never conflict over it.
+6. Open a pull request against `main` with a [conventional title](#pull-requests), link the issue, and fill in the
+   template.
 
 **Code style.** Match the code around you: its naming, its density and its comments. Docstrings and comments say
 *why*, briefly. Python 3.10+, type hints on public functions. Text files use LF line endings. User-facing words (docs,
@@ -166,11 +237,27 @@ accepts changes that pass it:
 
 ## Pull requests
 
-- Fill in the template: what changed, why, how you checked it (and pictures for anything visual).
-- Keep it focused: one feature or fix per pull request.
-- The `tests` check must pass. Changes go into `main` only through pull requests, for everyone, maintainers included;
-  nobody can force-push or delete `main`.
-- The maintainer reviews and merges. Expect questions about the ground rules and the consistency rules above.
+- **Link the issue** in the description (`Closes #123`). The `pr-policy` check fails until the linked issue is
+  accepted (design-approved for core changes); it re-runs when the pull request is edited.
+- **Title it** in the [Conventional Commits](https://www.conventionalcommits.org) form, because the project merges with
+  squash and the title becomes the commit on `main`: `type(area): what changed`, in the present tense, lower case
+  after the colon.
+  - Types: `feat` (a new capability), `fix` (a bug), `perf`, `docs`, `test`, `refactor`, `style` (a Scroll Studio
+    style, not code formatting), `build`, `ci`, `chore`, `revert`.
+  - Area (optional): `runtime`, `spec`, `compiler`, `scenes`, `styles`, `themes`, `models`, `cli`, `mcp`, `ui`,
+    `docs`, `examples`, `tests`, `ci`.
+  - A `!` after the type marks a breaking change: `feat(spec)!: ...`.
+  - Example: `fix(runtime): end reveals on transform none, not the stylesheet's offset`.
+- **A changelog fragment** for `feat`, `fix` and `perf` pull requests, unless a maintainer labels it `skip-changelog`.
+- **Keep it focused**: one feature or fix per pull request, ideally under 400 lines changed (the labeler adds a
+  `size:` label; split anything `size: xl`).
+- **Fill in the template**: what changed and why, and pictures or a recording for anything visual.
+- **The checks must pass.** Changes go into `main` only through pull requests, for everyone, maintainers included;
+  nobody can force-push or delete `main`. The required checks are listed in
+  [docs/maintainers/repo-settings.md](docs/maintainers/repo-settings.md).
+- **Review.** Expect a first response within 3 days and a review within 7 of the checks passing. Expect questions about
+  the ground rules, the rules for the area, and the consistency rules. Allow maintainers to edit your branch, so small
+  fixes don't need a round trip.
 
 ## Licence and the CLA
 

@@ -1,2 +1,41 @@
-# Every change to the engine, runtime, styles and docs is reviewed by the maintainer.
-* @Okohedeki
+# Who reviews what. A code owner's approval is needed for core areas (CONTRIBUTING.md#rules-per-area); the people
+# per area are listed in MAINTAINERS.md. The last matching line wins, so the general rule comes first.
+
+*                                   @Okohedeki
+
+# Core: the runtime that ships inside every built site
+/runtime/                           @Okohedeki
+/engine/compile/static/runtime/     @Okohedeki
+
+# Core: the site.yaml contract, the compiler, themes and the style contract
+/engine/spec.py                     @Okohedeki
+/engine/compile/                    @Okohedeki
+/engine/themes.yaml                 @Okohedeki
+
+# Core: what runs on the builder's machine (models, servers, commands)
+/engine/models.yaml                 @Okohedeki
+/engine/backends/                   @Okohedeki
+/engine/cli.py                      @Okohedeki
+/engine/mcp_server.py               @Okohedeki
+/engine/server/                     @Okohedeki
+/engine/serve.py                    @Okohedeki
+
+# Core: CI, security, packaging and the licence
+/.github/                           @Okohedeki
+/pyproject.toml                     @Okohedeki
+/package.json                       @Okohedeki
+/package-lock.json                  @Okohedeki
+/LICENSE                            @Okohedeki
+/NOTICE.md                          @Okohedeki
+/CLA.md                             @Okohedeki
+/AGENTS.md                          @Okohedeki
+/SECURITY.md                        @Okohedeki
+/GOVERNANCE.md                      @Okohedeki
+
+# Standard: styles, scenes, examples, docs
+/engine/styles/                     @Okohedeki
+/engine/styles/README.md            @Okohedeki
+/runtime/src/styles/                @Okohedeki
+/engine/scenes/                     @Okohedeki
+/examples/                          @Okohedeki
+/docs/                              @Okohedeki

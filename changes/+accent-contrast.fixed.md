@@ -1,0 +1,1 @@
+Button text on the accent colour now passes WCAG AA in the `ink` preset and seven styles (anime-intro, comic-book, halftone, isometric, particles, pop-up-book, stop-motion), and stop-motion's accent text on its paper. These colours show where a style falls back to the default markup (scene captions, unstyled blocks).

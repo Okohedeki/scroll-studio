@@ -1,6 +1,6 @@
 name: Feature or scene
 description: A new engine capability, scene type, spec field or command.
-labels: [enhancement]
+labels: ["type: feature", "status: needs-triage"]
 body:
   - type: markdown
     attributes:
@@ -34,3 +34,35 @@ body:
           required: true
         - label: It runs with local models only, without API keys.
           required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Where in the engine, if you know. Leave it if you're not sure.
+      multiple: true
+      options:
+        - Runtime (how built pages scroll and play)
+        - Spec (site.yaml fields and validation)
+        - Compiler, templates and themes
+        - Scenes and builders
+        - Styles
+        - Models, ComfyUI and Blender
+        - CLI
+        - MCP tools
+        - Studio app
+        - Docs
+        - Examples
+        - Not sure
+  - type: textarea
+    id: compat
+    attributes:
+      label: What happens to existing sites
+      description: >-
+        Would any existing spec, built site, command or MCP tool behave differently? Core changes (runtime, spec,
+        compiler, commands) need this design agreed before code (CONTRIBUTING.md#rules-per-area).
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contributing
+      options:
+        - label: I'd like to build this myself once the issue is accepted.

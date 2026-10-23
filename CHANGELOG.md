@@ -1,39 +1,13 @@
 # Changelog
 
 What changed in each version of Scroll Studio, newest first. Versions follow the project's milestones; each lists the
-commits it spans so you can check out any earlier state (`git checkout <commit>`).
+commits it spans so you can check out any earlier state (`git checkout <commit>`). Changes not yet released
+are in [changes/](changes/), one file each, until the next release gathers them here.
 
 Everything so far is version 1. On 2026-10-12 the releases first published as 2.0.0 and 3.0.0 were renumbered
 1.1.0 and 1.2.0 (tags `v1.1.0` and `v1.2.0`).
 
-## Unreleased (1.5)
-
-Planned: see the [1.5 milestone](https://github.com/Okohedeki/scroll-studio/milestone/1).
-
-### Added
-- Contribution guides: CONTRIBUTING.md (ground rules, what a complete feature includes, consistency rules for
-  themes and styles), a CLA, code of conduct, security policy, issue forms and a pull request template. CI runs the
-  tests on every pull request, `main` takes changes only through pull requests with the tests green, and
-  `tests/test_conformance.py` checks every theme preset and style (tokens, contrast, block types, docs, and a page with
-  every block type in every style).
-- Layout snapshots of every example (`tests/test_layout_snapshots.py`), the 1.5 release gate.
-- Inside flights take `light:` keys over the scroll (exposure, ambient, lamp, rim, lamp colour, eased between keys),
-  so the light can change as the page goes: evening to lamplight to lights out. Frames are only redrawn where the
-  light changes.
-
-### Changed
-- Map scenes preload their flight: while the loading screen is up the camera visits every stop (and the far point of
-  each long move) and waits for its tiles, keeps them cached, and draws labels without fading, so the scroll never
-  waits on the network. Measured on Tidewater Lines in Chrome on the GPU: hitches over 50 ms went from 2-3 per
-  scroll (up to 150 ms) to none, for about 5 s more on the loading screen (capped at 10 s, 6 s on phones). Routes
-  are added once and revealed with a gradient instead of being rebuilt every frame.
-
-### Fixed
-- Example config and docs no longer show machine-specific paths (placeholders instead), and
-  `tests/test_no_local_paths.py` fails any change that commits a drive-letter path or a home folder.
-- Button text on the accent colour now passes WCAG AA in the `ink` preset and seven styles (anime-intro, comic-book,
-  halftone, isometric, particles, pop-up-book, stop-motion), and stop-motion's accent text on its paper. These colours
-  show where a style falls back to the default markup (scene captions, unstyled blocks).
+<!-- towncrier release notes start -->
 
 ## 1.4.0 · 2026-10-13 to 2026-10-20
 

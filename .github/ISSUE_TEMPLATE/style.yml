@@ -1,6 +1,6 @@
 name: Style proposal
 description: Propose a new style (theme.style), an experience with its own scroll mechanic.
-labels: [enhancement, style]
+labels: ["type: style", "area: styles", "status: needs-triage"]
 body:
   - type: markdown
     attributes:

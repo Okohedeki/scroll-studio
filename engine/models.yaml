@@ -1,6 +1,6 @@
 # Every model Scroll Studio can use. ComfyUI models go in ComfyUI's model folders (see docs/INSTALL.md);
 # Hugging Face models download automatically into <model_dir>/hf on first use.
-# Licences belong to the model authors and are NOT covered by Scroll Studio's MIT licence. Check before commercial use.
+# Licences belong to the model authors and are NOT covered by Scroll Studio's licence (AGPL-3.0). Check before commercial use.
 
 comfyui:
   - name: LTX-2.3 22B distilled (fp8)

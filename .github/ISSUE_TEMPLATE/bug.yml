@@ -1,6 +1,6 @@
 name: Bug
 description: Something builds wrong, renders wrong or breaks.
-labels: [bug]
+labels: ["type: bug", "status: needs-triage"]
 body:
   - type: textarea
     id: what
@@ -32,3 +32,22 @@ body:
     attributes:
       label: Machine
       description: OS, GPU, and what `studio doctor` says is available (for render problems).
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Where in the engine, if you know. Leave it if you're not sure.
+      multiple: true
+      options:
+        - Runtime (how built pages scroll and play)
+        - Spec (site.yaml fields and validation)
+        - Compiler, templates and themes
+        - Scenes and builders
+        - Styles
+        - Models, ComfyUI and Blender
+        - CLI
+        - MCP tools
+        - Studio app
+        - Docs
+        - Examples
+        - Not sure

@@ -1,8 +1,14 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Question or help
+    url: https://github.com/Okohedeki/scroll-studio/discussions/categories/q-a
+    about: How do I...? Is this a bug? Ask in Discussions first (SUPPORT.md).
+  - name: Idea or proposal
+    url: https://github.com/Okohedeki/scroll-studio/discussions/categories/ideas
+    about: Talk an idea through before it becomes an issue; core designs become RFCs (docs/rfcs).
   - name: Security problem
     url: https://github.com/Okohedeki/scroll-studio/security/advisories/new
-    about: Report vulnerabilities privately, never in a public issue.
+    about: Report vulnerabilities privately, never in a public issue (SECURITY.md).
   - name: How to contribute
     url: https://github.com/Okohedeki/scroll-studio/blob/main/CONTRIBUTING.md
-    about: The ground rules, the consistency rules for themes and styles, and how pull requests are checked.
+    about: Every pull request needs an accepted issue. The ground rules, the rules per area and how pull requests are checked.
