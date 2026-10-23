@@ -1,0 +1,45 @@
+# GPU tests (tests/gpu) in the sandboxed self-hosted runner (ci/gpu-runner). Only the maintainer can start them
+# (manually or on the nightly schedule, which runs on main); they never run for pull requests, so code from a pull
+# request never reaches the GPU machine. The runner takes one job in a fresh container that is deleted afterwards.
+name: gpu
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 7 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gpu
+  cancel-in-progress: false
+
+jobs:
+  gpu:
+    if: >-
+      github.repository == 'Okohedeki/scroll-studio' &&
+      (github.event_name == 'schedule' || github.actor == 'Okohedeki')
+    runs-on: [self-hosted, linux, gpu, sandbox]
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Engine
+        run: pip install -e ".[dev]" transformers accelerate safetensors
+      - name: ComfyUI with the engine's own nodes
+        run: |
+          cp -r engine/backends/comfy_nodes/scroll_studio_nodes /opt/comfy/custom_nodes/
+          (cd /opt/comfy && nohup python main.py --listen 127.0.0.1 --port 8188 > /tmp/comfy.log 2>&1 &)
+          for i in $(seq 1 120); do curl -sf http://127.0.0.1:8188/system_stats > /dev/null && exit 0; sleep 2; done
+          tail -50 /tmp/comfy.log; exit 1
+      - name: GPU tests
+        run: python -m pytest tests/gpu -q -p no:cacheprovider
+      - name: Keep what the tests made
+        if: always()
+        run: cp /tmp/comfy.log tests/gpu/out/ 2>/dev/null || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gpu-test-output
+          path: tests/gpu/out/
+          if-no-files-found: ignore

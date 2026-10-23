@@ -33,3 +33,6 @@ examples/showcase/previews/*
 
 examples/_assets/kitchen_test/
 examples/*/build.log
+
+# GPU test output (uploaded by the gpu workflow)
+tests/gpu/out/

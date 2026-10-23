@@ -1,0 +1,31 @@
+# ComfyUI's model folders inside the sandbox: both are host folders mounted read-only by launch.ps1.
+local:
+    base_path: /models/comfy
+    checkpoints: checkpoints
+    clip: clip
+    clip_vision: clip_vision
+    configs: configs
+    controlnet: controlnet
+    diffusion_models: diffusion_models
+    unet: unet
+    embeddings: embeddings
+    loras: loras
+    latent_upscale_models: latent_upscale_models
+    upscale_models: upscale_models
+    text_encoders: text_encoders
+    vae: vae
+    model_patches: model_patches
+    sam2: sam2
+    LLM: LLM
+    seedvr2: SEEDVR2
+extra:
+    base_path: /models/extra
+    checkpoints: checkpoints
+    text_encoders: text_encoders
+    loras: loras
+    latent_upscale_models: latent_upscale_models
+    upscale_models: upscale_models
+    diffusion_models: diffusion_models
+    vae: vae
+    model_patches: model_patches
+    seedvr2: SEEDVR2
