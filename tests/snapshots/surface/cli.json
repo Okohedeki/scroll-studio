@@ -1,0 +1,1645 @@
+{
+ "commands": {
+  "brand": {
+   "help": "Set the theme's colours from a logo (contrast-checked) and use it as the nav logo.",
+   "params": {
+    "dry_run": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--dry-run",
+      "--no-dry-run"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "logo": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--logo"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "mode": {
+     "default": "light",
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--mode"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    }
+   }
+  },
+  "build": {
+   "help": "Build a project into dist/. Prints what will render and about how long it takes here before starting.",
+   "params": {
+    "draft": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--draft",
+      "--no-draft"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "force": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--force",
+      "--no-force"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "only": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--only"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "plan": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--plan"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "section": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--section"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "yes": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--yes",
+      "-y"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "camera": {
+   "help": "Keyed camera moves on a moving beat (`camera:` on a beat): preview the guide, or measure how well the render follows the keys.",
+   "params": {
+    "beat": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "beat"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "check": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--check"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "guide": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--guide"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "section": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--section"
+     ],
+     "required": false,
+     "type": "str"
+    }
+   }
+  },
+  "cinemagraph": {
+   "help": "Build the site's cinemagraphs (an image input with `cinemagraph:`: a still where only one thing moves) and report on each:",
+   "params": {
+    "check": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--check"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "force": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--force",
+      "--no-force"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "list_only": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--list"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "mobile": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--mobile"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "only": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--only"
+     ],
+     "required": false,
+     "type": "str"
+    }
+   }
+  },
+  "combine": {
+   "help": "Join recordings into one video with crossfades (e.g. a reel of several sites).",
+   "params": {
+    "fade": {
+     "default": 0.6,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--fade"
+     ],
+     "required": false,
+     "type": "float"
+    },
+    "out": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--out"
+     ],
+     "required": true,
+     "type": "path"
+    },
+    "videos": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "videos"
+     ],
+     "required": true,
+     "type": "path"
+    }
+   }
+  },
+  "copy": {
+   "commands": {
+    "export": {
+     "help": "Write the site's text to a Markdown copy deck.",
+     "params": {
+      "name": {
+       "default": null,
+       "kind": "argument",
+       "multiple": false,
+       "opts": [
+        "name"
+       ],
+       "required": true,
+       "type": "str"
+      },
+      "out": {
+       "default": null,
+       "kind": "option",
+       "multiple": false,
+       "opts": [
+        "--out"
+       ],
+       "required": false,
+       "type": "path"
+      }
+     }
+    },
+    "import": {
+     "help": "Apply an edited copy deck to site.yaml (comments kept; an invalid result is refused).",
+     "params": {
+      "deck": {
+       "default": null,
+       "kind": "argument",
+       "multiple": false,
+       "opts": [
+        "deck"
+       ],
+       "required": true,
+       "type": "path"
+      },
+      "dry_run": {
+       "default": false,
+       "kind": "option",
+       "multiple": false,
+       "opts": [
+        "--dry-run",
+        "--no-dry-run"
+       ],
+       "required": false,
+       "type": "boolean"
+      },
+      "name": {
+       "default": null,
+       "kind": "argument",
+       "multiple": false,
+       "opts": [
+        "name"
+       ],
+       "required": true,
+       "type": "str"
+      }
+     }
+    }
+   },
+   "help": "A copy deck for clients: export every piece of text to Markdown, import their edits.",
+   "params": {}
+  },
+  "cuts": {
+   "help": "The film grammar between a built site's sections (`transition:`): each cut, how long it is, the shapes a match",
+   "params": {
+    "clip": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--clip"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "frames": {
+     "default": 9,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--frames"
+     ],
+     "required": false,
+     "type": "int"
+    },
+    "mobile": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--mobile"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "only": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--only"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "reduced": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--reduced-motion"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "strip": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--strip"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "diorama": {
+   "help": "Miniature worlds: lay a `diorama` section out and say what was decided: the map with the places numbered",
+   "params": {
+    "full": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--full"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "section": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--section"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "strip": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--strip"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "directions": {
+   "help": "Art directions for the site, pitched like a studio: one brief in, several complete directions out (concept, palette,",
+   "params": {
+    "brief": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--brief"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "browser": {
+     "default": true,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--browser",
+      "--no-browser"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "images": {
+     "default": true,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--images",
+      "--no-images"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "n": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--count",
+      "--n"
+     ],
+     "required": false,
+     "type": "int"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "pick": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--pick"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "port": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--port"
+     ],
+     "required": false,
+     "type": "int"
+    },
+    "reroll": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--reroll"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "seed": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--seed"
+     ],
+     "required": false,
+     "type": "int"
+    },
+    "serve": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--serve"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "sheet": {
+     "default": true,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--no-sheet",
+      "--sheet"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "show": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--show"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "stills": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--stills"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "undo": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--undo"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "doctor": {
+   "help": "Check the toolchain and report what each scene type needs.",
+   "params": {}
+  },
+  "freeze": {
+   "help": "Render one frozen-moment beat (deep zoom and layers included), or print its tile plan, or measure its clip.",
+   "params": {
+    "against": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--against"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "beat": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "beat"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "plan": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--plan"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "report": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--report"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "inside": {
+   "help": "The product as the set: print the route (which parts each stop found, how the camera comes in, where the copy",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "out": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--out"
+     ],
+     "required": false,
+     "type": "path"
+    },
+    "samples": {
+     "default": 24,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--samples"
+     ],
+     "required": false,
+     "type": "int"
+    },
+    "scale": {
+     "default": 0.5,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--scale"
+     ],
+     "required": false,
+     "type": "float"
+    },
+    "section": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--section"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "still": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--still"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "strip": {
+     "default": 0,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--strip"
+     ],
+     "required": false,
+     "type": "int"
+    }
+   }
+  },
+  "inspect": {
+   "help": "Polish report for a built film (beats, a take or a video): scores it second by second and beat by beat for pops",
+   "params": {
+    "as_json": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--json"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "embed": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--embed"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "force": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--force"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "open_": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--open"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "section": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--section"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "video": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--video"
+     ],
+     "required": false,
+     "type": "path"
+    }
+   }
+  },
+  "journey": {
+   "help": "The one-take page (`journey:` on a film): its approach, every move and hold with the film seconds and scroll they get,",
+   "params": {
+    "as_json": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--json"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "section": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--section"
+     ],
+     "required": false,
+     "type": "str"
+    }
+   }
+  },
+  "light": {
+   "help": "Light as the scroll (`type: light`): build the section, then write what it made to look at, in",
+   "params": {
+    "build_": {
+     "default": true,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--build",
+      "--no-build"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "frames": {
+     "default": 7,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--frames"
+     ],
+     "required": false,
+     "type": "int"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "presets": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--presets"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "section": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--section"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "strips": {
+     "default": true,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--no-strips",
+      "--strips"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "looks": {
+   "help": "Build the site once in every style: dist/looks/<style>/ with a look switcher, and a gallery at dist/looks/.",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "styles": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--styles"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "thumbs": {
+     "default": true,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--no-thumbs",
+      "--thumbs"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "new": {
+   "help": "Create a project.",
+   "params": {
+    "example": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--example"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    }
+   }
+  },
+  "poster": {
+   "help": "A poster JPG of a built site at one scroll position (screenshot -> FFmpeg -> JPG).",
+   "params": {
+    "at": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--at"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "out": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--out"
+     ],
+     "required": true,
+     "type": "path"
+    },
+    "width": {
+     "default": 1280,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--width"
+     ],
+     "required": false,
+     "type": "int"
+    }
+   }
+  },
+  "preview": {
+   "help": "Serve a built project locally.",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "port": {
+     "default": 5173,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--port"
+     ],
+     "required": false,
+     "type": "int"
+    }
+   }
+  },
+  "previews": {
+   "help": "Preview video + poster for each project's first scene (for galleries and READMEs).",
+   "params": {
+    "names": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "names"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "out": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--out"
+     ],
+     "required": true,
+     "type": "path"
+    },
+    "out_width": {
+     "default": 1280,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--out-width"
+     ],
+     "required": false,
+     "type": "int"
+    },
+    "poster_at": {
+     "default": 0.5,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--poster-at"
+     ],
+     "required": false,
+     "type": "float"
+    },
+    "seconds": {
+     "default": 10.0,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--seconds"
+     ],
+     "required": false,
+     "type": "float"
+    },
+    "skip_existing": {
+     "default": true,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--no-skip-existing",
+      "--skip-existing"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "product": {
+   "help": "The site's product: normalise its model (cached), list its parts, render stills.",
+   "params": {
+    "all_parts": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--all"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "background": {
+     "default": "transparent",
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--background"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "exposure": {
+     "default": 0.0,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--exposure"
+     ],
+     "required": false,
+     "type": "float"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "out": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--out"
+     ],
+     "required": false,
+     "type": "path"
+    },
+    "part": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--part"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "parts": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--parts"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "scene": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--scene"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "size": {
+     "default": "1600x1200",
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--size"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "still": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--still"
+     ],
+     "required": false,
+     "type": "str"
+    }
+   }
+  },
+  "publish": {
+   "help": "Assemble built projects into one static folder: out/<project>/... ready for GitHub Pages or any host.",
+   "params": {
+    "home": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--home"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "names": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "names"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "out": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--out"
+     ],
+     "required": true,
+     "type": "path"
+    }
+   }
+  },
+  "record": {
+   "help": "Record a scroll-through to MP4 (for README, social posts, Reddit).",
+   "params": {
+    "gif": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--gif",
+      "--no-gif"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "height": {
+     "default": 1080,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--height"
+     ],
+     "required": false,
+     "type": "int"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "out": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--out"
+     ],
+     "required": false,
+     "type": "path"
+    },
+    "out_width": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--out-width"
+     ],
+     "required": false,
+     "type": "int"
+    },
+    "poster_at": {
+     "default": 0.5,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--poster-at"
+     ],
+     "required": false,
+     "type": "float"
+    },
+    "seconds": {
+     "default": 12.0,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--seconds"
+     ],
+     "required": false,
+     "type": "float"
+    },
+    "section": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--section"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "width": {
+     "default": 1920,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--width"
+     ],
+     "required": false,
+     "type": "int"
+    }
+   }
+  },
+  "schema": {
+   "help": "Print the site.yaml JSON Schema.",
+   "params": {}
+  },
+  "setup-comfy": {
+   "help": "Install the ComfyUI custom nodes that `reveal` (scroll-driven colour) and `faces: restore` use.",
+   "params": {
+    "no_weights": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--no-no-weights",
+      "--no-weights"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "snapshot": {
+   "help": "Screenshots at scroll positions + a contact sheet (snapshots/sheet.jpg).",
+   "params": {
+    "at": {
+     "default": null,
+     "kind": "option",
+     "multiple": true,
+     "opts": [
+      "--at"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "height": {
+     "default": 900,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--height"
+     ],
+     "required": false,
+     "type": "int"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "width": {
+     "default": 1600,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--width"
+     ],
+     "required": false,
+     "type": "int"
+    }
+   }
+  },
+  "storyboard": {
+   "help": "Storyboard the site before the full render: <project>/storyboard/ (the page with stills standing in for films,",
+   "params": {
+    "all_notes": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--all"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "browser": {
+     "default": true,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--browser",
+      "--no-browser"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "edit": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--edit"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "level": {
+     "default": "stills",
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--level"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "motion": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--motion"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "notes": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--notes"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "only": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--only"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "open_": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--open"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "port": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--port"
+     ],
+     "required": false,
+     "type": "int"
+    }
+   }
+  },
+  "trailer": {
+   "help": "Cut a launch trailer from the site's own renders: dist/trailer/trailer-16x9.mp4 and trailer-9x16.mp4.",
+   "params": {
+    "force": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--force",
+      "--no-force"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "format": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--format"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "plan": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--no-plan",
+      "--plan"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "ui": {
+   "help": "Start the Studio app.",
+   "params": {
+    "no_open": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--no-no-open",
+      "--no-open"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "port": {
+     "default": 5180,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--port"
+     ],
+     "required": false,
+     "type": "int"
+    }
+   }
+  },
+  "world": {
+   "help": "Check the in-world type of a built film (steps with `place: {kind: behind | surface | sky}`): draws each title's box",
+   "params": {
+    "frames": {
+     "default": 6,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--frames"
+     ],
+     "required": false,
+     "type": "int"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "section": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--section"
+     ],
+     "required": false,
+     "type": "str"
+    }
+   }
+  }
+ },
+ "help": "Scroll Studio: build scroll-driven sites from any inputs.",
+ "params": {}
+}

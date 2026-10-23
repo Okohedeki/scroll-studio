@@ -1,0 +1,1331 @@
+{
+ "add_input": {
+  "description": "Copy a local file (image, video, 3D model, .blend) into the project's inputs/. Returns the spec path to use.",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "source_path": {
+     "title": "Source Path",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project",
+    "source_path"
+   ],
+   "title": "add_inputArguments",
+   "type": "object"
+  }
+ },
+ "apply_copy_deck": {
+  "description": "Apply an edited copy deck to site.yaml (comments kept, invalid edits refused). Returns the changed fields.",
+  "input": {
+   "properties": {
+    "deck_path": {
+     "title": "Deck Path",
+     "type": "string"
+    },
+    "dry_run": {
+     "default": false,
+     "title": "Dry Run",
+     "type": "boolean"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project",
+    "deck_path"
+   ],
+   "title": "apply_copy_deckArguments",
+   "type": "object"
+  }
+ },
+ "approve_shot": {
+  "description": "Mark a storyboard shot approved (kept in storyboard/state.json, not in the spec). The sheet and `build --plan`",
+  "input": {
+   "properties": {
+    "approved": {
+     "default": true,
+     "title": "Approved",
+     "type": "boolean"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "shot": {
+     "title": "Shot",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project",
+    "shot"
+   ],
+   "title": "approve_shotArguments",
+   "type": "object"
+  }
+ },
+ "brand_from_logo": {
+  "description": "Set theme colours from a logo inside the project (contrast-checked) and use it as the nav logo.",
+  "input": {
+   "properties": {
+    "dry_run": {
+     "default": false,
+     "title": "Dry Run",
+     "type": "boolean"
+    },
+    "logo": {
+     "title": "Logo",
+     "type": "string"
+    },
+    "mode": {
+     "default": "light",
+     "title": "Mode",
+     "type": "string"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project",
+    "logo"
+   ],
+   "title": "brand_from_logoArguments",
+   "type": "object"
+  }
+ },
+ "build": {
+  "description": "Start building the site into dist/ (in the background). Returns a job id for job_status.",
+  "input": {
+   "properties": {
+    "draft": {
+     "default": false,
+     "title": "Draft",
+     "type": "boolean"
+    },
+    "force": {
+     "default": false,
+     "title": "Force",
+     "type": "boolean"
+    },
+    "only": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Only"
+    },
+    "plan_only": {
+     "default": false,
+     "title": "Plan Only",
+     "type": "boolean"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "section": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Section"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "buildArguments",
+   "type": "object"
+  }
+ },
+ "camera_check": {
+  "description": "Measure a built beat with `camera:` keys: how far the camera is from the keyed view (zoom error in %, shift in view",
+  "input": {
+   "properties": {
+    "beat": {
+     "title": "Beat",
+     "type": "string"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "section": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Section"
+    }
+   },
+   "required": [
+    "project",
+    "beat"
+   ],
+   "title": "camera_checkArguments",
+   "type": "object"
+  }
+ },
+ "camera_guide": {
+  "description": "For a beat with `camera:` keys: make its camera guide (depth, the moving people's mask, the guide videos) without",
+  "input": {
+   "properties": {
+    "beat": {
+     "title": "Beat",
+     "type": "string"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "section": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Section"
+    }
+   },
+   "required": [
+    "project",
+    "beat"
+   ],
+   "title": "camera_guideArguments",
+   "type": "object"
+  }
+ },
+ "cinemagraphs": {
+  "description": "Build the site's cinemagraphs (any image input with `cinemagraph: {moves: \"the steam above the cup\", ...}`: a still where",
+  "input": {
+   "properties": {
+    "force": {
+     "default": false,
+     "title": "Force",
+     "type": "boolean"
+    },
+    "list_only": {
+     "default": false,
+     "title": "List Only",
+     "type": "boolean"
+    },
+    "only": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Only"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "cinemagraphsArguments",
+   "type": "object"
+  }
+ },
+ "copy_deck": {
+  "description": "Write the site's visible text to <project>/copy.md: a Markdown deck the client can edit and send back.",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "copy_deckArguments",
+   "type": "object"
+  }
+ },
+ "create_project": {
+  "description": "Create a project in the projects folder, empty or copied from an example. Returns its path.",
+  "input": {
+   "properties": {
+    "example": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Example"
+    },
+    "name": {
+     "title": "Name",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "title": "create_projectArguments",
+   "type": "object"
+  }
+ },
+ "cuts": {
+  "description": "The film grammar between the built site's sections (`transition:` on a section: cut, dissolve, wipe, iris, whip, match,",
+  "input": {
+   "properties": {
+    "mobile": {
+     "default": false,
+     "title": "Mobile",
+     "type": "boolean"
+    },
+    "only": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "integer"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Only"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "reduced_motion": {
+     "default": false,
+     "title": "Reduced Motion",
+     "type": "boolean"
+    },
+    "strip": {
+     "default": false,
+     "title": "Strip",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "cutsArguments",
+   "type": "object"
+  }
+ },
+ "diorama_layout": {
+  "description": "Miniature worlds (scene type `diorama`): lay the section's world out (CPU, seconds, no GPU) and return what was",
+  "input": {
+   "properties": {
+    "full": {
+     "default": false,
+     "title": "Full",
+     "type": "boolean"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "section": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Section"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "diorama_layoutArguments",
+   "type": "object"
+  }
+ },
+ "direction_pick": {
+  "description": "Write one direction (its letter, or its name) into site.yaml: theme (style, colours, fonts, weights), `imagery` (how every",
+  "input": {
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project",
+    "id"
+   ],
+   "title": "direction_pickArguments",
+   "type": "object"
+  }
+ },
+ "direction_reroll": {
+  "description": "Another idea in place of one direction on the boards (by its letter), keeping the others: the best other school that",
+  "input": {
+   "properties": {
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "images": {
+     "default": true,
+     "title": "Images",
+     "type": "boolean"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "timeout_s": {
+     "default": 900,
+     "title": "Timeout S",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "project",
+    "id"
+   ],
+   "title": "direction_rerollArguments",
+   "type": "object"
+  }
+ },
+ "direction_undo": {
+  "description": "Put site.yaml back as it was before the last direction_pick (only if nothing has changed it since).",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "direction_undoArguments",
+   "type": "object"
+  }
+ },
+ "directions": {
+  "description": "Art directions for a site, pitched like a studio (`studio directions`): several complete directions (a concept line, palette,",
+  "input": {
+   "properties": {
+    "brief": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Brief"
+    },
+    "count": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Count"
+    },
+    "images": {
+     "default": true,
+     "title": "Images",
+     "type": "boolean"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "seed": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Seed"
+    },
+    "show_only": {
+     "default": false,
+     "title": "Show Only",
+     "type": "boolean"
+    },
+    "timeout_s": {
+     "default": 1800,
+     "title": "Timeout S",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "directionsArguments",
+   "type": "object"
+  }
+ },
+ "doctor": {
+  "description": "Which tools are installed (Blender, FFmpeg, GPU, ComfyUI...) and which scene types need them.",
+  "input": {
+   "properties": {},
+   "title": "doctorArguments",
+   "type": "object"
+  }
+ },
+ "get_spec": {
+  "description": "Read a project's site.yaml.",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "get_specArguments",
+   "type": "object"
+  }
+ },
+ "inside_route": {
+  "description": "The route of a `type: inside` scene (the camera flying into the site's product): per stop the parts it found,",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "samples": {
+     "default": 24,
+     "title": "Samples",
+     "type": "integer"
+    },
+    "scale": {
+     "default": 0.5,
+     "title": "Scale",
+     "type": "number"
+    },
+    "section": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Section"
+    },
+    "stills": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Stills"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "inside_routeArguments",
+   "type": "object"
+  }
+ },
+ "inspect_film": {
+  "description": "Polish report of a built film (`studio inspect`): scores it second by second and beat by beat for pops (jumps,",
+  "input": {
+   "properties": {
+    "embed": {
+     "default": false,
+     "title": "Embed",
+     "type": "boolean"
+    },
+    "force": {
+     "default": false,
+     "title": "Force",
+     "type": "boolean"
+    },
+    "issues": {
+     "default": 12,
+     "title": "Issues",
+     "type": "integer"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "section": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Section"
+    },
+    "timeout_s": {
+     "default": 900,
+     "title": "Timeout S",
+     "type": "integer"
+    },
+    "video": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Video"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "inspect_filmArguments",
+   "type": "object"
+  }
+ },
+ "job_status": {
+  "description": "Progress, status and log tail of a background job.",
+  "input": {
+   "properties": {
+    "job_id": {
+     "title": "Job Id",
+     "type": "string"
+    },
+    "log_lines": {
+     "default": 40,
+     "title": "Log Lines",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "job_id"
+   ],
+   "title": "job_statusArguments",
+   "type": "object"
+  }
+ },
+ "journey_plan": {
+  "description": "The one-take page (`journey:` on a film section): which approach it uses (a chain of camera moves between stop",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "section": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Section"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "journey_planArguments",
+   "type": "object"
+  }
+ },
+ "light_report": {
+  "description": "What a built `type: light` scene made (one place relit from dawn to night): per time of day the drift from the world",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "section": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Section"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "light_reportArguments",
+   "type": "object"
+  }
+ },
+ "list_inputs": {
+  "description": "Files in the project's inputs/ folder (reference them in the spec as inputs/<name>).",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "list_inputsArguments",
+   "type": "object"
+  }
+ },
+ "list_projects": {
+  "description": "List user projects and bundled examples (good starting points: copy one with create_project).",
+  "input": {
+   "properties": {},
+   "title": "list_projectsArguments",
+   "type": "object"
+  }
+ },
+ "list_styles": {
+  "description": "The twenty-one looks a site can take with theme.style (name, label, what it looks like).",
+  "input": {
+   "properties": {},
+   "title": "list_stylesArguments",
+   "type": "object"
+  }
+ },
+ "looks": {
+  "description": "Build the (already built) site once per style into dist/looks/<style>/ with a gallery at dist/looks/index.html,",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "styles": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Styles"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "looksArguments",
+   "type": "object"
+  }
+ },
+ "pick_shot_variant": {
+  "description": "Make a kept variant of a shot's image the one in use: its seed (and text) are written into site.yaml, and the",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "shot": {
+     "title": "Shot",
+     "type": "string"
+    },
+    "slot": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Slot"
+    },
+    "step": {
+     "default": 0,
+     "title": "Step",
+     "type": "integer"
+    },
+    "variant": {
+     "title": "Variant",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "project",
+    "shot",
+    "variant"
+   ],
+   "title": "pick_shot_variantArguments",
+   "type": "object"
+  }
+ },
+ "product_parts": {
+  "description": "The site's product model, normalised (cached): size (m), triangles, units, and every part with its",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "product_partsArguments",
+   "type": "object"
+  }
+ },
+ "product_still": {
+  "description": "Render a still of the site's product (Cycles, studio light; cached) and return its path to look at.",
+  "input": {
+   "properties": {
+    "background": {
+     "default": "transparent",
+     "title": "Background",
+     "type": "string"
+    },
+    "height": {
+     "default": 1200,
+     "title": "Height",
+     "type": "integer"
+    },
+    "part": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Part"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "scene": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Scene"
+    },
+    "view": {
+     "default": "three-quarter",
+     "title": "View",
+     "type": "string"
+    },
+    "width": {
+     "default": 1600,
+     "title": "Width",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "product_stillArguments",
+   "type": "object"
+  }
+ },
+ "record": {
+  "description": "Start recording a smooth scroll-through MP4 of the built site (background job).",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "seconds": {
+     "default": 12.0,
+     "title": "Seconds",
+     "type": "number"
+    },
+    "section": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Section"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "recordArguments",
+   "type": "object"
+  }
+ },
+ "regenerate_shot_image": {
+  "description": "Render one image of a storyboard shot again and return the new image's path (Read it). Only that image's stage",
+  "input": {
+   "properties": {
+    "mode": {
+     "default": "regenerate",
+     "title": "Mode",
+     "type": "string"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "seed": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Seed"
+    },
+    "shot": {
+     "title": "Shot",
+     "type": "string"
+    },
+    "slot": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Slot"
+    },
+    "step": {
+     "default": 0,
+     "title": "Step",
+     "type": "integer"
+    },
+    "timeout_s": {
+     "default": 1500,
+     "title": "Timeout S",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "project",
+    "shot"
+   ],
+   "title": "regenerate_shot_imageArguments",
+   "type": "object"
+  }
+ },
+ "resolve_note": {
+  "description": "Close a storyboard note with a short plain-language reply for the owner (what you understood and what you did, or",
+  "input": {
+   "properties": {
+    "changed": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Changed"
+    },
+    "note_id": {
+     "title": "Note Id",
+     "type": "string"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "reply": {
+     "title": "Reply",
+     "type": "string"
+    },
+    "status": {
+     "default": "done",
+     "title": "Status",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project",
+    "note_id",
+    "reply"
+   ],
+   "title": "resolve_noteArguments",
+   "type": "object"
+  }
+ },
+ "set_shot_field": {
+  "description": "Set one field of a storyboard shot in site.yaml (comments and layout kept, validated first, the previous text is",
+  "input": {
+   "properties": {
+    "field": {
+     "title": "Field",
+     "type": "string"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "shot": {
+     "title": "Shot",
+     "type": "string"
+    },
+    "value": {
+     "title": "Value"
+    }
+   },
+   "required": [
+    "project",
+    "shot",
+    "field",
+    "value"
+   ],
+   "title": "set_shot_fieldArguments",
+   "type": "object"
+  }
+ },
+ "set_spec": {
+  "description": "Validate and write a project's site.yaml (the whole file). Returns validation errors instead of writing if invalid.",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "yaml_text": {
+     "title": "Yaml Text",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project",
+    "yaml_text"
+   ],
+   "title": "set_specArguments",
+   "type": "object"
+  }
+ },
+ "snapshot": {
+  "description": "Screenshot the built site at scroll positions and return the image paths (read them to review the page).",
+  "input": {
+   "properties": {
+    "at": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "At"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "snapshotArguments",
+   "type": "object"
+  }
+ },
+ "spec_schema": {
+  "description": "JSON Schema of site.yaml. part = a scene/block type (film, artwork, scene3d, sequence, parallax, type, inside,",
+  "input": {
+   "properties": {
+    "part": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Part"
+    }
+   },
+   "title": "spec_schemaArguments",
+   "type": "object"
+  }
+ },
+ "storyboard": {
+  "description": "Storyboard the site before the full render, and review it: returns `sheet` (sheet.jpg, one image with a card",
+  "input": {
+   "properties": {
+    "level": {
+     "default": "stills",
+     "title": "Level",
+     "type": "string"
+    },
+    "motion": {
+     "default": false,
+     "title": "Motion",
+     "type": "boolean"
+    },
+    "only": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Only"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "timeout_s": {
+     "default": 900,
+     "title": "Timeout S",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "storyboardArguments",
+   "type": "object"
+  }
+ },
+ "storyboard_notes": {
+  "description": "The inbox of plain-language notes the owner wrote in the storyboard editor (\"warmer light\", \"she should look",
+  "input": {
+   "properties": {
+    "claim": {
+     "default": true,
+     "title": "Claim",
+     "type": "boolean"
+    },
+    "include_done": {
+     "default": false,
+     "title": "Include Done",
+     "type": "boolean"
+    },
+    "include_working": {
+     "default": false,
+     "title": "Include Working",
+     "type": "boolean"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "storyboard_notesArguments",
+   "type": "object"
+  }
+ },
+ "storyboard_shots": {
+  "description": "The storyboard as an editing workspace sees it (the same one `studio storyboard <project> --edit` opens): every",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "shot": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Shot"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "storyboard_shotsArguments",
+   "type": "object"
+  }
+ },
+ "trailer": {
+  "description": "Cut the launch trailer from the site's own renders (background job): dist/trailer/trailer-16x9.mp4 and",
+  "input": {
+   "properties": {
+    "force": {
+     "default": false,
+     "title": "Force",
+     "type": "boolean"
+    },
+    "formats": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Formats"
+    },
+    "plan_only": {
+     "default": false,
+     "title": "Plan Only",
+     "type": "boolean"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "trailerArguments",
+   "type": "object"
+  }
+ },
+ "wait_for_job": {
+  "description": "Block until a job finishes (or the timeout passes) and return its status.",
+  "input": {
+   "properties": {
+    "job_id": {
+     "title": "Job Id",
+     "type": "string"
+    },
+    "timeout_s": {
+     "default": 240,
+     "title": "Timeout S",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "job_id"
+   ],
+   "title": "wait_for_jobArguments",
+   "type": "object"
+  }
+ }
+}
