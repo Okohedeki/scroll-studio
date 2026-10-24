@@ -8,7 +8,7 @@
 {% if page.summary or site.description %}<meta name="description" content="{{ page.summary or site.description }}">{% endif %}
 <meta name="generator" content="Scroll Studio">
 {% if font_css %}<link rel="stylesheet" href="{{ font_css }}">
-{% else %}<link rel="preconnect" href="https://fonts.googleapis.com">
+{% endif %}{% if font_links or not font_css %}<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 {% for href in font_links %}<link rel="stylesheet" href="{{ href }}">
 {% endfor %}{% endif %}

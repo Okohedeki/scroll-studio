@@ -9,7 +9,7 @@ from urllib.parse import quote_plus
 import yaml
 
 from .. import safety
-from ..spec import Theme
+from ..spec import FontFile, Theme
 
 THEMES_FILE = Path(__file__).resolve().parent.parent / "themes.yaml"
 STYLES_DIR = Path(__file__).resolve().parent.parent / "styles"
@@ -162,7 +162,8 @@ def layers(theme: Theme) -> list[tuple[str, dict]]:
 
 def resolve(theme: Theme) -> dict:
     tokens = layer(*(s for _, s in layers(theme)))
-    colors, fonts, radius = tokens["colors"], tokens["fonts"], tokens["radius"]
+    colors, radius = tokens["colors"], tokens["radius"]
+    fonts, font_files = own_fonts(tokens["fonts"])
     # these end up inside the page's <style> block, so none may carry anything but a plain value (engine/safety.py)
     for k, c in colors.items():
         if not safety.css_value_ok(c):
@@ -181,6 +182,7 @@ def resolve(theme: Theme) -> dict:
         "mode": tokens["mode"],
         "colors": colors,
         "fonts": fonts,
+        "font_files": font_files,
         "display_weight": tokens["display_weight"],
         "em_italic": tokens["em_italic"],
         "em": tokens["display_em"],
@@ -192,6 +194,22 @@ def resolve(theme: Theme) -> dict:
         "runtime": {name: v for name, path in RUNTIME_TOKENS.items()
                     if (v := _at(tokens, path)) != _at(DEFAULTS, path)},
     }
+
+
+def own_fonts(fonts: dict) -> tuple[dict, list[dict]]:
+    """Font roles as family names, and the project's own font files among them ({file: ...} roles), one face each.
+    A file's family defaults to its name: fonts/Brand-Sans.woff2 is set as 'Brand Sans'."""
+    names, files = {}, []
+    for role, f in fonts.items():
+        if isinstance(f, dict):
+            f = FontFile.model_validate(f)
+        if isinstance(f, FontFile):
+            family = f.family or re.sub(r"[^\w .+&'-]", "", re.sub(r"[-_\s]+", " ", Path(f.file).stem)).strip()
+            if not any(x["file"] == f.file for x in files):
+                files.append({"family": family, "file": f.file, "weight": f.weight or "100 900", "style": f.style})
+            f = family
+        names[role] = f
+    return names, files
 
 
 def _at(d: dict, path: tuple):
@@ -337,7 +355,7 @@ def phone_css(css: str, phone: int) -> str:
 
 
 def font_links(t: dict) -> list[str]:
-    seen, links = set(), []
+    seen, links = {f["family"] for f in t.get("font_files", [])}, []      # the project's own files are not on Google
     for fam in t["fonts"].values():
         if fam in seen:
             continue

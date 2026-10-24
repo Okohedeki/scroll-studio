@@ -3361,6 +3361,58 @@
    "title": "FilmScene",
    "type": "object"
   },
+  "FontFile": {
+   "additionalProperties": false,
+   "description": "A font file of the project's own (a brand face that is not on Google Fonts), served from the site itself.",
+   "properties": {
+    "family": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "The family name it is set in (default: from the file name, fonts/Brand-Sans.woff2 is 'Brand Sans')",
+     "title": "Family"
+    },
+    "file": {
+     "description": "The font file inside the project folder: .woff2 (best), .woff, .ttf or .otf",
+     "title": "File",
+     "type": "string"
+    },
+    "style": {
+     "default": "normal",
+     "description": "normal, or italic for an italic file",
+     "enum": [
+      "normal",
+      "italic"
+     ],
+     "title": "Style",
+     "type": "string"
+    },
+    "weight": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "The weight the file holds, e.g. 400 or 700, or a range such as '100 900' for a variable font (default: every weight)",
+     "title": "Weight"
+    }
+   },
+   "required": [
+    "file"
+   ],
+   "title": "FontFile",
+   "type": "object"
+  },
   "Footer": {
    "additionalProperties": false,
    "properties": {
@@ -11142,9 +11194,20 @@
     },
     "fonts": {
      "additionalProperties": {
-      "type": "string"
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "$ref": "#/$defs/FontFile"
+       }
+      ],
+      "type": [
+       "string",
+       "object"
+      ]
      },
-     "description": "Google Fonts families: display, body, mono",
+     "description": "Fonts by role (display, body, mono): a Google Fonts family, or a file of the project's own ({file: fonts/Brand.woff2}), served from the site either way",
      "title": "Fonts",
      "type": "object"
     },

@@ -1,4 +1,5 @@
-"""Self-hosted fonts: download a theme's Google Fonts once and serve them from the site itself.
+"""Self-hosted fonts: download a theme's Google Fonts once and serve them from the site itself, beside any font
+files of the project's own (`fonts: {display: {file: fonts/Brand.woff2}}`).
 
 Built sites make no third-party requests for type. Files are cached per URL under
 ~/.scroll-studio/cache/fonts, so only the first build of a theme needs the network. Without network and
@@ -62,4 +63,29 @@ def vendor(links: list[str], dist: Path, log: Callable[[str], None] = print) -> 
         shutil.copy(CACHE / name, out / name)
     css = URL_RE.sub(lambda m: f"url({files[m.group(1)]})", css)
     (out / "fonts.css").write_text(css, encoding="utf-8")
+    return "fonts/fonts.css"
+
+
+FORMATS = {".woff2": "woff2", ".woff": "woff", ".ttf": "truetype", ".otf": "opentype"}
+
+
+def own(project, faces: list[dict], dist: Path, append: bool) -> str:
+    """Copy the project's own font files into dist/fonts/ and declare them in fonts.css (after the Google faces when
+    `append`, else on their own). Returns the stylesheet's site-relative path."""
+    from ..project import BuildError
+    out = dist / "fonts"
+    out.mkdir(parents=True, exist_ok=True)
+    rules = []
+    for f in faces:
+        src = project.path(f["file"])
+        if not src.is_file():
+            raise BuildError(f"theme font {f['file']} not found in the project folder")
+        data = src.read_bytes()
+        name = hashlib.sha1(data).hexdigest()[:16] + src.suffix.lower()     # a plain name: nothing from the spec in the CSS
+        (out / name).write_bytes(data)
+        rules.append(f'@font-face {{ font-family: "{f["family"]}"; src: url({name}) format("{FORMATS[src.suffix.lower()]}"); '
+                     f'font-weight: {f["weight"]}; font-style: {f["style"]}; font-display: swap; }}')
+    css = out / "fonts.css"
+    before = css.read_text(encoding="utf-8") + "\n" if append and css.exists() else ""
+    css.write_text(before + "\n".join(rules) + "\n", encoding="utf-8")
     return "fonts/fonts.css"

@@ -2384,6 +2384,46 @@ class MotionTokens(Model):
     _plain = model_validator(mode="after")(_css_values)
 
 
+FONT_FILE_TYPES = (".woff2", ".woff", ".ttf", ".otf")
+
+
+class FontFile(Model):
+    """A font file of the project's own (a brand face that is not on Google Fonts), served from the site itself."""
+    file: str = Field(..., description="The font file inside the project folder: .woff2 (best), .woff, .ttf or .otf")
+    family: Optional[str] = Field(None, description="The family name it is set in (default: from the file name, "
+                                                    "fonts/Brand-Sans.woff2 is 'Brand Sans')")
+    weight: Optional[str] = Field(None, description="The weight the file holds, e.g. 400 or 700, or a range such as "
+                                                    "'100 900' for a variable font (default: every weight)")
+    style: Literal["normal", "italic"] = Field("normal", description="normal, or italic for an italic file")
+
+    @field_validator("file")
+    @classmethod
+    def _a_font_file(cls, v: str) -> str:
+        if not v.lower().endswith(FONT_FILE_TYPES):
+            raise ValueError(f"file {v[:40]!r} is not a font file ({', '.join(FONT_FILE_TYPES)})")
+        return v
+
+    @field_validator("family")
+    @classmethod
+    def _a_family_name(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and not FONT_NAME.fullmatch(v):
+            raise ValueError(f"family {v[:40]!r} is not a font family name (letters, digits, spaces and . + & ' -)")
+        return v
+
+    @field_validator("weight", mode="before")
+    @classmethod
+    def _a_weight(cls, v: Any) -> Optional[str]:      # `weight: 700` in YAML is a number
+        if v is not None and not re.fullmatch(r"[1-9]00( [1-9]00)?", str(v).strip()):
+            raise ValueError(f"weight {v[:20]!r} is a weight such as 400, or a range such as '100 900'")
+        return v if v is None else str(v).strip()
+
+
+def _fonts_schema(schema: dict) -> None:
+    """A role is a family name or a FontFile. `type` stays in the schema beside the union, widened rather than
+    dropped, so whatever read `type: string` here before still finds it."""
+    schema["additionalProperties"]["type"] = ["string", "object"]
+
+
 class Theme(Model):
     preset: str = Field("night", description="night, brass, paper, lab, cosmos, studio, dusk, ink, blueprint, clinic (see engine/themes.yaml)")
     style: Optional[str] = Field(
@@ -2393,7 +2433,10 @@ class Theme(Model):
                           "art-deco, neo-brutalism, anime-intro, flipbook, pop-up-book, pinscreen, sand, zoetrope, stop-motion, paper-cut-out, scratch-film, smears, paint-on-glass, multiplane (see engine/styles/). Colours/fonts set here still win")
     mode: Optional[Literal["light", "dark"]] = Field(None, description="Override the preset's light/dark mode (set it when colors flip it)")
     colors: dict[str, str] = Field(default_factory=dict, description="Override tokens: bg, bg2, ink, accent, accent2")
-    fonts: dict[str, str] = Field(default_factory=dict, description="Google Fonts families: display, body, mono")
+    fonts: dict[str, Union[str, FontFile]] = Field(
+        default_factory=dict, json_schema_extra=_fonts_schema,
+        description="Fonts by role (display, body, mono): a Google Fonts family, or a file of the project's own "
+                    "({file: fonts/Brand.woff2}), served from the site either way")
     display_weight: Optional[int] = None
     display_italic_em: Optional[bool] = Field(None, description="Render <em> accent words in italic")
     display_em: Optional[Literal["accent", "bold", "heavy"]] = Field(
@@ -2431,9 +2474,9 @@ class Theme(Model):
 
     @field_validator("fonts")
     @classmethod
-    def _fonts_are_families(cls, v: dict[str, str]) -> dict[str, str]:
+    def _fonts_are_families(cls, v: dict[str, Union[str, FontFile]]) -> dict[str, Union[str, FontFile]]:
         for k, f in v.items():
-            if not CSS_NAME.fullmatch(k) or not FONT_NAME.fullmatch(f):
+            if not CSS_NAME.fullmatch(k) or not (isinstance(f, FontFile) or FONT_NAME.fullmatch(f)):
                 raise ValueError(f"fonts.{k}: {f[:40]!r} is not a Google Fonts family name (letters, digits, spaces and . + & ' -)")
         return v
 

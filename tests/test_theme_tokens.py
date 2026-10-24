@@ -152,6 +152,72 @@ def test_phone_rewrites_the_runtime_stylesheet_of_a_build(tmp_path, monkeypatch)
     assert "(max-width: 820px)" in css and "max-width:900px" not in css and "max-width:760px" not in css
 
 
+# ---------------------------------------------------------------- the project's own font files
+
+def _font_project(tmp_path, fonts: dict):
+    from engine.project import Project
+    (tmp_path / "fonts").mkdir()
+    (tmp_path / "fonts" / "Brand-Sans.woff2").write_bytes(b"wOF2 not really a font")
+    (tmp_path / "site.yaml").write_text(yaml.safe_dump({"name": "F", "theme": {"fonts": fonts},
+                                                        "sections": [{"type": "hero", "id": "hero", "title": "Hi"}]}),
+                                        encoding="utf-8")
+    return Project(tmp_path)
+
+
+def test_an_own_font_file_is_a_family_beside_google_fonts():
+    from engine.compile import themes as T
+    from engine.spec import Theme
+    t = T.resolve(Theme(fonts={"display": {"file": "fonts/Brand-Sans.woff2"}, "body": "Inter"}))
+    assert t["fonts"]["display"] == "Brand Sans" and t["fonts"]["body"] == "Inter"
+    assert t["font_files"] == [{"family": "Brand Sans", "file": "fonts/Brand-Sans.woff2", "weight": "100 900", "style": "normal"}]
+    assert '--font-display: "Brand Sans"' in T.css_vars(t)
+    links = " ".join(T.font_links(t))
+    assert "Brand" not in links and "family=Inter" in links          # only real Google families are fetched
+    named = T.resolve(Theme(fonts={"display": {"file": "fonts/x.otf", "family": "Acme Display", "weight": "700"}}))
+    assert named["fonts"]["display"] == "Acme Display" and named["font_files"][0]["weight"] == "700"
+
+
+@pytest.mark.parametrize("google_hosted", [False, True])
+def test_own_font_files_are_served_from_the_site(tmp_path, monkeypatch, google_hosted):
+    from engine.compile import compiler, fonts
+    project = _font_project(tmp_path, {"display": {"file": "fonts/Brand-Sans.woff2"}})
+
+    def vendor(links, dist, log=print):          # no network: either the Google faces were self-hosted, or not
+        if not google_hosted:
+            return None
+        (dist / "fonts").mkdir(parents=True, exist_ok=True)
+        (dist / "fonts" / "fonts.css").write_text("/* google faces */", encoding="utf-8")
+        return "fonts/fonts.css"
+    monkeypatch.setattr(fonts, "vendor", vendor)
+    html = compiler.build_site(project, log=lambda m: None).read_text(encoding="utf-8")
+    css = (tmp_path / "dist" / "fonts" / "fonts.css").read_text(encoding="utf-8")
+    assert 'font-family: "Brand Sans"' in css and 'format("woff2")' in css
+    assert css.startswith("/* google faces */") == google_hosted
+    served = [p for p in (tmp_path / "dist" / "fonts").iterdir() if p.suffix == ".woff2"]
+    assert len(served) == 1 and served[0].read_bytes() == b"wOF2 not really a font"
+    assert '<link rel="stylesheet" href="fonts/fonts.css">' in html
+    assert ("fonts.googleapis.com/css2" in html) != google_hosted       # the rest still linked from Google when offline
+
+
+def test_an_own_font_must_exist_inside_the_project(tmp_path, monkeypatch):
+    from pydantic import ValidationError
+
+    from engine.compile import compiler, fonts
+    from engine.project import BuildError, Project
+    from engine.spec import FontFile
+    monkeypatch.setattr(fonts, "vendor", lambda links, dist, log=print: None)
+    with pytest.raises(BuildError, match="not found"):
+        compiler.build_site(_font_project(tmp_path, {"display": {"file": "fonts/Missing.woff2"}}), log=lambda m: None)
+    (tmp_path / "site.yaml").write_text(yaml.safe_dump({"name": "F", "theme": {"fonts": {"display": {"file": "../Brand.woff2"}}},
+                                                        "sections": [{"type": "hero", "id": "hero", "title": "Hi"}]}),
+                                        encoding="utf-8")
+    with pytest.raises(BuildError, match="outside the project"):
+        compiler.build_site(Project(tmp_path), log=lambda m: None)
+    for bad in ({"file": "fonts/brand.exe"}, {"file": "a.woff2", "family": "x;}"}, {"file": "a.woff2", "weight": "bold"}):
+        with pytest.raises(ValidationError):
+            FontFile.model_validate(bad)
+
+
 if __name__ == "__main__":
     rows = [f"{json.dumps(k)}: {json.dumps(dump(t), sort_keys=True, separators=(',', ':'))}" for k, t in sorted(cases().items())]
     BASELINE.write_text("{\n" + ",\n".join(rows) + "\n}\n", encoding="utf-8", newline="\n")     # one case per line
