@@ -12,6 +12,6 @@
     "engine/trailer": 0,
     "engine/server": 12,
     "engine/cli.py": 14,
-    "engine/mcp_server.py": 0
+    "engine/mcp_server.py": 25
   }
 }
