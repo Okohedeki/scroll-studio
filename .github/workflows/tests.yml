@@ -1,9 +1,10 @@
 # The checks every change to main must pass. Branch protection requires the `tests` job (Linux, with coverage floors);
 # the others are `lint` (ruff and the repository hygiene tests, fast), `platforms` (the suite on Python 3.10 and 3.13,
 # Windows and macOS), `install` (the built wheel runs from a clean virtualenv) and `runtime` (the committed runtime bundle
-# is what `npm run build:runtime` makes, and the runtime and UI type-check). No GPU and no models: the suite covers the
-# spec, the planners, the compiler, the layout snapshots of every example and the conformance of every theme preset and
-# style. Tests that need ffmpeg or node run here too; GPU stages are not exercised.
+# is what `npm run build:runtime` makes, the runtime and UI type-check, and the runtime's unit tests pass with coverage).
+# No GPU and no models: the suite covers the spec, the planners, the compiler, the layout snapshots of every example, the
+# size budgets of the runtime and of a built page (tests/performance_budgets.json) and the conformance of every theme
+# preset and style. Tests that need ffmpeg or node run here too; GPU stages are not exercised.
 # Every action is pinned to a full commit SHA (the comment is its version); Dependabot raises them in a pull request.
 name: tests
 
@@ -197,7 +198,7 @@ jobs:
 
   runtime:
     # engine/compile/static/runtime is built from runtime/src and committed, so a site can be built without Node. This
-    # fails when the two disagree, and when the runtime or the UI does not type-check.
+    # fails when the two disagree, when the runtime or the UI does not type-check, and when a unit test of the runtime fails.
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -224,5 +225,7 @@ jobs:
             echo "::error title=Runtime bundle is out of date::engine/compile/static/runtime differs from a fresh build. Run 'npm run build:runtime' and commit the result."
             exit 1
           fi
+      - name: Runtime unit tests (Vitest in jsdom, with v8 coverage)
+        run: npm test -w runtime
       - name: Type-check the UI
         run: npx tsc --noEmit -p ui

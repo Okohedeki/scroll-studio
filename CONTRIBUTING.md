@@ -252,6 +252,18 @@ Every pull request runs these without a GPU, and `main` only accepts changes tha
   `[tool.setuptools.package-data]` (`tests/test_packaging.py` fails otherwise).
 - **Runtime** (`runtime` job): `npm run build:runtime` must reproduce the committed `engine/compile/static/runtime/`
   exactly, so a change to `runtime/src` commits its rebuilt bundle. The runtime and the UI are type-checked.
+- **Runtime unit tests** (`runtime` job), `npm run test:runtime`: Vitest in jsdom, with a v8 coverage report and floors
+  (`runtime/vitest.config.ts`). They cover the runtime's scroll maths, easing, caption and window timing, frame selection,
+  the players that need no GPU and the style toolkit. A change to `runtime/src` comes with tests; when it lifts a number
+  by 2 points or more, raise its floor in the same pull request.
+- **Size budgets** (`tests/test_performance_budgets.py`, part of the suite): the runtime entry, `studio.css`, each chunk and
+  the whole runtime folder, and the weight of the page the compiler emits for each example, may not grow past
+  `tests/performance_budgets.json` (each is the size when set plus about 10%). If a change makes something heavier on
+  purpose, raise it and say why in the pull request:
+
+  ```bash
+  UPDATE_PERFORMANCE_BUDGETS=1 python -m pytest tests/test_performance_budgets.py
+  ```
 - **Conformance** (`tests/test_conformance.py`): every preset and style against the rules above.
 - **Docs** ([docs workflow](.github/workflows/docs.yml)): the site builds in strict mode, and every `yaml` snippet in
   the docs validates against the spec (`tests/test_docs.py`).
