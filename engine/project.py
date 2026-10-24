@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -44,7 +45,18 @@ def child(base: str | Path, name: str, what: str = "name") -> Path:
             or any(c in _BAD_NAME_CHARS for c in name)):
         raise ValueError(f"{what} {name!r} is not allowed: it must be a plain folder or file name, with no slashes, '..' "
                          "or leading dot")
-    return Path(base) / name
+    return within(base, name)
+
+
+def within(base: str | Path, rel: str) -> Path:
+    """`base/rel` normalised, refused with ValueError unless it stays inside `base`. Lexical only: a caller that must
+    follow links resolves the result and checks again. Written as normpath plus a prefix test, the guard static
+    analysis (CodeQL) recognises."""
+    root = os.path.normpath(os.fspath(base))
+    full = os.path.normpath(os.path.join(root, rel))
+    if full != root and not full.startswith(root.rstrip(os.sep) + os.sep):
+        raise ValueError(f"{rel!r} is outside {root}")
+    return Path(full)
 
 
 def file_key(path: Path) -> dict:
@@ -90,14 +102,21 @@ class Project:
     def path(self, rel: str) -> Path:
         """A path named in the spec, resolved (links followed) and required to stay inside the project folder. An
         absolute path, `..` or a symlink pointing out is refused: a spec is a document that may come from anyone."""
+        outside = BuildError(f"{rel} is outside the project folder: use a file inside it (e.g. inputs/photo.jpg), "
+                             "not an absolute path, `..` or a link that leads out")
+        if "\x00" in str(rel):
+            raise BuildError(f"{rel!r} is not a usable path (embedded null character); use a file inside the project "
+                             "folder, e.g. inputs/photo.jpg")
         try:
-            if "\x00" in str(rel):
-                raise ValueError("embedded null character")
-            p = (self.root / rel).resolve()
-        except (OSError, ValueError, RuntimeError) as e:     # NUL bytes, loops, names the OS refuses
+            lexical = within(self.root, str(rel))          # `..` and absolute paths, before touching the disk
+        except ValueError:
+            raise outside from None
+        try:
+            p = lexical.resolve()                          # then links: one pointing out is refused below
+        except (OSError, ValueError, RuntimeError) as e:     # loops, names the OS refuses
             raise BuildError(f"{rel!r} is not a usable path ({e.__class__.__name__}); use a file inside the project folder, "
                              "e.g. inputs/photo.jpg") from e
-        if p != self.root and self.root not in p.parents:
+        if p != self.root and not p.is_relative_to(self.root):
             raise BuildError(f"{rel} is outside the project folder: use a file inside it (e.g. inputs/photo.jpg), "
                              "not an absolute path, `..` or a link that leads out")
         return p

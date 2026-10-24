@@ -87,9 +87,14 @@ def hostile_findings(html: str) -> list[str]:
 
 # ---------------------------------------------------------------- paths stay inside the project
 
+# drive and root-relative Windows paths only leave the project on Windows; elsewhere they are plain file names
+WINDOWS_ONLY = pytest.mark.skipif(os.name != "nt", reason="a Windows path is a plain file name on other systems")
+
+
 @pytest.mark.parametrize("ref", [
     f"../{OUTSIDE}/secret.txt", "inputs/../../" + OUTSIDE + "/secret.txt", "inputs/./../../" + OUTSIDE + "/secret.txt",
-    "/etc/passwd", "\\Windows\\win.ini", "C:\\Windows\\win.ini", "C:/Windows/win.ini", "inputs/\x00evil",
+    "/etc/passwd", "inputs/\x00evil",
+    *[pytest.param(w, marks=WINDOWS_ONLY) for w in ("\\Windows\\win.ini", "C:\\Windows\\win.ini", "C:/Windows/win.ini")],
 ])
 def test_project_path_refuses_names_that_leave_the_project(tmp_path, ref):
     p = make_project(tmp_path, "name: x\nsections: []\n")
