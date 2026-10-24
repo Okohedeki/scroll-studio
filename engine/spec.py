@@ -9,6 +9,7 @@ intro, features, stats, timeline, quote, cta, gallery).
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 from typing import Annotated, Any, Literal, Optional, Union
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_serializer, model_validator
@@ -35,6 +36,105 @@ class Model(BaseModel):
         if name == "hdri" and not re.fullmatch(r"[A-Za-z0-9_-]{1,40}", v):
             raise ValueError(f"hdri {v[:40]!r} is not a studio light name: use one of Blender's studio lights, e.g. studio, city, forest")
         return v
+
+
+# ---------------------------------------------------------------- deprecation (docs/compatibility.md)
+#
+# A deprecated field (or value of a field) keeps working and warns. Mark it where it is declared:
+#
+#     Field(None, json_schema_extra=deprecated("2.0.0", replacement="`headline`"))                  # the field
+#     Field("a", json_schema_extra=deprecated("2.0.0", replacement="`layout: stack`", value="b"))   # one value of it
+#
+# The mark goes into the JSON Schema (`deprecated: true` and `x-deprecated`), so the generated reference shows it.
+# `deprecations(spec)` lists every use in a spec; the spec still validates.
+
+_ANY = object()
+
+
+def deprecated(removed_in: str, replacement: Optional[str] = None, *, note: str = "", value: Any = _ANY) -> dict:
+    """`json_schema_extra` for a deprecated field, or with `value=` for one deprecated value of the field.
+    `removed_in` is the major version that removes it, `replacement` what to write instead, `note` anything else."""
+    rule: dict[str, Any] = {"removed_in": removed_in}
+    if replacement:
+        rule["replacement"] = replacement
+    if note:
+        rule["note"] = note
+    if value is _ANY:
+        return {"deprecated": True, "x-deprecated": [rule]}
+    return {"x-deprecated": [rule | {"value": value}]}
+
+
+def deprecated_all(*marks: dict) -> dict:
+    """Several marks on one field (a few deprecated values): `deprecated_all(deprecated(..., value="a"), deprecated(..., value="b"))`."""
+    out: dict[str, Any] = {"x-deprecated": [r for m in marks for r in m["x-deprecated"]]}
+    if any(m.get("deprecated") for m in marks):
+        out["deprecated"] = True
+    return out
+
+
+def deprecation_tail(rule: dict) -> str:
+    """'will be removed in 2.0.0. Use `x` instead.' for a rule from `deprecated()`, as the warnings and the reference say it."""
+    out = f"will be removed in {rule['removed_in']}."
+    if rule.get("replacement"):
+        out += f" Use {rule['replacement']} instead."
+    if rule.get("note"):
+        out += f" {rule['note']}"
+    return out
+
+
+@dataclass(frozen=True)
+class Deprecation:
+    """One deprecated use in a spec: where it is (`path`, inside section `section`), what to do about it."""
+    path: str                       # e.g. sections[2].steps[0].old_field
+    section: Optional[str]          # id of the section it is in
+    removed_in: str
+    replacement: Optional[str] = None
+    note: str = ""
+    value: Any = _ANY               # set when only this value of the field is deprecated
+
+    @property
+    def text(self) -> str:
+        where = f"{self.path} (section {self.section!r})" if self.section else self.path
+        what = "deprecated" if self.value is _ANY else f"the value {self.value!r} is deprecated"
+        return f"{where}: {what} and {deprecation_tail(self.__dict__)}"
+
+    def as_dict(self) -> dict:
+        """For JSON replies: the parts and the sentence."""
+        return {"path": self.path, "section": self.section, "removed_in": self.removed_in,
+                "replacement": self.replacement, "text": self.text}
+
+    def __str__(self) -> str:
+        return self.text
+
+
+def deprecations(spec: Any) -> list[Deprecation]:
+    """Every deprecated field or value a spec sets, in file order. `spec` is a validated model or the raw dict (validated
+    here, so an invalid spec raises as it does anywhere else). A field left at its default is not a use."""
+    found: list[Deprecation] = []
+    _walk(spec if isinstance(spec, Model) else Site.model_validate(spec), "", None, found)
+    return found
+
+
+def _walk(node: Any, path: str, section: Optional[str], found: list[Deprecation]) -> None:
+    if isinstance(node, Model):
+        if section is None and isinstance(getattr(node, "id", None), str):
+            section = node.id
+        for name, info in type(node).model_fields.items():
+            if name not in node.model_fields_set:
+                continue
+            value, here = getattr(node, name), f"{path}.{name}" if path else name
+            extra = info.json_schema_extra
+            for rule in extra.get("x-deprecated", ()) if isinstance(extra, dict) else ():
+                if "value" not in rule or value == rule["value"]:
+                    found.append(Deprecation(here, section, rule["removed_in"], rule.get("replacement"),
+                                             rule.get("note", ""), rule.get("value", _ANY)))
+            _walk(value, here, section, found)
+    elif isinstance(node, (list, tuple)):
+        for i, item in enumerate(node):
+            _walk(item, f"{path}[{i}]", section, found)
+    elif isinstance(node, dict):
+        for key, item in node.items():
+            _walk(item, f"{path}.{key}", section, found)
 
 
 # ---------------------------------------------------------------- shared pieces
