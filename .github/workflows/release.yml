@@ -77,9 +77,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ github.ref_name }}
         run: |
+          flags=()
+          if [[ "$TAG" == *rc* ]]; then flags+=(--prerelease); fi
           gh release create "$TAG" dist/* scroll-studio.spdx.json \
-            --repo "$GITHUB_REPOSITORY" --verify-tag --title "${TAG#v}" --notes-file release-notes.md \
-            $([[ "$TAG" == *rc* ]] && echo --prerelease)
+            --repo "$GITHUB_REPOSITORY" --verify-tag --title "${TAG#v}" --notes-file release-notes.md "${flags[@]}"
 
   pypi:
     needs: build
