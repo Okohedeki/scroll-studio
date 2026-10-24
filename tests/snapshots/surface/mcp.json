@@ -762,7 +762,7 @@
   }
  },
  "list_styles": {
-  "description": "The twenty-one looks a site can take with theme.style (name, label, what it looks like).",
+  "description": "The looks a site can take with theme.style (name, label, what it looks like).",
   "input": {
    "properties": {},
    "title": "list_stylesArguments",
@@ -1325,6 +1325,39 @@
     "job_id"
    ],
    "title": "wait_for_jobArguments",
+   "type": "object"
+  }
+ },
+ "world_check": {
+  "description": "Check the in-world type of a built film (steps with `place: {kind: behind | surface | sky}`, see the field docs of",
+  "input": {
+   "properties": {
+    "frames": {
+     "default": 6,
+     "title": "Frames",
+     "type": "integer"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "section": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Section"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "world_checkArguments",
    "type": "object"
   }
  }

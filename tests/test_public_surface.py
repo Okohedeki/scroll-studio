@@ -64,7 +64,7 @@ def mcp_surface() -> dict:
         return schema
 
     tools = asyncio.run(mcp_server.mcp.list_tools())
-    return {t.name: {"description": (t.description or "").strip().split("\n")[0], "input": clean(t.inputSchema)}
+    return {t.name: {"description": (t.description or "").strip().split("\n")[0], "input": clean(t.input_schema)}
             for t in sorted(tools, key=lambda t: t.name)}
 
 
