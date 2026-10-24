@@ -18,7 +18,7 @@ PRESETS = sorted(T.presets())
 HEX = re.compile(r"#[0-9a-fA-F]{6}")
 COLOURS = ("bg", "bg2", "ink", "accent", "accent2", "accent_ink")       # every preset sets them; a style may override any
 PRESET_KEYS = {"mode", "colors", "fonts", "display_weight", "em_italic", "radius", "display_em", "labels",
-               "display_optical_size"}
+               "display_optical_size", "space", "type", "shade", "motion", "grain", "phone"}
 STYLE_KEYS = PRESET_KEYS | {"label", "about", "font_axes", "cuts"}
 BLOCK_TYPES = {m.model_fields["type"].default for m in vars(spec).values()
                if isinstance(m, type) and issubclass(m, spec.BlockBase) and "type" in m.model_fields}

@@ -1,6 +1,7 @@
 """Themes as layered token sets (defaults, preset, style, site.yaml) -> CSS custom properties and font links."""
 from __future__ import annotations
 
+import re
 from functools import lru_cache
 from pathlib import Path
 from urllib.parse import quote_plus
@@ -100,8 +101,18 @@ def _hex_rgb(h: str) -> str:
 # A theme is a stack of token sets, each laid over the one before: the engine's defaults, the preset, the style, then
 # what site.yaml sets. Presets (themes.yaml) and styles (style.yaml) are token sets with names.
 DEFAULTS = {"mode": "dark", "colors": {}, "fonts": {}, "font_axes": {}, "display_weight": 500, "em_italic": False,
-            "display_em": "accent", "labels": "caps", "display_optical_size": None, "radius": "4px"}
-MERGED = ("colors", "fonts", "font_axes")      # these merge key by key; every other token replaces the one below it
+            "display_em": "accent", "labels": "caps", "display_optical_size": None, "radius": "4px",
+            # what runtime/src/styles.css and the runtime hard-coded before these were tokens (#15)
+            "space": {"gutter": "clamp(20px, 4vw, 64px)", "max": "1600px", "caption": "min(680px, 82vw)"},
+            "type": {"scale": 1, "body": "17px"}, "shade": {"strength": 1},
+            "motion": {"ease": "cubic-bezier(.22, .8, .2, 1)", "enter": 0.2, "follow": 0.1},
+            "grain": 0, "phone": None}
+MERGED = ("colors", "fonts", "font_axes", "space", "type", "shade", "motion")   # merge key by key; the rest replace
+# the stylesheet's custom property for each token it reads; studio.css declares the defaults
+CSS_TOKENS = {("space", "gutter"): "--gutter", ("space", "max"): "--max", ("space", "caption"): "--caption-w",
+              ("type", "scale"): "--type-scale", ("type", "body"): "--body-size", ("shade", "strength"): "--shade-strength",
+              ("motion", "ease"): "--ease"}
+RUNTIME_TOKENS = {"phone": ("phone",), "enter": ("motion", "enter"), "follow": ("motion", "follow")}   # window.__ssTheme
 TOKENS = tuple(DEFAULTS)                      # what a style.yaml contributes (the rest of it is about the style itself)
 
 
@@ -134,7 +145,10 @@ def override_tokens(theme: Theme) -> dict:
     return {"mode": theme.mode or None, "colors": theme.colors, "fonts": theme.fonts, "radius": theme.radius or None,
             "display_weight": theme.display_weight or None, "em_italic": theme.display_italic_em,
             "display_em": theme.display_em or None, "labels": theme.labels or None,
-            "display_optical_size": theme.display_optical_size or None}
+            "display_optical_size": theme.display_optical_size or None,
+            **{k: getattr(theme, k).model_dump(exclude_none=True) if getattr(theme, k) else None
+               for k in ("space", "type", "shade", "motion")},
+            "grain": theme.grain, "phone": theme.phone}
 
 
 def layers(theme: Theme) -> list[tuple[str, dict]]:
@@ -158,6 +172,9 @@ def resolve(theme: Theme) -> dict:
             raise ValueError(f"theme font {k}: {str(f)[:40]!r} is not a Google Fonts family name")
     if not safety.css_value_ok(radius):
         raise ValueError(f"theme radius {str(radius)[:40]!r} is not a CSS length such as 4px")
+    for (group, k) in CSS_TOKENS:
+        if not safety.css_value_ok(tokens[group][k]):
+            raise ValueError(f"theme {group}.{k}: {str(tokens[group][k])[:40]!r} is not a plain CSS value")
     return {
         "style": theme.style,
         "font_axes": tokens["font_axes"],
@@ -170,7 +187,17 @@ def resolve(theme: Theme) -> dict:
         "labels": tokens["labels"],
         "display_opsz": tokens.get("display_optical_size"),
         "radius": radius,
+        **{k: tokens.get(k) for k in ("space", "type", "shade", "motion", "grain", "phone")},
+        # what the runtime reads (window.__ssTheme): only tokens moved off their defaults, so a page that sets none is unchanged
+        "runtime": {name: v for name, path in RUNTIME_TOKENS.items()
+                    if (v := _at(tokens, path)) != _at(DEFAULTS, path)},
     }
+
+
+def _at(d: dict, path: tuple):
+    for k in path:
+        d = d.get(k) if isinstance(d, dict) else None
+    return d
 
 
 # ---------------------------------------------------------------- contrast (WCAG 2.x)
@@ -248,6 +275,9 @@ def css_vars(t: dict, log=lambda m: None) -> str:
         "--radius": t["radius"],
         "color-scheme": t["mode"],
     }
+    for (group, k), var in CSS_TOKENS.items():   # new tokens are written only when moved off the stylesheet's default
+        if t[group][k] != DEFAULTS[group][k]:
+            tokens[var] = str(t[group][k])
     for role, fam in f.items():   # extra roles a style declares (masthead, script, marquee...): --font-<role>
         if role not in ("display", "body", "mono"):
             tokens[f"--font-{role}"] = f'"{fam}", {"Georgia, serif" if fam in SERIFS else FALLBACK["body"]}'
@@ -295,6 +325,15 @@ def surface_css(c: dict, mode: str) -> str:
         scheme = "dark" if _lum(s_bg) < 0.2 else "light"
         css.append(f".ss-surface-{name} {{ {body} color-scheme: {scheme}; background: var(--bg); color: var(--ink); }}")
     return "\n".join(css)
+
+
+# the phone widths the stylesheet grew up with: the layout (900), scenes (760) and one-take pages (700)
+PHONE_WIDTHS = re.compile(r"\(max-width:\s*(?:900|760|700)px\)")
+
+
+def phone_css(css: str, phone: int) -> str:
+    """The runtime stylesheet with every phone width set to theme.phone (a media query cannot read a CSS variable)."""
+    return PHONE_WIDTHS.sub(f"(max-width: {int(phone)}px)", css)
 
 
 def font_links(t: dict) -> list[str]:

@@ -2,7 +2,10 @@
 /* Scroll Studio base styles. Every colour and font comes from the theme tokens the compiler writes
    into :root (--bg, --ink, --accent, --font-display, ...), so one stylesheet serves every theme. */
 
-:root { --gutter: clamp(20px, 4vw, 64px); --max: 1600px; --ease: cubic-bezier(.22, .8, .2, 1); }
+/* Layout, type, shade and motion tokens (theme.space, theme.type, theme.shade, theme.motion), at their defaults. :where()
+   keeps them at zero specificity, so the :root the compiler writes for a theme that sets one always wins. */
+:where(:root) { --gutter: clamp(20px, 4vw, 64px); --max: 1600px; --ease: cubic-bezier(.22, .8, .2, 1);
+  --caption-w: min(680px, 82vw); --type-scale: 1; --body-size: 17px; --shade-strength: 1; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 body { font-family: var(--font-body); font-weight: 400; background: var(--bg); overflow-x: hidden; }
@@ -38,11 +41,11 @@ code { font-family: var(--font-mono); font-size: .92em; color: var(--ink); backg
    which the theme compiler guarantees clears 4.5:1 */
 .ss-kicker, .ss-num, .ss-eyebrow, .ss-tag, .ss-when { font-family: var(--font-mono); font-size: 13px; letter-spacing: .12em; text-transform: uppercase; }
 .ss-kicker { color: var(--accent-text); display: block; margin-bottom: 22px; }
-.ss-display { font-family: var(--font-display); font-weight: var(--display-weight); font-size: clamp(40px, 5.4vw, 86px); line-height: 1.02; letter-spacing: -.03em; text-wrap: balance; }
-.ss-h1 { font-family: var(--font-display); font-weight: var(--display-weight); font-size: clamp(50px, 6.2vw, 108px); line-height: .96; letter-spacing: -.035em; margin: 20px 0 24px; text-wrap: balance; }
-.ss-h2 { font-family: var(--font-display); font-weight: var(--display-weight); font-size: clamp(38px, 4.4vw, 74px); line-height: 1.0; letter-spacing: -.03em; margin: 18px 0 20px; text-wrap: balance; }
+.ss-display { font-family: var(--font-display); font-weight: var(--display-weight); font-size: calc(clamp(40px, 5.4vw, 86px) * var(--type-scale)); line-height: 1.02; letter-spacing: -.03em; text-wrap: balance; }
+.ss-h1 { font-family: var(--font-display); font-weight: var(--display-weight); font-size: calc(clamp(50px, 6.2vw, 108px) * var(--type-scale)); line-height: .96; letter-spacing: -.035em; margin: 20px 0 24px; text-wrap: balance; }
+.ss-h2 { font-family: var(--font-display); font-weight: var(--display-weight); font-size: calc(clamp(38px, 4.4vw, 74px) * var(--type-scale)); line-height: 1.0; letter-spacing: -.03em; margin: 18px 0 20px; text-wrap: balance; }
 .ss-lede { font-size: clamp(17px, 1.25vw, 19px); line-height: 1.65; color: var(--ink-2); max-width: 52ch; }
-.ss-body { color: var(--ink-2); line-height: 1.7; font-size: 17px; max-width: 46ch; }
+.ss-body { color: var(--ink-2); line-height: 1.7; font-size: var(--body-size); max-width: 46ch; }
 /* no one-word last lines in running text; quotes hang their opening mark in the margin */
 .ss-body, .ss-lede, .ss-fact, .ss-block p { text-wrap: pretty; }
 blockquote { hanging-punctuation: first last; }
@@ -57,7 +60,7 @@ blockquote { hanging-punctuation: first last; }
 .ss-visual > canvas, .ss-visual > video, .ss-visual > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .ss-poster { transition: opacity .8s; }
 .ss-ready .ss-poster { opacity: 0; }
-.ss-shade { position: absolute; inset: 0; pointer-events: none; }
+.ss-shade { position: absolute; inset: 0; pointer-events: none; opacity: var(--shade-strength); }
 .ss-failed .ss-visual::after { content: "This scene needs WebGL"; position: absolute; inset: auto 0 40% 0; text-align: center; font-family: var(--font-mono); font-size: 12px; color: var(--ink-3); }
 
 /* overlay: full-bleed stage, captions over it */
@@ -67,7 +70,7 @@ blockquote { hanging-punctuation: first last; }
   linear-gradient(to right, rgba(var(--bg-rgb), .8), rgba(var(--bg-rgb), .2) 45%, transparent 70%),
   linear-gradient(to top, rgba(var(--bg-rgb), .8), transparent 35%); }
 .ss-shade-none .ss-shade, .ss-type-type .ss-shade { background: none; }
-.ss-captions { position: absolute; left: var(--gutter); top: 50%; transform: translateY(-50%); width: min(680px, 82vw); height: 340px; }
+.ss-captions { position: absolute; left: var(--gutter); top: 50%; transform: translateY(-50%); width: var(--caption-w); height: 340px; }
 .ss-caption { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 100%; pointer-events: none; }
 /* a caption placed elsewhere on the shot (step `place:`), with its own colours (`surface:`) and a button */
 .ss-captions--right, .ss-captions--top-right, .ss-captions--bottom-right { left: auto; right: var(--gutter); text-align: right; }
@@ -359,8 +362,8 @@ html:not(.js) .ss-strip { overflow-x: auto; }
   .ss-scalehud { top: 92px; bottom: auto; }   /* clear of the nav bar */
   .ss-visual .maplibregl-ctrl-bottom-right { top: 84px; bottom: auto; }   /* map credit stays visible, above the text cards */
   /* fluid down to the smallest phones, with a little more leading so descenders and ascenders never touch */
-  .ss-h1 { font-size: clamp(36px, 11.5vw, 56px); line-height: 1.02; }
-  .ss-h2 { font-size: clamp(30px, 8.8vw, 44px); line-height: 1.05; }
+  .ss-h1 { font-size: calc(clamp(36px, 11.5vw, 56px) * var(--type-scale)); line-height: 1.02; }
+  .ss-h2 { font-size: calc(clamp(30px, 8.8vw, 44px) * var(--type-scale)); line-height: 1.05; }
 }
 @media (prefers-reduced-motion: reduce) {
   .js .ss-reveal { opacity: 1; transform: none; }
@@ -385,7 +388,7 @@ html:not(.js) .ss-strip { overflow-x: auto; }
 /* light as the scroll (players/light.ts): the time of day in a corner; the section's own tokens follow the sky */
 .ss-type-light { color: var(--ink); }
 .ss-type-light .ss-stage, .ss-type-light .ss-pin { background: var(--bg); }
-.ss-type-light .ss-shade { opacity: var(--shade, 1); background:
+.ss-type-light .ss-shade { opacity: calc(var(--shade, 1) * var(--shade-strength)); background:
   linear-gradient(to right, rgba(var(--bg-rgb), .52), rgba(var(--bg-rgb), .2) 38%, transparent 62%),
   linear-gradient(to bottom, rgba(var(--bg-rgb), .32), transparent 16%),
   linear-gradient(to top, rgba(var(--bg-rgb), .42), transparent 26%); }

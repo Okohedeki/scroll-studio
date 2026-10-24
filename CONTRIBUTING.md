@@ -189,7 +189,7 @@ message naming the file and the rule.
 
 - Every preset sets `mode`, the colours `bg, bg2, ink, accent, accent2, accent_ink` (`#rrggbb`), and the fonts
   `display, body, mono` (Google Fonts families). Nothing else but the known keys (`display_weight, em_italic, radius,
-  display_em, labels, display_optical_size`).
+  display_em, labels, display_optical_size, space, type, shade, motion, grain, phone`).
 - `mode` matches the colours: `dark` means the background is darker than the ink.
 - Contrast: ink on `bg` at least **7:1**, ink on `bg2` at least 4.5:1, button text (`accent_ink` on `accent`) at least
   **4.5:1**.

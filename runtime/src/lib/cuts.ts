@@ -8,7 +8,7 @@
  * never intercepted: the gap is plain scroll distance.
  */
 import "./cuts.css";
-import { clamp, reducedMotion } from "./util";
+import { clamp, isMobile, reducedMotion } from "./util";
 import { matchFx, measureMatch } from "./cuts-match";
 import { carryFx, endCarry, measureCarry } from "./cuts-carry";
 import type { Cut, CutCfg, Fx, Layer, Metrics } from "./cuts-types";
@@ -226,7 +226,7 @@ export function makeCuts(): CutsApi | null {
   }
 
   function update() {
-    const m: Metrics = { W: document.documentElement.clientWidth, H: innerHeight, small: matchMedia("(max-width: 760px)").matches };
+    const m: Metrics = { W: document.documentElement.clientWidth, H: innerHeight, small: isMobile() };
     for (const c of cuts) {
       const L = c.gap.offsetHeight;
       const top = c.wIn.getBoundingClientRect().top;

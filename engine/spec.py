@@ -2341,6 +2341,49 @@ class Art(Model):
     video_model: Optional[VideoModel] = Field(None, description=VIDEO_MODEL_DOC)
 
 
+def _css_values(model: BaseModel) -> BaseModel:
+    """Theme token values end up inside the page's <style> block, so a string may only be a plain CSS value."""
+    for k, v in model:
+        if isinstance(v, str) and not css_value_ok(v):
+            raise ValueError(f"{k}: {v[:40]!r} is not a plain CSS value (a length such as 24px, or clamp(...), min(...))")
+    return model
+
+
+class SpaceTokens(Model):
+    """Page spacing. Each value defaults to what the stylesheet has always used."""
+    gutter: Optional[str] = Field(None, description="Margin at the page's sides (default clamp(20px, 4vw, 64px))")
+    max: Optional[str] = Field(None, description="Widest the content runs (default 1600px)")
+    caption: Optional[str] = Field(None, description="Width of the captions over a scene (default min(680px, 82vw))")
+
+    _plain = model_validator(mode="after")(_css_values)
+
+
+class TypeTokens(Model):
+    """Type sizes. Each value defaults to what the stylesheet has always used."""
+    scale: Optional[float] = Field(None, gt=0, le=4, description="Multiplies every headline size, on phones too "
+                                                                 "(default 1: 1.15 is a seventh larger)")
+    body: Optional[str] = Field(None, description="Size of running text (default 17px)")
+
+    _plain = model_validator(mode="after")(_css_values)
+
+
+class ShadeTokens(Model):
+    """The shade laid over a scene's picture so its captions stay readable."""
+    strength: Optional[float] = Field(None, ge=0, le=1, description="How strongly the shade fades the picture toward "
+                                                                    "the background: 1 as designed (the default), 0 none")
+
+
+class MotionTokens(Model):
+    """How the page moves. Each value defaults to what the runtime has always used; `scroll.speed` still paces it."""
+    ease: Optional[str] = Field(None, description="Easing of transitions (default cubic-bezier(.22, .8, .2, 1))")
+    enter: Optional[float] = Field(None, gt=0, le=1, description="Share of the screen height a block scrolls through "
+                                                                 "while it arrives (default 0.2)")
+    follow: Optional[float] = Field(None, gt=0, le=0.5, description="How quickly smooth scrolling catches up with the "
+                                                                    "wheel (default 0.1; 0.5 is nearly immediate)")
+
+    _plain = model_validator(mode="after")(_css_values)
+
+
 class Theme(Model):
     preset: str = Field("night", description="night, brass, paper, lab, cosmos, studio, dusk, ink, blueprint, clinic (see engine/themes.yaml)")
     style: Optional[str] = Field(
@@ -2367,6 +2410,16 @@ class Theme(Model):
     radius: Optional[str] = None
     art: Optional[Art] = Field(None, description="Artwork the style renders in its own medium (ascii-art: characters, "
                                                   "particles: points). A prompt or a file, optionally animated")
+    space: Optional[SpaceTokens] = Field(None, description="Page spacing: gutter, max width, caption width")
+    type: Optional[TypeTokens] = Field(None, description="Type sizes: headline scale and running-text size")
+    shade: Optional[ShadeTokens] = Field(None, description="Strength of the shade over scene pictures")
+    motion: Optional[MotionTokens] = Field(None, description="Easing, how blocks arrive and how smooth scrolling follows")
+    grain: Optional[float] = Field(None, ge=0, le=1, description="Film grain over the whole page: 0 none (the default) "
+                                                                  "to 1; 0.15-0.3 reads as print or film")
+    phone: Optional[int] = Field(None, ge=320, le=1600, description="Width in px below which the page takes its phone "
+                                                                     "layout, for the stylesheet and the runtime alike. "
+                                                                     "Unset keeps the built-in widths (900 for the "
+                                                                     "layout, 760 for scenes, 700 for one-take pages)")
 
     @field_validator("colors")
     @classmethod

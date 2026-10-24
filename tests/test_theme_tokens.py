@@ -83,6 +83,75 @@ def test_layers_go_defaults_preset_style_then_site_yaml():
     assert T.layer({"colors": {"a": 1}, "radius": "1px"}, {"colors": {"b": 2}, "radius": None}) == {"colors": {"a": 1, "b": 2}, "radius": "1px"}
 
 
+
+# ---------------------------------------------------------------- the tokens from #15: space, type, shade, motion, grain, phone
+
+def test_new_tokens_default_to_what_the_stylesheet_declares():
+    """runtime/src/styles.css declares each token's default; the theme's defaults must say the same, or a theme that
+    sets a token back to its documented default would move the page."""
+    import re
+
+    from engine.compile import themes as T
+    css = (ROOT / "runtime" / "src" / "styles.css").read_text(encoding="utf-8")
+    block = re.search(r":where\(:root\) \{(.*?)\}", css, re.S).group(1)
+    declared = dict(re.findall(r"(--[\w-]+):\s*([^;]+);", block))
+    for (group, k), var in T.CSS_TOKENS.items():
+        assert declared.get(var) == str(T.DEFAULTS[group][k]), f"{var}: studio.css says {declared.get(var)!r}, themes.DEFAULTS {T.DEFAULTS[group][k]!r}"
+
+
+def test_a_theme_that_sets_no_new_token_writes_nothing_new():
+    from engine.compile import themes as T
+    from engine.spec import Theme
+    t = T.resolve(Theme())
+    assert t["runtime"] == {} and t["grain"] == 0 and t["phone"] is None
+    assert not any(var in T.css_vars(t) for var in T.CSS_TOKENS.values())
+
+
+def test_new_tokens_reach_the_css_the_runtime_and_the_page():
+    from engine.compile import themes as T
+    from engine.compile.layout_snapshot import page_html
+    from engine.spec import Site
+    site = Site.model_validate({"name": "Tokens", "theme": {
+        "space": {"gutter": "24px", "caption": "560px"}, "type": {"scale": 1.2, "body": "18px"}, "shade": {"strength": 0.5},
+        "motion": {"ease": "ease-out", "enter": 0.3}, "grain": 0.2, "phone": 820},
+        "sections": [{"type": "hero", "id": "hero", "title": "Hi"}]})
+    t = T.resolve(site.theme)
+    css = T.css_vars(t)
+    for line in ("--gutter: 24px;", "--caption-w: 560px;", "--type-scale: 1.2;", "--body-size: 18px;", "--shade-strength: 0.5;",
+                 "--ease: ease-out;"):
+        assert line in css
+    assert "--max:" not in css                                  # a token left alone stays the stylesheet's
+    assert t["runtime"] == {"phone": 820, "enter": 0.3}
+    html = page_html(site)
+    assert 'window.__ssTheme = {"enter": 0.3, "phone": 820}' in html or 'window.__ssTheme = {"phone": 820, "enter": 0.3}' in html
+    assert 'class="ss-grain"' in html and "@media (max-width: 820px)" in html
+    built = T.phone_css("@media (max-width:900px){a{}}@media (max-width:760px){b{}}@media (max-width: 700px){c{}}"
+                        "@media (max-width:600px){d{}}", 820)
+    assert built.count("(max-width: 820px)") == 3 and "600px" in built   # the three phone widths become one; others stay
+
+
+def test_new_token_values_must_be_plain_css():
+    from pydantic import ValidationError
+
+    from engine.spec import Theme
+    for bad in ({"space": {"gutter": "1px;}</style><script>x</script>"}}, {"type": {"body": "x{}"}},
+                {"motion": {"ease": "url(javascript:x)"}}, {"phone": 100}, {"grain": 2}, {"shade": {"strength": -1}}):
+        with pytest.raises(ValidationError):
+            Theme.model_validate(bad)
+
+
+def test_phone_rewrites_the_runtime_stylesheet_of_a_build(tmp_path, monkeypatch):
+    from engine.compile import compiler, fonts
+    from engine.project import Project
+    (tmp_path / "site.yaml").write_text(yaml.safe_dump({"name": "P", "theme": {"phone": 820},
+                                                        "sections": [{"type": "hero", "id": "hero", "title": "Hi"}]}),
+                                        encoding="utf-8")
+    monkeypatch.setattr(fonts, "vendor", lambda links, dist, log=print: None)     # no network in tests
+    compiler.build_site(Project(tmp_path), log=lambda m: None)
+    css = (tmp_path / "dist" / "runtime" / "studio.css").read_text(encoding="utf-8")
+    assert "(max-width: 820px)" in css and "max-width:900px" not in css and "max-width:760px" not in css
+
+
 if __name__ == "__main__":
     rows = [f"{json.dumps(k)}: {json.dumps(dump(t), sort_keys=True, separators=(',', ':'))}" for k, t in sorted(cases().items())]
     BASELINE.write_text("{\n" + ",\n".join(rows) + "\n}\n", encoding="utf-8", newline="\n")     # one case per line

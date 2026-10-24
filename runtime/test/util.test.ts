@@ -210,3 +210,25 @@ describe("loading media", () => {
     await expect(loadImage("nope.png")).rejects.toThrow("failed to load nope.png");
   });
 });
+
+describe("theme tokens (window.__ssTheme)", () => {
+  it("isMobile asks for 760 px unless theme.phone sets one width for the page", async () => {
+    const asked: string[] = [];
+    const real = window.matchMedia;
+    vi.spyOn(window, "matchMedia").mockImplementation((q: string) => { asked.push(q); return real(q); });
+    const plain = await fresh(() => import("../src/lib/util"));
+    plain.isMobile();
+    expect(asked.at(-1)).toBe("(max-width: 760px)");
+    expect(plain.themeTokens).toEqual({});
+    (globalThis as any).__ssTheme = { phone: 820, enter: 0.3 };
+    try {
+      const themed = await fresh(() => import("../src/lib/util"));
+      themed.isMobile();
+      expect(asked.at(-1)).toBe("(max-width: 820px)");
+      expect(themed.themeTokens.enter).toBe(0.3);
+    } finally {
+      delete (globalThis as any).__ssTheme;
+      vi.restoreAllMocks();
+    }
+  });
+});

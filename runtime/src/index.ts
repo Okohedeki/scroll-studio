@@ -4,7 +4,7 @@
  */
 import Lenis from "lenis";
 import "./styles.css";
-import { clamp, debugP, follow, params, reducedMotion, scaleAt } from "./lib/util";
+import { clamp, debugP, follow, params, reducedMotion, scaleAt, themeTokens } from "./lib/util";
 import { makeBlocks } from "./lib/blocks";
 import type { FrameState, Player, PlayerFactory, SectionData } from "./lib/types";
 
@@ -263,7 +263,7 @@ const pace = Math.max(0.25, Number((window as any).__ssScroll?.speed) || 1);
 let lenis: Lenis | null = null;
 function startSmoothScroll() {
   if (reducedMotion || debugP !== null || lenis) return;
-  lenis = new Lenis({ lerp: Math.min(0.5, 0.1 * pace) });
+  lenis = new Lenis({ lerp: Math.min(0.5, (themeTokens.follow ?? 0.1) * pace) });
   (window as any).__ssLenis = lenis;   // players that scroll the page to a place (the one-take page's rail)
   const raf = (time: number) => { lenis!.raf(time); requestAnimationFrame(raf); };
   requestAnimationFrame(raf);
@@ -349,13 +349,14 @@ const reveals = [...document.querySelectorAll<HTMLElement>(".ss-reveal")].map((e
     dec: (v.dataset.count!.split(".")[1] || "").length, k: -1,
   })),
 }));
+const enterShare = themeTokens.enter ?? 0.2;     // theme.motion.enter: the share of the screen a block arrives over
 let revealY = NaN, revealH = NaN;
 function updateReveals() {
   if (scrollY === revealY && innerHeight === revealH) return;
   revealY = scrollY; revealH = innerHeight;
   for (const r of reveals) {
     const top = r.el.getBoundingClientRect().top;
-    const k = reducedMotion ? 1 : clamp((innerHeight * 0.98 - top) / (innerHeight * 0.2 / pace) - r.lag);
+    const k = reducedMotion ? 1 : clamp((innerHeight * 0.98 - top) / (innerHeight * enterShare / pace) - r.lag);
     if (k !== r.k) {
       r.k = k;
       r.el.style.opacity = k.toFixed(3);

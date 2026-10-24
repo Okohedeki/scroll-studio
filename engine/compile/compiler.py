@@ -351,6 +351,9 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         if rt.exists():
             shutil.rmtree(rt)
         shutil.copytree(STATIC / "runtime", rt)
+        if theme["phone"]:
+            (rt / "studio.css").write_text(themes.phone_css((rt / "studio.css").read_text(encoding="utf-8"), theme["phone"]),
+                                           encoding="utf-8")
 
     # A nav logo given as an image file is copied in like any other media; SVG path data passes through.
     logo = site.nav.logo

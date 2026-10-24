@@ -9,7 +9,9 @@ export const debugP: number | null = params.has("p") ? clamp(parseFloat(params.g
 export const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 /** Lerp factor for eased scroll values; 1 = jump straight to the target. */
 export const follow = reducedMotion || debugP !== null ? 1 : 0.14;
-export const isMobile = () => matchMedia("(max-width: 760px)").matches;
+/** Theme tokens the runtime reads (theme.phone, theme.motion), written by the compiler only when moved off a default. */
+export const themeTokens: { phone?: number; enter?: number; follow?: number } = (globalThis as any).__ssTheme || {};
+export const isMobile = () => matchMedia(`(max-width: ${themeTokens.phone || 760}px)`).matches;
 
 export function hexToRgb(hex: string): [number, number, number] {
   let h = hex.replace("#", "");

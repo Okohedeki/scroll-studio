@@ -79,7 +79,7 @@
   .ss-hero__phone .ss-phone { position: absolute; top: 0; left: 50%; width: clamp(230px, 22vw, 340px); transform: translate(-50%, calc(var(--hero-p, 0) * 40px)); }
   .ss-product__stats .ss-v { font-size: clamp(40px, 4.2vw, 72px); }
   .ss-product__stats .ss-l { margin-top: 4px; }
-  @media (max-width: 900px) {
+  @media (max-width: {{ theme.phone or 900 }}px) {
     .ss-pose--rise.ss-product { padding-top: 100px; }
     .ss-pose--rise .ss-product__media { height: max(34svh, 250px); }
     .ss-pose--rise .ss-phone { width: min(64vw, 300px); }
@@ -115,6 +115,11 @@
   .ss-footer__in { font-family: var(--font-body); }
 {% endif %}
   .ss-h1, .ss-display { text-wrap: balance; }
+{% if theme.grain %}
+  /* Film grain over the whole page (theme.grain): a still noise tile, so it costs nothing while scrolling. */
+  .ss-grain { position: fixed; inset: 0; z-index: 2147482000; pointer-events: none; mix-blend-mode: overlay; background-size: 220px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+{% endif %}
 </style>
 {% if site.loader.enabled %}
 <style>
@@ -138,7 +143,8 @@
 {% endif %}
 </head>
 <body>
-{% if site.loader.enabled %}
+{% if theme.grain %}<div class="ss-grain" aria-hidden="true" style="opacity: {{ theme.grain }}"></div>
+{% endif %}{% if site.loader.enabled %}
 <div class="ss-loader" id="ss-loader" role="status" aria-live="polite">
   <div class="ss-loader__name">{{ site.loader.label or site.name }}</div>
   <div class="ss-loader__bar"><i></i></div>
@@ -186,7 +192,8 @@
 {% endif %}</div></footer>
 
 <script>window.__ssScroll = { speed: {{ site.scroll.speed }} };</script>
-{% if cuts %}<script type="application/json" id="ss-cuts">{{ cuts | tojson }}</script>
+{% if theme.runtime %}<script>window.__ssTheme = {{ theme.runtime | tojson }};</script>
+{% endif %}{% if cuts %}<script type="application/json" id="ss-cuts">{{ cuts | tojson }}</script>
 {% endif %}{% if art %}<script type="application/json" id="ss-art">{{ art | tojson }}</script>
 {% endif %}<script type="module" src="{{ runtime }}index.js"></script>
 {% if looks %}
