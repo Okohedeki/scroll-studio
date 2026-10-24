@@ -39,5 +39,6 @@ examples/*/build.log
 .coverage.*
 coverage.json
 coverage.xml
+runtime/coverage/
 htmlcov/
 build/
