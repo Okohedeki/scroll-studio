@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 import yaml
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 from pydantic import ValidationError
 
 from .config import ROOT, settings
@@ -22,7 +22,7 @@ from .project import BuildError, Project
 from .server.jobs import JobQueue, logger
 from .spec import SCENE_TYPES, Site
 
-mcp = FastMCP("scroll-studio")
+mcp = MCPServer("scroll-studio")
 
 
 class _Jobs(JobQueue):
@@ -418,6 +418,7 @@ def cinemagraphs(project: str, only: Optional[str] = None, force: bool = False, 
     return jobs.submit("cinemagraph", p.name, "cinemagraph", run).public(tail=5)
 
 
+@mcp.tool()
 def world_check(project: str, section: Optional[str] = None, frames: int = 6) -> dict:
     """Check the in-world type of a built film (steps with `place: {kind: behind | surface | sky}`, see the field docs of
     `place`): per title, how steady the track is (jitter in pixels of a 960-wide frame), how much of its window the type is on
@@ -518,7 +519,7 @@ def trailer(project: str, formats: Optional[list[str]] = None, force: bool = Fal
 
 @mcp.tool()
 def list_styles() -> list[dict]:
-    """The twenty-one looks a site can take with theme.style (name, label, what it looks like)."""
+    """The looks a site can take with theme.style (name, label, what it looks like)."""
     from .compile import themes
     return [{"name": k, "label": v["label"], "about": v.get("about", "")} for k, v in themes.styles().items()]
 
