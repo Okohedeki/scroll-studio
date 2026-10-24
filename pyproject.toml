@@ -25,7 +25,7 @@ dependencies = [
   "websocket-client>=1.7",
   "requests>=2.31",
   "huggingface_hub>=0.23",
-  "mcp>=1.2,<2",            # 2.x renamed FastMCP to MCPServer; migrating is issue #83
+  "mcp>=1.2,<3",            # 2.x renamed FastMCP to MCPServer; migrating is issue #83
   "playwright>=1.44",
   "tomli>=2.0; python_version < '3.11'",   # studio.toml: tomllib is in the standard library from 3.11
 ]
