@@ -55,6 +55,14 @@ request needs a design-approved one). The labeler adds `area:`, `tier: core` and
 6. **Merge** with squash once everything is green. The pull request title becomes the commit message, so make sure it
    follows the [title format](https://github.com/Okohedeki/scroll-studio/blob/main/CONTRIBUTING.md#pull-requests).
 
+## Dependabot pull requests
+
+They are exempt from the issue rule. Python and Actions updates merge when green. npm updates to the runtime's
+libraries change the built bundle, so the `runtime` check fails until it is rebuilt: check out the branch, run
+`npm ci && npm run build:runtime`, look at the scenes the library drives (`studio snapshot` on an example that uses
+it), commit the bundle and push. Major versions are never proposed automatically; they are planned upgrades with
+their own issue.
+
 ## Saying no
 
 Most declined work breaks a ground rule. Link it, say what would make the idea fit (often: make it an engine feature
