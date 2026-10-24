@@ -329,6 +329,9 @@ class SpecDocs:
             typ += " (optional)" if "default" in s and s["default"] is None else ""
         default = "**required**" if required else self.default_text(model, field, s)
         notes = [prose(s["description"])] if s.get("description") else []
+        for rule in s.get("x-deprecated", []):
+            lead = "**Deprecated:**" if "value" not in rule else f"**Deprecated value** {code(rule['value'])}:"
+            notes.append(f"{lead} {prose(spec_mod.deprecation_tail(rule))}")
         for allowed in enums_in(s):
             notes.append("Allowed values: " + ", ".join(code(v) for v in allowed) + ".")
         cons = constraints_in(s)

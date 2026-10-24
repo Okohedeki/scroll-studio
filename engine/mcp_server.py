@@ -20,7 +20,7 @@ from pydantic import ValidationError
 from .config import ROOT, settings
 from .project import BuildError, Project, child, safe_name
 from .server.jobs import JobQueue, logger
-from .spec import SCENE_TYPES, Site
+from .spec import SCENE_TYPES, Site, deprecations
 
 mcp = MCPServer("scroll-studio")
 
@@ -133,16 +133,17 @@ def get_spec(project: str) -> str:
 
 @mcp.tool()
 def set_spec(project: str, yaml_text: str) -> dict:
-    """Validate and write a project's site.yaml (the whole file). Returns validation errors instead of writing if invalid."""
+    """Validate and write a project's site.yaml (the whole file). Returns validation errors instead of writing if invalid.
+    A spec that uses deprecated fields is written, with `deprecations` naming each one and what replaces it."""
     p = _find(project)
     try:
-        Site.model_validate(yaml.safe_load(yaml_text))
+        site = Site.model_validate(yaml.safe_load(yaml_text))
     except ValidationError as e:
         return {"ok": False, "errors": [f"{'.'.join(map(str, er['loc']))}: {er['msg']}" for er in e.errors()]}
     except yaml.YAMLError as e:
         return {"ok": False, "errors": [f"YAML: {e}"]}
     p.spec_path.write_text(yaml_text, encoding="utf-8")
-    return {"ok": True}
+    return {"ok": True, "deprecations": [d.as_dict() for d in deprecations(site)]}
 
 
 @mcp.tool()

@@ -91,9 +91,12 @@ def build(name: str, only: Optional[str] = typer.Option(None, help="Render only 
     from .compile.compiler import build_site
     from .plan import announce, fmt
     from .project import Project
+    from .spec import deprecations
     project = Project(resolve(name))
     ids = ",".join(x for x in (only, section) if x) or None
     est = announce(project, only=ids.split(",") if ids else None, force=force, options={"draft": draft}, log=typer.echo)
+    for d in deprecations(project.load()):
+        typer.echo(f"warning: {d}")
     if plan:
         return
     limit = settings().get("confirm_over")

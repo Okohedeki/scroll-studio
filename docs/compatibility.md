@@ -43,3 +43,24 @@ changelog fragment, whether it deprecates something or (in a major release) remo
 - **An old-spec corpus**: the examples from every release tag must still validate and compile.
 - **Schema, CLI and MCP snapshots**: a change to the public surface shows up as a reviewed diff.
 - **Conformance tests** for every theme preset and style.
+
+## How to deprecate a field
+
+Mark it where it is declared in `engine/spec.py`. Nothing else changes: it still validates and builds.
+
+```python
+from engine.spec import deprecated, deprecated_all
+
+# a whole field
+tagline: Optional[str] = Field(None, description="...", json_schema_extra=deprecated("2.0.0", "`description`"))
+
+# one value of a field (several: wrap the marks in deprecated_all)
+layout: Literal["flow", "stack", "pile"] = Field("flow", json_schema_extra=deprecated("2.0.0", "`stack`", value="pile"))
+```
+
+`deprecated(removed_in, replacement=None, note="")` takes the major version that removes it, what to write instead
+(in backticks) and, if needed, a note. `engine.spec.deprecations(spec)` returns a `Deprecation` for every use in a
+spec (its `path`, the `section` it is in, `removed_in`, `replacement` and a `text` sentence). `studio build` prints each
+as a warning, the `set_spec` MCP tool and the Studio app's spec save return them as `deprecations`, and the generated
+reference marks the field. The mark is in the JSON Schema (`deprecated: true`, `x-deprecated`), so the schema snapshot
+changes: update it in the same pull request, with the migration note in the changelog fragment.

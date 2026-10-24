@@ -19,7 +19,7 @@ from pydantic import BaseModel, ValidationError
 
 from ..config import ROOT, settings
 from ..project import BuildError, Project, child, safe_name
-from ..spec import SCENE_TYPES, Site
+from ..spec import SCENE_TYPES, Site, deprecations
 from .jobs import JobQueue, logger
 from .local_only import UI_DEV_PORTS, LocalOnly
 
@@ -171,7 +171,7 @@ def put_spec(name: str, req: SpecUpdate):
     p = find(name)
     try:
         data = yaml.safe_load(req.yaml) if req.yaml is not None else req.data
-        Site.model_validate(data)
+        site = Site.model_validate(data)
     except ValidationError as e:
         return JSONResponse({"ok": False, "errors": [{"loc": ".".join(map(str, er["loc"])), "msg": er["msg"]} for er in e.errors()]}, 422)
     except yaml.YAMLError as e:
@@ -180,7 +180,7 @@ def put_spec(name: str, req: SpecUpdate):
         p.spec_path.write_text(req.yaml, encoding="utf-8")
     else:
         p.save(data)
-    return {"ok": True, "modified": p.spec_path.stat().st_mtime}
+    return {"ok": True, "modified": p.spec_path.stat().st_mtime, "deprecations": [d.as_dict() for d in deprecations(site)]}
 
 
 @app.get("/api/projects/{name}/inputs")
