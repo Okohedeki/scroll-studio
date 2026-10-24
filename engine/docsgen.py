@@ -543,7 +543,7 @@ def mcp_page() -> str:
         lines += [f"## `{t.name}` {{ #{t.name.replace('_', '-')} }}", ""]
         if t.description:
             lines += [block(t.description), ""]
-        sch = t.inputSchema or {}
+        sch = t.input_schema or {}
         props = sch.get("properties", {})
         if not props:
             lines += ["Takes no arguments.", ""]

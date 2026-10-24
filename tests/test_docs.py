@@ -107,7 +107,7 @@ def test_every_mcp_tool_is_documented(generated):
     assert len(tools) == source.count("@mcp.tool()"), "a tool is registered twice or a decorator was lost"
     for t in tools:
         assert f"## `{t.name}`" in generated["mcp.md"], t.name
-        for arg in t.inputSchema.get("properties", {}):
+        for arg in t.input_schema.get("properties", {}):
             assert f"| `{arg}` |" in generated["mcp.md"], f"{t.name}({arg})"
 
 
