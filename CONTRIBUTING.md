@@ -5,6 +5,7 @@ site comes out, made with open models on the contributor's own GPU. This guide s
 every change keeps, so the engine stays consistent as more people work on it.
 
 - [Before you start](#before-you-start)
+- [No bounties](#no-bounties)
 - [Ground rules](#ground-rules)
 - [Rules per area: core, standard and trivial](#rules-per-area)
 - [Set up](#set-up)
@@ -34,6 +35,14 @@ until it links an issue that a maintainer has accepted, so nobody spends time on
 The current plan is in [docs/design/](docs/design/) and [docs/directions.md](docs/directions.md); how decisions are
 made is in [GOVERNANCE.md](GOVERNANCE.md). Be kind and specific: the [code of conduct](CODE_OF_CONDUCT.md) applies
 everywhere in the project.
+
+<a id="no-bounties"></a>
+### No bounties
+
+Scroll Studio does not pay for contributions. There are no bounties, tips or payments for issues, pull requests,
+reviews, translations or security reports, and nobody is authorised to promise any on the project's behalf. Pull
+requests or issues that ask for payment (including wallet addresses or payment details) are closed. Contributors are
+credited by name in the release notes, and security reporters in the advisory.
 
 ## Ground rules
 
