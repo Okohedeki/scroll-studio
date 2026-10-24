@@ -54,7 +54,9 @@ def within(base: str | Path, rel: str) -> Path:
     analysis (CodeQL) recognises."""
     root = os.path.normpath(os.fspath(base))
     full = os.path.normpath(os.path.join(root, rel))
-    if full != root and not full.startswith(root.rstrip(os.sep) + os.sep):
+    if full == root:
+        return Path(full)
+    if not full.startswith(root.rstrip(os.sep) + os.sep):
         raise ValueError(f"{rel!r} is outside {root}")
     return Path(full)
 
