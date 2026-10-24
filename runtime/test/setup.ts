@@ -23,6 +23,7 @@ for (const name of ["ResizeObserver", "IntersectionObserver"]) {
 
 // ---- a 2D canvas context that records what is drawn and measures text as half an em per character
 export type FakeContext = CanvasRenderingContext2D & { calls: [string, ...unknown[]][]; alphaAtDraw: number[] };
+const NAMED: Record<string, string> = { black: "#000000", white: "#ffffff", red: "#ff0000", lime: "#00ff00", blue: "#0000ff", rebeccapurple: "#663399" };
 function fakeContext(canvas: HTMLCanvasElement): FakeContext {
   const calls: [string, ...unknown[]][] = [];
   const alphaAtDraw: number[] = [];
@@ -32,10 +33,16 @@ function fakeContext(canvas: HTMLCanvasElement): FakeContext {
   const target: Record<string, unknown> = {
     canvas, calls, alphaAtDraw, textBaseline: "alphabetic", letterSpacing: "0px", globalAlpha: 1, imageSmoothingQuality: "low",
     get fillStyle() { return fill; },
-    // like a real context, a colour is read back normalised: "#rgb" and "#rrggbb" as "#rrggbb", anything else as it was
+    // like a real context, a colour is read back normalised: opaque colours as "#rrggbb", and one it cannot read is ignored
     set fillStyle(v: string) {
-      const hex = /^#([0-9a-f]{3})$/i.exec(v);
-      fill = hex ? "#" + [...hex[1]].map((c) => c + c).join("") : v;
+      const text = String(v).trim().toLowerCase();
+      const hex = /^#([0-9a-f]{3})$/.exec(text), hex6 = /^#[0-9a-f]{6}$/.exec(text);
+      const rgb = /^rgb\(\s*(\d+)[ ,]+(\d+)[ ,]+(\d+)\s*\)$/.exec(text);
+      if (hex) fill = "#" + [...hex[1]].map((c) => c + c).join("");
+      else if (hex6) fill = text;
+      else if (rgb) fill = "#" + rgb.slice(1).map((n) => Number(n).toString(16).padStart(2, "0")).join("");
+      else if (text in NAMED) fill = NAMED[text];
+      else if (/^rgba\(|^hsla?\(/.test(text)) fill = text;
     },
     get font() { return font; },
     set font(v: string) { font = v; },
@@ -73,6 +80,10 @@ Range.prototype.getBoundingClientRect = function (this: Range) {
 HTMLMediaElement.prototype.play = vi.fn(async () => {}) as unknown as typeof HTMLMediaElement.prototype.play;
 HTMLMediaElement.prototype.pause = vi.fn() as unknown as typeof HTMLMediaElement.prototype.pause;
 HTMLMediaElement.prototype.load = vi.fn() as unknown as typeof HTMLMediaElement.prototype.load;
+
+// ---- Web Animations and SVG path length: nothing animates and a path is 100 long
+Element.prototype.animate = vi.fn(() => ({ cancel() {}, finish() {}, play() {}, pause() {}, onfinish: null, finished: Promise.resolve() })) as unknown as typeof Element.prototype.animate;
+(SVGElement.prototype as unknown as { getTotalLength: () => number }).getTotalLength = () => 100;
 
 // ---- the rest of what a page has
 window.scrollTo = vi.fn() as unknown as typeof window.scrollTo;

@@ -42,7 +42,7 @@ export async function fresh<T>(load: () => Promise<T>): Promise<T> {
 export function frames() {
   const queue: FrameRequestCallback[] = [];
   vi.spyOn(window, "requestAnimationFrame").mockImplementation((cb) => { queue.push(cb); return queue.length; });
-  let now = 0;
+  let now = performance.now();
   return {
     /** run the callbacks queued so far (they may queue the next frame) */
     step(dt = 16) { now += dt; const run = queue.splice(0); run.forEach((cb) => cb(now)); },
