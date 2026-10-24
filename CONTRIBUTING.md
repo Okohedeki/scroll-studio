@@ -264,6 +264,10 @@ Every pull request runs these without a GPU, and `main` only accepts changes tha
   ```bash
   UPDATE_PERFORMANCE_BUDGETS=1 python -m pytest tests/test_performance_budgets.py
   ```
+- **Render** ([render workflow](.github/workflows/render.yml), `tests/render/`): every style and preset built into a
+  real page and loaded in Chromium at desktop and phone sizes: no console errors, one `<h1>`, all the spec's words, no
+  sideways overflow, no serious axe-core violations. It runs in the pinned Playwright image and skips anywhere else; the
+  Docker command is in [tests/render/README.md](tests/render/README.md).
 - **Conformance** (`tests/test_conformance.py`): every preset and style against the rules above.
 - **Docs** ([docs workflow](.github/workflows/docs.yml)): the site builds in strict mode, and every `yaml` snippet in
   the docs validates against the spec (`tests/test_docs.py`).

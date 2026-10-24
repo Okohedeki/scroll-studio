@@ -1,0 +1,40 @@
+# Browser rendering tests (tests/render/): every style and theme preset built into a real page and loaded in Chromium
+# at a desktop and a phone size. They fail a change that breaks how pages render: console errors, a missing <h1> or
+# words, horizontal overflow, serious accessibility violations (axe-core). They run in the pinned Playwright image so
+# fonts and browser match on every run (tests/render/README.md).
+name: render
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: render-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    container: mcr.microsoft.com/playwright/python:v1.58.0-noble
+    env:
+      SS_RENDER: "1"
+      RENDER_WORKERS: "4"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Fonts cache
+        # each look's Google Fonts are downloaded once (871 files for anime-intro alone) and kept between runs
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: /root/.scroll-studio/cache/fonts
+          key: render-fonts-${{ hashFiles('engine/themes.yaml', 'engine/styles/*/style.yaml') }}
+      - name: Render tests
+        run: bash tests/render/run.sh

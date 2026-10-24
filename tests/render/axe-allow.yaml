@@ -1,0 +1,103 @@
+# Accessibility findings known and accepted: [{rule: <axe rule id>, look: <style-name | preset-name | *>, selector: <regex in the
+# element's ancestry, optional>, reason}]. axe-core `serious` and `critical` violations fail test_no_serious_accessibility_violations
+# unless listed here. Fix a finding rather than add it: an entry is a debt, and its reason says what would remove it.
+
+# --- in every look: the page dims what is not yet in focus, and axe measures it as it stands (reduced motion does not light it)
+- rule: color-contrast
+  look: "*"
+  selector: 'ss-type--reveal'
+  reason: "reveal type scenes: words not yet lit are set at .34 opacity (runtime/src/players/type.ts), about 2.5:1; reduced motion should show them all lit"
+- rule: color-contrast
+  look: "*"
+  selector: 'ss-steps.*ss-card'
+  reason: "split and cards scenes: a step that is not the current one fades to near nothing (runtime/src/index.ts); reduced motion should keep every step at full strength"
+
+# --- one look
+- rule: color-contrast
+  look: preset-paper
+  selector: 'ss-stats.*ss-l|ss-tile__text'
+  reason: "stat labels measure 4.49:1 on the band colour (4.5 needed): a hair under; the tile tags are under too"
+- rule: color-contrast
+  look: style-anime-intro
+  selector: 'ai-hud__logo'
+  reason: "the 'EP.01' tag in the HUD logo is 4.48:1 (#fff7ee on #e60033), a hair under 4.5"
+- rule: color-contrast
+  look: style-ascii-art
+  selector: 'ss-orbit__item'
+  reason: "the highlighted orbit service (default markup) is 1.28:1: text colour #ffd27a on the style's accent #ffb000"
+- rule: color-contrast
+  look: style-bauhaus
+  selector: 'ss-orbit__item'
+  reason: "orbit service status text is 3.2:1 on the red and 4.2:1 on the yellow primary colours (default orbit markup)"
+- rule: color-contrast
+  look: style-clay-3d
+  selector: 'ss-orbit__item'
+  reason: "the highlighted orbit service's status is 3.3:1 on the violet accent"
+- rule: color-contrast
+  look: style-comic-book
+  selector: 'ss-orbit__item'
+  reason: "the highlighted orbit service is cream on white, about 1.2:1"
+- rule: color-contrast
+  look: style-neo-brutalism
+  selector: 'ss-orbit__item'
+  reason: "the highlighted orbit service is cream on white, about 1.1:1"
+- rule: color-contrast
+  look: style-glassmorphism
+  selector: 'gl-coda'
+  reason: "the closing site name (.gl-coda) is 1.8:1 on the dark background"
+- rule: color-contrast
+  look: style-gradient-mesh
+  selector: 'gm-|ss-kicker'
+  reason: "kickers #635bff on #f6f9fc are 4.44:1, card numbers white on pale grey 1.2:1, step dates and the default kickers also under 4.5:1"
+- rule: color-contrast
+  look: style-isometric
+  selector: 'iso-bar|iso-kicker|ss-kicker'
+  reason: "the orange #d24a28 is 3.4-4.4:1 on its light panels (bar numbers, kickers)"
+- rule: color-contrast
+  look: style-kinetic-type
+  selector: 'kt-nav'
+  reason: "the nav is white on the cream page, 1.14:1 measured white (#fff) on the cream page background #f2efe8"
+- rule: aria-prohibited-attr
+  look: style-kinetic-type
+  selector: 'kt-stat__v|kt-lens'
+  reason: "aria-label on a <p> (stat odometers) and a <blockquote> (the lens quote) is not allowed; use role=img or visually-hidden text"
+- rule: scrollable-region-focusable
+  look: style-multiplane
+  selector: 'mp-roll'
+  reason: "the rolling strip is a scroll container with no focusable content and no tabindex, so the keyboard cannot reach it"
+- rule: scrollable-region-focusable
+  look: style-paint-on-glass
+  selector: 'pg-roll'
+  reason: "the rolling strip is a scroll container with no focusable content and no tabindex, so the keyboard cannot reach it"
+- rule: color-contrast
+  look: style-paper-cut-out
+  selector: 'ss-footer'
+  reason: "footer text is #202522 on #1f3a35, 1.3:1"
+- rule: color-contrast
+  look: style-pinscreen
+  selector: 'pn-faq__n'
+  reason: "FAQ numbers are 1.4:1 (pale tan on cream)"
+- rule: color-contrast
+  look: style-pop-up-book
+  selector: 'ss-tile|ss-orbit__item'
+  reason: "gallery tiles are near-black text on a dark card (1.0-1.6:1) and the highlighted orbit status is under 4.5:1"
+- rule: color-contrast
+  look: style-retro-vhs
+  selector: 'vhs-tape__kind|vhs-brand'
+  reason: "tape labels are white on pink (3.1:1) and the TV brand is 4.04:1"
+- rule: color-contrast
+  look: style-sand
+  selector: 'ss-footer|sd-kicker'
+  reason: "footer text is #28180c on #2e1d10 (1.05:1) and the '3 of 3' kicker is 1.03:1"
+- rule: color-contrast
+  look: style-smears
+  selector: 'sa-head__cta|sa-cap--badge|sa-folio|sa-key__no'
+  reason: "white on hot pink is 3.3:1 (header button, badge); the folios and key numbers are 2.8-3.7:1"
+- rule: button-name
+  look: style-split-flap
+  selector: 'sf-sound'
+  reason: "the phone board's sound toggle (.sf-sound) is a button with no accessible name"
+- rule: color-contrast
+  look: style-stop-motion
+  selector: 'sm-head__cta'
+  reason: "the header button is 3.84:1 (cream on orange)"

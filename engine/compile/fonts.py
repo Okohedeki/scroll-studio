@@ -7,8 +7,10 @@ without a cache, the site falls back to linking Google Fonts directly (and the b
 from __future__ import annotations
 
 import hashlib
+import os
 import re
 import shutil
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -31,11 +33,10 @@ def _fetch(url: str, binary: bool):
     r = requests.get(url, headers=UA, timeout=30)
     r.raise_for_status()
     CACHE.mkdir(parents=True, exist_ok=True)
-    if binary:
-        path.write_bytes(r.content)
-        return r.content
-    path.write_text(r.text, encoding="utf-8")
-    return r.text
+    tmp = path.with_suffix(path.suffix + f".{os.getpid()}.tmp")        # written whole, then moved: a build running beside this one never reads half a file
+    tmp.write_bytes(r.content if binary else r.text.encode("utf-8"))
+    os.replace(tmp, path)
+    return r.content if binary else r.text
 
 
 def vendor(links: list[str], dist: Path, log: Callable[[str], None] = print) -> Optional[str]:
@@ -47,11 +48,10 @@ def vendor(links: list[str], dist: Path, log: Callable[[str], None] = print) -> 
     out = dist / "fonts"
     try:
         css = "\n".join(_fetch(u, binary=False) for u in links)
-        files = {}
-        for url in sorted(set(URL_RE.findall(css))):
-            name = _key(url) + ".woff2"
-            _fetch(url, binary=True)
-            files[url] = name
+        urls = sorted(set(URL_RE.findall(css)))
+        with ThreadPoolExecutor(16) as pool:        # a CJK face is a hundred unicode-range files: fetched side by side
+            list(pool.map(lambda u: _fetch(u, binary=True), urls))
+        files = {url: _key(url) + ".woff2" for url in urls}
     except Exception as e:  # offline and not cached yet
         log(f"  note: fonts not self-hosted ({e.__class__.__name__}); linking Google Fonts instead")
         return None

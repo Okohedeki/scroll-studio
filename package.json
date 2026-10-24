@@ -2,12 +2,18 @@
   "name": "scroll-studio",
   "private": true,
   "license": "AGPL-3.0-only",
-  "workspaces": ["runtime", "ui"],
+  "workspaces": [
+    "runtime",
+    "ui"
+  ],
   "scripts": {
     "build": "npm run build -w runtime && npm run build -w ui",
     "build:runtime": "npm run build -w runtime",
     "build:ui": "npm run build -w ui",
     "dev:ui": "npm run dev -w ui",
     "test:runtime": "npm test -w runtime"
+  },
+  "devDependencies": {
+    "axe-core": "4.10.2"
   }
 }

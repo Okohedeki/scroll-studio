@@ -1,0 +1,44 @@
+# Problems found when these tests were first written, accepted so CI is green with each bug on record and red for a new one.
+# [{look, check: ready|errors|h1|missing|overflow, viewport: desktop|phone, motion: with|reduced, reason}]; viewport and motion
+# omitted mean both. The matching test is marked xfail while the problem is there. Fix the bug, then delete its entry.
+# (Every overflow below is clipped by `body { overflow-x: hidden }`, so there is no sideways scrollbar, but the page is wider
+# than the screen: content in it is cut off and a phone browser may let the page pan.)
+- look: style-zoetrope
+  check: errors
+  motion: reduced
+  reason: "'Cannot access Te before initialization' thrown from the zoetrope chunk (a load listener reading a const declared after it) when the page loads with reduced motion"
+- look: style-kinetic-type
+  check: missing
+  motion: reduced
+  reason: "a stat's number is an odometer of 0-9 digit reels (aria-hidden), so '480' is not text on the page; its aria-label sits on a <p>, which ARIA does not allow (see axe-allow.yaml)"
+- look: style-particles
+  check: overflow
+  reason: "the strip block's track (.ss-strip__track) is 17px (desktop) / 30px (phone) wider than the screen"
+- look: style-art-deco
+  check: overflow
+  viewport: phone
+  reason: "the decorative doors (.dc-door) and bursts (.dc-burst) reach 39px past the screen edge"
+- look: style-ascii-art
+  check: overflow
+  viewport: phone
+  reason: "the key/value rows of the stats (.tx-kv, 480px wide) are 106px wider than the phone screen, so their right side is cut off"
+- look: style-pop-up-book
+  check: overflow
+  viewport: phone
+  reason: "the spreads (.pb-spread, .pb-floor) are 413px wide on a 390px screen"
+- look: style-scratch-film
+  check: overflow
+  viewport: phone
+  reason: "a spoke plate (.sf-spoke) ends 4px past the screen edge"
+- look: style-smears
+  check: overflow
+  viewport: phone
+  reason: "the decorative bursts (.sa-burst, 537px) reach 74px past the screen edge"
+- look: style-anime-intro
+  check: overflow
+  reason: "the slide-in menu list sits off the right edge, and a few px of the page show past the screen while scrolling (timing dependent)"
+- look: style-retro-vhs
+  check: overflow
+  viewport: phone
+  motion: with
+  reason: "at some scroll positions with motion the page is 7-18px wider than the phone screen (not with reduced motion; the position varies, so timing dependent)"
