@@ -1,0 +1,159 @@
+# The docs site: https://okohedeki.github.io/scroll-studio/
+# Build it with `python -m engine.docsgen docs/reference && mkdocs build --strict` (docs/contributing/building-the-docs.md).
+site_name: Scroll Studio
+site_description: Open-source engine for scroll-driven websites. One YAML file in, a finished site out, made on your own GPU with no API keys.
+site_url: https://okohedeki.github.io/scroll-studio/
+site_author: Edeki Okoh
+repo_url: https://github.com/Okohedeki/scroll-studio
+repo_name: Okohedeki/scroll-studio
+edit_uri: edit/main/docs/
+copyright: Scroll Studio is free software under the GNU AGPL-3.0 with additional terms. Sites you build are yours.
+
+docs_dir: docs
+site_dir: site
+use_directory_urls: true
+
+theme:
+  name: material
+  logo: media/logo.svg
+  favicon: media/logo.svg
+  language: en
+  font: false                  # no request to Google Fonts: the page loads nothing from a third party
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep orange
+      accent: deep orange
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep orange
+      accent: deep orange
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.tracking
+    - navigation.top
+    - navigation.footer
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.action.edit
+    - content.tabs.link
+
+plugins:
+  - search
+
+hooks:
+  - mkdocs_hooks.py
+
+# Every kind of broken link fails the strict build: files, anchors, absolute paths, links to nothing.
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+  anchors: warn
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Okohedeki/scroll-studio
+
+nav:
+  - Home: index.md
+  - Get started:
+      - Install: INSTALL.md
+      - Quick start: quickstart.md
+  - Guides:
+      - Make a site: guide.md
+      - Examples: examples.md
+  - Scenes:
+      - Scenes: scenes.md
+      - Miniature worlds: miniature.md
+  - Styles:
+      - Style gallery: styles.md
+      - Style research:
+          - styles/index.md
+          - "1 to 5: particles to wireframe 3D": styles/styles-01-05.md
+          - "6 to 10: glassmorphism to ASCII art": styles/styles-06-10.md
+          - "11 to 15: gradient mesh to halftone": styles/styles-11-15.md
+          - "16 to 21: Bauhaus to anime intro": styles/styles-16-21.md
+          - "22 and 23: pinscreen and sand": styles/styles-22-23.md
+          - "24 and 25: zoetrope and flipbook": styles/styles-24-25.md
+          - "26 and 27: pop-up book and rotoscope": styles/styles-26-27.md
+          - "28 and 29: stop-motion and paper cut-out": styles/styles-28-29.md
+          - "30 and 31: paint on glass and multiplane": styles/styles-30-31.md
+          - "32 and 33: scratch film and smears": styles/styles-32-33.md
+          - Animation techniques (next batch): styles/todo.md
+  - Reference:
+      - reference/index.md
+      - site.yaml:
+          - reference/spec/index.md
+          - Site and theme: reference/spec/site.md
+          - Scenes: reference/spec/scenes.md
+          - Blocks: reference/spec/blocks.md
+          - Nested models: reference/spec/nested.md
+      - Command line: reference/cli.md
+      - MCP tools: reference/mcp.md
+      - Architecture: ENGINE.md
+  - Contributing:
+      - How to contribute: contributing/guide.md
+      - Build the docs: contributing/building-the-docs.md
+      - Code of conduct: contributing/code-of-conduct.md
+      - Getting help: project/support.md
+      - Compatibility and deprecation: compatibility.md
+      - Design proposals (RFCs):
+          - rfcs/README.md
+          - RFC template: rfcs/0000-template.md
+      - Contributor licence agreement: contributing/cla.md
+      - For AI agents: contributing/agents.md
+      - Maintainers:
+          - Triage: maintainers/triage.md
+          - Releasing: maintainers/releasing.md
+          - Repository settings: maintainers/repo-settings.md
+  - Project:
+      - Why Scroll Studio: why.md
+      - Governance: project/governance.md
+      - Maintainers: project/maintainers.md
+      - Security:
+          - Security policy: contributing/security.md
+          - Threat model: security/threat-model.md
+      - What's new: whats-new.md
+      - Changelog: project/changelog.md
+      - Roadmap: directions.md
+      - Design:
+          - design/index.md
+          - "1.5: Make it yours": design/1.5-make-it-yours.md
+      - Licence: licence.md
+      - Notice: project/notice.md

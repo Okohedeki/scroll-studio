@@ -119,7 +119,7 @@ part of the place instead of over it. Example: [Fenmoor](../examples/fenmoor/sit
   journey:
     world: The inside of an old stone farmhouse on a northern moor at dawn, a long whitewashed hall ...   # described once
     restore: 1080
-    blockout: { objects: [ ... rough shapes: walls, arches, a table, a window ... ] }                   # the world as shapes
+    blockout: { objects: [ ... ] }                                                                      # the world as shapes: walls, arches, a table, a window
     stops:
       - id: door
         place: the view from just inside the open oak front door down the whole length of the house
@@ -182,6 +182,7 @@ balance, saturation, softness, grain, a light wrap). `hdri:` picks a studio ligh
         - { t: 0, at: [-70, 190, 70], look: [0, 40, 6] }
         - { t: 15, at: [1.6, -3.4, 1.3], look: [0, -5, 0.95] }
       product: { model: inputs/bottle.glb, at: [0, -5, 0.78], height: 0.27 }
+      ltx: { segments: [...] }          # the video model's settings: one prompt per stretch of the camera move
 ```
 
 For detail, render the world at `ltx: { res: [1920, 1088] }` (multiples of 32; 1024x576 is a quick draft) and add
@@ -787,11 +788,15 @@ sections:
     type: film
     beats:
       - id: door
+        prompt: ...
+        motion: ...
         video_model: wan    # per beat; `image` is the first frame and `end_image` the last (first-last-frame)
-        ...
+        # ...
   - id: take
     type: film
     take:
+      duration: 15
+      camera: ...
       video_model: wan      # Wan 2.2 Fun Control paints the world along the Blender depth guide
       wan: { quality: fast }
       ltx: { segments: [...] }   # the same segments and prompts drive either model
@@ -839,7 +844,7 @@ progress numbers:
            ];
       - { path: php artisan test, kind: run, file: inputs/test-output.txt }
     steps:
-      - { title: Every change, <em>a diff you can follow.</em>, state: { file: app/Models/User.php } }
+      - { title: "Every change, <em>a diff you can follow.</em>", state: { file: app/Models/User.php } }
 ```
 
 For an edit, start each line with `+`, `-` or a space, like a diff (use `|2` so YAML keeps the leading markers).
@@ -886,12 +891,13 @@ sections:
   - type: film
     id: dusk
     transition: { type: match, shape: the sun, becomes: the rim of a cup }   # the sun becomes a coffee cup
-    ...
+    # ...
   - type: parallax
     id: morning
     transition: whip                       # a bare name is enough: a fast directional blur-pan into the next
-    ...
+    # ...
   - type: product
+    title: ...
     transition: { type: carry }            # this section's heading travels into the next section's heading
 ```
 
@@ -940,6 +946,7 @@ Or design the match instead of hoping for it: an image can be made to match anot
 ```yaml
   - type: hero
     id: sun
+    title: ...
     image:
       match:
         section: mark                      # the section whose last frame to match (it is built first)

@@ -42,3 +42,9 @@ coverage.xml
 runtime/coverage/
 htmlcov/
 build/
+
+# The docs site: built output and the reference pages generated from the engine (python -m engine.docsgen docs/reference)
+/site/
+docs/reference/spec/
+docs/reference/cli.md
+docs/reference/mcp.md
