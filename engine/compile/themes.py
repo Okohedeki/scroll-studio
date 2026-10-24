@@ -1,4 +1,4 @@
-"""Theme presets -> CSS custom properties and Google Fonts links."""
+"""Themes as layered token sets (defaults, preset, style, site.yaml) -> CSS custom properties and font links."""
 from __future__ import annotations
 
 from functools import lru_cache
@@ -96,21 +96,59 @@ def _hex_rgb(h: str) -> str:
     return ", ".join(str(int(h[i:i + 2], 16)) for i in (0, 2, 4))
 
 
-def resolve(theme: Theme) -> dict:
-    base = presets().get(theme.preset)
-    if base is None:
-        raise ValueError(f"unknown theme preset '{theme.preset}' (have: {', '.join(presets())})")
-    st = {}
+# ---------------------------------------------------------------- token sets and their layers
+# A theme is a stack of token sets, each laid over the one before: the engine's defaults, the preset, the style, then
+# what site.yaml sets. Presets (themes.yaml) and styles (style.yaml) are token sets with names.
+DEFAULTS = {"mode": "dark", "colors": {}, "fonts": {}, "font_axes": {}, "display_weight": 500, "em_italic": False,
+            "display_em": "accent", "labels": "caps", "display_optical_size": None, "radius": "4px"}
+MERGED = ("colors", "fonts", "font_axes")      # these merge key by key; every other token replaces the one below it
+TOKENS = tuple(DEFAULTS)                      # what a style.yaml contributes (the rest of it is about the style itself)
+
+
+def layer(*sets: dict) -> dict:
+    """Lay token sets over each other in order. A token a set leaves out (or sets to None) keeps the value below."""
+    out: dict = {}
+    for s in sets:
+        for k, v in s.items():
+            if v is not None:
+                out[k] = dict(out.get(k, {}), **v) if k in MERGED else v
+    return out
+
+
+def preset_tokens(name: str) -> dict:
+    p = presets().get(name)
+    if p is None:
+        raise ValueError(f"unknown theme preset '{name}' (have: {', '.join(presets())})")
+    return p
+
+
+def style_tokens(name: str) -> dict:
+    st = styles().get(name)
+    if st is None:
+        raise ValueError(f"unknown style '{name}' (have: {', '.join(styles())})")
+    return {k: v for k, v in st.items() if k in TOKENS}
+
+
+def override_tokens(theme: Theme) -> dict:
+    """What site.yaml sets on `theme:` itself, the top layer. An empty value (0, '') never overrode, so it still doesn't."""
+    return {"mode": theme.mode or None, "colors": theme.colors, "fonts": theme.fonts, "radius": theme.radius or None,
+            "display_weight": theme.display_weight or None, "em_italic": theme.display_italic_em,
+            "display_em": theme.display_em or None, "labels": theme.labels or None,
+            "display_optical_size": theme.display_optical_size or None}
+
+
+def layers(theme: Theme) -> list[tuple[str, dict]]:
+    """The token sets this theme is made of, bottom first, each named for where it came from."""
+    out = [("defaults", DEFAULTS), (f"preset {theme.preset}", preset_tokens(theme.preset))]
     if theme.style:
-        st = styles().get(theme.style)
-        if st is None:
-            raise ValueError(f"unknown style '{theme.style}' (have: {', '.join(styles())})")
-        # the style's look goes over the preset; anything site.yaml sets still wins
-        base = dict(base, **{k: v for k, v in st.items() if k in ("mode", "radius", "display_weight", "em_italic", "display_em")},
-                    colors=dict(base["colors"], **st.get("colors", {})), fonts=dict(base["fonts"], **st.get("fonts", {})))
-    colors = dict(base["colors"], **theme.colors)
-    fonts = dict(base["fonts"], **theme.fonts)
-    radius = theme.radius or base.get("radius", "4px")
+        out.append((f"style {theme.style}", style_tokens(theme.style)))
+    out.append(("site.yaml", override_tokens(theme)))
+    return out
+
+
+def resolve(theme: Theme) -> dict:
+    tokens = layer(*(s for _, s in layers(theme)))
+    colors, fonts, radius = tokens["colors"], tokens["fonts"], tokens["radius"]
     # these end up inside the page's <style> block, so none may carry anything but a plain value (engine/safety.py)
     for k, c in colors.items():
         if not safety.css_value_ok(c):
@@ -122,15 +160,15 @@ def resolve(theme: Theme) -> dict:
         raise ValueError(f"theme radius {str(radius)[:40]!r} is not a CSS length such as 4px")
     return {
         "style": theme.style,
-        "font_axes": st.get("font_axes", {}),
-        "mode": theme.mode or base.get("mode", "dark"),
+        "font_axes": tokens["font_axes"],
+        "mode": tokens["mode"],
         "colors": colors,
         "fonts": fonts,
-        "display_weight": theme.display_weight or base.get("display_weight", 500),
-        "em_italic": base.get("em_italic", False) if theme.display_italic_em is None else theme.display_italic_em,
-        "em": theme.display_em or base.get("display_em", "accent"),
-        "labels": theme.labels or base.get("labels", "caps"),
-        "display_opsz": theme.display_optical_size or base.get("display_optical_size"),
+        "display_weight": tokens["display_weight"],
+        "em_italic": tokens["em_italic"],
+        "em": tokens["display_em"],
+        "labels": tokens["labels"],
+        "display_opsz": tokens.get("display_optical_size"),
         "radius": radius,
     }
 
