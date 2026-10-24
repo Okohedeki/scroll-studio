@@ -122,6 +122,17 @@ describe("captions and the HUD", () => {
     expect(at(0.2)).toEqual(["ss-on", "idle"]);          // scrolling back
   });
 
+  it("a caption's window includes both its ends", async () => {
+    const f = await boot({ markup: scene({ inner: `<div class="ss-caption" id="a" data-from="0.25" data-to="0.5"></div>` }), reduced: true });
+    box($("#s1"), 0, 5 * H);
+    await settle();
+    const on = (p: number) => { box($(".ss-track"), -p * 4 * H, 5 * H); f.step(); return $("#a").classList.contains("ss-on"); };
+    expect(on(0.25)).toBe(true);
+    expect(on(0.5)).toBe(true);
+    expect(on(0.5 + 1 / 1024)).toBe(false);
+    expect(on(0.25 - 1 / 1024)).toBe(false);
+  });
+
   it("splits a caption's words into spans that rise one after another", async () => {
     await boot({ markup: scene({ inner: `<div class="ss-caption" data-from="0" data-to="1"><h2 class="ss-split-words">Cold <em>from</em> the source</h2></div>` }) });
     const words = [...document.querySelectorAll<HTMLElement>(".ss-w")];

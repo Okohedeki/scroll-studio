@@ -43,6 +43,7 @@ describe("reveal keys (amountsAt)", () => {
     const out = amountsAt(keys, ["a"], 0.01, "smooth", true);
     expect(out.a).toBe(1);
     expect(amountsAt(keys, ["a"], 0.6, "smooth", true).a).toBe(0);
+    expect(amountsAt(keys, ["a"], 0, "smooth", true).a).toBe(0);      // not before the change has begun
     const flat: RevealKey[] = [{ at: 0, a: 0.4 }, { at: 0.5, a: 0.4 }, { at: 1, a: 1 }];
     expect(amountsAt(flat, ["a"], 0.25, "smooth", true).a).toBe(0.4);
   });
@@ -73,12 +74,11 @@ describe("one-take film clock (journey timeAt)", () => {
     expect(filmTime(map, 2)).toBe(5);
   });
 
-  it("a jump (two points at the same progress) takes the later film time and never divides by zero", () => {
+  it("a jump (two points at the same progress) holds the earlier time up to it and the later time after it", () => {
     const jump = [[0, 0], [0.5, 1], [0.5, 4], [1, 5]];
     expect(filmTime(jump, 0.5)).toBe(1);
     expect(filmTime(jump, 0.50001)).toBeCloseTo(4, 3);
-    const degenerate = [[0, 0], [0, 3]];
-    expect(filmTime(degenerate, 0.5)).toBe(3);
+    expect(filmTime([[0, 0], [0, 3]], 0.5)).toBe(3);         // a map that never moves: its last time
   });
 });
 

@@ -122,7 +122,7 @@ describe("neo-brutalism: a desk you fill up", () => {
     it("is not used on a narrow screen, where the cards slap by threshold like everything else", async () => {
       html(`<main>${deck}</main>`);
       stubIntersectionObserver();
-      vi.spyOn(window, "matchMedia").mockImplementation((q: string) => ({ matches: /max-width:\s*900px/.test(q), media: q, addEventListener() {}, removeEventListener() {} }) as MediaQueryList);
+      vi.spyOn(window, "matchMedia").mockImplementation((q: string) => ({ matches: /max-width:\s*900px/.test(q), media: q, addEventListener() {}, removeEventListener() {} }) as unknown as MediaQueryList);
       await start("neo-brutalism");
       expect(document.documentElement.classList.contains("nb-deck-on")).toBe(false);
       expect(observers[0].targets.map((t) => t.id)).toEqual(["c0", "c1", "c2"]);
