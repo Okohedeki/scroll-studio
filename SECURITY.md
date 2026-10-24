@@ -18,6 +18,9 @@ version or commit you tested.
 | Within 90 days | The fix is released, sooner for serious problems. If it needs longer, we agree a date with you. |
 | On release | We publish a GitHub security advisory (with a CVE where it applies) and credit you, if you want credit. |
 
+The project pays no bug bounties ([CONTRIBUTING.md](CONTRIBUTING.md#no-bounties)); reporters are credited in the
+advisory.
+
 Please give us the chance to release a fix before you talk about the problem in public. We will keep you updated
 throughout and will not take legal action against good-faith research that follows this policy.
 
