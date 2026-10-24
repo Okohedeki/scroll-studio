@@ -14,8 +14,9 @@ page in the same pull request (or right after, for settings that only exist in t
 
 - `main` (branch protection):
   - Changes only through pull requests, for everyone, administrators included. No force pushes, no deletion.
-  - Required checks, branch up to date before merging: `tests`, plus the checks this page lists as required once they
-    are stable (`pr-policy`, `lint`, `runtime`, `docs`, `dependency-review`).
+  - Required checks, branch up to date before merging: `tests`, `lint`, `runtime`, `install`, `pr-policy`,
+    `dependency-review`, `secrets` and `workflows`. The `platforms` jobs (Windows, macOS, Python 3.10 and 3.13) and
+    `docs` (which only runs when docs change) run on every pull request but are not required yet.
   - Conversations must be resolved. Stale approvals are dismissed when new commits are pushed.
 - `v*` tags (ruleset "Release tags"): only repository administrators can create, move or delete release tags.
 - `cla-signatures`: holds the CLA signatures (`signatures/cla.json`), written by the CLA workflow.
@@ -32,4 +33,5 @@ page in the same pull request (or right after, for settings that only exist in t
 
 - Workflows from fork pull requests need approval for first-time contributors.
 - The default `GITHUB_TOKEN` is read-only; each workflow asks for the permissions it needs.
-- Actions are pinned to commit SHAs; Dependabot updates them.
+- Actions must be pinned to full commit SHAs ("Require actions to be pinned to a full-length commit SHA" is on);
+  Dependabot updates them.
