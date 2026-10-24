@@ -3,7 +3,7 @@
  * what each pin looks like. jsdom has no layout, so the page's boxes are set by hand and read back from the styles written.
  */
 import { beforeEach, describe, expect, it } from "vitest";
-import { box, fresh, html, media, moveTo, screen, scrollTo } from "./helpers";
+import { box, fresh, html, media, moveTo, screen, scrollToY } from "./helpers";
 
 const GAP = 1000;   // px of scroll the cut plays over
 const W = 1280, H = 800;
@@ -292,7 +292,7 @@ describe("what scroll-driven players ask the cuts", () => {
 
   it("land: the scroll position at which the section below's own first screen is on show", async () => {
     const { api, goto, $ } = await setup();
-    scrollTo(300);
+    scrollToY(300);
     goto(0.2);          // the wrapper's top is now -200 in the viewport, 100 in the document
     expect(api.land($("b"))).toBe(-200 + 300 + GAP);
     expect(api.land(document.body)).toBeNull();
@@ -301,7 +301,7 @@ describe("what scroll-driven players ask the cuts", () => {
 
   it("docTop: where an element's own top sits with no cut holding it", async () => {
     const { api, goto, $ } = await setup();
-    scrollTo(0);
+    scrollToY(0);
     goto(0.2);
     // the wrapper of the section below has its gap above it
     expect(api.docTop($("b"))).toBe(-200 + GAP);

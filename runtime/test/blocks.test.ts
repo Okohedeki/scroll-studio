@@ -1,6 +1,6 @@
 /** Scroll motion for content blocks and the stack layout: everything is a pure function of the scroll position. */
 import { beforeEach, describe, expect, it } from "vitest";
-import { box, fresh, html, media, moveTo, screen, scrollTo } from "./helpers";
+import { box, fresh, html, media, moveTo, screen, scrollToY } from "./helpers";
 
 const H = 800;
 const prop = (el: Element, name: string) => (el as HTMLElement).style.getPropertyValue(name);
@@ -30,27 +30,27 @@ describe("makeBlocks", () => {
     it("--cover is how far the next panel has come up: 0 while it is a screen below, 1 once it has arrived", async () => {
       const { update, p } = await stack();
       box(p[0], 0, H); box(p[1], H, H); box(p[2], 2 * H, H);
-      scrollTo(1); update();
+      scrollToY(1); update();
       expect(prop(p[0], "--cover")).toBe("0.000");
-      moveTo(p[1], H / 2); scrollTo(2); update();
+      moveTo(p[1], H / 2); scrollToY(2); update();
       expect(prop(p[0], "--cover")).toBe("0.500");
-      moveTo(p[1], 0); scrollTo(3); update();
+      moveTo(p[1], 0); scrollToY(3); update();
       expect(prop(p[0], "--cover")).toBe("1.000");
-      moveTo(p[1], -50); scrollTo(4); update();       // past the top: still just covered
+      moveTo(p[1], -50); scrollToY(4); update();       // past the top: still just covered
       expect(prop(p[0], "--cover")).toBe("1.000");
     });
 
     it("the last panel is never covered", async () => {
       const { update, p } = await stack();
       box(p[0], 0, H); box(p[1], 0, H); box(p[2], 0, H);
-      scrollTo(1); update();
+      scrollToY(1); update();
       expect(prop(p[2], "--cover")).toBe("0.000");
     });
 
     it("a panel taller than the screen sticks by its bottom edge, so its own content scrolls first", async () => {
       const { update, p } = await stack();
       box(p[0], 0, 2 * H); box(p[1], 2 * H, H); box(p[2], 3 * H, H);
-      scrollTo(1); update();
+      scrollToY(1); update();
       expect(p[0].style.top).toBe(`${-H}px`);
       expect(p[1].style.top).toBe("0px");        // a panel that fits sticks to the top
     });
@@ -58,10 +58,10 @@ describe("makeBlocks", () => {
     it("measures again when the screen resizes, and only then", async () => {
       const { update, p } = await stack();
       box(p[0], 0, 1000); box(p[1], H, H); box(p[2], 2 * H, H);
-      scrollTo(1); update();
+      scrollToY(1); update();
       expect(p[0].style.top).toBe("-200px");
       box(p[0], 0, 1200);
-      scrollTo(2); update();                      // scrolled, not resized: the old measure stands
+      scrollToY(2); update();                      // scrolled, not resized: the old measure stands
       expect(p[0].style.top).toBe("-200px");
       screen({ w: 1280, h: 600, y: 2 }); update();
       expect(p[0].style.top).toBe("-600px");
@@ -72,11 +72,11 @@ describe("makeBlocks", () => {
     it("--hero-p follows how far the hero has scrolled off the top", async () => {
       const update = await blocks(`<section class="ss-hero" id="h"></section>`);
       const h = document.getElementById("h")!;
-      box(h, 0, 700); scrollTo(1); update();
+      box(h, 0, 700); scrollToY(1); update();
       expect(prop(h, "--hero-p")).toBe("0.000");
-      moveTo(h, -350); scrollTo(2); update();
+      moveTo(h, -350); scrollToY(2); update();
       expect(prop(h, "--hero-p")).toBe("0.500");
-      moveTo(h, -900); scrollTo(3); update();
+      moveTo(h, -900); scrollToY(3); update();
       expect(prop(h, "--hero-p")).toBe("1.000");
     });
 
@@ -84,7 +84,7 @@ describe("makeBlocks", () => {
       const update = await blocks(`<div class="ss-panel" id="p0"><section class="ss-hero" id="h"></section></div><div class="ss-panel" id="p1"></div>`);
       const [p0, p1, h] = ["p0", "p1", "h"].map((id) => document.getElementById(id)!);
       box(p0, 0, H); box(p1, H * 0.25, H); box(h, 0, H);
-      scrollTo(1); update();
+      scrollToY(1); update();
       expect(prop(h, "--hero-p")).toBe("0.750");
     });
 
@@ -92,9 +92,9 @@ describe("makeBlocks", () => {
       let held = true;
       const update = await blocks(`<section class="ss-hero" id="h"></section>`, () => held);
       const h = document.getElementById("h")!;
-      box(h, -350, 700); scrollTo(1); update();
+      box(h, -350, 700); scrollToY(1); update();
       expect(prop(h, "--hero-p")).toBe("");
-      held = false; scrollTo(2); update();
+      held = false; scrollToY(2); update();
       expect(prop(h, "--hero-p")).toBe("0.500");
     });
   });
@@ -103,11 +103,11 @@ describe("makeBlocks", () => {
     it("--float runs from -1 as the element enters at the bottom to +1 as it leaves at the top", async () => {
       const update = await blocks(`<div data-float id="f"></div>`);
       const f = document.getElementById("f")!;
-      box(f, H, 400); scrollTo(1); update();
+      box(f, H, 400); scrollToY(1); update();
       expect(prop(f, "--float")).toBe("-1.000");
-      moveTo(f, (H - 400) / 2); scrollTo(2); update();
+      moveTo(f, (H - 400) / 2); scrollToY(2); update();
       expect(prop(f, "--float")).toBe("0.000");
-      moveTo(f, -400); scrollTo(3); update();
+      moveTo(f, -400); scrollToY(3); update();
       expect(prop(f, "--float")).toBe("1.000");
     });
   });
@@ -118,7 +118,7 @@ describe("makeBlocks", () => {
       const s = document.getElementById("s")!;
       box(s, (H - 200) / 2, 200);
       Object.defineProperty(s, "scrollWidth", { configurable: true, value: 2280 });
-      scrollTo(1); update();
+      scrollToY(1); update();
       expect(prop(s, "--strip")).toBe("500.0");          // halfway: half of the 1000px the row overflows by
     });
 
@@ -127,7 +127,7 @@ describe("makeBlocks", () => {
       const s = document.getElementById("s")!;
       box(s, 100, 200);
       Object.defineProperty(s, "scrollWidth", { configurable: true, value: 900 });
-      scrollTo(1); update();
+      scrollToY(1); update();
       expect(prop(s, "--strip")).toBe("0.0");
     });
   });
@@ -140,7 +140,7 @@ describe("makeBlocks", () => {
       const o = document.getElementById("o")!;
       box(o, 100, 300, { width: 400 });
       document.getElementById("i0")!.style.transform = "translate(1px, 1px)";
-      scrollTo(1); update();
+      scrollToY(1); update();
       expect(o.classList.contains("ss-orbit--live")).toBe(false);
       expect(document.getElementById("i0")!.style.transform).toBe("");
     });
@@ -151,7 +151,7 @@ describe("makeBlocks", () => {
       const items = [0, 1, 2, 3].map((i) => document.getElementById("i" + i)!);
       box(o, (H - 600) / 2, 600, { width: 600 });
       items.forEach((it) => box(it, 0, 100, { width: 100 }));
-      scrollTo(1); update();
+      scrollToY(1); update();
       expect(o.classList.contains("ss-orbit--live")).toBe(true);
       // outer ring fits the stage: 600 / 2 - 100 / 2 - 4 = 246; the inner ring is one circle and a gap inside it
       expect(prop(o, "--r-out")).toBe("246.0px");
@@ -160,7 +160,7 @@ describe("makeBlocks", () => {
       const [x0, y0] = items[0].style.transform.match(/-?[\d.]+/g)!.map(Number);
       expect(Math.hypot(x0, y0)).toBeCloseTo(132, 0);
       const first = items[0].style.transform;
-      moveTo(o, -600); scrollTo(2); update();
+      moveTo(o, -600); scrollToY(2); update();
       expect(items[0].style.transform).not.toBe(first);
     });
   });
@@ -168,12 +168,12 @@ describe("makeBlocks", () => {
   it("does not recompute when neither the scroll position nor the screen has changed", async () => {
     const update = await blocks(`<div data-float id="f"></div>`);
     const f = document.getElementById("f")!;
-    box(f, H, 400); scrollTo(1); update();
+    box(f, H, 400); scrollToY(1); update();
     expect(prop(f, "--float")).toBe("-1.000");
     moveTo(f, 0);                  // the layout moved, the scroll did not (a cut or an animation moved it)
     update();
     expect(prop(f, "--float")).toBe("-1.000");
-    scrollTo(2); update();
+    scrollToY(2); update();
     expect(prop(f, "--float")).not.toBe("-1.000");
   });
 
@@ -182,7 +182,7 @@ describe("makeBlocks", () => {
     const update = await blocks(`<div class="ss-panel" id="p0"><div data-float id="f"></div></div><div class="ss-panel" id="p1"></div><section class="ss-hero" id="h"></section>`);
     const [p0, p1, f, h] = ["p0", "p1", "f", "h"].map((id) => document.getElementById(id)!);
     box(p0, 0, H); box(p1, 100, H); box(f, 50, 100); box(h, -300, 700);
-    scrollTo(1); update();
+    scrollToY(1); update();
     expect(prop(p0, "--cover")).toBe("0.000");
     expect(prop(f, "--float")).toBe("0.000");
     expect(prop(h, "--hero-p")).toBe("0.000");

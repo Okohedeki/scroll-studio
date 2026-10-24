@@ -14,7 +14,7 @@ export function screen(o: { w?: number; h?: number; y?: number } = {}) {
   Object.defineProperty(window, "scrollY", { configurable: true, writable: true, value: y });
   Object.defineProperty(document.documentElement, "clientWidth", { configurable: true, value: w });
 }
-export const scrollTo = (y: number) => { Object.defineProperty(window, "scrollY", { configurable: true, writable: true, value: y }); };
+export const scrollToY = (y: number) => { Object.defineProperty(window, "scrollY", { configurable: true, writable: true, value: y }); };
 
 /** Give an element a layout box (jsdom has none). `top` is its viewport top; the rest follows from the size. */
 export function box(el: Element, top: number, height: number, o: { left?: number; width?: number } = {}) {
@@ -67,8 +67,8 @@ export function playerCtx(steps: { intro?: boolean; length?: number }[] = []) {
 export const frameState = (p: number, o: Record<string, unknown> = {}) => ({ p, steps: [] as number[], active: -1, t: 0, mx: 0, my: 0, ...o }) as any;
 
 /** Load a module the way the page does for `?p=<p>` (eased values jump straight to their target), with the media features given. */
-export async function atPage<T>(load: () => Promise<T>, o: { p?: number; reduced?: boolean; mobile?: boolean } = {}): Promise<T> {
-  history.replaceState(null, "", o.p === undefined ? "/" : `/?p=${o.p}`);
+export async function atPage<T>(load: () => Promise<T>, o: { p?: number; s?: string; reduced?: boolean; mobile?: boolean } = {}): Promise<T> {
+  history.replaceState(null, "", o.p === undefined ? "/" : `/?p=${o.p}${o.s ? `&s=${o.s}` : ""}`);
   media.reduced = !!o.reduced;
   media.mobile = !!o.mobile;
   vi.resetModules();
