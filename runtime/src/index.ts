@@ -359,7 +359,7 @@ function updateReveals() {
     if (k !== r.k) {
       r.k = k;
       r.el.style.opacity = k.toFixed(3);
-      r.el.style.transform = k < 1 ? `translateY(${((1 - k) * 22).toFixed(1)}px)` : "";
+      r.el.style.transform = k < 1 ? `translateY(${((1 - k) * 22).toFixed(1)}px)` : "none";
     }
     for (const c of r.counts) {
       const kc = reducedMotion ? 1 : clamp((innerHeight * 0.95 - top) / (innerHeight * 0.4 / pace));
