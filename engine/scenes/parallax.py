@@ -51,6 +51,8 @@ def build(sec: ParallaxScene, ctx: BuildContext, theme: dict) -> dict:
         if st.world is not None:      # type in the world (engine/world.py): this step's title set inside its photograph
             from .. import world
             chapters[-1]["world"] = world.build_photo(sec, ctx, i, idx[i], st, img_out, dep_out)
+        if getattr(st.image, "live", None):      # living details on this photo (engine/live.py), drawn in the photo's own pass
+            chapters[-1]["live"] = live_details(ctx, st.image, src, img_out, theme)
         if credit(st.image):
             credits.append(credit(st.image))
     cfg = {"chapters": chapters, "move": sec.move, "strength": sec.strength, "end": chapters[-1]["image"],
@@ -86,4 +88,18 @@ def pointer_layers(sec: ParallaxScene, ctx: BuildContext, credits: list[str]) ->
         out.append(ctx.url(dst))
         if credit(ref):
             credits.append(credit(ref))
+    return out
+
+
+def live_details(ctx: BuildContext, ref, src, shown, theme: dict) -> list:
+    """A photo's living details for the page; their masks (a prompt's region) are copied in beside the photo."""
+    import shutil
+    from .. import live
+
+    def url(p):
+        shutil.copy(p, ctx.web / p.name)
+        return ctx.url(ctx.web / p.name)
+    out = live.page_details(ctx.project, ref, src, shown, (theme or {}).get("colors", {}), url, ctx.log)
+    if out:
+        ctx.log(f"  live: {live.summary(out)}")
     return out

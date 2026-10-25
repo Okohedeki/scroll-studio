@@ -334,6 +334,65 @@ class Cinemagraph(Model):
                                           "outline is not cut off at the edge of the region")
 
 
+LIVE_KINDS = ("sweep", "glint", "drift", "rise", "flow")
+LIVE_COLOURS = ("light", "dark", "accent", "accent2", "ink", "bg", "bg2")
+
+
+class LiveDetail(Model):
+    """One small thing alive in a still picture: a light sweeping, a cloud drifting, sparks rising, a glint, water moving.
+    Drawn by the page itself (a small WebGL effect over the picture, or inside a parallax photo's own pass), so it needs no
+    GPU at build time and works on a laptop. Paused off screen and in a hidden tab; with reduced motion the picture is
+    simply still. Put it on a hero, product, strip or gallery image, or on a parallax photo:
+
+        image: { file: inputs/hero.jpg, live: [{ kind: drift, box: [0.35, 0.25, 0.55, 0.42] }] }
+
+    sweep: a soft band of light slides across the region now and then (or, with `origin`, a beam turns round that
+    point). glint: small four-pointed twinkles on the region's brightest points (found in the picture at build time).
+    drift: the region slides slowly to and fro with soft edges (clouds, mist, a hanging sign). rise: soft specks rise
+    through the region and fade (embers, bubbles, dust in a beam). flow: a gentle wavy shimmer (water)."""
+    kind: Literal["sweep", "glint", "drift", "rise", "flow"] = Field(..., description="What lives there: sweep, glint, "
+                                                                                      "drift, rise or flow")
+    box: Optional[tuple[float, float, float, float]] = Field(
+        None, description="x0, y0, x1, y1 of the region, 0-1 of the picture. For drift give some room around the thing that "
+                          "moves (it slides inside the box and fades out at its edges)")
+    prompt: Optional[str] = Field(None, description="Or name the region, as you would to a person (\"the clouds\"): found "
+                                                    "at build time by Florence-2 + SAM 2.1 (the same tooling as "
+                                                    "`edit.region`; needs ComfyUI). Without them the build uses `box` if "
+                                                    "given, and leaves the detail out otherwise")
+    pick: Union[Literal["all", "first", "largest", "smallest", "left", "right", "top", "bottom", "center"], int] = Field(
+        "all", description="When `prompt` matches several things: all of them, or one by rank or index")
+    speed: float = Field(1.0, ge=0.1, le=4, description="How fast it lives: 1 is calm, 0.5 slower, 2 twice as fast")
+    strength: float = Field(0.6, ge=0.05, le=1, description="How much: the brightness of a sweep, glint or rise, how far a "
+                                                            "drift slides, how much a flow ripples")
+    color: Optional[str] = Field(None, description="The light's colour (sweep, glint, rise): a theme token (light, dark, "
+                                                   "accent, accent2, ink, bg, bg2) or a hex colour. Default: light (the "
+                                                   "lighter of the theme's text and background) for sweep and glint, "
+                                                   "accent2 for rise")
+    angle: float = Field(0, ge=-360, le=360, description="Direction in degrees, 0 to the right, 90 down: where a sweep "
+                                                         "slides and a drift goes; the line a flow's ripples run along. A "
+                                                         "rise always goes up")
+    origin: Optional[tuple[float, float]] = Field(None, description="sweep: turn a beam round this point (x, y, 0-1 of the "
+                                                                   "region, may lie outside it: a lighthouse lamp) "
+                                                                   "instead of sliding a band")
+    count: int = Field(12, ge=1, le=24, description="glint: how many twinkles; rise: how dense the specks are (about this "
+                                                    "many on screen)")
+    softness: float = Field(0.25, ge=0, le=0.5, description="How soft the region's edge is, as a share of the box")
+
+    @model_validator(mode="after")
+    def _region(self):
+        if self.box is None and not self.prompt:
+            raise ValueError(f"live {self.kind}: give the region as a box [x0, y0, x1, y1] (0-1 of the picture) or a prompt")
+        if self.box is not None:
+            x0, y0, x1, y1 = self.box
+            if not (0 <= x0 < x1 <= 1 and 0 <= y0 < y1 <= 1):
+                raise ValueError("live box is x0, y0, x1, y1 in 0-1 of the picture, with x0 < x1 and y0 < y1")
+        if self.color is not None and self.color not in LIVE_COLOURS and not re.fullmatch(r"#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?", self.color):
+            raise ValueError(f"live color is a theme token ({', '.join(LIVE_COLOURS)}) or a hex colour like #ffe2c0")
+        if self.origin is not None and self.kind != "sweep":
+            raise ValueError("live origin turns a sweep's beam; other kinds have none")
+        return self
+
+
 # ---- art direction in one medium (engine/medium.py): a named medium is a tested local recipe -------------------------
 
 MEDIUM_NAMES = ("risograph", "toile", "engraving", "gouache", "watercolour", "halftone", "ink")
@@ -388,6 +447,15 @@ class ImageInput(Model):
         None, description="Keep this side of the picture calm for a headline: asked of the model, then measured; a busy "
                           "result is mirrored or regenerated with the next seeds (a file is only checked). Set by "
                           "itself on a hero in a named medium (its `align` side)")
+    live: Optional[list[LiveDetail]] = Field(
+        None, max_length=4, description="Living details: one small thing alive in the still (see LiveDetail): sweep, "
+                                        "glint, drift, rise or flow in a region, drawn by the page (no GPU needed). Up to "
+                                        "four; on hero, product, strip and gallery images and parallax photos")
+
+    @field_validator("live", mode="before")
+    @classmethod
+    def _one_detail(cls, v):
+        return [v] if isinstance(v, dict) else v
 
     @field_validator("medium")
     @classmethod
@@ -402,11 +470,11 @@ class ImageInput(Model):
 
     @model_serializer(mode="wrap")
     def _late_fields(self, handler, info):
-        """`medium` and `calm` are left out of a dump while unset, so pages and caches made before they existed (a
+        """`medium`, `calm` and `live` are left out of a dump while unset, so pages and caches made before they existed (a
         scene's steps are embedded in its page) stay the same."""
         d = handler(self)
         if isinstance(d, dict):
-            for k in ("medium", "calm"):
+            for k in ("medium", "calm", "live"):
                 if d.get(k, 0) is None:
                     d.pop(k)
         return d

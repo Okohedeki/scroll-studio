@@ -101,19 +101,26 @@ def favicon(site: Site, theme: dict) -> str:
     return "data:image/svg+xml," + quote(svg)
 
 
-def wire_cinemagraphs(html: str, cines: dict[str, dict]) -> str:
+def wire_cinemagraphs(html: str, cines: dict[str, dict], name: str = "data-cine") -> str:
     """Mark where a cinemagraph's still is shown: every <img> with that poster, and every element that has it as a CSS
     background (a section backdrop), gets `data-cine` (the video, the mask, where the video sits on the still); the runtime
     (runtime/src/lib/cinemagraph.ts) lays the video over it. Nothing else changes: without the script the still is the page.
-    Works on the finished markup, so every style's own templates take part."""
+    Works on the finished markup, so every style's own templates take part. Living details are marked the same way, with
+    `data-live` (wire_live)."""
     import html as htmllib
 
     for poster, entry in cines.items():
-        attr = ' data-cine="%s"' % htmllib.escape(json.dumps(entry, separators=(",", ":")), quote=True)
+        attr = ' %s="%s"' % (name, htmllib.escape(json.dumps(entry, separators=(",", ":")), quote=True))
         q = re.escape(poster)
         html = re.sub(r'(<img\b[^>]*?\bsrc="%s"[^>]*?)(\s*/?>)' % q, lambda m: m.group(1) + attr + m.group(2), html)
         html = re.sub(r'(<(?!img\b)[a-z][a-z0-9-]*\b[^>]*?url\(%s\)[^>]*?)(>)' % q, lambda m: m.group(1) + attr + m.group(2), html)
     return html
+
+
+def wire_live(html: str, lives: dict[str, dict]) -> str:
+    """Mark where a picture with living details is shown (`data-live`: its aspect and details, engine/live.py); the runtime
+    (runtime/src/players/liveStill.ts) draws them over it."""
+    return wire_cinemagraphs(html, lives, "data-live")
 
 
 def runtime_ready() -> bool:
@@ -261,6 +268,23 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         cines[poster] = cine.page_entry(built, url)
         log(f"  cinemagraph: {cine.summary(built['data'])}")
 
+    lives: dict[str, dict] = {}     # poster url -> its living details (data-live)
+
+    def live_of(ref, poster: str, src: Path, shown: Path) -> None:
+        """An image input with `live:`: its details resolved for the page (regions, colours, glint points; engine/live.py)."""
+        if not isinstance(ref, ImageInput) or not ref.live:
+            return
+        from .. import live
+
+        def url(p: Path) -> str:
+            media.mkdir(parents=True, exist_ok=True)
+            shutil.copy(p, media / p.name)
+            return f"assets/_media/{p.name}"
+        details = live.page_details(project, ref, src, shown, theme["colors"], url, log)
+        if details:
+            lives[poster] = live.page_entry(details, shown)
+            log(f"  live: {live.summary(details)}")
+
     def block_image(ref, width: int, knockout: bool = False) -> Optional[str]:
         if ref is None:
             return None
@@ -286,6 +310,7 @@ def build_site(project: Project, log: Callable[[str], None] = print,
             credits.append(image_credit(ref))
         poster = f"assets/_media/{out.name}"
         cinemagraph_of(ref, poster)
+        live_of(ref, poster, src, out)
         return poster
     for e in sections:
         if e["s"].type == "gallery":
@@ -434,6 +459,8 @@ def build_site(project: Project, log: Callable[[str], None] = print,
     )
     if cines:
         html = wire_cinemagraphs(html, cines)
+    if lives:
+        html = wire_live(html, lives)
     if badge:   # the storyboard marks its pages: never mistaken for the finished site
         mark = (f'<div class="ss-storyboard-badge" style="position:fixed;left:14px;bottom:14px;z-index:2147483000;'
                 f'font:600 12px/1 system-ui,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#111;'

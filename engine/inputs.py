@@ -63,7 +63,7 @@ def _lfs_check(url: str, out: Path, log=print) -> None:
 
 # Image-input fields added after earlier builds were keyed: left out of keys while unset, so adding a field never
 # re-renders finished work.
-LATE_FIELDS = ("product", "scene", "beat_frame", "region", "match", "cinemagraph", "medium", "calm")
+LATE_FIELDS = ("product", "scene", "beat_frame", "region", "match", "cinemagraph", "medium", "calm", "live")
 
 
 def stable_dump(model) -> dict:
@@ -83,6 +83,7 @@ def image_key(ref: ImageRef) -> dict:
     d = stable_dump(ref)
     d.pop("credit", None)
     d.pop("cinemagraph", None)       # a cinemagraph moves part of the picture on the page; the picture itself is the same
+    d.pop("live", None)              # so do living details (drawn by the page)
     return d
 
 
