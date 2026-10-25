@@ -12,7 +12,8 @@ import re
 from dataclasses import dataclass
 from typing import Annotated, Any, Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator, model_serializer, model_validator
+from pydantic import (BaseModel, ConfigDict, Discriminator, Field, PrivateAttr, Tag, field_validator, model_serializer,
+                      model_validator)
 
 from .safety import CSS_NAME, FONT_NAME, SAFE_ID, check_url, css_value_ok
 
@@ -509,18 +510,107 @@ def _place(v):
     return v
 
 
+# ---- where words go and when they show: one model for every scene (docs/design/1.5-make-it-yours.md §1-2) -----------
+#
+# `at` places an element (a named spot, a box on the stage, a slot on the 12-column grid), `show` times it over the
+# scene's progress, `enter` and `exit` say how it arrives and leaves. The older fields (`layout` + `side`, `place:
+# <corner>`, `at: [from, to]`, `length` in split/cards) compile into the same model (engine/layout.py).
+
+SPOTS = ("auto", "left", "right", "center", "top", "bottom", "top-left", "top-right", "bottom-left", "bottom-right")
+Spot = Literal["auto", "left", "right", "center", "top", "bottom", "top-left", "top-right", "bottom-left", "bottom-right"]
+MOTIONS = ("fade", "rise", "wipe", "type-on", "scale", "none")
+Motion = Literal["fade", "rise", "wipe", "type-on", "scale", "none"]
+_GRID = re.compile(r"\s*(\d{1,2})\s*(?:/\s*(?:span\s+(\d{1,2})|(\d{1,2})))?\s*")
+
+
+class AtBox(Model):
+    """A box on the stage, in fractions of its width and height (0 is the left or top edge, 1 the right or bottom)."""
+    x: float = Field(..., ge=0, le=1, description="Where the box's left edge is, 0-1 across the stage")
+    y: float = Field(..., ge=0, le=1, description="Where the box's top edge is, 0-1 down the stage")
+    w: float = Field(0.34, gt=0, le=1, description="How wide the box is, 0-1 of the stage's width")
+    h: Optional[float] = Field(None, gt=0, le=1, description="How tall the box is, 0-1 of the stage's height (default: as "
+                                                             "tall as its words)")
+    align: Literal["left", "center", "right"] = Field("left", description="How the words line up inside the box")
+
+    @model_validator(mode="after")
+    def _inside(self):
+        if self.x + self.w > 1 + 1e-6:
+            raise ValueError(f"the box runs off the right edge: x {self.x} + w {self.w} is more than 1")
+        if self.h is not None and self.y + self.h > 1 + 1e-6:
+            raise ValueError(f"the box runs off the bottom edge: y {self.y} + h {self.h} is more than 1")
+        return self
+
+
+class AtGrid(Model):
+    """A slot on the theme's 12-column grid: the content width between the page's gutters, cut into 12 columns."""
+    grid: str = Field(..., description="The columns, written as CSS writes them: \"9 / span 4\" (start at column 9, four "
+                                       "columns wide), \"1 / 7\" (columns 1 to 6) or \"5\" (column 5 alone)")
+    row: Literal["top", "middle", "bottom"] = Field("middle", description="Where the slot sits down the stage")
+    align: Literal["left", "center", "right"] = Field("left", description="How the words line up inside the slot")
+
+    @field_validator("grid")
+    @classmethod
+    def _columns(cls, v: str) -> str:
+        m = _GRID.fullmatch(v)
+        if not m:
+            raise ValueError(f"grid {v!r} is not a column slot: write \"9 / span 4\", \"1 / 7\" or \"5\"")
+        start, span, end = int(m[1]), m[2], m[3]
+        n = int(span) if span else (int(end) - start if end else 1)
+        if not 1 <= start <= 12 or n < 1 or start + n - 1 > 12:
+            raise ValueError(f"grid {v!r} does not fit the 12 columns: start at 1-12 and end by column 12")
+        return v.strip()
+
+    @property
+    def columns(self) -> tuple[int, int]:
+        """(first column, how many columns), 1-based."""
+        m = _GRID.fullmatch(self.grid)
+        start = int(m[1])
+        return start, int(m[2]) if m[2] else (int(m[3]) - start if m[3] else 1)
+
+
+def _at_kind(v: Any) -> str:
+    """Which of the four forms an `at` is, so a mistake is reported against that form alone."""
+    if isinstance(v, (AtBox, AtGrid)):
+        return "grid" if isinstance(v, AtGrid) else "box"
+    if isinstance(v, dict):
+        return "grid" if "grid" in v else "box"
+    if isinstance(v, str):
+        return "spot"
+    return "window"
+
+
+At = Annotated[Union[Annotated[tuple[float, float], Tag("window")], Annotated[Spot, Tag("spot")],
+                     Annotated[AtBox, Tag("box")], Annotated[AtGrid, Tag("grid")]], Discriminator(_at_kind)]
+
+AT_DOC = ("Where the step's words sit. A named spot: left, right, center, top, bottom, top-left, top-right, bottom-left, "
+          "bottom-right (auto, the default, lets the layout decide). Or a box on the stage, `{x, y, w, h, align}` in 0-1 "
+          "(x and y are its top-left corner). Or a slot on the theme's 12-column grid, `{grid: \"9 / span 4\", row: top | "
+          "middle | bottom}`. Overlay scenes take all three; cards take all three for the card; split takes a spot (the "
+          "copy stays in its column). Two numbers, `[from, to]`, are the older way to write `show`")
+SHOW_DOC = ("When the step is on screen: from and to, 0-1 of the scene's progress (0.3-0.46 is the stretch from 30% to 46% "
+            "of the way through). Overlay scenes; in split and cards a step shows while it scrolls past, for its `length`. "
+            "Scenes that time their own copy (inside, light, code with `state.file`, film beats with `state.beat`, "
+            "diorama) fill it in for steps that leave it out")
+ENTER_DOC = ("How the step arrives: fade, rise (the words rise into place), wipe (revealed from the left), type-on (word by "
+             "word), scale (grows in) or none. Default: the layout's own, words rising over a stage and cards brightening "
+             "as they reach the middle of the screen. With reduced motion every motion is a plain fade")
+EXIT_DOC = ("How the step leaves: fade, rise (the words rise away), wipe (cleared to the right), type-on (gone at once), "
+            "scale or none. Default: the layout's own")
+
+
 class Step(Model):
     """One beat of copy that scrolls past the scene."""
     kicker: Optional[str] = None
     title: str = Field(..., description="Headline; <em>…</em> marks the accent words")
     body: Optional[str] = None
     fact: Optional[str] = Field(None, description="Small print under the body (mono)")
-    at: Optional[tuple[float, float]] = Field(None, description="overlay layout: visible between these scene progress values (0-1)")
+    at: Optional[At] = Field(None, description=AT_DOC)
     length: float = Field(1.2, description="split/cards layouts: scroll distance of this step, in screen heights")
     intro: bool = Field(False, description="Render as the section's opening headline (h1)")
     hint: Optional[str] = Field(None, description="Small 'scroll to begin' line under an intro step")
     place: Optional[Union[Literal["left", "right", "center", "top-left", "top-right", "bottom-left", "bottom-right"], WorldPlace]] = Field(
-        None, description="overlay layout: where this caption sits on the shot (default: left, centred vertically). Or an "
+        None, description="overlay layout: where this caption sits on the shot (default: left, centred vertically); "
+                          "a corner here is the same as `at: <corner>`. Or an "
                           "object, `{kind: behind | surface | sky, ...}`: the title is set inside the scene instead of over "
                           "it (type in the world; see WorldPlace). `place: sky` is shorthand")
 
@@ -546,6 +636,33 @@ class Step(Model):
     image: Optional[ImageRef] = Field(None, description="parallax: this step's photo")
     state: dict[str, Any] = Field(default_factory=dict,
         description="Scene-specific state for this step. chart: {show, focus, x, y, reveal, marks}; map: {center, zoom, pitch, bearing, route, marker}")
+    show: Optional[tuple[float, float]] = Field(None, description=SHOW_DOC)
+    enter: Optional[Motion] = Field(None, description=ENTER_DOC)
+    exit: Optional[Motion] = Field(None, description=EXIT_DOC)
+
+    @model_validator(mode="after")
+    def _placement(self):
+        if self.show is not None:
+            a, b = self.show
+            if not 0 <= a < b <= 1:
+                raise ValueError(f"step '{self.title[:40]}': show {list(self.show)} must be [from, to] with 0 <= from < to <= 1")
+            if isinstance(self.at, tuple):
+                raise ValueError(f"step '{self.title[:40]}': `at: [from, to]` is the older way to write `show`; give one of them")
+        if self.corner is not None and self.at is not None and not isinstance(self.at, tuple):
+            raise ValueError(f"step '{self.title[:40]}': `place: {self.corner}` is the older way to write `at: {self.corner}`; "
+                             f"give one of them")
+        return self
+
+    @model_serializer(mode="wrap")
+    def _dump(self, handler):
+        """The layout fields are left out while unset, so a spec written before them dumps (and is embedded in the page)
+        exactly as it did."""
+        d = handler(self)
+        if isinstance(d, dict):
+            for k in ("show", "enter", "exit"):
+                if d.get(k, 0) is None:
+                    del d[k]
+        return d
 
 
 class Hud(Model):
@@ -678,6 +795,21 @@ class SceneBase(Model):
                                             "says so). A locked scene that was never rendered is rendered once. Unlock "
                                             "(or delete the render) to redo it")
     transition: Optional[Transition] = Field(None, description=TRANSITION_DOC)
+
+    @model_validator(mode="after")
+    def _step_placement(self):
+        """What the layout can do with a step's `at` and `show` (engine/layout.py), checked before anything renders."""
+        if self.layout in ("split", "cards"):
+            for st in self.steps:
+                if st.show is not None:
+                    raise ValueError(f"scene '{self.id}', step '{st.title[:40]}': in a {self.layout} layout a step shows "
+                                     f"while it scrolls past, so `show` has nothing to time; set its `length` (scroll "
+                                     f"distance) instead, or use `layout: overlay`")
+                if self.layout == "split" and isinstance(st.at, (AtBox, AtGrid)):
+                    raise ValueError(f"scene '{self.id}', step '{st.title[:40]}': in a split layout the copy keeps its "
+                                     f"column beside the picture, so `at` takes a spot (left, center, right, top, bottom "
+                                     f"...); a box or a grid slot needs `layout: cards` or `overlay`")
+        return self
 
 
 # ---------------------------------------------------------------- scene types

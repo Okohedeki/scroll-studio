@@ -360,6 +360,104 @@
    "title": "ArtworkScene",
    "type": "object"
   },
+  "AtBox": {
+   "additionalProperties": false,
+   "description": "A box on the stage, in fractions of its width and height (0 is the left or top edge, 1 the right or bottom).",
+   "properties": {
+    "align": {
+     "default": "left",
+     "description": "How the words line up inside the box",
+     "enum": [
+      "left",
+      "center",
+      "right"
+     ],
+     "title": "Align",
+     "type": "string"
+    },
+    "h": {
+     "anyOf": [
+      {
+       "exclusiveMinimum": 0,
+       "maximum": 1,
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "How tall the box is, 0-1 of the stage's height (default: as tall as its words)",
+     "title": "H"
+    },
+    "w": {
+     "default": 0.34,
+     "description": "How wide the box is, 0-1 of the stage's width",
+     "exclusiveMinimum": 0,
+     "maximum": 1,
+     "title": "W",
+     "type": "number"
+    },
+    "x": {
+     "description": "Where the box's left edge is, 0-1 across the stage",
+     "maximum": 1,
+     "minimum": 0,
+     "title": "X",
+     "type": "number"
+    },
+    "y": {
+     "description": "Where the box's top edge is, 0-1 down the stage",
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Y",
+     "type": "number"
+    }
+   },
+   "required": [
+    "x",
+    "y"
+   ],
+   "title": "AtBox",
+   "type": "object"
+  },
+  "AtGrid": {
+   "additionalProperties": false,
+   "description": "A slot on the theme's 12-column grid: the content width between the page's gutters, cut into 12 columns.",
+   "properties": {
+    "align": {
+     "default": "left",
+     "description": "How the words line up inside the slot",
+     "enum": [
+      "left",
+      "center",
+      "right"
+     ],
+     "title": "Align",
+     "type": "string"
+    },
+    "grid": {
+     "description": "The columns, written as CSS writes them: \"9 / span 4\" (start at column 9, four columns wide), \"1 / 7\" (columns 1 to 6) or \"5\" (column 5 alone)",
+     "title": "Grid",
+     "type": "string"
+    },
+    "row": {
+     "default": "middle",
+     "description": "Where the slot sits down the stage",
+     "enum": [
+      "top",
+      "middle",
+      "bottom"
+     ],
+     "title": "Row",
+     "type": "string"
+    }
+   },
+   "required": [
+    "grid"
+   ],
+   "title": "AtGrid",
+   "type": "object"
+  },
   "Beat": {
    "additionalProperties": false,
    "description": "One shot of a story film: a still generated from `prompt` (or taken from `image`), brought to life by `motion`.",
@@ -10799,24 +10897,49 @@
     "at": {
      "anyOf": [
       {
-       "maxItems": 2,
-       "minItems": 2,
-       "prefixItems": [
+       "oneOf": [
         {
-         "type": "number"
+         "maxItems": 2,
+         "minItems": 2,
+         "prefixItems": [
+          {
+           "type": "number"
+          },
+          {
+           "type": "number"
+          }
+         ],
+         "type": "array"
         },
         {
-         "type": "number"
+         "enum": [
+          "auto",
+          "left",
+          "right",
+          "center",
+          "top",
+          "bottom",
+          "top-left",
+          "top-right",
+          "bottom-left",
+          "bottom-right"
+         ],
+         "type": "string"
+        },
+        {
+         "$ref": "#/$defs/AtBox"
+        },
+        {
+         "$ref": "#/$defs/AtGrid"
         }
-       ],
-       "type": "array"
+       ]
       },
       {
        "type": "null"
       }
      ],
      "default": null,
-     "description": "overlay layout: visible between these scene progress values (0-1)",
+     "description": "Where the step's words sit. A named spot: left, right, center, top, bottom, top-left, top-right, bottom-left, bottom-right (auto, the default, lets the layout decide). Or a box on the stage, `{x, y, w, h, align}` in 0-1 (x and y are its top-left corner). Or a slot on the theme's 12-column grid, `{grid: \"9 / span 4\", row: top | middle | bottom}`. Overlay scenes take all three; cards take all three for the card; split takes a spot (the copy stays in its column). Two numbers, `[from, to]`, are the older way to write `show`",
      "title": "At"
     },
     "body": {
@@ -10842,6 +10965,48 @@
      ],
      "default": null,
      "description": "overlay layout: a button under the caption, e.g. the call to action on a film's last shot"
+    },
+    "enter": {
+     "anyOf": [
+      {
+       "enum": [
+        "fade",
+        "rise",
+        "wipe",
+        "type-on",
+        "scale",
+        "none"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "How the step arrives: fade, rise (the words rise into place), wipe (revealed from the left), type-on (word by word), scale (grows in) or none. Default: the layout's own, words rising over a stage and cards brightening as they reach the middle of the screen. With reduced motion every motion is a plain fade",
+     "title": "Enter"
+    },
+    "exit": {
+     "anyOf": [
+      {
+       "enum": [
+        "fade",
+        "rise",
+        "wipe",
+        "type-on",
+        "scale",
+        "none"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "How the step leaves: fade, rise (the words rise away), wipe (cleared to the right), type-on (gone at once), scale or none. Default: the layout's own",
+     "title": "Exit"
     },
     "fact": {
      "anyOf": [
@@ -10931,8 +11096,31 @@
       }
      ],
      "default": null,
-     "description": "overlay layout: where this caption sits on the shot (default: left, centred vertically). Or an object, `{kind: behind | surface | sky, ...}`: the title is set inside the scene instead of over it (type in the world; see WorldPlace). `place: sky` is shorthand",
+     "description": "overlay layout: where this caption sits on the shot (default: left, centred vertically); a corner here is the same as `at: <corner>`. Or an object, `{kind: behind | surface | sky, ...}`: the title is set inside the scene instead of over it (type in the world; see WorldPlace). `place: sky` is shorthand",
      "title": "Place"
+    },
+    "show": {
+     "anyOf": [
+      {
+       "maxItems": 2,
+       "minItems": 2,
+       "prefixItems": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "number"
+        }
+       ],
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "When the step is on screen: from and to, 0-1 of the scene's progress (0.3-0.46 is the stretch from 30% to 46% of the way through). Overlay scenes; in split and cards a step shows while it scrolls past, for its `length`. Scenes that time their own copy (inside, light, code with `state.file`, film beats with `state.beat`, diorama) fill it in for steps that leave it out",
+     "title": "Show"
     },
     "state": {
      "additionalProperties": true,
