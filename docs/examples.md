@@ -32,6 +32,7 @@ Every example is a `site.yaml` in [`examples/`](../examples/) and rebuilds with 
 | **Gaussian splat** | `splat` | [Hollis House](../examples/hollis-house/site.yaml) | A walk through a scanned house, room by room |
 | **Product sequence** | `sequence` | [Fischer & Vale](../examples/fischer-vale/site.yaml) | A glass chess set lifts off its board (Blender) |
 | **Artwork** | `artwork` | [Atelier Sfumato](../examples/atelier-sfumato/site.yaml) | The Mona Lisa drawn and painted in five lessons |
+| **The pointer reveals** | `pointer:` + `parallax` | [Atelier Sfumato](../examples/atelier-sfumato/site.yaml) | A torch over the Mona Lisa; her colour through a lens on the grey |
 | **Construction drawing** | `artwork` | [Hale & Rowe](../examples/hale-rowe/site.yaml) | A house drawn from construction lines to finished photo |
 | **Live 3D** | `scene3d` | [Cellwright Bio](../examples/cellwright-bio/site.yaml) | From tissue to a molecule docking on DNA |
 | **Cosmic zoom** | `scene3d` | [Northstar Observatory](../examples/northstar-observatory/site.yaml) | A fall from the whole galaxy to one living planet |

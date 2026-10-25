@@ -503,6 +503,65 @@ Everything is cached per region: the film, the prompt, its frame and the model a
 show it (base look; with masks from a full build, the colour at that moment), and the animatic is cut from those frames.
 It runs on ComfyUI with `studio setup-comfy` (below) and about 2 GB of models.
 
+### The visitor's pointer reveals the picture (`pointer:`)
+
+The visitor's pointer does the revealing. A **lens** is a soft circle under the pointer that shows a second layer through
+the first: the picture's own colour through a black-and-white page, or a second picture of the same view (before and
+after, the drawing under the paint, the inside of a product through its outside). A **light** is a torch: the picture
+goes dark and a pool of warm light follows the pointer. Add it to a `parallax` or `film` section:
+
+```yaml
+- id: after-hours
+  type: parallax
+  layout: split
+  pointer: { mode: light, rest: [0.45, 0.3] }          # a torch on the photo; it falls off with the photo's depth
+  steps:
+    - { title: "Hold a torch <em>to her.</em>", image: inputs/painting.jpg }
+- id: value-first
+  type: parallax
+  layout: split
+  pointer: { mode: lens, layer: colour, base: mono, radius: 0.22 }    # colour through a black-and-white photo
+  steps:
+    - { title: "Under every colour, <em>a value.</em>", image: inputs/painting.jpg }
+- id: renovation
+  type: parallax
+  pointer: { mode: lens, layer: [inputs/kitchen-before.jpg, inputs/hall-before.jpg] }   # one second picture per photo
+  steps:
+    - { title: "The kitchen, <em>then and now.</em>", image: inputs/kitchen-after.jpg }
+    - { title: "The hall.", image: inputs/hall-after.jpg }
+```
+
+- **The fields.** `mode` (`lens` or `light`); `layer` (lens: `colour`, a second picture as any image input, or a list
+  with one per photo in step order; a photo without one has no lens); `base` (the look outside a lens: `mono`, `dim`,
+  `blur`, a hex tint or `none`; by default mono for a colour lens, the photo as it is for a second picture); `radius`
+  (a share of the picture's shorter side, 0.2 for a lens and 0.32 for a light by default); `softness` (the edge, 0-1);
+  `strength` (lens: how fully the layer shows; light: how dark the rest of the picture is, 0.85 by default); `color`
+  (the light's colour, a warm torch by default); `rest` (where it sits when no pointer is on the picture).
+- **How the lens is drawn.** In the scene's own WebGL pass, so it costs one extra texture read: the second picture is
+  sampled through the same 2.5D camera move and depth warp as the photo, so it stays lined up while the camera moves,
+  and a hairline rim marks the circle where the two layers look alike. The builder crops and resizes each second picture
+  to its photo's exact size (a log line says when the shapes differed). On a film the lens shows the film's own colour
+  through `base` (or through the film's `reveal.base`, alongside its tracked regions); a second picture needs a
+  parallax section, since a still cannot follow a moving film.
+- **How the light is drawn.** In 2D, from the picture: everything is darkened, and a pool of light with a soft edge and a
+  dim spill follows the pointer. On a photo the depth map shades it: farther surfaces get less light, and the slope of the
+  surface (the depth map's gradient, read a little blurred so it follows big shapes) turns it towards or away from a lamp
+  held just in front of the picture, so the light rakes across a face or a fold. On a film, which has no depth map on
+  the page, it is a plain warm pool. This is not relighting: there is no G-buffer or 3D render behind it, so shadows are not
+  cast and nothing behind a shape is lit.
+- **Phones.** With no hover, the lens or light follows the finger while it touches the screen, sitting a radius above it so
+  the finger does not cover it, and glides back to `rest` when the finger lifts; with nothing touching it drifts slowly
+  around `rest` so the page hints that it can be touched.
+- **Reduced motion, keyboards, no WebGL.** With `prefers-reduced-motion` it stays at `rest`, still: the static version
+  of the reveal. Keyboard users get that same static version (it moves only under a mouse or a finger). It is purely
+  visual: the words never depend on it. Without WebGL2 the scene shows as it always did.
+- **Cost.** It redraws only when the pointer (or the scroll) moves: a still pointer costs nothing, and a section off
+  screen is not drawn at all. Moving, it adds one texture read per pixel (lens) or five (light) to the scene's pass;
+  the example draws at a steady 60 fps while the pointer moves.
+
+Example: [Atelier Sfumato](../examples/atelier-sfumato/site.yaml) (both modes on the Mona Lisa, buildable on a laptop:
+the painting is in the project and the depth model runs on the CPU).
+
 ### Cinemagraphs: one thing moves (`cinemagraph:`)
 
 A still where only one thing moves (steam above a cup, a curtain in a breeze, light on water, a candle flame, smoke) and

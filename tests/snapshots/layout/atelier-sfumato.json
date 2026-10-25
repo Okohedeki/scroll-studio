@@ -369,6 +369,309 @@
    ]
   },
   {
+   "id": "after-hours",
+   "type": "parallax",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-scene",
+      "ss-split",
+      "ss-side-left",
+      "ss-type-parallax",
+      "ss-shade-auto"
+     ],
+     "id": "after-hours",
+     "data": {
+      "data-scene": "parallax"
+     },
+     "text": {
+      "kicker": "Copying at the Museum · after hours",
+      "title": "Hold a torch to her.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-split-grid"
+       ],
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-steps"
+         ],
+         "children": [
+          {
+           "tag": "article",
+           "class": [
+            "ss-step"
+           ],
+           "style": {
+            "--h": "140vh"
+           },
+           "text": {
+            "kicker": "Copying at the Museum · after hours",
+            "title": "Hold a torch to her.",
+            "title_tag": "h2"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-card"
+             ]
+            }
+           ]
+          },
+          {
+           "tag": "article",
+           "class": [
+            "ss-step"
+           ],
+           "style": {
+            "--h": "140vh"
+           },
+           "text": {
+            "kicker": "Sfumato",
+            "title": "Edges that melt.",
+            "title_tag": "h2"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-card"
+             ]
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-pin"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "sdata": {
+    "layout": "split",
+    "length": 4.0,
+    "steps": [
+     {
+      "kicker": "Copying at the Museum · after hours",
+      "title": "Hold a torch <em>to her.</em>",
+      "body": "Move the light across the panel. A low, raking light finds what daylight flattens, the turn of a cheek and the veil over her hair.",
+      "fact": null,
+      "at": null,
+      "length": 1.4,
+      "intro": false,
+      "hint": null,
+      "place": null,
+      "surface": null,
+      "button": null,
+      "image": {
+       "file": "inputs/mona_lisa.jpg",
+       "generate": null,
+       "gradient": null,
+       "product": null,
+       "scene": null,
+       "size": [
+        1920,
+        1088
+       ],
+       "seed": 7,
+       "crop": [
+        0.04,
+        0.06,
+        0.96,
+        0.66
+       ],
+       "edit": null,
+       "beat_frame": null,
+       "match": null,
+       "credit": "Mona Lisa, Leonardo da Vinci, c. 1503–1519. Public domain.",
+       "cinemagraph": null
+      },
+      "state": {}
+     },
+     {
+      "kicker": "Sfumato",
+      "title": "Edges that <em>melt.</em>",
+      "body": "Bring the light close to the corner of her mouth. There is no line there at all, only shadow handing over to light.",
+      "fact": null,
+      "at": null,
+      "length": 1.4,
+      "intro": false,
+      "hint": null,
+      "place": null,
+      "surface": null,
+      "button": null,
+      "image": {
+       "file": "inputs/mona_lisa.jpg",
+       "generate": null,
+       "gradient": null,
+       "product": null,
+       "scene": null,
+       "size": [
+        1920,
+        1088
+       ],
+       "seed": 7,
+       "crop": [
+        0.04,
+        0.06,
+        0.96,
+        0.66
+       ],
+       "edit": null,
+       "beat_frame": null,
+       "match": null,
+       "credit": null,
+       "cinemagraph": null
+      },
+      "state": {}
+     }
+    ],
+    "hud": {
+     "kind": "none",
+     "fields": [],
+     "events": [],
+     "clock": null,
+     "scales": [],
+     "legend": []
+    }
+   }
+  },
+  {
+   "id": "value-first",
+   "type": "parallax",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-scene",
+      "ss-split",
+      "ss-side-right",
+      "ss-type-parallax",
+      "ss-shade-auto"
+     ],
+     "id": "value-first",
+     "data": {
+      "data-scene": "parallax"
+     },
+     "text": {
+      "kicker": "Value, then colour",
+      "title": "Under every colour, a value.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-split-grid"
+       ],
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-steps"
+         ],
+         "children": [
+          {
+           "tag": "article",
+           "class": [
+            "ss-step"
+           ],
+           "style": {
+            "--h": "160vh"
+           },
+           "text": {
+            "kicker": "Value, then colour",
+            "title": "Under every colour, a value.",
+            "title_tag": "h2"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-card"
+             ]
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-pin"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "sdata": {
+    "layout": "split",
+    "length": 4.0,
+    "steps": [
+     {
+      "kicker": "Value, then colour",
+      "title": "Under every colour, <em>a value.</em>",
+      "body": "The painting in black and white is already finished. Look through the lens and the colour is only a tint laid over it.",
+      "fact": null,
+      "at": null,
+      "length": 1.6,
+      "intro": false,
+      "hint": null,
+      "place": null,
+      "surface": null,
+      "button": null,
+      "image": {
+       "file": "inputs/mona_lisa.jpg",
+       "generate": null,
+       "gradient": null,
+       "product": null,
+       "scene": null,
+       "size": [
+        1920,
+        1088
+       ],
+       "seed": 7,
+       "crop": [
+        0.04,
+        0.06,
+        0.96,
+        0.66
+       ],
+       "edit": null,
+       "beat_frame": null,
+       "match": null,
+       "credit": null,
+       "cinemagraph": null
+      },
+      "state": {}
+     }
+    ],
+    "hud": {
+     "kind": "none",
+     "fields": [],
+     "events": [],
+     "clock": null,
+     "scales": [],
+     "legend": []
+    }
+   }
+  },
+  {
    "id": null,
    "type": "quote",
    "markup": [

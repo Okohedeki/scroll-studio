@@ -63,6 +63,44 @@ sections:
       - { value: "5", label: Lessons behind every painting }
       - { value: "6", unit: hrs, label: Of north light a day }
       - { value: "∞", label: Patience included }
+  # The visitor's pointer reveals the painting (`pointer:` on a parallax section; the photo gets a depth map). Builds on a
+  # laptop: the painting is in inputs/ and the depth model runs on the CPU when there is no GPU.
+  #   light  a torch: the panel is dark, a pool of warm light follows the pointer and rakes across her face and hands
+  #   lens   value and colour: the painting in black and white, its colour through a soft circle under the pointer
+  # On a phone the light and the lens follow the finger (the lens sits above it), and drift gently when nothing touches;
+  # with reduced motion, and for keyboard users, they rest where `rest` puts them.
+  - id: after-hours
+    type: parallax
+    nav_label: After hours
+    layout: split
+    side: left
+    moves: [dolly, rise]
+    strength: 0.6
+    pointer: { mode: light, rest: [0.45, 0.3] }
+    steps:
+      - kicker: Copying at the Museum · after hours
+        title: Hold a torch <em>to her.</em>
+        body: Move the light across the panel. A low, raking light finds what daylight flattens, the turn of a cheek and the veil over her hair.
+        length: 1.4
+        image: { file: inputs/mona_lisa.jpg, crop: [0.04, 0.06, 0.96, 0.66], credit: "Mona Lisa, Leonardo da Vinci, c. 1503–1519. Public domain." }
+      - kicker: Sfumato
+        title: Edges that <em>melt.</em>
+        body: Bring the light close to the corner of her mouth. There is no line there at all, only shadow handing over to light.
+        length: 1.4
+        image: { file: inputs/mona_lisa.jpg, crop: [0.04, 0.06, 0.96, 0.66] }
+  - id: value-first
+    type: parallax
+    nav_label: Value first
+    layout: split
+    moves: [dolly]
+    strength: 0.5
+    pointer: { mode: lens, layer: colour, base: mono, radius: 0.22, rest: [0.5, 0.36] }
+    steps:
+      - kicker: Value, then colour
+        title: Under every colour, <em>a value.</em>
+        body: The painting in black and white is already finished. Look through the lens and the colour is only a tint laid over it.
+        length: 1.6
+        image: { file: inputs/mona_lisa.jpg, crop: [0.04, 0.06, 0.96, 0.66] }
   - type: quote
     text: You can have no dominion greater or less than that over <em>yourself.</em>
     who: Leonardo da Vinci, notebooks
