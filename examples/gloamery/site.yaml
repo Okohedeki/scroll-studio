@@ -1,0 +1,147 @@
+# Gloamery: a fictional AI painting tool, in gouache, with the light in the visitor's hand.
+#
+#   studio build examples/gloamery        # no ComfyUI needed: the stills are in inputs/, the medium runs on the CPU
+#   studio inspect examples/gloamery --page
+#
+# `imagery.medium: gouache` paints every picture on the page in matte, flat shapes pulled toward the brand's colours
+# (ink, amber, teal) with brush streaks and paper tooth. The opening is a photo parallax of a painting rather than a
+# hero block, so it can carry `pointer: { mode: light }`: the studio is dark, and a pool of lamplight follows the
+# pointer, falling off with the picture's depth (on a phone it follows the finger and rests on the lamp). The same
+# torch returns on the lake further down.
+#
+# inputs/ holds the raw Z-Image Turbo stills these were made from, before the medium was applied. With a GPU, swap a
+# `file:` for the `generate:` in the comment above it (and drop its `medium:`, which the site's own covers).
+name: Gloamery
+description: An AI painting partner that paints your rough scene in gouache, then hands you the lamp. A concept site.
+theme:
+  preset: night
+  from:
+    mode: dark
+    colors: { bg: "#12131c", bg2: "#1b1d29", ink: "#f1e8d6", accent: "#f0a23b", accent2: "#3e9c9a", accent_ink: "#1a1206" }
+    fonts: { display: Instrument Serif, body: Inter }
+    radius: 999px
+  labels: plain
+imagery:
+  medium: gouache
+nav:
+  cta: { label: Start painting, href: "#start" }
+sections:
+  - id: studio
+    type: parallax
+    layout: overlay
+    length: 1.6
+    moves: [dolly]
+    strength: 0.5
+    pointer: { mode: light, rest: [0.64, 0.58], radius: 0.34, strength: 0.84, color: "#ffcf8a" }
+    steps:
+      - intro: true
+        at: left
+        kicker: Gloamery · open beta
+        title: Paint the scene. <em>Then move the light.</em>
+        body: Rough in a room, a street or a shoreline. Gloamery paints it in gouache, and the lamp goes wherever you point.
+        hint: Move your pointer. You are holding the lamp.
+        button: { label: Start painting, href: "#start" }
+        image:
+          # generate: A cluttered painter's attic studio at night under a sloping roof, canvases leaning against the walls, jars of brushes and rags, a big arched window looking out over moonlit rooftops, an easel on the right with a half-finished landscape, a single oil lamp on a stool casting a warm amber pool of light, deep ultramarine shadows everywhere else
+          # (2048x1152, seed 401, the second of a batch of four; calm: left)
+          file: inputs/studio.jpg
+          medium: gouache
+          # a living detail, drawn by the page: dust turning in the lamplight above the stool
+          live:
+            - { kind: rise, box: [0.55, 0.22, 0.76, 0.6], count: 16, color: accent, speed: 0.6, strength: 0.6 }
+
+  - type: intro
+    id: why
+    nav_label: Why light
+    kicker: Light first
+    title: Light decides what a picture is <em>about.</em>
+    body: Most image tools hand you a finished frame and a prompt box. Gloamery hands you the lamp, one source you can carry round the scene until the story sits where you want it.
+
+  - type: product
+    side: right
+    kicker: Practical lights
+    title: Every window is a switch.
+    body: Gloamery finds the lamps, windows and fires it painted and lets you turn each one up, down or off. The rest of the scene answers, down to the wet cobbles.
+    tags: [Window glow, Lamp falloff, Wet reflections]
+    image:
+      # generate: A narrow old town street at blue hour seen from above, shop windows glowing amber, rain on the cobbles, a lone cyclist with a light
+      # (1600x1280, seed 4)
+      file: inputs/street.jpg
+      medium: gouache
+
+  - id: lantern
+    type: parallax
+    nav_label: Try the lantern
+    layout: split
+    side: right
+    moves: [dolly]
+    strength: 0.5
+    pointer: { mode: light, rest: [0.55, 0.6], radius: 0.36, strength: 0.6, color: "#ffcf8a" }
+    steps:
+      - kicker: Try it here
+        title: Carry the lantern <em>down to the shore.</em>
+        body: Light one thing and the rest goes quiet. Move across the lake and the pines, the mist and the boat come and go with you.
+        length: 1.4
+        image:
+          # generate: A small rowing boat on a dark still lake at night with a lantern hanging at its bow, a pine forest on the far shore, low mist on the water, stars
+          # (2048x1152, seed 7)
+          file: inputs/lake.jpg
+          medium: gouache
+          live: [{ kind: flow, box: [0.0, 0.48, 1.0, 0.74], speed: 0.6, strength: 0.4 }]   # the lake moves a little
+
+  - type: strip
+    id: gallery
+    nav_label: Gallery
+    kicker: Painted this week
+    title: Four scenes, <em>four kinds of light.</em>
+    body: Every one started as a pencil rough and a single light source.
+    items:
+      # generate: A lighthouse on a rocky point at dusk, its beam sweeping over a dark sea, a small cottage beside it with a lit window (1600x1200, seed 4)
+      - caption: A beam that sweeps
+        image:
+          file: inputs/lit-lighthouse.jpg
+          medium: gouache
+          crop: [0, 0.025, 1, 1]          # the paper edge the model drew along the top
+          live: [{ kind: sweep, box: [0.0, 0.0, 1.0, 0.5], origin: [0.6, 0.38], speed: 0.8, strength: 0.5 }]
+      # generate: Camels and travellers resting around a campfire among desert dunes at night, the fire lighting their tents (1600x1200, seed 4)
+      - caption: Firelight in the dunes
+        image:
+          file: inputs/lit-caravan.jpg
+          medium: gouache
+          crop: [0, 0.025, 1, 1]          # the paper edge the model drew along the top
+          live: [{ kind: rise, box: [0.32, 0.4, 0.54, 0.74], count: 12, color: accent, speed: 0.9 }]
+      # generate: A Victorian glasshouse full of palms and ferns at golden hour, low sun shining through the panes (1600x1200, seed 4)
+      - caption: Low sun through glass
+        image: { file: inputs/lit-glasshouse.jpg, medium: gouache, crop: [0, 0.025, 1, 1] }
+      # generate: A small railway station platform in fog at night, one gas lamp, a waiting train with lit carriage windows (1600x1200, seed 4)
+      - caption: One gas lamp in fog
+        image:
+          file: inputs/lit-station.jpg
+          medium: gouache
+          crop: [0, 0.025, 1, 1]          # the paper edge the model drew along the top
+          live: [{ kind: glint, box: [0.22, 0.14, 0.38, 0.36], count: 3, color: accent }]
+
+  - type: stats
+    items:
+      - { value: "1", label: light you carry round any scene }
+      - { value: "4", unit: s, label: to repaint the scene when the light moves }
+      - { value: "12", label: "palettes to paint in, or bring your own" }
+
+  - type: quote
+    text: I used to light a scene by painting it again. <em>Now I pick up the lamp.</em>
+    who: Noor Halvorsen, background painter (a fictional quote)
+
+  - type: cta
+    id: start
+    kicker: Open beta, free while it lasts
+    title: Pick up <em>the lamp.</em>
+    button: { label: Start painting, href: "#start" }
+    surface: dark
+    backdrop:               # drawn on the spot, no model: the page's dark with lamplight rising from below
+      gradient:
+        colors: ["#12131c", "#15161f"]
+        glows: [{ x: 0.5, y: 1.05, color: "#c9782a", radius: 0.55, strength: 0.55 }, { x: 0.5, y: 1.1, color: "#f0a23b", radius: 0.25, strength: 0.5 }]
+        grain: 0.05
+
+footer:
+  left: Gloamery is a fictional product. A Scroll Studio example.

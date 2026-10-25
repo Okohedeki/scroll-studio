@@ -1,0 +1,495 @@
+{
+ "example": "gloamery",
+ "root": {
+  "class": [
+   "mode-dark",
+   "layout-flow"
+  ]
+ },
+ "cuts": [],
+ "sections": [
+  {
+   "id": "studio",
+   "type": "parallax",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-scene",
+      "ss-overlay",
+      "ss-side-right",
+      "ss-type-parallax",
+      "ss-shade-auto"
+     ],
+     "id": "studio",
+     "data": {
+      "data-scene": "parallax"
+     },
+     "text": {
+      "kicker": "Gloamery · open beta",
+      "title": "Paint the scene. Then move the light.",
+      "title_tag": "h1"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-track"
+       ],
+       "style": {
+        "height": "160vh"
+       },
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-stage"
+         ],
+         "children": [
+          {
+           "tag": "div",
+           "class": [
+            "ss-shade"
+           ]
+          },
+          {
+           "tag": "div",
+           "class": [
+            "ss-captions"
+           ]
+          },
+          {
+           "tag": "div",
+           "class": [
+            "ss-captions",
+            "ss-captions--left"
+           ],
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-caption"
+             ],
+             "data": {
+              "data-from": "0",
+              "data-to": "1"
+             },
+             "text": {
+              "kicker": "Gloamery · open beta",
+              "title": "Paint the scene. Then move the light.",
+              "title_tag": "h1"
+             }
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "sdata": {
+    "layout": "overlay",
+    "length": 1.6,
+    "steps": [
+     {
+      "kicker": "Gloamery · open beta",
+      "title": "Paint the scene. <em>Then move the light.</em>",
+      "body": "Rough in a room, a street or a shoreline. Gloamery paints it in gouache, and the lamp goes wherever you point.",
+      "fact": null,
+      "at": "left",
+      "length": 1.2,
+      "intro": true,
+      "hint": "Move your pointer. You are holding the lamp.",
+      "place": null,
+      "surface": null,
+      "button": {
+       "label": "Start painting",
+       "href": "#start"
+      },
+      "image": {
+       "file": "inputs/studio.jpg",
+       "generate": null,
+       "gradient": null,
+       "product": null,
+       "scene": null,
+       "size": [
+        1920,
+        1088
+       ],
+       "seed": 7,
+       "crop": null,
+       "edit": null,
+       "beat_frame": null,
+       "match": null,
+       "credit": null,
+       "cinemagraph": null,
+       "medium": "gouache",
+       "live": [
+        {
+         "kind": "rise",
+         "box": [
+          0.55,
+          0.22,
+          0.76,
+          0.6
+         ],
+         "prompt": null,
+         "pick": "all",
+         "speed": 0.6,
+         "strength": 0.6,
+         "color": "accent",
+         "angle": 0.0,
+         "origin": null,
+         "count": 16,
+         "softness": 0.25
+        }
+       ]
+      },
+      "state": {}
+     }
+    ],
+    "hud": {
+     "kind": "none",
+     "fields": [],
+     "events": [],
+     "clock": null,
+     "scales": [],
+     "legend": []
+    }
+   }
+  },
+  {
+   "id": "why",
+   "type": "intro",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ],
+     "id": "why",
+     "text": {
+      "kicker": "Light first",
+      "title": "Light decides what a picture is about.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-intro2"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "product",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-product",
+      "ss-product--right",
+      "ss-pose--beside"
+     ],
+     "text": {
+      "kicker": "Practical lights",
+      "title": "Every window is a switch.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-product__in"
+       ],
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-product__media"
+         ],
+         "data": {
+          "data-float": ""
+         },
+         "children": [
+          {
+           "tag": "img",
+           "class": [
+            "ss-product__img"
+           ]
+          }
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-product__copy",
+          "ss-reveal"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "lantern",
+   "type": "parallax",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-scene",
+      "ss-split",
+      "ss-side-right",
+      "ss-type-parallax",
+      "ss-shade-auto"
+     ],
+     "id": "lantern",
+     "data": {
+      "data-scene": "parallax"
+     },
+     "text": {
+      "kicker": "Try it here",
+      "title": "Carry the lantern down to the shore.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-split-grid"
+       ],
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-steps"
+         ],
+         "children": [
+          {
+           "tag": "article",
+           "class": [
+            "ss-step"
+           ],
+           "style": {
+            "--h": "140vh"
+           },
+           "text": {
+            "kicker": "Try it here",
+            "title": "Carry the lantern down to the shore.",
+            "title_tag": "h2"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-card"
+             ]
+            }
+           ]
+          }
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-pin"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "sdata": {
+    "layout": "split",
+    "length": 4.0,
+    "steps": [
+     {
+      "kicker": "Try it here",
+      "title": "Carry the lantern <em>down to the shore.</em>",
+      "body": "Light one thing and the rest goes quiet. Move across the lake and the pines, the mist and the boat come and go with you.",
+      "fact": null,
+      "at": null,
+      "length": 1.4,
+      "intro": false,
+      "hint": null,
+      "place": null,
+      "surface": null,
+      "button": null,
+      "image": {
+       "file": "inputs/lake.jpg",
+       "generate": null,
+       "gradient": null,
+       "product": null,
+       "scene": null,
+       "size": [
+        1920,
+        1088
+       ],
+       "seed": 7,
+       "crop": null,
+       "edit": null,
+       "beat_frame": null,
+       "match": null,
+       "credit": null,
+       "cinemagraph": null,
+       "medium": "gouache",
+       "live": [
+        {
+         "kind": "flow",
+         "box": [
+          0.0,
+          0.48,
+          1.0,
+          0.74
+         ],
+         "prompt": null,
+         "pick": "all",
+         "speed": 0.6,
+         "strength": 0.4,
+         "color": null,
+         "angle": 0.0,
+         "origin": null,
+         "count": 12,
+         "softness": 0.25
+        }
+       ]
+      },
+      "state": {}
+     }
+    ],
+    "hud": {
+     "kind": "none",
+     "fields": [],
+     "events": [],
+     "clock": null,
+     "scales": [],
+     "legend": []
+    }
+   }
+  },
+  {
+   "id": "gallery",
+   "type": "strip",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-strip"
+     ],
+     "id": "gallery",
+     "text": {
+      "kicker": "Painted this week",
+      "title": "Four scenes, four kinds of light.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-head",
+        "ss-strip__head",
+        "ss-reveal"
+       ]
+      },
+      {
+       "tag": "div",
+       "class": [
+        "ss-strip__track"
+       ],
+       "data": {
+        "data-strip": ""
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "stats",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-band"
+     ],
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-stats",
+        "ss-stats--3"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "quote",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "start",
+   "type": "cta",
+   "markup": [
+    {
+     "tag": "div",
+     "class": [
+      "ss-backdrop",
+      "ss-surface-dark"
+     ],
+     "children": [
+      {
+       "tag": "section",
+       "class": [
+        "ss-block",
+        "ss-cta",
+        "ss-surface-dark"
+       ],
+       "id": "start",
+       "text": {
+        "kicker": "Open beta, free while it lasts",
+        "title": "Pick up the lamp.",
+        "title_tag": "h2"
+       },
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-cta__in"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
