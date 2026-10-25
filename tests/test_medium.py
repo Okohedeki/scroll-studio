@@ -390,6 +390,19 @@ def test_finish_mirrors_or_regenerates_until_the_side_is_calm(tmp_path):
                          regenerate=lambda k: pytest.fail("regenerated"), log=logs.append).exists()
 
 
+def test_a_full_bleed_print_is_made_at_the_width_the_page_serves(tmp_path):
+    """A picture with a calm side (a hero or a backdrop with words over it) is printed at PRINT_WIDTH, so a phone's narrow
+    crop shows the medium's own grain instead of a small print blown up; other pictures keep their size."""
+    p = project(tmp_path, spec())
+    src = p.root / "small.png"
+    fixture(960, 544).save(src)
+    pal = medium.palette("risograph", BRAND)
+    hero = Image.open(medium.finish(p, src, "risograph", pal, 7, None, "left", log=lambda m: None))
+    assert hero.size == (medium.PRINT_WIDTH, round(544 * medium.PRINT_WIDTH / 960))
+    plate = Image.open(medium.finish(p, src, "risograph", pal, 7, None, None, log=lambda m: None))
+    assert plate.size == (960, 544)
+
+
 def test_a_file_in_a_medium_resolves_through_the_recipe(tmp_path):
     p = project(tmp_path, spec())
     (p.root / "inputs").mkdir()

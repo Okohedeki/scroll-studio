@@ -326,11 +326,11 @@ def build_site(project: Project, log: Callable[[str], None] = print,
             e["s"] = tiles(e["s"])
     def block_media(s) -> dict:
         """The media a block shows (images resized and written as WebP, files copied in), keyed as the templates read them."""
-        x = {"backdrop": block_image(getattr(s, "backdrop", None), 2400)}
+        x = {"backdrop": block_image(getattr(s, "backdrop", None), 2560)}
         if s.type == "hero":
             from ..inputs import hero_image
             img, side = hero_image(project, s)
-            x["img"], x["video"] = block_image(img, 2400), publish(s.video)
+            x["img"], x["video"] = block_image(img, 2560), publish(s.video)
             if side and x["img"] and not s.video:      # words over a calm side: their colour from the picture
                 from ..medium import tone
                 from PIL import Image

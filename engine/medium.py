@@ -33,7 +33,7 @@ import numpy as np
 from .spec import MEDIUM_NAMES, medium_name
 
 # bump when a recipe's prompt or post-process changes, so cached results are redone
-VERSION = 1
+VERSION = 2
 
 
 @dataclass(frozen=True)
@@ -593,6 +593,9 @@ REGIONS = {"left": (0.04, 0.24, 0.48, 0.76), "right": (0.52, 0.24, 0.96, 0.76), 
            "top": (0.06, 0.04, 0.94, 0.44), "bottom": (0.06, 0.56, 0.94, 0.96)}
 MIRROR = {"left": "right", "right": "left"}
 CALM_LIMIT = 0.06
+# a full-bleed picture (one with a calm side for words) is printed at the width the page serves it at, so its grain,
+# dots and paper are made at that size instead of being blown up from a smaller print on a phone's narrow crop
+PRINT_WIDTH = 2560
 
 
 def busyness(image, box) -> float:
@@ -698,6 +701,8 @@ def finish(project, raw: Path, name: Optional[str], pal: Optional[dict], seed: i
             log(f"  composition: {calm_side} side calm ({score:.3f})" + (", mirrored" if flip else "")
                 + (f", try {k + 1}" if k else ""))
     if name:
+        if calm_side and im.width < PRINT_WIDTH:
+            im = im.resize((PRINT_WIDTH, round(im.height * PRINT_WIDTH / im.width)), Image.LANCZOS)
         im = apply(im, name, pal, seed, grain, trim=False)
         log(f"  medium: {name} in {', '.join(hexc(c) for c in pal['inks'])} on {hexc(pal['paper'])}")
     out.parent.mkdir(parents=True, exist_ok=True)
