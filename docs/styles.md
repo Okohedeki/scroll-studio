@@ -6,7 +6,8 @@
 `theme: { style: <name> }` changes how a site is experienced: what scrolling does, how content is laid out and
 arrives, how sections hand over, what the pointer does and what the call to action is. The same `site.yaml` reads
 as a departures board, a comic, a terminal session, a game level or an anime opening. `theme.colors` and
-`theme.fonts` still win, so a brand's palette can wear any style.
+`theme.fonts` still win, and `theme.from` puts a whole brand on any style: its palette and faces replace the style's
+own while the experience stays ([themes and brands](guide.md#themes-and-brands)).
 
 | Style | What scrolling is |
 |---|---|

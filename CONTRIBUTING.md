@@ -202,7 +202,8 @@ A style is an **experience**: its own scroll mechanic, layout, transitions and p
 those with an existing one is a reskin and is not merged. The full contract is
 [engine/styles/README.md](engine/styles/README.md); in short:
 
-- **A complete folder:** `style.yaml` (label, about, mode, colours, fonts, `font_axes`, radius, optional `cuts`),
+- **A complete folder:** `style.yaml` (label, about, mode, colours, fonts, `font_axes`, radius, optional `cuts` and
+  `requires`: the tokens a brand may not change),
   `style.css`, `blocks.html.j2` (declaring the block types it renders), optional `chrome.html.j2`, and its runtime
   `runtime/src/styles/<name>.ts`. The folder name is lowercase words joined by hyphens.
 - **Tokens, checked like a preset's:** the same colour roles, mode and contrast rules; `font_axes` only for fonts it uses.

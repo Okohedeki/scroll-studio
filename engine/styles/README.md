@@ -11,7 +11,8 @@ anti-patterns, and a one-paragraph UX signature) is in [docs/styles/](../../docs
 
 ```
 engine/styles/<name>/
-  style.yaml        label, about, mode, colors, fonts, font_axes (Google css2 specs for its fonts), radius.
+  style.yaml        label, about, mode, colors, fonts, font_axes (Google css2 specs for its fonts), radius,
+                    optional requires (tokens a brand may not change, below) and cuts.
                     fonts beyond display/body/mono (e.g. masthead: UnifrakturMaguntia) are loaded and exposed as
                     --font-<role> CSS variables
   style.css         everything visual, scoped under html.style-<name>
@@ -20,6 +21,30 @@ engine/styles/<name>/
   scenes.html.j2    its own markup for scene types (optional, rare)
 runtime/src/styles/<name>.ts   its experience: scroll controller, transitions, pointer (loaded only for this style)
 ```
+
+### Wearing a brand (`theme.from`)
+
+A style is a named token set over the preset, and a brand is laid over the style (the order is in the
+[guide](../../docs/guide.md#themes-and-brands)). With a brand on, the compiler swaps the style's own palette, every
+colour in its `style.yaml` `colors` as `#hex` or `rgb()` anywhere in `style.css`, for the brand's, and its display, body
+and mono families (quoted) for the brand's faces. So:
+
+- **Write the palette with the colours your `style.yaml` declares** (or `var(--bg)`, `var(--ink)`, `var(--accent)`...).
+  Colours that are not in the palette are the style's own (a CRT's phosphor green, a pin's brass) and stay, and so
+  do pure black and white and `accent_ink` (unless it is also another palette colour, such as the background). The brand's accents are held to the contrast your own accent has with your
+  background and your `accent_ink` (up to 7:1), so declare the `accent_ink` your stylesheet really sets on the accent.
+- **Declare what a brand may not change** in `requires`, a token set laid over the brand. A style drawn for a light or
+  dark room requires its `mode`; the brand's palette is then rebuilt in that mode around the brand's accents. A style
+  whose mechanic is a typeface requires that face:
+
+  ```yaml
+  requires:
+    mode: dark
+    fonts: { display: Tilt Neon }
+  ```
+
+`tests/test_conformance.py` renders every style wearing three unrelated brands (light, dark, saturated) and checks the
+contrast rules on each.
 
 ### blocks.html.j2
 

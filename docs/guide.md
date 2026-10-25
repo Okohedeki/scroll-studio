@@ -64,6 +64,73 @@ model: colour stops, glows, stars and grain, enough for colour cards, dusk skies
     title: Your words stay <em>on your phone.</em>
 ```
 
+## Themes and brands
+
+Everything visual is a token, and a theme is a stack of token sets, each laid over the one before:
+
+1. the engine's defaults
+2. the `preset` (`engine/themes.yaml`)
+3. the `style` (`engine/styles/<name>/style.yaml`)
+4. the brand, `theme.from`
+5. what you set on `theme:` itself (`colors`, `fonts`, `radius`, `mode`, and the tokens below), which always wins
+
+A brand comes from a web page, a saved page, a logo or a `brand.yaml` in the project. Its colours, fonts (Google Fonts
+families), button radius and logo are read once and kept in `.build/brand/`; the logo becomes the nav logo when
+`nav.logo` is not set. Missing colours are derived from the ones found, with the presets' contrast rules.
+
+```yaml
+theme:
+  style: bauhaus
+  from: https://example.com/        # or brand/logo.svg, brand/home.html, brand/brand.yaml
+```
+
+`studio brand my-site --from https://example.com/` reads the brand afresh and writes its tokens into site.yaml, where
+they can be edited; the site then builds without reading the page again:
+
+```yaml
+theme:
+  style: bauhaus
+  from:
+    mode: light
+    colors: { bg: "#fbf7ef", bg2: "#f1ede4", ink: "#1d2a24", accent: "#0b6e4f", accent2: "#f2a541", accent_ink: "#ffffff" }
+    fonts: { display: Fraunces, body: Inter }
+    radius: 10px
+    logo: brand/logo.svg
+    source: https://example.com/
+```
+
+**A brand on a style.** The style keeps its experience (its scroll mechanic, layout, transitions and pointer) and
+wears the brand: the brand's palette and faces replace the style's own, in the style's stylesheet too. A style can
+require tokens in its `style.yaml`: most keep the light or dark room their drawing is made for, so a light brand on
+neon-glow is rebuilt dark around its accents, and a few keep the face their mechanic is built on (pixel-art's pixel
+fonts, neon-glow's tube lettering). Under a style the brand's accents keep the contrast the style's own accents have
+with what they meet (the background, the words set on them), because styles draw words and shapes in them directly. `theme.colors` and `theme.fonts` on a style mean what they always have: they
+change the theme's tokens, which the style reads where it uses them; `from:` is what reskins the style itself.
+
+**Fonts of your own.** A font role can be a file in the project instead of a Google Fonts family; it is served from
+the site like the Google faces are:
+
+```yaml
+theme:
+  fonts:
+    display: { file: fonts/Brand-Display.woff2 }
+    body: { file: fonts/Brand-Text.woff2, weight: 400 }
+    mono: IBM Plex Mono
+```
+
+**Spacing, type, shade and motion.** Each defaults to what the stylesheet has always used, so a theme that sets none
+looks as it did. Presets and styles may set them too.
+
+```yaml
+theme:
+  space: { gutter: 24px, max: 1280px, caption: 560px }   # defaults: clamp(20px, 4vw, 64px), 1600px, min(680px, 82vw)
+  type: { scale: 1.1, body: 18px }                        # headline sizes x1.1; running text (17px)
+  shade: { strength: 0.6 }                                # the shade over scene pictures (1)
+  motion: { ease: "cubic-bezier(.3, .7, .2, 1)", enter: 0.3, follow: 0.08 }   # how blocks arrive (0.2), smooth scroll (0.1)
+  grain: 0.2                                              # film grain over the page (0, none)
+  phone: 820                                              # one phone width for the stylesheet and the runtime
+```
+
 ## Direction boards: pitch it before you build it
 
 A studio does not start with the build. It shows the client three or six different ideas of what the site could be, side
@@ -282,6 +349,7 @@ cached, so a re-run costs nothing until something changes; `studio trailer my-si
 studio copy export my-site                 # my-site/copy.md: every visible line of text, ready to send
 studio copy import my-site copy.md         # apply the client's edits (prints a diff; --dry-run to preview)
 studio brand my-site --logo inputs/logo.png --mode light   # theme colours from the logo, contrast-checked
+studio brand my-site --from https://example.com/           # a brand's colours, fonts, radius and logo into theme.from
 ```
 
 The copy deck is plain Markdown: one `###` key per field, the text under it. Imports keep site.yaml's comments and
