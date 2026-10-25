@@ -14,7 +14,7 @@ page in the same pull request (or right after, for settings that only exist in t
 
 - `main` (branch protection):
   - Changes only through pull requests, for everyone, administrators included. No force pushes, no deletion.
-  - Required checks, branch up to date before merging: `tests`, `lint`, `runtime`, `install`, `pr-policy`,
+  - Required checks, branch up to date before merging: `tests`, `lint`, `runtime`, `install`, `render`, `pr-policy`,
     `dependency-review`, `secrets` and `workflows`. The `platforms` jobs (Windows, macOS, Python 3.10 and 3.13) and
     `docs` (which only runs when docs change) run on every pull request but are not required yet.
   - Conversations must be resolved. Stale approvals are dismissed when new commits are pushed.

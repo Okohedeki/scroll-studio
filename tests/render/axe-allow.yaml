@@ -101,3 +101,17 @@
   look: style-stop-motion
   selector: 'sm-head__cta'
   reason: "the header button is 3.84:1 (cream on orange)"
+
+# --- found by axe-core 4.14 (#107)
+- rule: label-content-name-mismatch
+  look: style-comic-book
+  selector: 'cb-cornerbox'
+  reason: "the issue-number corner link reads '#1 Free' but its aria-label is 'Kitchen Sink, issue 1, back to the cover': the label should start with the visible text"
+- rule: label-content-name-mismatch
+  look: style-retro-vhs
+  selector: 'vhs-key|vhs-rk'
+  reason: "the VCR keys and remote buttons show REW, F.FWD, CH and TRK but their aria-labels don't contain those words: the labels should include the visible text"
+- rule: color-contrast
+  look: style-smears
+  selector: 'sa-print__cap'
+  reason: "gallery caption emphasis is #45ddff on white, 1.61:1"
