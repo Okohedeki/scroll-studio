@@ -390,6 +390,20 @@ def test_finish_mirrors_or_regenerates_until_the_side_is_calm(tmp_path):
                          regenerate=lambda k: pytest.fail("regenerated"), log=logs.append).exists()
 
 
+def test_a_light_hero_keeps_a_dark_nav_over_it(tmp_path):
+    """A hero in a medium whose calm side came out light sets its words dark; the nav over it must not turn white."""
+    def hero_site(root, colour):
+        p = project(root, spec(sections=[{"type": "hero", "align": "left", "title": "Hello",
+                                          "image": {"file": "inputs/h.png", "medium": "engraving"}}]))
+        (p.root / "inputs").mkdir()
+        Image.new("RGB", (640, 360), colour).save(p.root / "inputs" / "h.png")
+        return compiler.build_site(p, log=lambda m: None).read_text(encoding="utf-8")
+    light = hero_site(tmp_path / "light", (250, 248, 240))
+    assert " hero-light" in light and " hero-media" not in light and "ss-surface-light ss-hero--media" in light
+    dark = hero_site(tmp_path / "dark", (10, 12, 20))
+    assert " hero-media" in dark and " hero-light" not in dark
+
+
 def test_a_full_bleed_print_is_made_at_the_width_the_page_serves(tmp_path):
     """A picture with a calm side (a hero or a backdrop with words over it) is printed at PRINT_WIDTH, so a phone's narrow
     crop shows the medium's own grain instead of a small print blown up; other pictures keep their size."""

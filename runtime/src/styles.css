@@ -177,6 +177,9 @@ blockquote { hanging-punctuation: first last; }
 .ss-captions--grid.ss-captions--row-bottom { top: auto; bottom: 12%; }
 .ss-captions--grid .ss-caption { grid-column: var(--col); }
 :is(.ss-captions--top, .ss-captions--bottom, .ss-captions--box, .ss-captions--grid) .ss-caption { position: relative; top: auto; transform: none; }
+/* a caption in a grid slot or a box sets its headline to fit the slot, not the screen (a third of the grid is narrow) */
+:is(.ss-captions--box, .ss-captions--grid) .ss-caption { container-type: inline-size; }
+:is(.ss-captions--box, .ss-captions--grid) .ss-caption .ss-display { font-size: max(26px, min(calc(clamp(40px, 5.4vw, 86px) * var(--type-scale)), 12cqi)); }
 .ss-captions--align-right, .ss-at--align-right .ss-card { text-align: right; }
 .ss-captions--align-center, .ss-at--align-center .ss-card { text-align: center; }
 :is(.ss-captions--top, .ss-captions--bottom, .ss-captions--align-center) .ss-eyebrow { justify-content: center; }
@@ -330,6 +333,8 @@ blockquote { hanging-punctuation: first last; }
 .ss-panel::after { content: ""; position: absolute; inset: 0; background: #000; opacity: calc(var(--cover, 0) * .4); pointer-events: none; z-index: 5; }
 .layout-stack .ss-footer { position: relative; z-index: 1; background: var(--bg); }
 html.hero-media .ss-nav:not(.ss-solid) { --ink: #fff; --ink-rgb: 255, 255, 255; --ink-2: rgba(255, 255, 255, .82); color: #fff; }
+/* a hero whose picture is light (its words are dark) keeps a dark nav over it: the page's ink, or on a dark site its ground */
+html.mode-dark.hero-light .ss-nav:not(.ss-solid) { --ink: var(--bg); --ink-rgb: var(--bg-rgb); --ink-2: rgba(var(--bg-rgb), .82); color: var(--bg); }
 
 /* ---------------------------------------------------------------- hero */
 .ss-hero { position: relative; min-height: 100vh; min-height: 100svh; display: flex; align-items: center; justify-content: center;

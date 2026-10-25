@@ -636,3 +636,45 @@ def test_a_tall_overlay_caption_on_a_phone_stops_below_the_nav(chromium, tmp_pat
         httpd.shutdown()
         httpd.server_close()
     assert top >= nav, f"the caption starts at {top:.0f}px, under the nav that ends at {nav:.0f}px"
+
+
+def test_a_headline_in_a_narrow_grid_slot_fits_the_slot(chromium, tmp_path):
+    """A third of the grid is about 440 px on a laptop: a caption there sets its headline to the slot, not the screen."""
+    from playwright.sync_api import sync_playwright
+
+    from engine.compile import compiler, fonts
+    from engine.serve import serve
+    root = tmp_path / "site"
+    root.mkdir()
+    steps = [{"title": "Back-pressure at the door", "body": "Short.", "at": {"grid": f"{c} / span 4", "row": "top"},
+              "show": [0.05, 0.95]} for c in (1, 5, 9)]
+    spec = {"name": "Slots", "theme": {"preset": "paper"}, "sections": [
+        {"id": "desk", "type": "diorama", "layout": "overlay", "world": {"kind": "desk", "seed": 4},
+         "places": [{"name": "Notebook", "kind": "notebook"}], "steps": steps}, {"type": "cta", "title": "End"}]}
+    (root / "site.yaml").write_text(yaml.safe_dump(spec, sort_keys=False), encoding="utf-8")
+    saved = fonts.vendor
+    fonts.vendor = lambda links, dist, log=print: None
+    try:
+        compiler.build_site(Project(root), log=lambda m: None)
+    finally:
+        fonts.vendor = saved
+    httpd = serve(root / "dist", 0, background=True)
+    try:
+        with sync_playwright() as p:
+            b = p.chromium.launch()
+            page = b.new_page(viewport={"width": 1440, "height": 900}, reduced_motion="reduce")
+            page.goto(f"http://127.0.0.1:{httpd.server_address[1]}/", wait_until="load")
+            page.wait_for_timeout(500)
+            boxes = page.eval_on_selector_all("#desk .ss-captions--grid .ss-caption", """els => els.map(e => {
+                const h = e.querySelector('.ss-display');
+                return {slot: e.getBoundingClientRect().width, size: parseFloat(getComputedStyle(h).fontSize),
+                        right: h.getBoundingClientRect().right, edge: e.getBoundingClientRect().right};
+            })""")
+            b.close()
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+    assert len(boxes) == 3
+    for x in boxes:
+        assert x["size"] <= x["slot"] * 0.12 + 0.5, x            # the type follows the slot
+        assert x["right"] <= x["edge"] + 1, x                     # and the headline stays inside it
