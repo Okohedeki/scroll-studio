@@ -18,7 +18,8 @@ Scroll Studio runs entirely on your machine. What you need depends on which scen
 | `splat` | A scan as a 3DGS `.ply` (any) or a gsplat `.pt` checkpoint (needs PyTorch to read). No GPU at build time. |
 | `diorama` | Nothing beyond the package (NumPy, OpenCV, Pillow lay the world out on the CPU in seconds; no models, no GPU, no Blender). Visitors need WebGL 2. `studio diorama --strip` photographs the built site and needs Chrome. |
 
-`studio doctor` (or the Toolchain page in the UI) shows what this machine has.
+`studio doctor` (or the Toolchain page in the UI) shows what this machine has, and opens with what it can build without a GPU.
+No GPU: [Try it on a laptop](laptop.md).
 
 ## 1. Core (every site)
 

@@ -20,8 +20,13 @@ MODELS = {
 @lru_cache(maxsize=2)
 def _load(size: str):
     os.environ.setdefault("HF_HOME", str(Path(settings()["model_dir"]) / "hf"))
-    import torch
-    from transformers import AutoImageProcessor, AutoModelForDepthEstimation
+    try:
+        import torch
+        from transformers import AutoImageProcessor, AutoModelForDepthEstimation
+    except ImportError as e:
+        from ..project import BuildError
+        raise BuildError(f"photo parallax estimates depth with PyTorch and transformers, and {e.name} is not installed: run "
+                         "`pip install torch transformers` (the CPU build is enough; docs/laptop.md)") from None
     name = MODELS[size]
     dev = "cuda" if torch.cuda.is_available() else "cpu"
     # safetensors only: never fall back to a pickled pytorch_model.bin, which can run code when loaded
@@ -31,8 +36,8 @@ def _load(size: str):
 
 def estimate(img: Image.Image, size: str = "small") -> np.ndarray:
     """Relative depth, 0 (far) .. 1 (near), at the image's own resolution."""
-    import torch
     proc, model, dev = _load(size)
+    import torch
     inputs = proc(images=img.convert("RGB"), return_tensors="pt").to(dev)
     with torch.inference_mode():
         pred = model(**inputs).predicted_depth
@@ -45,8 +50,8 @@ def estimate(img: Image.Image, size: str = "small") -> np.ndarray:
 def estimate_raw(img: Image.Image, size: str = "small") -> np.ndarray:
     """The model's own relative inverse depth (larger = nearer), at the image's resolution and NOT normalised: the
     scale differs from frame to frame, which is what engine/world_depth.py aligns for a film."""
-    import torch
     proc, model, dev = _load(size)
+    import torch
     inputs = proc(images=img.convert("RGB"), return_tensors="pt").to(dev)
     with torch.inference_mode():
         pred = model(**inputs).predicted_depth

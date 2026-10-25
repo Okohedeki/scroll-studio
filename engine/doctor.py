@@ -170,12 +170,94 @@ def verify_models() -> list[dict]:
     return out or [{"name": "Model files (SHA-256)", "ok": True, "detail": "no pinned model files found on disk", "needed_by": "every model"}]
 
 
+# What builds without a GPU. Each scene type here is built by Python on the CPU (engine/scenes/*.py) with no call to ComfyUI,
+# Blender or FFmpeg, and tests/test_laptop.py builds a site from them with those three out of reach to keep it so.
+# `need` names the Python modules a build imports beyond the package's core dependencies, `fix` how to get them.
+LAPTOP_SCENES: list[dict] = [
+    {"label": "Photo parallax", "uses": "type: parallax", "need": ("torch", "transformers"), "fix": "pip install torch transformers",
+     "detail": "your photos get depth and a slow camera; the CPU is enough, and the small depth model (about 100 MB) "
+               "downloads on the first build"},
+    {"label": "Kinetic type", "uses": "type: type", "detail": "words that reveal, swap, stack and scale as you scroll"},
+    {"label": "Artwork", "uses": "type: artwork", "detail": "your own image, drawn and painted in stages"},
+    {"label": "Vector art", "uses": "type: vector",
+     "detail": "an SVG draws itself, then fills; a raster image is traced first (pip install -e .[vector])"},
+    {"label": "Maps", "uses": "type: map", "detail": "a live map with routes and markers (tiles load when the page opens)"},
+    {"label": "Data", "uses": "type: chart", "detail": "charts that draw themselves from a CSV"},
+    {"label": "Code", "uses": "type: code", "detail": "a flight through your code, the diffs applying as you scroll"},
+    {"label": "Live 3D, miniature worlds, scans", "uses": "type: scene3d, diorama, splat",
+     "detail": "drawn in the visitor's browser (WebGL); a scan is a .ply or .spz file"},
+]
+
+
+def laptop_summary() -> dict:
+    """What this machine can build, in two lists. `no_gpu`: what needs no GPU, each ready or with the one line that makes it
+    ready. `gpu_stack`: what needs ComfyUI, Blender or a CUDA GPU, each ready or not here."""
+    from . import spec
+    from .compile import themes
+    no_gpu = []
+    for item in LAPTOP_SCENES:
+        missing = [m for m in item.get("need", ()) if importlib.util.find_spec(m) is None]
+        no_gpu.append({"label": item["label"], "uses": item["uses"], "detail": item["detail"], "ok": not missing,
+                       "fix": item.get("fix") if missing else None})
+    blocks = [c.model_fields["type"].default for c in spec.BlockBase.__subclasses__()]
+    no_gpu.append({"label": "Blocks", "uses": ", ".join(blocks), "ok": True, "fix": None,
+                   "detail": "copy, features, stats, quotes, FAQ and the rest; a picture is a file or a gradient (`generate:` needs ComfyUI)"})
+    no_gpu.append({"label": f"Every style ({len(themes.styles())})", "uses": "theme: { style: <name> }", "ok": True, "fix": None,
+                   "detail": "a style's own `art:` made from a prompt needs ComfyUI; from a file it does not"})
+    if importlib.util.find_spec("engine.remake") is not None:
+        no_gpu.append({"label": "Remake a landing page", "uses": "studio remake <url> --no-gpu", "ok": True, "fix": None,
+                       "detail": "reads a live page and opens with photo parallax; needs the network"})
+    s = settings()
+    from .backends import comfy
+    try:
+        import torch
+        cuda = torch.cuda.is_available()
+    except Exception:
+        cuda = False
+    comfy_ok = bool(comfy.alive())
+    blender_ok = bool(_ver([s["blender"], "--version"]))
+    gpu_stack = [
+        {"label": "Generated film, the one-take page, cinemagraphs, light as the scroll, `generate:` images",
+         "uses": "type: film, light; generate:", "ok": comfy_ok and cuda,
+         "detail": "ComfyUI running and a 24 GB CUDA GPU" + ("" if comfy_ok and cuda else
+                   f" (here: ComfyUI {'up' if comfy_ok else 'not running'}, CUDA {'found' if cuda else 'not found'})")},
+        {"label": "Product sequences, inside the product", "uses": "type: sequence, inside, showroom", "ok": blender_ok,
+         "detail": "Blender 4.2+" + (", faster with a GPU" if blender_ok else " (not found here)")},
+    ]
+    return {"no_gpu": no_gpu, "gpu_stack": gpu_stack}
+
+
+def marks(encoding: str | None) -> tuple[str, str]:
+    """The tick and cross for an output that can show them; plain text where it can't (a cp1252 Windows console, or
+    output redirected to a file in that code page), which would otherwise stop the report with UnicodeEncodeError."""
+    try:
+        "✓✗".encode(encoding or "utf-8")
+        return "✓", "✗"
+    except (LookupError, UnicodeEncodeError):
+        return "ok", "no"
+
+
 def report(verify: bool = False) -> None:
     from rich.console import Console
+    from rich.markup import escape
     from rich.table import Table
-    t = Table(title="Scroll Studio doctor")
+    console = Console()
+    yes, no = marks(console.encoding)
+    summary = laptop_summary()
+    for title, key in (("Without a GPU you can build:", "no_gpu"), ("Needs the GPU stack (ComfyUI, Blender):", "gpu_stack")):
+        table = Table(title=title, title_justify="left", show_header=False, box=None, pad_edge=False)
+        for _ in range(4):
+            table.add_column(overflow="fold")
+        for row in summary[key]:
+            note = escape(row["detail"]) + (f"  [yellow]Install: {escape(row['fix'])}[/]" if row.get("fix") else "")
+            table.add_row(f"[green]{yes}[/]" if row["ok"] else f"[red]{no}[/]", escape(row["label"]), f"[dim]{escape(row['uses'])}[/]", note)
+        console.print(table)
+        console.print()
+    console.print("No GPU? `studio new my-site --laptop` makes a site that builds on this machine (docs/laptop.md).")
+    console.print()
+    t = Table(title="Scroll Studio doctor: the whole toolchain")
     for c in ("", "Check", "Detail", "Needed by"):
         t.add_column(c)
     for c in checks() + (verify_models() if verify else []):
-        t.add_row("[green]✓[/]" if c["ok"] else "[red]✗[/]", c["name"], str(c["detail"]), c["needed_by"])
-    Console().print(t)
+        t.add_row(f"[green]{yes}[/]" if c["ok"] else f"[red]{no}[/]", c["name"], str(c["detail"]), c["needed_by"])
+    console.print(t)
