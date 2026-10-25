@@ -1,11 +1,13 @@
 """`studio remake <url>` (issue #118): a live landing page read and told again as a scroll site.
 
 No network: the fixture pages (tests/fixtures/remake/, invented brands) are parsed straight from their files, or served
-from a local HTTP server on 127.0.0.1; any request to another host fails the test. Playwright is used only by the one
-test that reads a page in Chromium, which is skipped when the browser is not installed."""
+from a local HTTP server on 127.0.0.1; any request to another host fails the test. Their pictures are drawn when a site
+is served (the repository keeps no media under tests/). Playwright is used only by the one test that reads a page in
+Chromium, which is skipped when the browser is not installed."""
 from __future__ import annotations
 
 import functools
+import shutil
 import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -20,6 +22,25 @@ from engine.compile.layout_snapshot import page_html
 from engine.project import BuildError, Project
 
 FIXTURES = Path(__file__).parent / "fixtures" / "remake"
+# The pictures each fixture page links to, by size: photos, a share card, logos, an avatar and tracking pixels.
+PICTURES = {
+    "quillfern": {"img/hero.jpg": (1600, 900), "img/share.jpg": (1200, 630), "img/map-view.png": (1200, 800),
+                  **{f"img/client-logo-{i}.png": (120, 40) for i in range(1, 5)}, "img/track.gif": (1, 1)},
+    "driftmoss": {"media/coast-dawn.jpg": (1920, 1080), **{f"media/trip-{i}.jpg": (900, 600) for i in range(1, 5)},
+                  **{f"media/press-logo-{i}.png": (100, 36) for i in range(1, 4)}, "media/avatar-1.jpg": (64, 64),
+                  "media/pixel.gif": (1, 1)},
+}
+
+
+def draw(path: Path, size: tuple[int, int], seed: int) -> None:
+    """A small picture: a two-colour gradient with a disc on it."""
+    from PIL import Image, ImageDraw
+    w, h = size
+    a, b = (40 + seed * 37 % 180, 60 + seed * 53 % 160, 90 + seed * 71 % 140), (230, 220 - seed * 13 % 90, 200)
+    im = Image.linear_gradient("L").resize((w, h))
+    im = Image.composite(Image.new("RGB", (w, h), a), Image.new("RGB", (w, h), b), im)
+    ImageDraw.Draw(im).ellipse((w * .3, h * .3, w * .7, h * .8), fill=b[::-1])
+    im.save(path)
 
 
 class _Quiet(SimpleHTTPRequestHandler):
@@ -28,7 +49,7 @@ class _Quiet(SimpleHTTPRequestHandler):
 
 
 @pytest.fixture
-def serve(monkeypatch):
+def serve(monkeypatch, tmp_path_factory):
     """serve('quillfern') -> the fixture site's base URL on a local server. Requests anywhere else fail."""
     servers = []
     real_get = requests.get
@@ -39,7 +60,11 @@ def serve(monkeypatch):
     monkeypatch.setattr(requests, "get", local_only)
 
     def start(name: str) -> str:
-        srv = ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(_Quiet, directory=str(FIXTURES / name)))
+        root = tmp_path_factory.mktemp("web") / name
+        shutil.copytree(FIXTURES / name, root)
+        for k, (rel, size) in enumerate(PICTURES.get(name, {}).items()):
+            draw(root / rel, size, k)
+        srv = ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(_Quiet, directory=str(root)))
         threading.Thread(target=srv.serve_forever, daemon=True).start()
         servers.append(srv)
         return f"http://127.0.0.1:{srv.server_address[1]}/"
