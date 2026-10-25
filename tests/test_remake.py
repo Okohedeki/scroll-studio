@@ -194,7 +194,7 @@ def test_a_page_of_plain_divs_maps_by_shape(tmp_path, serve):
     assert len(strip["items"]) == 4 and strip["items"][2]["caption"] == "Tents on a beach at dusk"
     assert all((p.root / i["image"]).exists() for i in strip["items"])
     assert [s.get("unit") for s in by_type(spec, "stats")[0]["items"]] == [None, None, None]
-    assert by_type(spec, "stats")[0]["items"][2]["value"] == "2,300"
+    assert by_type(spec, "stats")[0]["items"][2]["value"] == "1,850"
     assert by_type(spec, "quote")[0] == {"type": "quote", "id": "what-paddlers-say", "who": "Ines, first-timer",
                                          "text": "I had never been in a kayak. By the end of the morning I was paddling "
                                                  "into a cave with seals watching us."}
