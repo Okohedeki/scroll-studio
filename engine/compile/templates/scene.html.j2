@@ -77,7 +77,8 @@
   </div>
 {% endif %}
   <script type="application/json" class="ss-config">{{ cfg | tojson }}</script>
-  <script type="application/json" class="ss-section">{{ sdata | tojson }}</script>
+  <script type="application/json" class="ss-section">{{ sdata | tojson }}</script>{% if s.pointer %}
+  <script type="application/json" class="ss-pointer">{{ s.pointer.page() | tojson }}</script>{% endif %}
 </section>
 {% endif %}
 {% endmacro %}

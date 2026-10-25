@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import cv2
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 
 from ..inputs import credit, image_key, resolve_image
 from ..project import BuildContext, BuildError, file_key
@@ -53,5 +53,37 @@ def build(sec: ParallaxScene, ctx: BuildContext, theme: dict) -> dict:
             chapters[-1]["world"] = world.build_photo(sec, ctx, i, idx[i], st, img_out, dep_out)
         if credit(st.image):
             credits.append(credit(st.image))
-    return {"chapters": chapters, "move": sec.move, "strength": sec.strength, "end": chapters[-1]["image"],
-            "poster": chapters[0]["image"], "credits": credits}
+    cfg = {"chapters": chapters, "move": sec.move, "strength": sec.strength, "end": chapters[-1]["image"],
+           "poster": chapters[0]["image"], "credits": credits}
+    if sec.pointer is not None and sec.pointer.pictures:       # the lens's second pictures, one per photo
+        cfg["pointer"] = {"layers": pointer_layers(sec, ctx, credits)}
+    return cfg
+
+
+def pointer_layers(sec: ParallaxScene, ctx: BuildContext, credits: list[str]) -> list:
+    """Each photo's second picture for the pointer lens (`pointer.layer`), cropped to the photo's shape and resized to its
+    exact size, so the page samples both through the same camera move and depth warp. None for a photo without one."""
+    out: list = []
+    for i, ref in enumerate(sec.pointer.pictures):
+        if ref is None:
+            out.append(None)
+            continue
+        photo = ctx.web / f"photo{i}.jpg"
+        src = resolve_image(ctx.project, ref, ctx.log)
+        dst = ctx.web / f"layer{i}.jpg"
+
+        def run(src=src, photo=photo, dst=dst):
+            with Image.open(photo) as ph:
+                size = ph.size
+            im = Image.open(src).convert("RGB")
+            if abs(im.width / im.height - size[0] / size[1]) > 0.02:
+                ctx.log(f"  note: pointer layer {i} is not the shape of photo {i}: cropped to it (the lens lines up best "
+                        f"when both are the same view at the same size)")
+            ImageOps.fit(im, size, Image.LANCZOS).save(dst, quality=90, optimize=True, progressive=True)
+
+        key = {"v": 1, "img": image_key(ref), "file": file_key(src), "photo": file_key(photo)}
+        ctx.stage(f"layer{i}", key, [dst], run)
+        out.append(ctx.url(dst))
+        if credit(ref):
+            credits.append(credit(ref))
+    return out

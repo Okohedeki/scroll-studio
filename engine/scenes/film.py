@@ -584,9 +584,10 @@ def build(sec: FilmScene, ctx: BuildContext, theme: dict) -> dict:
     if sec.reveal:      # reveal: fail now, before a film renders, if ComfyUI lacks the nodes that mask it
         from .. import reveal
         reveal.preflight(ctx)
-    in_world = typeworld.active(sec) and not sec.reveal
-    if typeworld.active(sec) and sec.reveal:
-        ctx.log("  note: type in the world is not drawn through `reveal`'s shader yet: the titles stay ordinary captions on this film")
+    in_world = typeworld.active(sec) and not sec.reveal and sec.pointer is None
+    if typeworld.active(sec) and not in_world:
+        ctx.log("  note: type in the world is not drawn through `reveal`'s shader yet (`reveal` and `pointer` use it): the "
+                "titles stay ordinary captions on this film")
     if in_world:           # type in the world: fail now, before a film renders, if a placement can't work
         typeworld.preflight(sec, ctx)
     src = ctx.project.path(sec.video) if sec.video else beats_film(sec, ctx) if sec.beats else generate(sec, ctx)
@@ -602,6 +603,9 @@ def build(sec: FilmScene, ctx: BuildContext, theme: dict) -> dict:
     if sec.reveal:
         from .. import reveal
         cfg["reveal"] = reveal.build(sec, ctx, src, cfg)
+    elif sec.pointer is not None:   # the pointer lens or light is drawn by the reveal shader, frame by frame: it needs the rate
+        num, _, den = str(probe(src).get("r_frame_rate") or "24/1").partition("/")
+        cfg["fps"] = round(float(num) / float(den or 1), 3)
     # ---- type in the world (engine/world.py): depth, tracks and masks for the titles set inside the film
     if in_world:
         cfg["world"] = typeworld.build(sec, ctx, src, cfg)

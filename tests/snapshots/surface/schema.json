@@ -3335,6 +3335,18 @@
      "default": null,
      "title": "Nav Label"
     },
+    "pointer": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Pointer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "The visitor's pointer reveals the picture (see Pointer): `{mode: lens}` shows the colour (or a second picture) through a soft circle under the pointer, `{mode: light}` is a torch on a darkened picture. A film's lens shows its own colour"
+    },
     "reveal": {
      "anyOf": [
       {
@@ -7836,6 +7848,18 @@
      "default": null,
      "title": "Nav Label"
     },
+    "pointer": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Pointer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "The visitor's pointer reveals the picture (see Pointer): `{mode: lens}` shows the colour (or a second picture) through a soft circle under the pointer, `{mode: light}` is a torch on a darkened picture. On photos the light uses each photo's depth map"
+    },
     "shade": {
      "default": "auto",
      "enum": [
@@ -8097,6 +8121,130 @@
     }
    },
    "title": "PartMaterial",
+   "type": "object"
+  },
+  "Pointer": {
+   "additionalProperties": false,
+   "description": "The visitor's pointer reveals the picture. A `lens` is a soft circle under the pointer that shows a second layer\nthrough the first: the picture's own colour through a black-and-white (or dimmed, blurred, tinted) page, or a second\npicture of the same view (before and after, the inside of a product through its outside). `light` is a torch: the\npicture is dark and a pool of warm light follows the pointer; on a photo with a depth map the light falls off with\ndepth and rakes across the shapes. On a phone the lens follows the finger while it touches, a little above it so the\nfinger does not hide it, and rests at `rest` otherwise, drifting gently. With reduced motion (and for keyboard users)\nit stays at `rest`. Purely visual: the words never depend on it, and without WebGL2 the picture shows as it always did.\nWorks on `parallax` and `film` sections. A torch is drawn in 2D from the picture and its depth map, not relit from a\n3D render.",
+   "properties": {
+    "base": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "What the picture looks like outside the lens: mono (black and white), dim, blur, a hex colour (a duotone through it), or none (as it is). Default: mono when the lens shows colour (a film's own `reveal.base` if it has one), none when it shows a second picture",
+     "title": "Base"
+    },
+    "color": {
+     "default": "#ffd7a8",
+     "description": "light: the colour of the light (a warm torch by default), a hex colour",
+     "title": "Color",
+     "type": "string"
+    },
+    "layer": {
+     "anyOf": [
+      {
+       "const": "colour",
+       "type": "string"
+      },
+      {
+       "type": "string"
+      },
+      {
+       "$ref": "#/$defs/ImageInput"
+      },
+      {
+       "items": {
+        "anyOf": [
+         {
+          "type": "string"
+         },
+         {
+          "$ref": "#/$defs/ImageInput"
+         }
+        ]
+       },
+       "type": "array"
+      }
+     ],
+     "default": "colour",
+     "description": "lens: what shows through it. colour: the picture's own colour, with the rest in the `base` look. Or a second picture of the same view, the same shape as the photo (any image input: a file, generate:, edit:, a product still), or a list, one per photo of a parallax section in step order; a photo without one has no lens. A film's lens shows its colour",
+     "title": "Layer"
+    },
+    "mode": {
+     "default": "lens",
+     "description": "lens: a circle that shows `layer` through the picture. light: a torch, a pool of light on a darkened picture",
+     "enum": [
+      "lens",
+      "light"
+     ],
+     "title": "Mode",
+     "type": "string"
+    },
+    "radius": {
+     "anyOf": [
+      {
+       "maximum": 0.6,
+       "minimum": 0.04,
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Size of the lens or the pool of light: its radius as a share of the picture's shorter side. Default 0.2 for a lens, 0.32 for light",
+     "title": "Radius"
+    },
+    "rest": {
+     "default": [
+      0.62,
+      0.42
+     ],
+     "description": "Where the lens or light rests when no pointer is on the picture (phones, keyboard, reduced motion): x, y in 0-1 of the picture",
+     "maxItems": 2,
+     "minItems": 2,
+     "prefixItems": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "number"
+      }
+     ],
+     "title": "Rest",
+     "type": "array"
+    },
+    "softness": {
+     "default": 0.35,
+     "description": "How soft the edge is: 0 a sharp circle, 1 a wide fade",
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Softness",
+     "type": "number"
+    },
+    "strength": {
+     "anyOf": [
+      {
+       "maximum": 1,
+       "minimum": 0,
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "lens: how fully the layer shows inside it (default 1). light: how dark the rest of the picture is, 0 not at all to 1 nearly black (default 0.85)",
+     "title": "Strength"
+    }
+   },
+   "title": "Pointer",
    "type": "object"
   },
   "Pool": {

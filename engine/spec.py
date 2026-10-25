@@ -1072,6 +1072,92 @@ def _faces(v):
     return v
 
 
+_HEX = re.compile(r"#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})")
+
+
+class Pointer(Model):
+    """The visitor's pointer reveals the picture. A `lens` is a soft circle under the pointer that shows a second layer
+    through the first: the picture's own colour through a black-and-white (or dimmed, blurred, tinted) page, or a second
+    picture of the same view (before and after, the inside of a product through its outside). `light` is a torch: the
+    picture is dark and a pool of warm light follows the pointer; on a photo with a depth map the light falls off with
+    depth and rakes across the shapes. On a phone the lens follows the finger while it touches, a little above it so the
+    finger does not hide it, and rests at `rest` otherwise, drifting gently. With reduced motion (and for keyboard users)
+    it stays at `rest`. Purely visual: the words never depend on it, and without WebGL2 the picture shows as it always did.
+    Works on `parallax` and `film` sections. A torch is drawn in 2D from the picture and its depth map, not relit from a
+    3D render."""
+    mode: Literal["lens", "light"] = Field("lens", description="lens: a circle that shows `layer` through the picture. "
+                                                               "light: a torch, a pool of light on a darkened picture")
+    layer: Union[Literal["colour"], ImageRef, list[ImageRef]] = Field(
+        "colour", description="lens: what shows through it. colour: the picture's own colour, with the rest in the `base` "
+                              "look. Or a second picture of the same view, the same shape as the photo (any image input: a "
+                              "file, generate:, edit:, a product still), or a list, one per photo of a parallax section in "
+                              "step order; a photo without one has no lens. A film's lens shows its colour")
+    base: Optional[str] = Field(None, description="What the picture looks like outside the lens: mono (black and white), dim, "
+                                                  "blur, a hex colour (a duotone through it), or none (as it is). Default: "
+                                                  "mono when the lens shows colour (a film's own `reveal.base` if it has one), "
+                                                  "none when it shows a second picture")
+    radius: Optional[float] = Field(None, ge=0.04, le=0.6, description="Size of the lens or the pool of light: its radius as a "
+                                                                       "share of the picture's shorter side. Default 0.2 for a "
+                                                                       "lens, 0.32 for light")
+    softness: float = Field(0.35, ge=0, le=1, description="How soft the edge is: 0 a sharp circle, 1 a wide fade")
+    strength: Optional[float] = Field(None, ge=0, le=1, description="lens: how fully the layer shows inside it (default 1). "
+                                                                    "light: how dark the rest of the picture is, 0 not at all "
+                                                                    "to 1 nearly black (default 0.85)")
+    color: str = Field("#ffd7a8", description="light: the colour of the light (a warm torch by default), a hex colour")
+    rest: tuple[float, float] = Field((0.62, 0.42), description="Where the lens or light rests when no pointer is on the "
+                                                               "picture (phones, keyboard, reduced motion): x, y in 0-1 of "
+                                                               "the picture")
+
+    @field_validator("layer", mode="before")
+    @classmethod
+    def _colour(cls, v):
+        return "colour" if v == "color" else v
+
+    @field_validator("base")
+    @classmethod
+    def _base(cls, v):
+        if v is not None and v not in ("mono", "dim", "blur", "none") and not _HEX.fullmatch(v):
+            raise ValueError("pointer.base is mono, dim, blur, none or a hex colour like #2a4a6a")
+        return v
+
+    @field_validator("color")
+    @classmethod
+    def _color(cls, v):
+        if not _HEX.fullmatch(v):
+            raise ValueError("pointer.color is a hex colour like #ffd7a8")
+        return v
+
+    @field_validator("rest")
+    @classmethod
+    def _rest(cls, v):
+        if not all(0 <= c <= 1 for c in v):
+            raise ValueError("pointer.rest is x, y in 0-1 of the picture")
+        return v
+
+    @model_validator(mode="after")
+    def _light_has_no_layer(self):
+        if self.mode == "light" and self.layer != "colour":
+            raise ValueError("pointer: light has no layer (it lights the picture itself); use mode: lens to show a second picture")
+        return self
+
+    @property
+    def pictures(self) -> list[Optional[ImageRef]]:
+        """The second pictures, one per photo in order (empty when the lens shows colour)."""
+        if self.layer == "colour":
+            return []
+        return list(self.layer) if isinstance(self.layer, list) else [self.layer]
+
+    def page(self) -> dict:
+        """What the page reads (`.ss-pointer`): every setting but the pictures, which the scene builder resolves."""
+        d = self.model_dump(mode="json", exclude={"layer"})
+        d["layer"] = "colour" if self.layer == "colour" else "picture"
+        return d
+
+
+POINTER_DOC = ("The visitor's pointer reveals the picture (see Pointer): `{mode: lens}` shows the colour (or a second "
+               "picture) through a soft circle under the pointer, `{mode: light}` is a torch on a darkened picture")
+
+
 # ---------------------------------------------------------------------------------------------------------------
 
 
@@ -1262,6 +1348,7 @@ class FilmScene(SceneBase):
                                                        "`base` look and brings colour into tracked regions as you scroll")
     faces: Optional[Faces] = Field(None, description="`restore`: repair the faces in the whole film (GFPGAN) before it is "
                                                      "encoded; beats can set it per beat. Off by default")
+    pointer: Optional[Pointer] = Field(None, description=POINTER_DOC + ". A film's lens shows its own colour")
     # ---- type in the world (steps with `place: {kind: behind | surface | sky}`)
     depth_model: Optional[Literal["small", "base", "large"]] = Field(
         None, description="Steps with in-world type (`place: {kind: ...}`): the Depth Anything V2 size that measures the film's "
@@ -1271,6 +1358,16 @@ class FilmScene(SceneBase):
     @classmethod
     def _faces_in(cls, v):
         return _faces(v)
+
+    @model_validator(mode="after")
+    def _pointer_on_film(self):
+        if self.pointer is not None:
+            if self.pointer.pictures:
+                raise ValueError(f"film '{self.id}': a film's pointer lens shows the film's own colour (layer: colour); a "
+                                 "second picture needs a parallax section")
+            if self.journey is not None:
+                raise ValueError(f"film '{self.id}': `pointer` is not drawn on the one-take page (journey)")
+        return self
 
     @model_validator(mode="after")
     def _journey_beats(self):
@@ -1499,6 +1596,16 @@ class ParallaxScene(SceneBase):
     depth_model: Literal["small", "base", "large"] = Field(
         "small", description="Depth Anything V2 size. small is Apache-2.0; base/large are sharper but CC-BY-NC (non-commercial)")
     width: int = Field(2560, description="Max photo width served to desktop browsers")
+    pointer: Optional[Pointer] = Field(None, description=POINTER_DOC + ". On photos the light uses each photo's depth map")
+
+    @model_validator(mode="after")
+    def _pointer_pictures(self):
+        if self.pointer is not None and len(self.pointer.pictures) > 1:
+            photos = sum(1 for st in self.steps if st.image is not None)
+            if len(self.pointer.pictures) > photos:
+                raise ValueError(f"parallax '{self.id}': pointer.layer lists {len(self.pointer.pictures)} pictures for "
+                                 f"{photos} photos (one per photo, in step order)")
+        return self
 
 
 class VectorScene(SceneBase):
