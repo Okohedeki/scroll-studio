@@ -8,9 +8,10 @@
  * Headline words slide out from behind the poster's left edge and lock; everything else slides along a grid axis.
  * Reduced motion: each state is a static poster; posters swap with a short crossfade.
  */
-import { $$, onFrame, reduced } from "./_kit";
+import { $$, onFrame, reduced, skin } from "./_kit";
 
-const COL = { paper: "#efe8da", blue: "#1f4e9c", red: "#be1e2d", yellow: "#f2c230", black: "#111111" };
+// the poster's primaries: paper, blue, red and black are the style's palette (a brand re-colours them), the yellow is its own
+const COL = { paper: skin("bg", "#efe8da"), blue: skin("accent2", "#1f4e9c"), red: skin("accent", "#be1e2d"), yellow: "#f2c230", black: skin("ink", "#111111") };
 type Bg = keyof typeof COL;
 type Id = "h" | "q" | "t" | "b" | "c" | "d" | "r1" | "r2";
 const IDS: Id[] = ["h", "q", "t", "b", "c", "d", "r1", "r2"];
@@ -287,7 +288,7 @@ export default function start() {
             cells.forEach((cell, k) => {
               cell.style.width = "4px"; cell.style.height = (k % 5 === 0 ? 22 : 12) + "px";
               cell.style.left = x0 + (span * k) / (cells.length - 1) - 2 + "px"; cell.style.top = y + "px";
-              cell.style.background = "#111";
+              cell.style.background = COL.black;
             });
           }
         });
@@ -349,7 +350,7 @@ export default function start() {
       el.style.width = w + "px"; el.style.height = h + "px";
       el.style.transform = `translate(${(x - w / 2 + ix).toFixed(1)}px, ${(yy - h / 2).toFixed(1)}px) rotate(${r.toFixed(2)}deg)`;
       el.style.opacity = String(o);
-      if (id === "c") el.style.background = pie >= 0.999 ? "" : `conic-gradient(#be1e2d 0 ${(pie * 360).toFixed(2)}deg, #f2c230 0)`;
+      if (id === "c") el.style.background = pie >= 0.999 ? "" : `conic-gradient(${COL.red} 0 ${(pie * 360).toFixed(2)}deg, ${COL.yellow} 0)`;
     }
 
     // ground and wipes

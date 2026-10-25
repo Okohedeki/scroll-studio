@@ -10,6 +10,8 @@
  * Photosensitivity: marks are thin or small; the dye grounds sit within a luminance band of 0.04 of one another, dye and
  * pressed frames change at most 12 times a second, and nothing is red.
  */
+import { skin, skinRgba } from "./_kit";
+
 export type Tone = "leader" | "dye" | "pressed";
 export const TONES: Tone[] = ["leader", "dye", "pressed"];
 export const FPB = 12;            // frames per beat (120 beats a minute at 24 frames a second)
@@ -26,7 +28,9 @@ function rngFrom(seed: number) {
 }
 const toneId = (t: Tone) => (t === "leader" ? 1 : t === "dye" ? 2 : 3);
 
-export const LAMP = "#fff6df";
+/** The projector lamp: the style's ink, so a brand's. The dyes below are film stock (with their own luminance and no-red rules) and stay. */
+export const LAMP = skin("ink", "#fff6df");
+export const lamp = (a: number | string) => skinRgba("ink", "#fff6df", a);
 /** Dye grounds (deep, dense dye) share one luminance band; marks are the bright dyes. Nothing red. */
 export const GROUNDS = ["#5a0f3c", "#0b4a5c", "#5a4308", "#0d4a2c", "#3a1a66"];
 export const MARKS = ["#12b8d8", "#e0338f", "#f2c814", "#f08a1c", "#2ab56a"];
@@ -171,10 +175,10 @@ function drawDye(ctx: Ctx, w: number, h: number, frame0: number, lw: number) {
     }
   }
   // a comb of fine light lines
-  ctx.strokeStyle = "rgba(255,246,223,.7)"; ctx.lineWidth = lw * 0.7; ctx.lineCap = "round";
+  ctx.strokeStyle = lamp(0.7); ctx.lineWidth = lw * 0.7; ctx.lineCap = "round";
   const lines = 14, y0 = h * (0.1 + 0.6 * hash(ph, 99));
   for (let i = 0; i < lines; i++) { const y = y0 + i * lw * 2.2 + (r() - 0.5) * lw; needle(ctx, w * (0.05 + 0.4 * r()), y, w * (0.55 + 0.4 * r()), y + (r() - 0.5) * lw * 3, r, lw * 2); }
-  ctx.fillStyle = "rgba(255,246,223,.8)";
+  ctx.fillStyle = lamp(0.8);
   for (let i = 0; i < 16; i++) { ctx.beginPath(); ctx.arc(r() * w, r() * h, lw * (0.4 + r() * 0.8), 0, 7); ctx.fill(); }
 }
 
@@ -225,7 +229,7 @@ export function drawFrame(ctx: Ctx, w: number, h: number, frame: number, tone: T
   // a hair caught in the gate, three frames at a time
   if (hash(Math.floor(frame / 3), 11, toneId(tone)) < 0.14) {
     const r = rngFrom(hash(Math.floor(frame / 3), 12) * 4294967296);
-    ctx.strokeStyle = tone === "leader" ? "rgba(255,246,223,.7)" : "rgba(10,6,2,.7)"; ctx.lineWidth = lw * 0.8; ctx.lineCap = "round";
+    ctx.strokeStyle = tone === "leader" ? lamp(0.7) : "rgba(10,6,2,.7)"; ctx.lineWidth = lw * 0.8; ctx.lineCap = "round";
     const side = r() < 0.5, y = r() * h, x0 = side ? 0 : w;
     ctx.beginPath(); ctx.moveTo(x0, y); ctx.bezierCurveTo(w * (side ? 0.2 : 0.8), y + (r() - 0.5) * h * 0.3, w * (side ? 0.3 : 0.7), y + (r() - 0.5) * h * 0.4, w * (0.15 + 0.7 * r()), y + (r() - 0.5) * h * 0.5); ctx.stroke();
   }
@@ -249,7 +253,7 @@ export function drawRunOn(ctx: Ctx, w: number, h: number, y: number, tone: Tone,
     const x = Math.round(hash(c, 77) * w) + 0.5, seg = 380 + hash(c, 78) * 900, per = Math.floor((y + hash(c, 79) * 5000) / seg);
     if (hash(c, per, 80) > 0.42) continue;
     const y0 = per * seg - hash(c, 79) * 5000, y1 = y0 + seg * (0.4 + hash(c, per, 81) * 0.6);
-    ctx.strokeStyle = tone === "leader" ? `rgba(255,246,223,${0.18 + Math.min(0.4, speed * 0.0002)})` : "rgba(255,246,223,.16)";
+    ctx.strokeStyle = tone === "leader" ? lamp(0.18 + Math.min(0.4, speed * 0.0002)) : lamp(0.16);
     ctx.beginPath(); ctx.moveTo(x, y0 - y); ctx.lineTo(x + (hash(c, per, 82) - 0.5) * 3, y1 - y); ctx.stroke();
   }
   ctx.restore();

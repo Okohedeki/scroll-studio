@@ -7,7 +7,7 @@
  * numerals that light segment by segment; the timeline is one tube drawn along the wall as you scroll; the CTA is the
  * OPEN sign switching on with a clunk. Reduced motion: signs light and dim with a short fade, no flicker, no buzz.
  */
-import { $, $$, onFrame, reduced, pinned } from "./_kit";
+import { $, $$, onFrame, reduced, pinned, skin } from "./_kit";
 import { clamp } from "../lib/util";
 
 const NS = "http://www.w3.org/2000/svg";
@@ -29,7 +29,7 @@ export default function start() {
     const er = el.getBoundingClientRect();
     if (er.width < 2) return;
     const cs0 = getComputedStyle(el);
-    const c1 = cs0.getPropertyValue("--tube").trim() || "#ff2a6d", c2 = cs0.getPropertyValue("--tube2").trim() || c1;
+    const c1 = cs0.getPropertyValue("--tube").trim() || skin("accent", "#ff2a6d"), c2 = cs0.getPropertyValue("--tube2").trim() || c1;
     s.color = c1;
     const hero = el.classList.contains("ng-sign--hero");
     const items: { t: string; x: number; y: number; font: string; size: number; ls: string; col: string; lag?: boolean }[] = [];

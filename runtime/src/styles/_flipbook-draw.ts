@@ -5,8 +5,10 @@
  * paths, red pencil for keys and accents.
  */
 import type { ArtFrames } from "./_art";
+import { skin } from "./_kit";
 
-export const LEAD = "#2f2f33", BLUE = "#3461b0", RED = "#c4452e", PAPER = "#f7f3ea";
+// the red pencil is the style's accent, so a brand's accent; graphite, blue pencil and paper are the animator's tools
+export const LEAD = "#2f2f33", BLUE = "#3461b0", RED = skin("accent", "#c4452e"), PAPER = "#f7f3ea";
 export const HAND = '"Caveat", "Comic Sans MS", cursive', MONO = '"Courier Prime", monospace';
 const TAU = Math.PI * 2;
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -99,7 +101,7 @@ export function pageFurniture(ctx: CanvasRenderingContext2D, W: number, H: numbe
   g.addColorStop(0, "rgba(60, 60, 70, .035)"); g.addColorStop(1, "rgba(60, 60, 70, 0)");
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   // peg holes along the top edge (the peg bar sits over them)
-  ctx.fillStyle = "#1f2427";
+  ctx.fillStyle = skin("bg", "#1f2427");     // the table seen through the peg holes
   const cx = W / 2;
   ctx.beginPath(); ctx.arc(cx, 17, 6, 0, TAU); ctx.fill();
   for (const d of [-1, 1]) { ctx.beginPath(); ctx.ellipse(cx + d * Math.min(W * 0.21, 150), 17, 15, 5, 0, 0, TAU); ctx.fill(); }

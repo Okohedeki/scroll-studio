@@ -21,11 +21,24 @@ from . import fonts, themes
 TEMPLATES = Path(__file__).resolve().parent / "templates"
 
 
-def _env(style_dir: Optional[Path] = None) -> Environment:
+class _SkinLoader(FileSystemLoader):
+    """A style's templates in a brand's colours and fonts: the markup draws some of the style's palette itself (signage
+    tubes, an SVG mascot), and a brand swaps those the way it swaps them in the stylesheet (themes.reskin)."""
+
+    def __init__(self, path: Path, skin: dict):
+        super().__init__(path)
+        self.skin = skin
+
+    def get_source(self, environment, template):
+        source, filename, uptodate = super().get_source(environment, template)
+        return themes.reskin(source, self.skin), filename, uptodate
+
+
+def _env(style_dir: Optional[Path] = None, skin: Optional[dict] = None) -> Environment:
     # a style's own templates are reachable as "style/<file>" (see themes.style_dir)
     loaders = [FileSystemLoader(TEMPLATES)]
     if style_dir is not None:
-        loaders.append(PrefixLoader({"style": FileSystemLoader(style_dir)}))
+        loaders.append(PrefixLoader({"style": _SkinLoader(style_dir, skin) if skin else FileSystemLoader(style_dir)}))
     env = Environment(loader=ChoiceLoader(loaders), autoescape=select_autoescape(["html", "j2"]),
                       trim_blocks=True, lstrip_blocks=True)
     # Copy fields allow a little inline markup (<em>, <br>, <b>, <i>, <code>); everything else is escaped.
@@ -366,7 +379,7 @@ def build_site(project: Project, log: Callable[[str], None] = print,
     if theme["font_files"]:
         font_css = fonts.own(project, theme["font_files"], dist, append=font_css is not None)
     sdir = themes.style_dir(theme["style"]) if theme["style"] else None
-    env = _env(sdir)
+    env = _env(sdir, theme.get("skin"))
     # theme.art: frames a style renders in its own medium (style templates see it as `art`)
     art_cfg = None
     if site.theme.art:

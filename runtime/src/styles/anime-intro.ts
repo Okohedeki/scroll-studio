@@ -12,7 +12,7 @@
  * effects are rate-limited by wall-clock time however fast the visitor scrolls. Reduced motion: no opening at all;
  * the page stays the storyboard (numbered still frames) the stylesheet draws by default.
  */
-import { $, $$, onFrame, reduced } from "./_kit";
+import { $, $$, onFrame, reduced, skin, skinRgba } from "./_kit";
 import { clamp, rng } from "../lib/util";
 
 type Shot = {
@@ -107,14 +107,14 @@ export default function start(): void {
       const R = rng(Math.floor(t));
       debris = Array.from({ length: 16 }, () => {
         const a = R(0, Math.PI * 2), sp = R(700, 1500);
-        return { x: W / 2, y: H / 2, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: R(8, 26), va: R(-12, 12), a: R(0, 6), c: R() > 0.5 ? "#ffe600" : "#fff7ee" };
+        return { x: W / 2, y: H / 2, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: R(8, 26), va: R(-12, 12), a: R(0, 6), c: R() > 0.5 ? skin("accent2", "#ffe600") : skin("ink", "#fff7ee") };
       });
     }
   }
 
   function drawFocus(cx: number, cy: number, strength: number, seed: number) {
     const R = rng(seed), out = Math.hypot(W, H) * 0.75;
-    ctx.fillStyle = `rgba(255, 247, 238, ${0.16 + 0.42 * strength})`;
+    ctx.fillStyle = skinRgba("ink", "#fff7ee", 0.16 + 0.42 * strength);
     ctx.beginPath();
     for (let i = 0; i < 110; i++) {
       const a = R(0, Math.PI * 2), sp = R(0.002, 0.011);
@@ -127,7 +127,7 @@ export default function start(): void {
   }
   function drawSpeed(dir: number, density: number, seed: number, t: number) {
     const R = rng(seed);
-    ctx.fillStyle = `rgba(255, 247, 238, ${0.1 + 0.14 * density})`;
+    ctx.fillStyle = skinRgba("ink", "#fff7ee", 0.1 + 0.14 * density);
     ctx.beginPath();
     const n = Math.round(26 + 40 * density);
     for (let i = 0; i < n; i++) {

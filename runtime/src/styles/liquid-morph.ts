@@ -7,7 +7,7 @@
  * droplet that merges with the blob. Headings melt in and end crisp. Reduced motion: static shapes, 200 ms crossfades
  * between end shapes, no velocity deformation, no wobble.
  */
-import { $, $$, onFrame, onSeen, chars, reduced, pinned } from "./_kit";
+import { $, $$, onFrame, onSeen, chars, reduced, pinned, skin, skinRgba } from "./_kit";
 import { clamp } from "../lib/util";
 
 type Ball = { x: number; y: number; r: number; m: number };
@@ -127,7 +127,7 @@ export default function start() {
       svg.setAttribute("class", "lq-flow"); svg.setAttribute("width", String(W)); svg.setAttribute("height", String(H));
       svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("aria-hidden", "true");
       const id = "lqg" + Math.random().toString(36).slice(2, 7);
-      svg.innerHTML = `<defs><linearGradient id="${id}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb86b"/><stop offset=".5" stop-color="#ff6b9a"/><stop offset="1" stop-color="#8b7bff"/></linearGradient>
+      svg.innerHTML = `<defs><linearGradient id="${id}c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffb86b"/><stop offset=".5" stop-color="${skin("accent", "#ff6b9a")}"/><stop offset="1" stop-color="${skin("accent2", "#8b7bff")}"/></linearGradient>
         <filter id="${id}g" x="-50%" y="-5%" width="200%" height="110%"><feGaussianBlur stdDeviation="6"/><feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 22 -9"/></filter></defs>`;
       let d = `M ${pts[0].x} 0`;
       let prev = { x: pts[0].x, y: 0 };
@@ -139,13 +139,13 @@ export default function start() {
       });
       d += ` C ${prev.x - sway} ${prev.y + 60}, ${prev.x} ${H - 40}, ${prev.x} ${H}`;
       const track = document.createElementNS(NS, "path");
-      track.setAttribute("d", d); track.setAttribute("fill", "none"); track.setAttribute("stroke", `rgba(27,21,48,.1)`); track.setAttribute("stroke-width", "10"); track.setAttribute("stroke-linecap", "round");
+      track.setAttribute("d", d); track.setAttribute("fill", "none"); track.setAttribute("stroke", skinRgba("ink", "#1b1530", ".1")); track.setAttribute("stroke-width", "10"); track.setAttribute("stroke-linecap", "round");
       const g = document.createElementNS(NS, "g");
       g.setAttribute("filter", `url(#${id}g)`);
       const path = document.createElementNS(NS, "path");
       path.setAttribute("d", d); path.setAttribute("fill", "none"); path.setAttribute("stroke", `url(#${id}c)`); path.setAttribute("stroke-width", "11"); path.setAttribute("stroke-linecap", "round");
       const head = document.createElementNS(NS, "circle");
-      head.setAttribute("r", "15"); head.setAttribute("fill", "#ff6b9a");
+      head.setAttribute("r", "15"); head.setAttribute("fill", skin("accent", "#ff6b9a"));
       g.appendChild(path); g.appendChild(head);
       svg.appendChild(track); svg.appendChild(g);
       f.ol.prepend(svg);

@@ -5,6 +5,7 @@
  * phone on a turntable, cameo, coin, sunburst, photo pan, theme art) come from _zoetrope-strips.ts.
  */
 import type { ArtFrames } from "./_art";
+import { skin } from "./_kit";
 import { drawFrame, type Device, type StripSpec } from "./_zoetrope-strips";
 
 export const FIGURES = [
@@ -21,7 +22,8 @@ export interface FigData {
   device?: Device | null; img?: HTMLImageElement | null; imgs?: HTMLImageElement[]; art?: ArtFrames | null; frames?: HTMLCanvasElement[];
 }
 
-const PAPER = "#efe2c4", PAPER2 = "#e2cfa6", INK = "#1b1611", RED = "#c8402a", BLUE = "#2b5079", OCHRE = "#c78f2a", SKY = "#dfe0cf", NIGHT = "#1f3354", GOLD = "#e2b54a";
+// the print: its ink, red and blue are the style's ink and two accents (a brand's colours when it wears one); the paper and the rest are the card stock's
+const PAPER = "#efe2c4", PAPER2 = "#e2cfa6", INK = skin("ink", "#1b1611"), RED = skin("accent", "#c8402a"), BLUE = skin("accent2", "#2b5079"), OCHRE = "#c78f2a", SKY = "#dfe0cf", NIGHT = "#1f3354", GOLD = "#e2b54a";
 const DISPLAY = '"Bodoni Moda", Georgia, serif', SLAB = '"Alfa Slab One", Georgia, serif';
 const TAU = Math.PI * 2;
 const tri = (p: number) => 0.5 - 0.5 * Math.cos(TAU * p);      // 0 at pose 0, 1 halfway, 0 again
