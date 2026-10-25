@@ -84,6 +84,17 @@ def build(sec: CodeScene, ctx: BuildContext, theme: dict) -> dict:
         "outroAt": spans["outro"],
         "files": files,
         "tree": sec.tree,
-        "colors": {k: theme["colors"].get(k) for k in ("bg", "ink", "accent", "accent2")},
+        "colors": code_colors(sec, theme),
         "mono": theme["fonts"].get("mono") or "JetBrains Mono",
     }
+
+
+def code_colors(sec, theme: dict) -> dict:
+    """The colours the code world is drawn in: the page's, or with `surface:` on the scene the section's own (an editor
+    is dark, so `surface: dark` on a light site puts the code in a dark room, captions and all)."""
+    colors = {k: theme["colors"].get(k) for k in ("bg", "ink", "accent", "accent2")}
+    if sec.surface and all(theme["colors"].get(k) for k in ("bg", "bg2", "ink", "accent2")):
+        from ..compile.themes import surface_hex
+        s = surface_hex(theme["colors"], theme.get("mode", "dark"), sec.surface)
+        colors.update(bg=s["bg"], ink=s["ink"])
+    return colors

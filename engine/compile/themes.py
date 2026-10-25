@@ -352,11 +352,11 @@ def _surface_tokens(bg, bg2, ink, accent, accent2) -> dict:
     }
 
 
-def surface_css(c: dict, mode: str) -> str:
-    """Per-section colour schemes (`surface:` in the spec) derived from the theme, so a dark panel on a light
-    theme gets the same contrast guarantees as the page itself."""
+def surface_colors(c: dict, mode: str) -> dict:
+    """{surface: (bg, bg2, ink)} as 0-255 RGB for each `surface:` a section can take (dark, light, accent), derived
+    from the theme's colours so a dark panel on a light theme keeps the page's contrast guarantees."""
     bg, bg2, ink = _rgb(c["bg"]), _rgb(c["bg2"]), _rgb(c["ink"])
-    acc, acc2 = _rgb(c["accent"]), _rgb(c["accent2"])
+    acc2 = _rgb(c["accent2"])
     if mode == "light":
         dark = (ink, _mix(bg, ink, 0.08), bg)                  # the theme's ink becomes the background
         light = (bg2, bg, ink)
@@ -365,9 +365,21 @@ def surface_css(c: dict, mode: str) -> str:
         light = (ink, _mix(bg, ink, 0.9), bg)                  # inverted: a pale panel on a dark site
     soft = _mix(acc2, (255, 255, 255), 0.55) if mode == "light" else _mix(acc2, bg, 0.25)
     accent_ink = max((ink, bg), key=lambda col: contrast(col, soft))
-    accent = (soft, _mix(soft, accent_ink, 0.06), accent_ink)
+    return {"dark": dark, "light": light, "accent": (soft, _mix(soft, accent_ink, 0.06), accent_ink)}
+
+
+def surface_hex(c: dict, mode: str, surface: str) -> dict:
+    """A surface's {bg, bg2, ink} as #hex, for a player that draws in the section's colours (a scene with `surface:`)."""
+    return {k: "#" + "".join(f"{round(v):02x}" for v in col)
+            for k, col in zip(("bg", "bg2", "ink"), surface_colors(c, mode)[surface])}
+
+
+def surface_css(c: dict, mode: str) -> str:
+    """Per-section colour schemes (`surface:` in the spec) derived from the theme, so a dark panel on a light
+    theme gets the same contrast guarantees as the page itself."""
+    acc, acc2 = _rgb(c["accent"]), _rgb(c["accent2"])
     css = []
-    for name, (s_bg, s_bg2, s_ink) in (("dark", dark), ("light", light), ("accent", accent)):
+    for name, (s_bg, s_bg2, s_ink) in surface_colors(c, mode).items():
         tok = _surface_tokens(s_bg, s_bg2, s_ink, acc, acc2)
         body = " ".join(f"{k}: {v};" for k, v in tok.items())
         scheme = "dark" if _lum(s_bg) < 0.2 else "light"
