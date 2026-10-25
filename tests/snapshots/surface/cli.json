@@ -998,6 +998,26 @@
      "required": false,
      "type": "str"
     },
+    "image": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--image"
+     ],
+     "required": false,
+     "type": "path"
+    },
+    "laptop": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--laptop"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
     "name": {
      "default": null,
      "kind": "argument",

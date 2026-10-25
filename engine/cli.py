@@ -1,6 +1,7 @@
 """`studio` command line.
 
   studio new my-site [--example lodestar-orbital]   create projects/my-site (from an example or a starter)
+  studio new my-site --laptop [--image photo.jpg]   a starter that builds on any laptop: no GPU, ComfyUI or Blender
   studio remake https://example.com/ [--name x] [--style bauhaus] [--no-gpu]   a live landing page told as a scroll site
   studio build my-site [--only hero,door] [--force] [--draft] [--yes] [--plan]
   studio storyboard my-site [--level sketch|stills|animatic] [--only id,id] [--motion] [--open]
@@ -25,6 +26,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shutil
 from pathlib import Path
 from typing import Optional
@@ -56,6 +58,67 @@ sections:
 """
 
 
+# `studio new --laptop`: every scene in it is one that needs no GPU (engine/doctor.py LAPTOP_SCENES). It opens on kinetic type
+# (nothing to install), or on a photo parallax when the user brings a picture (`--image`).
+LAPTOP_STARTER = """# A site that builds on any laptop: no GPU, no ComfyUI, no Blender (docs/laptop.md).
+name: @TITLE@
+description: A scroll-driven site built with Scroll Studio.
+theme: { preset: night, style: bauhaus }
+nav: { cta: { label: Get in touch, href: "#contact" } }
+sections:
+@OPENING@
+  - id: idea
+    type: type
+    mode: reveal
+    text: "Say what you do in a few plain words, and let the page <em>move</em> while they read it."
+    length: 3
+  - type: intro
+    kicker: About
+    title: Say what you do in <em>one line.</em>
+    body: Replace this with a paragraph about the product, the place or the idea.
+  - type: features
+    kicker: What you get
+    title: Three things, <em>made clear.</em>
+    items:
+      - { tag: One, title: The first thing, body: One sentence about it. }
+      - { tag: Two, title: The second thing, body: One sentence about it. }
+      - { tag: Three, title: The third thing, body: One sentence about it. }
+  - type: stats
+    items:
+      - { value: "3", label: Things to know }
+      - { value: "1", label: Page }
+  - type: cta
+    id: contact
+    title: Ready when <em>you are.</em>
+    button: { label: Get in touch, href: "mailto:hello@example.com" }
+"""
+
+LAPTOP_TYPE_OPENING = """  # Open on your own photo instead: copy a picture into inputs/ and replace this scene with the parallax one in docs/laptop.md.
+  - id: hero
+    type: type
+    mode: scale
+    text: @TITLE@
+    length: 2.5"""
+
+LAPTOP_PHOTO_OPENING = """  - id: hero
+    type: parallax
+    layout: cards
+    steps:
+      - intro: true
+        kicker: Welcome
+        title: A picture, <em>given depth.</em>
+        body: Your photo, turned into a slow camera move as you scroll.
+        hint: Scroll to look around
+        image: @IMAGE@"""
+
+
+def laptop_starter(title: str, image: Optional[str] = None) -> str:
+    """The starter site.yaml of `studio new --laptop`: kinetic type up front, or a photo parallax of `image` (a path inside inputs/)."""
+    quoted = json.dumps(title)                       # a YAML double-quoted string: any name is safe
+    opening = LAPTOP_PHOTO_OPENING.replace("@IMAGE@", json.dumps(image)) if image else LAPTOP_TYPE_OPENING
+    return LAPTOP_STARTER.replace("@OPENING@", opening).replace("@TITLE@", quoted)
+
+
 def resolve(name: str) -> Path:
     for cand in (Path(name), Path(settings()["projects"]) / name, ROOT / "examples" / name):
         if (cand / "site.yaml").exists():
@@ -64,18 +127,45 @@ def resolve(name: str) -> Path:
 
 
 @app.command()
-def new(name: str, example: Optional[str] = typer.Option(None, help="Copy an example from examples/")):
+def new(name: str, example: Optional[str] = typer.Option(None, help="Copy an example from examples/"),
+        laptop: bool = typer.Option(False, "--laptop", help="A starter that builds on any laptop, with no GPU, ComfyUI or Blender"),
+        image: Optional[Path] = typer.Option(None, "--image", help="With --laptop: your photo, opened as a photo parallax "
+                                                                   "(default: the page opens on kinetic type)")):
     """Create a project."""
     dst = Path(settings()["projects"]) / name
     if dst.exists():
         raise typer.BadParameter(f"{dst} already exists")
+    if (laptop or image) and example:
+        raise typer.BadParameter("--laptop and --image make a starter; --example copies an example: use one or the other")
+    if image and not laptop:
+        raise typer.BadParameter("--image goes with --laptop (studio new my-site --laptop --image photo.jpg)")
+    if image and not image.is_file():
+        raise typer.BadParameter(f"{image} is not a file")
     if example:
         src = ROOT / "examples" / example
         shutil.copytree(src, dst, ignore=shutil.ignore_patterns(".build", "dist"))
+    elif laptop:
+        from PIL import Image, UnidentifiedImageError
+        if image:
+            try:
+                with Image.open(image) as im:
+                    im.verify()
+            except (UnidentifiedImageError, OSError):
+                raise typer.BadParameter(f"{image} is not a picture Scroll Studio can read (jpg, png, webp)") from None
+        (dst / "inputs").mkdir(parents=True)
+        inside = None
+        if image:
+            inside = "inputs/" + re.sub(r"[^A-Za-z0-9._-]+", "-", image.name)
+            shutil.copyfile(image, dst / inside)
+        (dst / "site.yaml").write_text(laptop_starter(re.sub(r"[-_]+", " ", name).strip().title() or "My Site", inside), encoding="utf-8")
     else:
         (dst / "inputs").mkdir(parents=True)
         (dst / "site.yaml").write_text(STARTER, encoding="utf-8")
     typer.echo(f"created {dst}\nnext: studio build {name} && studio preview {name}")
+    if laptop:
+        typer.echo("this one builds on any laptop: it needs no GPU, ComfyUI or Blender"
+                   + (f"; it opens on {inside.split('/')[-1]} as a photo parallax (the first build downloads a small depth model)" if image else
+                      "; to open on your own photo, see docs/laptop.md"))
 
 
 @app.command()
