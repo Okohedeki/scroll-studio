@@ -48,7 +48,7 @@ pages:
   - { slug: support, title: Support, source: pages/support.md, nav: true }
 ```
 
-A `product` block's phone can play a screen recording instead of showing a screenshot: `device: { video: inputs/clips/write.mp4, image: inputs/write.jpg }` (muted, looping; the image is the poster). `pose:` picks the composition so a run of product panels doesn't repeat one: `beside` (default), `rise` (centred under centred copy, cut off by the panel's bottom edge), `close` (larger, cut off below), `lean` (tilted out of the lower corner), `pair` (with a second phone, `behind: { video: …, image: … }`, the two swapping places on a loop), `turn` (turned in perspective towards the copy). `stats: [{value, label}]` shows big figures under the body instead of tags. A `hero` takes a `device:` too, rising from the bottom edge under the copy. `theme.display_em: bold` sets `<em>` words as bold italics in the text's own colour instead of the accent colour. `scroll: { speed: 1.2 }` paces the smooth scroll, anchor scrolls and scroll-driven reveals (1 is the default; 1.2 is a fifth faster).
+A `product` block's phone can play a screen recording instead of showing a screenshot: `device: { video: inputs/clips/write.mp4, image: inputs/write.jpg }` (muted, looping; the image is the poster). `pose:` picks the composition so a run of product panels doesn't repeat one: `beside` (default), `rise` (centred under centred copy, cut off by the panel's bottom edge), `close` (larger, cut off below), `lean` (tilted out of the lower corner), `pair` (with a second phone, `behind: { video: …, image: … }`, the two swapping places on a loop), `turn` (turned in perspective towards the copy). `stats: [{value, label}]` shows big figures under the body instead of tags. A `hero` takes a `device:` too, rising from the bottom edge under the copy. `theme.display_em: bold` sets `<em>` words as bold italics in the text's own colour instead of the accent colour. A `features` card takes an `image:` (a file or `generate:`): an illustration on top of the card, with the words under it, so a row of cards reads as a set of pictures instead of three empty boxes. `scroll: { speed: 1.2 }` paces the smooth scroll, anchor scrolls and scroll-driven reveals (1 is the default; 1.2 is a fifth faster).
 
 Any section can sit on a full-bleed `backdrop:` (in the stack layout, the panel's own), with `surface:` picking the
 text colour. A backdrop can be a file, a URL, a `generate:` prompt, or a `gradient:` rendered on the spot with no
@@ -423,7 +423,7 @@ theme roles: accent, accent2, ink, bg, bg2, dark) and `imagery.paper`; `imagery.
 ink texture. The other `imagery:` parts (light, mood, palette in words) still apply.
 
 **Which pictures.** The site's medium reaches every `generate:` image (heroes, backdrops, product shots, strips,
-galleries, parallax photos, a film beat's first frame; a film's clip is phrased in the medium's words but its frames
+feature cards, galleries, parallax photos, a film beat's first frame; a film's clip is phrased in the medium's words but its frames
 are not re-processed). A file you supply is left as it is, unless it asks: any image takes its own `medium:`, which
 also works on a file (the post-process only), and `medium: none` leaves one image out.
 

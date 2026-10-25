@@ -433,6 +433,8 @@ def image_refs(sec) -> list[tuple[str, object, bool]]:
             out.append(("behind", sec.behind.image, True))
     elif t == "strip":
         out += [(f"item {i + 1}", it.image, True) for i, it in enumerate(sec.items)]
+    elif t == "features":
+        out += [(f"card {i + 1}", it.image, True) for i, it in enumerate(sec.items) if it.image is not None]
     return out
 
 

@@ -1,0 +1,1 @@
+A `features` card takes an `image:` (a file or `generate:`): an illustration on top of the card with its words underneath. In a named medium (`imagery.medium`) the pictures are drawn in it like the rest of the page.

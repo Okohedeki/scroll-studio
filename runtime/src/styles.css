@@ -267,6 +267,10 @@ blockquote { hanging-punctuation: first last; }
 .ss-tag { color: var(--ink-3); }
 .ss-feature h3 { font-family: var(--font-display); font-weight: var(--display-weight); font-size: 28px; letter-spacing: -.02em; line-height: 1.1; margin-bottom: 12px; }
 .ss-feature p { color: var(--ink-2); line-height: 1.6; font-size: 15px; }
+/* a card with an illustration (`features.items[].image`): the picture on top, the words under it, nothing pushed apart */
+.ss-feature--art { justify-content: flex-start; gap: 18px; padding-top: 20px; min-height: 0; }
+.ss-feature__art { margin: 0 -12px 6px; aspect-ratio: 4 / 3; overflow: hidden; border-radius: min(var(--radius), 10px); background: var(--bg-2); }
+.ss-feature__art img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .ss-meter { margin-top: 18px; height: 3px; background: var(--line); position: relative; }
 .ss-meter i { position: absolute; inset: 0 auto 0 0; background: var(--accent); box-shadow: 0 0 10px rgba(var(--accent-rgb), .6); }
 .ss-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }

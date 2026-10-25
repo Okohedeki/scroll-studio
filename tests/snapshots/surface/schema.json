@@ -3219,6 +3219,22 @@
      "default": null,
      "title": "Body"
     },
+    "image": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "$ref": "#/$defs/ImageInput"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "An illustration at the top of the card: a file, URL or image input (generate:, ...). In a named medium (`imagery.medium`) it is drawn in it like every generated picture, and shown whole",
+     "title": "Image"
+    },
     "meter": {
      "anyOf": [
       {

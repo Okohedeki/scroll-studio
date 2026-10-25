@@ -187,6 +187,8 @@ def _media(s) -> dict:
                  behind=has(s.behind and s.behind.image), behind_clip=has(s.behind and s.behind.video))
     elif s.type == "strip":
         x["imgs"] = ["standin" for _ in s.items]
+    elif s.type == "features" and any(it.image is not None for it in s.items):
+        x["imgs"] = [has(it.image) for it in s.items]
     row = s if s.type == "logos" else getattr(s, "logos", None)
     if row is not None:
         x["logos"] = [{"src": "standin", "mask": True} if lg.image else None for lg in row.items]

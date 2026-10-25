@@ -2490,6 +2490,17 @@ class Feature(Model):
     title: str
     body: Optional[str] = None
     meter: Optional[float] = Field(None, description="0-1 progress bar under the card")
+    image: Optional[ImageRef] = Field(None, description="An illustration at the top of the card: a file, URL or image "
+                                                        "input (generate:, ...). In a named medium (`imagery.medium`) it "
+                                                        "is drawn in it like every generated picture, and shown whole")
+
+    @model_serializer(mode="wrap")
+    def _late_fields(self, handler, info):
+        """`image` is left out of a dump while unset, so pages made before it existed stay the same."""
+        d = handler(self)
+        if isinstance(d, dict) and d.get("image", 0) is None:
+            d.pop("image")
+        return d
 
 
 class FeaturesBlock(BlockBase):

@@ -108,7 +108,9 @@
   {% if b.title %}<div class="ss-head ss-reveal">{% if b.kicker %}<span class="ss-kicker">{{ b.kicker }}</span>{% endif %}<h2 class="ss-display">{{ b.title | rich }}</h2></div>{% endif %}
   <div class="ss-features ss-features--{{ b.items | length }}">
     {% for f in b.items %}
-    <div class="ss-feature ss-reveal">
+    {% set art = e.imgs[loop.index0] if e.imgs else None %}
+    <div class="ss-feature ss-reveal{% if e.imgs %} ss-feature--art{% endif %}">
+      {% if art %}<div class="ss-feature__art"><img src="{{ art }}" alt="" loading="lazy"></div>{% endif %}
       {% if f.tag %}<span class="ss-tag">{{ f.tag }}</span>{% endif %}
       <div><h3>{{ f.title | rich }}</h3>{% if f.body %}<p>{{ f.body | rich }}</p>{% endif %}
       {% if f.meter is not none %}<div class="ss-meter"><i style="width: {{ (f.meter * 100) | round }}%"></i></div>{% endif %}</div>

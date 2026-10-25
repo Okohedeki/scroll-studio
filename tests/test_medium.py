@@ -396,6 +396,28 @@ def test_a_file_in_a_medium_resolves_through_the_recipe(tmp_path):
     assert resolve_image(p, ImageInput(file="inputs/a.png"), log=lambda m: None).name == "a.png"
 
 
+# ---------------------------------------------------------------- illustrated feature cards
+
+def test_feature_cards_take_an_illustration_in_the_medium(tmp_path):
+    from engine.plan import image_refs
+    from engine.spec import Feature
+    assert "image" not in Feature(title="Plain").model_dump()          # old pages dump as they did
+    p = project(tmp_path, spec(sections=[{"type": "features", "title": "Three things", "items": [
+        {"title": "One", "body": "First.", "image": {"file": "inputs/a.png", "medium": "risograph"}},
+        {"title": "Two", "body": "Second.", "image": {"file": "inputs/a.png", "medium": "risograph"}},
+        {"title": "Three", "body": "Third."}]}]))
+    (p.root / "inputs").mkdir()
+    fixture().save(p.root / "inputs" / "a.png")
+    sec = p.load().sections[0]
+    assert [r[0] for r in image_refs(sec)] == ["card 1", "card 2"]
+    logs = []
+    html = compiler.build_site(p, log=logs.append).read_text(encoding="utf-8")
+    assert html.count('class="ss-feature__art"') == 2 and html.count("ss-feature--art") == 3
+    assert sum("medium: risograph" in m for m in logs) == 1             # the same file is printed once, then cached
+    plain = project(tmp_path / "plain", spec(sections=[{"type": "features", "items": [{"title": "One"}]}]))
+    assert "ss-feature__art" not in compiler.build_site(plain, log=lambda m: None).read_text(encoding="utf-8")
+
+
 # ---------------------------------------------------------------- the example
 
 def test_the_example_builds_on_the_cpu_in_its_media(tmp_path):

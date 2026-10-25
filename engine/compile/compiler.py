@@ -351,6 +351,8 @@ def build_site(project: Project, log: Callable[[str], None] = print,
             x["behind_clip"] = publish(s.behind.video) if s.behind and s.behind.video else None
         elif s.type == "strip":
             x["imgs"] = [block_image(it.image, 900) for it in s.items]
+        elif s.type == "features" and any(it.image is not None for it in s.items):
+            x["imgs"] = [block_image(it.image, 900) for it in s.items]
         row = s if s.type == "logos" else getattr(s, "logos", None)
         if row is not None:
             x["logos"] = [logo_image(lg.image) for lg in row.items]
