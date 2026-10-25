@@ -10,6 +10,7 @@ import type { PlayerFactory } from "../lib/types";
 import { clamp, easeInOut, loadImage, reducedMotion, smooth } from "../lib/util";
 import { baseGlsl, POINTER_GLSL, pointerEnv, readPointer, trackPointer, uniforms as pointerUniforms, type PointerCfg } from "../lib/pointer";
 import { WORLD_GLSL } from "../lib/worldGlsl";
+import type { LiveDetail } from "../lib/live";
 import { contrastWith, inkFor, layout, PAD, probeStyle, rasterize, type Layout, type WorldStyle } from "../lib/worldText";
 
 const VS = `#version 300 es
@@ -17,7 +18,8 @@ in vec2 p; out vec2 uv;
 void main(){ uv = vec2(p.x * .5 + .5, .5 - p.y * .5); gl_Position = vec4(p, 0., 1.); }`;
 
 // pointer (lib/pointer.ts): PTR_MODE 0 none, 1 lens, 2 light; PTR_LAYER 1 the photo's colour through `base`, 2 a second picture
-const fragment = (ptr: PointerCfg | null) => `#version 300 es
+// living details (lib/live.ts, `live:` on a step's photo): LIVE_GLSL, drawn on each view's photo where it is sampled
+const fragment = (ptr: PointerCfg | null, liveGlsl = "") => `#version 300 es
 precision highp float;
 in vec2 uv; out vec4 o;
 #define PAD ${PAD.toFixed(3)}
@@ -26,6 +28,9 @@ in vec2 uv; out vec4 o;
 #define RELIEF 0.08
 ${WORLD_GLSL}
 ${ptr ? POINTER_GLSL : ""}
+${liveGlsl ? `#define LIVE 1
+#define LV_VIEWS 2
+${liveGlsl}` : ""}
 ${ptr ? `vec3 ptrBase(vec3 c, vec3 bl) { return ${baseGlsl(ptr.base)}; }` : ""}
 uniform sampler2D imgA, depA, imgB, depB, mskA, mskB, uText, layA, layB;
 uniform float hasLayA, hasLayB;
@@ -50,6 +55,10 @@ vec3 sampleView(sampler2D img, sampler2D dep, sampler2D msk, sampler2D lay, floa
   }
   q = clamp(q, vec2(.001), vec2(.999));
   vec3 col = texture(img, q).rgb;
+#ifdef LIVE
+  float la = 0.0;
+  col = liveApply(img, q, col, v, la);
+#endif
   if (uOnT[v] > 0.002) {
     int kind = uKindT[v];
     // behind / sky: where the title's own depth puts it on screen; surface: on the photo's surface point itself
@@ -128,12 +137,15 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   const gl = canvas.getContext("webgl2", { antialias: false, preserveDrawingBuffer: true });
   if (!gl) throw new Error("no webgl2");
   const ptr = readPointer(ctx.section, cfg);
+  // living details, one list per photo (engine/live.py); none with reduced motion, and then the module is not even loaded
+  const liveMod = !reducedMotion && cfg.chapters.some((c: any) => Array.isArray(c.live) && c.live.length) ? await import("../lib/live") : null;
+  const lives: LiveDetail[][] = liveMod ? cfg.chapters.map((c: any) => liveMod.readLive(c.live)) : [];
   const chapters: { img: WebGLTexture; dep: WebGLTexture; msk: WebGLTexture; lay: WebGLTexture | null; w: number; h: number; focus: number; move: string }[] = [];
 
   const sh = (type: number, src: string) => { const s = gl.createShader(type)!; gl.shaderSource(s, src); gl.compileShader(s);
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) || "shader"); return s; };
   const prog = gl.createProgram()!;
-  gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fragment(ptr)));
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fragment(ptr, liveMod?.LIVE_GLSL)));
   gl.linkProgram(prog); gl.useProgram(prog);
   gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
@@ -258,6 +270,19 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   // the pointer's lens or light (lib/pointer.ts): it moves only when the pointer does, and the canvas is redrawn only then
   const track = ptr ? trackPointer(canvas, { rest: ptr.rest, radius: ptr.radius }, pointerEnv()) : null;
   const white = texture(null);
+  // the details' masks (a prompt's region) in one atlas on unit 9; the pack is rewritten when the two views change
+  let liveCells: ([number, number, number, number] | null)[][] = [];
+  const livePack = liveMod ? liveMod.emptyPack(2) : null;
+  let liveViews = "";
+  if (liveMod) {
+    const flat = lives.flat();
+    const atlas = await liveMod.maskAtlas(flat.map((d) => d.mask), loadImage);
+    let n = 0;
+    liveCells = lives.map((ds) => ds.map(() => atlas.cells[n++]));
+    gl.activeTexture(gl.TEXTURE9);
+    gl.bindTexture(gl.TEXTURE_2D, atlas.canvas ? texture(atlas.canvas as unknown as HTMLImageElement) : white);
+    gl.uniform1i(U("uLvMask"), 9);
+  }
   let drawn = "";
   resize();
   (((window as any).__ssWorld ||= {}) as Record<string, any>).live = live;
@@ -305,12 +330,29 @@ const factory: PlayerFactory = async (cfg, ctx) => {
       const a = B && fade >= 1 ? B : A || B!, b = B || A!;
       const ka = a === B ? c : prev;
       // nothing changed since the last frame (the scroll and the pointer are still): the canvas keeps what it shows
-      const key = `${ka}|${c}|${local.toFixed(4)}|${fade.toFixed(4)}|${px.toFixed(4)}|${py.toFixed(4)}|${track ? track.pos.join(",") : ""}`;
+      // living details on either view, on screen: a new frame 30 times a second (lib/live.ts); off screen they hold still
+      let tick = "";
+      if (livePack && liveMod && ((lives[ka]?.length) || (lives[c]?.length))) {
+        const r = canvas.getBoundingClientRect();
+        if (r.bottom > 0 && r.top < innerHeight && !document.hidden) tick = String(Math.floor(s.t * liveMod.FPS));
+      }
+      const key = `${ka}|${c}|${local.toFixed(4)}|${fade.toFixed(4)}|${px.toFixed(4)}|${py.toFixed(4)}|${track ? track.pos.join(",") : ""}|${tick}`;
       if (key === drawn) return;
       drawn = key;
       bind(0, a.img); bind(1, a.dep); bind(2, b.img); bind(3, b.dep); bind(4, a.msk); bind(5, b.msk);
       bind(7, a.lay || white); bind(8, b.lay || white);
       gl.uniform1f(u.hasLayA, a.lay ? 1 : 0); gl.uniform1f(u.hasLayB, b.lay ? 1 : 0);
+      if (livePack && liveMod) {
+        if (liveViews !== `${ka}|${c}`) {
+          liveViews = `${ka}|${c}`;
+          liveMod.packView(livePack, 0, lives[ka] || [], liveCells[ka]);
+          liveMod.packView(livePack, 1, lives[c] || [], liveCells[c]);
+          gl.uniform4fv(U("uLvBox"), livePack.box); gl.uniform4fv(U("uLvA"), livePack.a); gl.uniform4fv(U("uLvB"), livePack.b);
+          gl.uniform4fv(U("uLvC"), livePack.c); gl.uniform4fv(U("uLvM"), livePack.m); gl.uniform4fv(U("uLvP"), livePack.p);
+        }
+        gl.uniform1f(U("uLvT"), s.t);
+        gl.uniform1f(U("uLvAsp"), b.w / b.h);
+      }
       if (track && ptr) {
         const pu = pointerUniforms(track.pos, ptr.radius, canvas.getBoundingClientRect(), null);
         gl.uniform2fv(u.ptrC, pu.centre); gl.uniform1f(u.ptrR, pu.radius); gl.uniform1f(u.ptrAsp, pu.aspect);

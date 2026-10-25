@@ -332,3 +332,5 @@ document.querySelectorAll<HTMLVideoElement>(".ss-tile video").forEach((v) => {
 
 // ---------------------------------------------------------------- cinemagraphs (image inputs with `cinemagraph:`)
 if (document.querySelector("[data-cine]")) import("./lib/cinemagraph").then((m) => m.start());
+// ---------------------------------------------------------------- living details (image inputs with `live:`)
+if (document.querySelector("[data-live]")) import("./players/liveStill").then((m) => m.start());
