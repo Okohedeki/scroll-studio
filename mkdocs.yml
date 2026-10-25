@@ -93,6 +93,7 @@ extra:
 nav:
   - Home: index.md
   - Get started:
+      - Try it on a laptop: laptop.md
       - Install: INSTALL.md
       - Quick start: quickstart.md
   - Guides:

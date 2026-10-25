@@ -2,7 +2,7 @@
 
 From a fresh clone to a built site in a few minutes. Live 3D, charts, maps, type, vector art and miniature worlds need
 nothing but Python and a browser; generated film and images need ComfyUI and a 24 GB GPU (see [Install](INSTALL.md)
-for what each scene type needs).
+for what each scene type needs). No GPU? [Try it on a laptop](laptop.md) is this path for a machine without a GPU.
 
 ## Install and look around
 

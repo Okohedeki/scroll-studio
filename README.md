@@ -1,7 +1,19 @@
 <div align="center">
   <img src="docs/media/logo.svg" alt="Scroll Studio" width="88" />
   <h1>Scroll Studio</h1>
-  <p><strong>An open-source design studio for scroll-driven landing pages. One YAML file in, a finished site out, made on your own GPU with no API keys.</strong></p>
+  <p><strong>An open-source design studio for scroll-driven landing pages. One YAML file in, a finished site out, made on your own machine with no API keys.</strong></p>
+  <table>
+    <tr>
+      <td align="center" width="50%">
+        <a href="https://okohedeki.github.io/scroll-studio-showcase/"><strong>See it live &rarr;</strong></a><br />
+        Every example, built by this engine, on one page. Scroll it.
+      </td>
+      <td align="center" width="50%">
+        <a href="docs/laptop.md"><strong>Try it on a laptop &rarr;</strong></a><br />
+        No GPU needed: <code>pip install -e .</code>, then <code>studio new my-site --laptop</code>.
+      </td>
+    </tr>
+  </table>
   <p>
     <a href="https://okohedeki.github.io/scroll-studio-showcase/">Showcase</a> ·
     <a href="#get-started">Get started</a> ·
@@ -30,8 +42,8 @@
 | Miniature worlds, maps, charts, live 3D | Film cuts between any two sections | Claude drives it all through MCP |
 | Photo parallax from your own pictures | Any brand, from a page, a logo or a brand.yaml | Remake a live landing page: `studio remake <url>` |
 
-Every image and video is made with open models on your machine (Z-Image, Qwen-Image-Edit, LTX-2.3, Wan 2.2, SeedVR2,
-Blender). The output is plain HTML, CSS and JS you can host anywhere. The [examples](docs/examples.md) show what each
+The heavy scenes (generated film and images) are made with open models on your own GPU (Z-Image, Qwen-Image-Edit, LTX-2.3,
+Wan 2.2, SeedVR2, Blender); photo parallax, kinetic type, maps, data, code, live 3D and every style need no GPU. The output is plain HTML, CSS and JS you can host anywhere. The [examples](docs/examples.md) show what each
 scene does; they are not templates. Bring your own photos, footage, 3D models, logo and copy, or a brief.
 
 <details>
@@ -72,6 +84,9 @@ studio build examples/cellwright-bio  # live 3D: needs nothing but Python
 studio preview cellwright-bio         # http://localhost:5173
 studio ui                             # the Studio app: http://localhost:5180
 ```
+
+No GPU? [Try it on a laptop](docs/laptop.md): `studio new my-site --laptop` makes a site that builds without ComfyUI or
+Blender, and `studio remake <url> --no-gpu` turns a live page into one.
 
 | What you build | What it needs |
 |---|---|
