@@ -1,6 +1,7 @@
 /**
- * parallax: each photo + its estimated depth map becomes a 2.5D camera move. One chapter per non-intro
- * step; chapters crossfade as the next step begins. Pointer adds a little look-around.
+ * parallax: each photo + its estimated depth map becomes a 2.5D camera move. One chapter per step with a photo (a step
+ * without one is a caption over the photo before it); chapters crossfade as the next photo's step begins. Pointer adds a
+ * little look-around.
  *
  * Type in the world (engine/world.py `build_photo`): a step with `place: {kind: ...}` has its title set in its photograph.
  * behind / sky: the title sits at a depth in the photo's own depth map, so the layers the camera moves past it pass in front

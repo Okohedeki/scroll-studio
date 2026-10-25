@@ -97,6 +97,8 @@ always has ([Margin](../examples/margin-notes/site.yaml) uses all of them):
   or `"1 / 7"`, on the theme's 12 columns between the gutters; `row: top | middle | bottom`). Overlay scenes take all
   three; in `cards` the card goes there; in `split` the copy keeps its column, so `at` takes a spot (its side and height).
   On a phone a box or a grid slot reads where the layout puts every caption.
+  In a photo `parallax`, a step without an `image` of its own is another caption over the photo before it, so
+  several captions can take their own places over one picture.
 - **`show: [from, to]`** is the window of the scene's progress the step is on screen for (overlay scenes). Scenes
   that time their own copy (`inside`, `light`, `diorama`, `code` steps with `state.file`, `film` steps with
   `state.beat`) fill it in for steps that leave it out. In `split` and `cards` a step shows while it scrolls past, for

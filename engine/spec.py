@@ -887,7 +887,8 @@ class Step(Model):
                                                      "last shot")
     badge: Optional[Union[str, Badge]] = Field(None, description="A small pill above the headline: words, or "
                                                "`{text, href, tag, icon}` for a link with a 'New' tag or a dot")
-    image: Optional[ImageRef] = Field(None, description="parallax: this step's photo")
+    image: Optional[ImageRef] = Field(None, description="parallax: this step's photo (a step without one is another "
+                                                        "caption over the photo before it)")
     state: dict[str, Any] = Field(default_factory=dict,
         description="Scene-specific state for this step. chart: {show, focus, x, y, reveal, marks}; map: {center, zoom, pitch, bearing, route, marker}")
     show: Optional[tuple[float, float]] = Field(None, description=SHOW_DOC)
@@ -2024,7 +2025,8 @@ class ShowroomScene(SceneBase):
 
 
 class ParallaxScene(SceneBase):
-    """Photos turned into 2.5D camera moves with an estimated depth map; one photo per step."""
+    """Photos turned into 2.5D camera moves with an estimated depth map; one photo per step, or several captions over
+    one photo (a step without an `image` keeps the photo before it)."""
     type: Literal["parallax"] = "parallax"
     layout: Literal["overlay", "split", "cards"] = "cards"
     move: Literal["dolly", "pan", "orbit", "rise"] = Field("dolly", description="Default camera move for each photo")

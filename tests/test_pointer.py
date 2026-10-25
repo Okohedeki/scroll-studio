@@ -13,7 +13,7 @@ from PIL import Image
 from pydantic import ValidationError
 
 from engine.compile.layout_snapshot import page_html
-from engine.project import BuildContext, Project
+from engine.project import BuildContext, BuildError, Project
 from engine.spec import Pointer, Site
 
 
@@ -177,3 +177,18 @@ def test_the_one_take_page_does_not_draw_it():
     film_sec["pointer"] = {"mode": "light"}
     with pytest.raises(ValidationError, match="not drawn on the one-take page"):
         Site.model_validate(data)
+
+
+def test_steps_without_a_photo_are_captions_over_the_photo_before_them(photo_project):
+    sec = {"id": "p", "type": "parallax", "layout": "overlay", "steps": [
+        {"title": "First", "image": "inputs/p0.jpg"}, {"title": "Second", "at": {"grid": "5 / span 4", "row": "top"}},
+        {"title": "Third", "image": "inputs/p1.jpg"}, {"title": "Fourth"}]}
+    (photo_project / "site.yaml").write_text(yaml.safe_dump({"name": "x", "sections": [sec]}))
+    project = Project(photo_project)
+    from engine.scenes import parallax as builder
+    cfg = builder.build(project.load().sections[0], BuildContext(project, "p", log=lambda m: None), {})
+    assert [c["step"] for c in cfg["chapters"]] == [0, 2]                 # two photos; steps 1 and 3 hold them
+    sec["steps"] = [{"title": "No photo at all"}]
+    (photo_project / "site.yaml").write_text(yaml.safe_dump({"name": "x", "sections": [sec]}))
+    with pytest.raises(BuildError, match="has no images"):
+        builder.build(Project(photo_project).load().sections[0], BuildContext(Project(photo_project), "p"), {})

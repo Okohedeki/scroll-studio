@@ -8578,7 +8578,7 @@
   },
   "ParallaxScene": {
    "additionalProperties": false,
-   "description": "Photos turned into 2.5D camera moves with an estimated depth map; one photo per step.",
+   "description": "Photos turned into 2.5D camera moves with an estimated depth map; one photo per step, or several captions over\none photo (a step without an `image` keeps the photo before it).",
    "properties": {
     "backdrop": {
      "anyOf": [
@@ -12245,7 +12245,7 @@
       }
      ],
      "default": null,
-     "description": "parallax: this step's photo",
+     "description": "parallax: this step's photo (a step without one is another caption over the photo before it)",
      "title": "Image"
     },
     "intro": {

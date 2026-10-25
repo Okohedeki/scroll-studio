@@ -1,4 +1,6 @@
-"""parallax: one photo per step, each given an estimated depth map and played back as a 2.5D camera move."""
+"""parallax: one photo per step, each given an estimated depth map and played back as a 2.5D camera move. A step
+without a photo of its own is another caption over the photo before it (the camera keeps moving through that photo's
+step), so several captions can be placed and timed over one picture."""
 from __future__ import annotations
 
 import cv2
@@ -14,13 +16,11 @@ VERSION = 2
 
 def build(sec: ParallaxScene, ctx: BuildContext, theme: dict) -> dict:
     from ..backends import depth as depthmod
-    # every step with an image is a chapter (an intro step may have one); other caption steps are an error (a block step
-    # shows its block over the chapter it sits in)
-    if any(s.image is None for s in sec.steps if not s.intro and s.content is None):
-        raise BuildError(f"parallax section '{sec.id}': every non-intro caption step needs an `image`")
+    # every step with an image is a chapter; a step without one (a caption, or a block step) shows over the photo
+    # before it
     idx = [i for i, s in enumerate(sec.steps) if s.image is not None]
     if not idx:
-        raise BuildError(f"parallax section '{sec.id}' has no images")
+        raise BuildError(f"parallax section '{sec.id}' has no images: give at least one step an `image`")
     steps = [sec.steps[i] for i in idx]
     chapters, credits = [], []
     for i, st in enumerate(steps):
