@@ -30,6 +30,7 @@ studio directions my-site          # six art directions; --pick one
 studio storyboard my-site --edit   # sketches, stills and an animatic before any video render
 studio build my-site               # cached stage by stage: change one thing, rebuild one thing
 studio inspect my-site             # pops, softness, halos and drift in every film
+studio inspect my-site --page      # the built page: text over pictures, type, pictures, layout; exit 1 on a fail
 studio publish my-site --out site  # one static folder for GitHub Pages or any host
 ```
 

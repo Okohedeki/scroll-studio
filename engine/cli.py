@@ -15,6 +15,7 @@
   studio cuts my-site [--strip] [--only 0,2] [--mobile]   the film grammar between sections: each cut, the shapes a match found, frame strips
   studio cinemagraph my-site [--only steam] [--force]   build (or list) every `cinemagraph:` image: video + mask + a measured report
   studio inspect my-site [--section story] [--json]   polish report of a built film: pops, softness, halos, style drift, morphs
+  studio inspect my-site --page [--section hero]      polish report of the built page: text over pictures, type, pictures, layout; exit 1 on a fail
   studio trailer my-site [--format 9x16] [--plan]      launch trailer from the site's renders -> dist/trailer/
   studio ui                                         the Studio app (http://localhost:5180)
   studio doctor                                     check Python, Node, FFmpeg, Blender, GPU, ComfyUI, models
@@ -575,18 +576,39 @@ def inspect(name: str, section: Optional[str] = typer.Option(None, help="Film se
             embed: bool = typer.Option(False, "--embed", help="Also measure style drift with a local CLIP embedding "
                                                               "(OpenCLIP ViT-H/14 from the Hugging Face cache, CPU, slow; "
                                                               "nothing is downloaded)"),
-            open_: bool = typer.Option(False, "--open", help="Open the HTML report when done")):
+            open_: bool = typer.Option(False, "--open", help="Open the HTML report when done"),
+            page: bool = typer.Option(False, "--page", help="Check the built page instead of its films: screenshots at "
+                                                           "desktop and phone size (headless Chromium, reduced motion), "
+                                                           "text over pictures, type, pictures and layout, per section; "
+                                                           "exits 1 when anything fails. --section limits it to one section")):
     """Polish report for a built film (beats, a take or a video): scores it second by second and beat by beat for pops
     (jumps, flicker, judder and crossfades that do not line up), softness (looks upscaled), halos (rims and double edges),
     style drift (the look moving away from the section's start) and morphs (shapes rebuilding instead of moving). Writes
     <project>/.build/inspect/<section>.json and .html (the worst moments with pictures and a line saying what is wrong);
-    the storyboard editor shows each beat's worst problem. CPU only; unchanged films are answered from the saved report."""
+    the storyboard editor shows each beat's worst problem. CPU only; unchanged films are answered from the saved report.
+
+    With --page it checks the built page instead (see the guide, "Check a page before you ship it"): the report is
+    <project>/.build/inspect/page/report.json with a contact sheet per screen size, and the exit code is 1 when a check
+    fails, so a showcase page can be gated on it."""
     import json as _json
     import sys
     from . import polish
     from .project import Project
     project = Project(resolve(name))
     log = (lambda m: typer.echo(m, err=True)) if as_json else typer.echo
+    if page:
+        from .polish import page as page_check
+        try:
+            r = page_check.inspect_page(project, only=section, log=log)
+        except polish.Nothing as e:
+            raise typer.BadParameter(str(e))
+        out = _json.dumps(r, indent=1, default=float) if as_json else page_check.table(r)
+        enc = getattr(sys.stdout, "encoding", None) or "utf-8"          # page text may hold characters a console cannot show
+        typer.echo(out.encode(enc, "replace").decode(enc))
+        if open_:
+            import webbrowser
+            webbrowser.open((Path(r["folder"]) / next(iter(r["sheets"].values()))).as_uri())
+        raise typer.Exit(1 if r["summary"]["fails"] else 0)
     try:
         reports = ([polish.inspect_video(project, str(video), force=force, embed=embed, log=log)] if video
                    else polish.inspect_project(project, section, force=force, embed=embed, log=log))

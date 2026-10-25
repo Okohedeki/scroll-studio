@@ -147,7 +147,8 @@ UI (React) ◄─► engine server (FastAPI + job queue + websocket events) ◄�
 - **`doctor`** checks the whole stack: Python, Node, FFmpeg, Blender, CUDA/VRAM, ComfyUI, disk space, models.
 - **Polish report** (`engine/polish/`: `metrics.py` the measurements on frames, `analyze.py` the scorers over a film, `run.py`
   the section glue and the report, `explain.py` the sentences, `thumbs.py` the pictures, `report.py` the HTML, `embed.py`
-  the optional embedding, `api.py` cache and read-back). `studio inspect` finds a film section's finished film
+  the optional embedding, `api.py` cache and read-back; `page.py` + `page_metrics.py`: `studio inspect --page`, the built
+  page in headless Chromium, with the facts it reads kept apart from the rules and numbers that judge them). `studio inspect` finds a film section's finished film
   (`gen/gen_sr.mp4` or `beats.mp4`, `take.mp4`, the `video:` file), places every beat on it from the clips' lengths and the
   engine's own crossfade formula, and reads it once: a 384 px gray copy of every frame (optical flow, between *new* frames:
   a 12 fps clip written at 24 repeats every frame, and a held shot repeats its frame) and edge, fine-detail and style

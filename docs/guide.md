@@ -400,6 +400,42 @@ Agents drive the same loop through the MCP tools `storyboard_notes`, `resolve_no
 page from the edited spec and what is rendered so far (a sketch-level storyboard: no ComfyUI, images not drawn yet show as
 cards); `studio storyboard my-site` does the same at stills or animatic level.
 
+## Check a page before you ship it
+
+`studio inspect` scores a built film; `studio inspect my-site --page` checks the built *page*. It serves `dist/`, opens it in
+headless Chromium at 1440x900 and at a 390x844 phone (2x), with reduced motion on so nothing is mid-fade, and stops at each
+section's key positions: a block at each screen of its height, a scene at each of its captions or steps. At every stop it
+takes the screenshot a visitor sees, then the same page with every word hidden (and with each scrim hidden), and measures
+the real pixels behind the words. Nothing needs a GPU or a network, only Playwright's Chromium (`playwright install chromium`).
+
+```bash
+studio build my-site
+studio inspect my-site --page              # a table, then the findings with their fixes
+studio inspect my-site --page --section hero --json
+```
+
+| Check | What it measures | Flagged when |
+|---|---|---|
+| Text over a picture | the busy-ness (0-100: edge density and detail) of the picture behind each headline, caption and button, and the WCAG contrast of the words against those pixels, typical and on the worst tenth | contrast needs 4.5:1 (3:1 for text of 24 px, or 18.66 px bold): under 90% of that is a fail, just under it or under 80% of it on the worst tenth of the pixels is a warn; busy-ness 60 or more; the page reads only because of a scrim (under 3:1 without it) |
+| Type | headline against body size, characters per line of body copy, headline lines on a phone | ratio under 1.6; lines over 80 characters, or under 35 in a paragraph of four lines or more; headlines over 5 lines (7 is a fail) |
+| Pictures | the picture's own pixels against the pixels its box needs (`<img>` and CSS backgrounds), a face cut by the frame edge, words across a face | blown up more than 1.3x (a fail past 2x); under 95% of a face inside the crop; text over a face |
+| Layout | horizontal overflow, the first button of each hero against the fold, text over text | any overflow or overlap; a button below the fold (a fail) or cut by it (a warn) |
+
+Each finding names the section, the size, the numbers and the fix in the spec's terms: move a caption to the calmer side
+with `place: right` (the report measures the left and right thirds of the shot and says which is calmer), give a step
+`surface: dark`, set the scene `shade: strong`, regenerate the picture with calm space where the words go, use a bigger
+`size:` for a `generate:` image, shorten a headline or lower `theme.type.scale`. The report is
+`.build/inspect/page/report.json` (every finding, the text over pictures with its numbers, every picture with its upscale)
+next to one contact sheet per size, `sheet-desktop.jpg` and `sheet-phone.jpg`: each screenshot framed green, amber or red,
+with a box on every finding. The command exits 1 when anything fails, so a showcase page can be gated on it:
+`studio inspect showcase --page && studio publish showcase --out site`.
+
+What it does not check: pictures a player draws itself (parallax photos, films, 3D scenes) have no size to measure, so only
+elements and CSS backgrounds are checked for blow-up and crop. The face check is OpenCV's bundled frontal-face detector: it
+finds upright faces looking at the camera and misses profiles and tilted heads. The words' own text shadow is hidden while
+measuring, so the contrast is the picture's, not the shadow's. The check is a second pair of eyes, not a replacement for
+looking at the sheet.
+
 ## Launch trailers
 
 `studio trailer my-site` cuts a launch film from what the site already rendered, in 16:9 and 9:16, with no extra

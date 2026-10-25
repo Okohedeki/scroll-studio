@@ -825,6 +825,16 @@
      "required": false,
      "type": "boolean"
     },
+    "page": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--page"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
     "section": {
      "default": null,
      "kind": "option",

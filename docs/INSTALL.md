@@ -41,6 +41,9 @@ CPU. Its optional `--embed` drift check also needs `pip install -e .[embed]` (op
 weights (`laion/CLIP-ViT-H-14-laion2B-s32B-b79K`, 3.9 GB, MIT) already in the Hugging Face cache; it never downloads them
 (`huggingface-cli download laion/CLIP-ViT-H-14-laion2B-s32B-b79K open_clip_pytorch_model.bin` fetches them once).
 
+`studio inspect --page` (the polish report of a built page) needs Playwright's Chromium, which `playwright` (a core
+dependency) downloads once with `playwright install chromium`; it runs headless, on the CPU, with no network.
+
 ## 2. GPU stages (parallax, film)
 
 Install PyTorch for your CUDA driver first, then the ML extras:
