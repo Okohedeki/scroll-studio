@@ -352,6 +352,8 @@ html.hero-media .ss-nav:not(.ss-solid) { --ink: #fff; --ink-rgb: 255, 255, 255; 
 .ss-hero--media .ss-h1 { text-shadow: 0 2px 40px rgba(0, 0, 0, .25); }
 .ss-badge { display: inline-flex; align-items: center; padding: 8px 16px; border-radius: 999px; font-size: 14px; font-weight: 500;
   background: rgba(var(--ink-rgb), .1); border: 1px solid rgba(var(--ink-rgb), .22); }
+/* over a picture the pill is frosted in the hero's own background, so it reads on whatever part of the picture it lands */
+.ss-hero--media .ss-badge, .ss-hero--media .ss-btn:not(.ss-btn--hot):not(:hover) { background: color-mix(in srgb, var(--bg) 62%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
 .ss-btns { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; }
 .ss-hero:not(.ss-hero--left) .ss-btns { justify-content: center; }
 
@@ -614,6 +616,9 @@ html:not(.js) .ss-strip { overflow-x: auto; }
   .ss-product__media { min-height: 52vh; }
   .ss-product__img { max-height: 52vh; }
   .ss-hero { padding: 110px var(--gutter) 70px; }
+  /* on a phone the words run the full width, so a calm hero's light scrim follows them down the middle, not one side */
+  .ss-hero--calm-left .ss-hero__shade, .ss-hero--calm-right .ss-hero__shade { background: linear-gradient(180deg, transparent 6%,
+    color-mix(in srgb, var(--bg) 30%, transparent) 28%, color-mix(in srgb, var(--bg) 30%, transparent) 78%, transparent 96%); }
   /* phones get the static layout (rings need more room): circles in rows under the brand */
   .ss-orbit__stage { --s: 96px; width: 100%; aspect-ratio: auto; padding: 8px 0; gap: 12px; }
   .ss-orbit__center { margin-bottom: 8px; }
