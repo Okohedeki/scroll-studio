@@ -63,7 +63,9 @@ sections:
 LAPTOP_STARTER = """# A site that builds on any laptop: no GPU, no ComfyUI, no Blender (docs/laptop.md).
 name: @TITLE@
 description: A scroll-driven site built with Scroll Studio.
-theme: { preset: night, style: bauhaus }
+# Your brand: `theme: { from: https://yoursite.com }` (or a logo, or brand.yaml). A style is an optional experience on top,
+# e.g. `style: bauhaus` (studio looks lists them).
+theme: { preset: night }
 nav: { cta: { label: Get in touch, href: "#contact" } }
 sections:
 @OPENING@

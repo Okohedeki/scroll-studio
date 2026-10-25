@@ -28,9 +28,11 @@ studio preview my-site                # http://localhost:5173
 ```
 
 `studio new --laptop` writes `projects/my-site/site.yaml`: a scene of kinetic type, a second one that reveals a sentence as
-you scroll, then an intro, three features, two stats and a call to action, all in the `bauhaus` style. Every scene in it is
-one that needs no models, so the build finishes in seconds. Edit the YAML, build again, and only what you changed
-rebuilds.
+you scroll, then an intro, three features, two stats and a call to action. Every scene in it is one that needs no models,
+so the build finishes in seconds. Edit the YAML, build again, and only what you changed rebuilds.
+
+Make it yours with `theme: { from: https://yoursite.com }` (or a logo, or a `brand.yaml`): your colours, fonts and logo.
+A style is an optional experience on top of your brand, such as `style: bauhaus`; `studio looks` shows them all.
 
 Try another experience by changing one word, `theme: { style: <name> }`; the [style gallery](styles.md) lists all 32, and
 every one builds on a laptop.

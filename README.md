@@ -34,12 +34,12 @@
 
 ## Your brand. Your scroll.
 
-| Scenes | Styles | Workflow |
+| Scenes | Your brand | Workflow |
 | :--- | :--- | :--- |
-| One camera take through a whole page | 32 page experiences, one word to switch | Six art directions from one brief |
-| Cinemagraphs, light from dawn to night | Zoetrope, stop-motion, paint on glass | Storyboard before you render |
-| Fly inside your product's 3D model | Pop-up book, multiplane, Spider-Verse smears | A polish report on every film |
-| Miniature worlds, maps, charts, live 3D | Film cuts between any two sections | Claude drives it all through MCP |
+| One camera take through a whole page | Remake any landing page: `studio remake <url>` | Six art directions from one brief |
+| Cinemagraphs, light from dawn to night | Your colours, fonts and logo from a URL or a logo | Storyboard before you render |
+| Fly inside your product's 3D model | Every spacing, type and motion value is yours to set | A polish report on every film |
+| Miniature worlds, maps, charts, live 3D | Optional experiences on top: 32 styles, from zoetrope to paint on glass | Claude drives it all through MCP |
 | Photo parallax from your own pictures | Any brand, from a page, a logo or a brand.yaml | Remake a live landing page: `studio remake <url>` |
 
 The heavy scenes (generated film and images) are made with open models on your own GPU (Z-Image, Qwen-Image-Edit, LTX-2.3,
