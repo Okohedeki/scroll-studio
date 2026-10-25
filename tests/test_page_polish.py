@@ -437,7 +437,10 @@ def test_a_missing_build_or_chromium_is_said_plainly(tmp_path):
 
 
 def test_no_faces_are_found_in_a_flat_picture():
-    assert P.detect_faces(solid((90, 90, 90), 400, 300)) == []
+    faces = P.detect_faces(solid((90, 90, 90), 400, 300))
+    if faces is None:       # an OpenCV build without the bundled cascade files: the report lists faces as not checked
+        pytest.skip("this OpenCV has no face cascade files")
+    assert faces == []
 
 
 # ---------------------------------------------------------------- the command
