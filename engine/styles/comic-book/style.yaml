@@ -22,3 +22,7 @@ font_axes:
   Luckiest Guy: ""
 display_weight: 400
 radius: 0px
+# What a brand (theme.from) cannot change here: the light room its CSS is drawn for, and its display face (the balloons are hand-lettered)
+requires:
+  mode: light
+  fonts: { display: Bangers }

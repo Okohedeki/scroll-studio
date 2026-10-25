@@ -356,7 +356,7 @@ def build_site(project: Project, log: Callable[[str], None] = print,
                                            encoding="utf-8")
 
     # A nav logo given as an image file is copied in like any other media; SVG path data passes through.
-    logo = site.nav.logo
+    logo = site.nav.logo or theme["logo"]        # a brand's logo (theme.from) when the nav names none
     if logo and not logo.startswith("M"):
         logo = publish(logo)
 
@@ -401,7 +401,7 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         font_css=font_css, font_links=google, nav_links=nav, page_links=page_links, credits=credits,
         concept=concept, product=site.product,
         configs={e["s"].id: e["config"] for e in sections if e["scene"]},
-        style_css=themes.style_css(theme["style"]) if theme["style"] else "",
+        style_css=themes.style_css(theme["style"], theme) if theme["style"] else "",
         style_blocks=bool(sdir and (sdir / "blocks.html.j2").exists()),
         style_chrome=bool(sdir and (sdir / "chrome.html.j2").exists()),
         style_scenes=bool(sdir and (sdir / "scenes.html.j2").exists()),

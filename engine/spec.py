@@ -12,7 +12,7 @@ import re
 from dataclasses import dataclass
 from typing import Annotated, Any, Literal, Optional, Union
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_serializer, model_validator
+from pydantic import BaseModel, ConfigDict, Field, PrivateAttr, field_validator, model_serializer, model_validator
 
 from .safety import CSS_NAME, FONT_NAME, SAFE_ID, check_url, css_value_ok
 
@@ -2424,7 +2424,52 @@ def _fonts_schema(schema: dict) -> None:
     schema["additionalProperties"]["type"] = ["string", "object"]
 
 
+BRAND_COLOURS = ("bg", "bg2", "ink", "accent", "accent2", "accent_ink")
+
+
+class Brand(Model):
+    """A brand as tokens: what `theme.from` reads from a web page, a logo or a brand.yaml, or what you write yourself.
+    Missing colours are derived from the ones given with the presets' contrast rules."""
+    mode: Optional[Literal["light", "dark"]] = Field(None, description="light or dark (default: what the colours say)")
+    colors: dict[str, str] = Field(default_factory=dict, description="Brand colours as #hex: accent (the main brand "
+                                                                     "colour) and any of accent2, bg, bg2, ink, accent_ink")
+    fonts: dict[str, Union[str, FontFile]] = Field(default_factory=dict, description="Brand fonts by role (display, "
+                                                                                     "body, mono): a Google Fonts family "
+                                                                                     "or {file: ...} of the project's own")
+    radius: Optional[str] = Field(None, description="Corner radius of buttons and cards, e.g. 6px")
+    logo: Optional[str] = Field(None, description="The brand's logo (an image file in the project), shown in the nav "
+                                                  "when nav.logo is not set")
+    source: Optional[str] = Field(None, description="Where these tokens were read from (written by `studio brand`)")
+
+    @field_validator("colors")
+    @classmethod
+    def _brand_colours(cls, v: dict[str, str]) -> dict[str, str]:
+        for k, c in v.items():
+            if k not in BRAND_COLOURS or not re.fullmatch(r"#(?:[0-9a-fA-F]{3}){1,2}", c):
+                raise ValueError(f"colors.{k}: {c[:40]!r} is not allowed: brand colours are {', '.join(BRAND_COLOURS)}, "
+                                 "each a #hex colour")
+        return v
+
+    @field_validator("fonts")
+    @classmethod
+    def _brand_fonts(cls, v: dict) -> dict:
+        for k, f in v.items():
+            if k not in ("display", "body", "mono") or not (isinstance(f, FontFile) or FONT_NAME.fullmatch(f)):
+                raise ValueError(f"fonts.{k}: brand fonts are display, body and mono, each a family name or {{file: ...}}")
+        return v
+
+    @field_validator("radius")
+    @classmethod
+    def _brand_radius(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and not css_value_ok(v):
+            raise ValueError(f"radius {v[:40]!r} is not a CSS length such as 6px")
+        return v
+
+
 class Theme(Model):
+    model_config = ConfigDict(extra="forbid", populate_by_name=True)
+    # the tokens of a `from:` source (a URL, image or brand.yaml), read by Project.load() (engine/brand.py)
+    _brand: Optional[dict] = PrivateAttr(None)
     preset: str = Field("night", description="night, brass, paper, lab, cosmos, studio, dusk, ink, blueprint, clinic (see engine/themes.yaml)")
     style: Optional[str] = Field(
         None, description="An experience in one word: its own scroll mechanic, layout, transitions and look. particles, "
@@ -2459,6 +2504,11 @@ class Theme(Model):
     motion: Optional[MotionTokens] = Field(None, description="Easing, how blocks arrive and how smooth scrolling follows")
     grain: Optional[float] = Field(None, ge=0, le=1, description="Film grain over the whole page: 0 none (the default) "
                                                                   "to 1; 0.15-0.3 reads as print or film")
+    from_: Optional[Union[str, Brand]] = Field(
+        None, alias="from",
+        description="Wear a brand: a web page URL, a logo image or a brand.yaml in the project (read once and kept in "
+                    ".build/brand/), or the brand's tokens themselves (what `studio brand` writes). Its colours, fonts, "
+                    "radius and logo go over the preset and the style; anything else set on theme still wins")
     phone: Optional[int] = Field(None, ge=320, le=1600, description="Width in px below which the page takes its phone "
                                                                      "layout, for the stylesheet and the runtime alike. "
                                                                      "Unset keeps the built-in widths (900 for the "
@@ -2478,6 +2528,17 @@ class Theme(Model):
         for k, f in v.items():
             if not CSS_NAME.fullmatch(k) or not (isinstance(f, FontFile) or FONT_NAME.fullmatch(f)):
                 raise ValueError(f"fonts.{k}: {f[:40]!r} is not a Google Fonts family name (letters, digits, spaces and . + & ' -)")
+        return v
+
+    @field_validator("from_")
+    @classmethod
+    def _a_brand_source(cls, v: Union[str, Brand, None]) -> Union[str, Brand, None]:
+        if isinstance(v, str):
+            if v.startswith(("http://", "https://")):
+                check_url(v, "from")
+            elif not v.lower().endswith((".yaml", ".yml", ".html", ".htm", ".png", ".jpg", ".jpeg", ".webp", ".svg")):
+                raise ValueError(f"from {v[:60]!r}: give a web page (https://...), a page saved as .html, a logo image "
+                                 "(.png, .jpg, .webp, .svg) or a brand.yaml in the project, or the brand's tokens")
         return v
 
     @field_validator("radius")

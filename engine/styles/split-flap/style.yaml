@@ -21,3 +21,7 @@ font_axes:
   IBM Plex Mono: "wght@400;500;600"
 display_weight: 600
 radius: 3px
+# What a brand (theme.from) cannot change here: the light room its CSS is drawn for, and its display face (the flaps are cut for a condensed face)
+requires:
+  mode: light
+  fonts: { display: Barlow Condensed }

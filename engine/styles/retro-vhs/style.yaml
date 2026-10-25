@@ -22,3 +22,7 @@ font_axes:
   Permanent Marker: ""
 display_weight: 400
 radius: 0px
+# What a brand (theme.from) cannot change here: the dark room its CSS is drawn for, and its display, mono faces (the on-screen display is a VCR's)
+requires:
+  mode: dark
+  fonts: { display: VT323, mono: VT323 }

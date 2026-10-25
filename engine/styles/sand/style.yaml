@@ -22,3 +22,6 @@ font_axes:
   Alegreya Sans SC: "wght@500;700"
 display_weight: 700
 radius: 999px
+# What a brand (theme.from) cannot change here: the light room its CSS is drawn for
+requires:
+  mode: light

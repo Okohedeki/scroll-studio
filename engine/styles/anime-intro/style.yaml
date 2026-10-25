@@ -8,3 +8,6 @@ fonts: { display: "Dela Gothic One", body: "M PLUS 1p", mono: "M PLUS 1 Code", c
 font_axes: { "Dela Gothic One": "", "M PLUS 1p": "wght@400;500;700;800", "M PLUS 1 Code": "wght@400;700", "Anton": "", "Shippori Mincho B1": "wght@800" }
 display_weight: 400
 radius: 0px
+# What a brand (theme.from) cannot change here: the dark room its CSS is drawn for
+requires:
+  mode: dark

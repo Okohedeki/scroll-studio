@@ -26,3 +26,6 @@ font_axes:
   Alfa Slab One: ""
 display_weight: 700
 radius: 2px
+# What a brand (theme.from) cannot change here: the light room its CSS is drawn for
+requires:
+  mode: light

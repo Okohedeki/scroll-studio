@@ -21,3 +21,7 @@ font_axes:
   Silkscreen: "wght@400;700"
 display_weight: 400
 radius: 0px
+# What a brand (theme.from) cannot change here: the dark room its CSS is drawn for, and its display, body, mono faces (the pixel grid is set in its pixel faces)
+requires:
+  mode: dark
+  fonts: { display: Press Start 2P, body: Pixelify Sans, mono: Silkscreen }

@@ -22,3 +22,6 @@ font_axes:
   Architects Daughter: ""
 display_weight: 600
 radius: 0px
+# What a brand (theme.from) cannot change here: the dark room its CSS is drawn for
+requires:
+  mode: dark

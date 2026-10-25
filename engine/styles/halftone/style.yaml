@@ -24,3 +24,6 @@ font_axes:
   Oswald: "wght@200..700"
 display_weight: 800
 radius: 0px
+# What a brand (theme.from) cannot change here: the light room its CSS is drawn for
+requires:
+  mode: light

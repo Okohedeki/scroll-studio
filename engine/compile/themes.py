@@ -1,9 +1,11 @@
-"""Themes as layered token sets (defaults, preset, style, site.yaml) -> CSS custom properties and font links."""
+"""Themes as layered token sets (defaults, preset, style, brand, site.yaml) -> CSS custom properties and font links."""
 from __future__ import annotations
 
+import colorsys
 import re
 from functools import lru_cache
 from pathlib import Path
+from typing import Optional
 from urllib.parse import quote_plus
 
 import yaml
@@ -86,8 +88,10 @@ def style_dir(name: str) -> Path:
     return STYLES_DIR / name
 
 
-def style_css(name: str) -> str:
-    return (style_dir(name) / "style.css").read_text(encoding="utf-8")
+def style_css(name: str, t: Optional[dict] = None) -> str:
+    """The style's stylesheet; in a brand's colours and fonts when the theme `t` wears one (theme.from)."""
+    css = (style_dir(name) / "style.css").read_text(encoding="utf-8")
+    return reskin(css, t.get("skin")) if t else css
 
 
 def _hex_rgb(h: str) -> str:
@@ -98,8 +102,9 @@ def _hex_rgb(h: str) -> str:
 
 
 # ---------------------------------------------------------------- token sets and their layers
-# A theme is a stack of token sets, each laid over the one before: the engine's defaults, the preset, the style, then
-# what site.yaml sets. Presets (themes.yaml) and styles (style.yaml) are token sets with names.
+# A theme is a stack of token sets, each laid over the one before: the engine's defaults, the preset, the style, the
+# brand (theme.from), then what site.yaml sets on theme. Presets (themes.yaml) and styles (style.yaml) are token sets
+# with names.
 DEFAULTS = {"mode": "dark", "colors": {}, "fonts": {}, "font_axes": {}, "display_weight": 500, "em_italic": False,
             "display_em": "accent", "labels": "caps", "display_optical_size": None, "radius": "4px",
             # what runtime/src/styles.css and the runtime hard-coded before these were tokens (#15)
@@ -151,11 +156,29 @@ def override_tokens(theme: Theme) -> dict:
             "grain": theme.grain, "phone": theme.phone}
 
 
+def brand_tokens(theme: Theme) -> Optional[dict]:
+    """theme.from as a token set: written inline, or read from its source when the project loaded (engine/brand.py)."""
+    if theme.from_ is None:
+        return None
+    if isinstance(theme.from_, str):
+        if theme._brand is None:
+            raise ValueError(f"theme.from {theme.from_[:60]!r} is read when the project is loaded (Project.load), "
+                             "not from a bare spec")
+        return theme._brand
+    return theme.from_.model_dump(exclude_none=True)
+
+
 def layers(theme: Theme) -> list[tuple[str, dict]]:
     """The token sets this theme is made of, bottom first, each named for where it came from."""
     out = [("defaults", DEFAULTS), (f"preset {theme.preset}", preset_tokens(theme.preset))]
+    brand = brand_tokens(theme)
     if theme.style:
-        out.append((f"style {theme.style}", style_tokens(theme.style)))
+        st = style_tokens(theme.style)
+        if brand and brand.get("colors"):      # the brand's palette replaces the style's whole skin, extras included
+            st = {k: v for k, v in st.items() if k != "colors"}
+        out.append((f"style {theme.style}", st))
+    if brand:
+        out.append(("brand", brand_layer(brand, theme.style)))
     out.append(("site.yaml", override_tokens(theme)))
     return out
 
@@ -163,6 +186,7 @@ def layers(theme: Theme) -> list[tuple[str, dict]]:
 def resolve(theme: Theme) -> dict:
     tokens = layer(*(s for _, s in layers(theme)))
     colors, radius = tokens["colors"], tokens["radius"]
+    brand = brand_tokens(theme)
     fonts, font_files = own_fonts(tokens["fonts"])
     # these end up inside the page's <style> block, so none may carry anything but a plain value (engine/safety.py)
     for k, c in colors.items():
@@ -193,6 +217,8 @@ def resolve(theme: Theme) -> dict:
         # what the runtime reads (window.__ssTheme): only tokens moved off their defaults, so a page that sets none is unchanged
         "runtime": {name: v for name, path in RUNTIME_TOKENS.items()
                     if (v := _at(tokens, path)) != _at(DEFAULTS, path)},
+        "logo": (brand or {}).get("logo"),
+        "skin": skin(theme.style, colors, fonts) if brand and theme.style else None,
     }
 
 
@@ -271,6 +297,8 @@ def css_vars(t: dict, log=lambda m: None) -> str:
     ink_rgb, bgs = _rgb(c["ink"]), [_rgb(c["bg"]), _rgb(c["bg2"])]
     # Secondary text tiers are derived per theme so small labels always stay readable: a fixed opacity
     # passes on dark backgrounds but fails on light ones.
+    if t.get("skin"):     # a style wearing a brand may lay its own near-black (or near-white) under the words
+        bgs.append((0.0, 0.0, 0.0) if t["mode"] == "dark" else (255.0, 255.0, 255.0))
     a3 = _min_alpha(ink_rgb, bgs, SMALL_TEXT, 0.44)
     a2 = max(_min_alpha(ink_rgb, bgs, SMALL_TEXT, 0.68), min(1.0, round(a3 + 0.14, 2)))   # keep the tiers apart
     for key in ("ink2", "ink3"):
@@ -352,6 +380,151 @@ PHONE_WIDTHS = re.compile(r"\(max-width:\s*(?:900|760|700)px\)")
 def phone_css(css: str, phone: int) -> str:
     """The runtime stylesheet with every phone width set to theme.phone (a media query cannot read a CSS variable)."""
     return PHONE_WIDTHS.sub(f"(max-width: {int(phone)}px)", css)
+
+
+# ---------------------------------------------------------------- brands (theme.from)
+BRAND_ROLES = ("bg", "bg2", "ink", "accent", "accent2", "accent_ink")
+
+
+def _hls_rgb(h: float, l: float, s: float) -> tuple:
+    return tuple(v * 255 for v in colorsys.hls_to_rgb(h, l, s))
+
+
+def brand_palette(given: dict, mode: Optional[str] = None) -> tuple[dict, str]:
+    """A complete colour set from whatever a brand gives (an accent at least), held to the presets' contrast rules:
+    ink on bg 7:1, on bg2 4.5:1, button text on the accent 4.5:1. Given colours are kept where they pass; the rest are
+    built around the accent's hue. `mode` forces light or dark (a style that requires one)."""
+    g = {k: _rgb(v) for k, v in given.items() if k in BRAND_ROLES}
+    accent = g.get("accent") or g.get("accent2") or g.get("ink") or _rgb("#1d5fd1")
+    if mode is None:
+        if "bg" in g:
+            mode = "dark" if _lum(g["bg"]) < (_lum(g["ink"]) if "ink" in g else 0.18) else "light"
+        else:
+            mode = "light"
+    bg, ink, bg2 = g.get("bg"), g.get("ink"), g.get("bg2")
+    if not (bg and ink and (_lum(bg) < _lum(ink)) == (mode == "dark") and contrast(ink, bg) >= 7):
+        h, _, s = colorsys.rgb_to_hls(*(v / 255 for v in accent))      # surfaces and ink tinted with the brand's hue
+        if mode == "light":
+            bg, ink = _hls_rgb(h, 0.965, min(s, 0.35)), _hls_rgb(h, 0.11, min(s, 0.3))
+        else:
+            bg, ink = _hls_rgb(h, 0.045, min(s, 0.4)), _hls_rgb(h, 0.95, min(s, 0.25))
+        bg2 = None
+    if bg2 is None or contrast(ink, bg2) < SMALL_TEXT or (_lum(bg2) < _lum(ink)) != (mode == "dark"):
+        bg2 = _mix(ink, bg, 0.05)
+    accent2 = g.get("accent2")
+    if accent2 is None:                                                 # a lighter accent
+        h, l, s = colorsys.rgb_to_hls(*(v / 255 for v in accent))
+        accent2 = _hls_rgb(h, min(0.8, l + 0.18), s)
+    accent_ink = g.get("accent_ink")
+    if accent_ink is None or contrast(accent_ink, accent) < SMALL_TEXT:
+        accent_ink = _on(accent, ink, bg)
+    cols = dict(zip(BRAND_ROLES, (bg, bg2, ink, accent, accent2, accent_ink)))
+    return {k: _css_rgb(v) for k, v in cols.items()}, mode
+
+
+def _on(colour, ink, bg) -> tuple:
+    """The text colour that reads best on a filled colour (a button)."""
+    return max((ink, bg, (255.0, 255.0, 255.0), (0.0, 0.0, 0.0)), key=lambda c: contrast(c, colour))
+
+
+def brand_layer(brand: dict, style: Optional[str]) -> dict:
+    """The brand as the token set laid over the style. A style's `requires` (style.yaml) wins over the brand: a style
+    that needs a dark room gets the brand's palette rebuilt dark around its accents, and keeps its own fonts where they
+    are the mechanic. Under a style the accents are also held to the style's own pairings (accent_partners)."""
+    req = styles()[style].get("requires", {}) if style else {}
+    out = {k: brand[k] for k in ("fonts", "radius") if brand.get(k)}
+    if brand.get("colors"):
+        colors, mode = brand_palette(brand["colors"], req.get("mode") or brand.get("mode"))
+        if style:
+            c = {k: _rgb(v) for k, v in colors.items()}
+            for role, partners in accent_partners(style, colors).items():
+                c[role] = _hold(c[role], partners)
+            if contrast(c["accent_ink"], c["accent"]) < SMALL_TEXT:
+                c["accent_ink"] = _on(c["accent"], c["ink"], c["bg"])
+            colors = {k: _css_rgb(v) for k, v in c.items()}
+        out.update(colors=colors, mode=mode)
+    return layer(out, req)
+
+
+def accent_partners(style: str, colors: dict) -> dict:
+    """What each accent must stand against when a brand recolours this style: the colours the style's own accent
+    clears 3:1 or more against (its background, its button text), as the page draws them with the brand, each to the
+    style's own ratio up to 7:1. A style that sets black words on a pastel accent keeps a pastel accent; one that sets
+    a gold accent on black keeps a bright one."""
+    sc = {k: _rgb(v) for k, v in styles()[style].get("colors", {}).items() if HEX.fullmatch(str(v))}
+    out: dict = {}
+    for role in ("accent", "accent2"):
+        partners = []
+        for other in ("bg", "accent_ink"):
+            r = contrast(sc[role], sc[other])
+            # the partner as drawn: a palette colour the skin swaps (reskin), else the style's own hex, which stays
+            swapped = next((k for k in SKIN_ORDER if k in sc and sc[k] == sc[other] and _css_rgb(sc[k]) not in NEUTRALS), None)
+            if r < 3 or swapped in ("accent", "accent2"):
+                continue
+            partners.append((_rgb(colors[swapped]) if swapped in colors else sc[other], min(r, 7.0)))
+        out[role] = partners
+    return out
+
+
+def _hold(col: tuple, partners: list) -> tuple:
+    """The colour nearest `col`, mixed toward black or white, that clears every (colour, ratio) partner; the closest
+    miss when none does."""
+    def score(c):
+        return min((contrast(c, p) / t for p, t in partners), default=1.0)
+    tries = [_mix(end, col, k / 50) for k in range(51) for end in ((0.0, 0.0, 0.0), (255.0, 255.0, 255.0))]
+    return next((c for c in tries if score(c) >= 1), max(tries, key=score))
+
+
+# accent_ink is left out: a style's button text is usually plain black, white or its background, which the brand's
+# accents are held to (accent_partners)
+SKIN_ORDER = ("bg", "ink", "accent", "accent2", "bg2", "accent_text", "ink2", "ink3", "line")
+NEUTRALS = ("#000000", "#ffffff")     # every stylesheet's black and white, never only the palette's
+HEX = re.compile(r"#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b")
+RGB = re.compile(r"(rgba?\(\s*)(\d{1,3})(\s*,\s*)(\d{1,3})(\s*,\s*)(\d{1,3})\b")
+
+
+def _hex6(h: str) -> str:
+    h = h.lstrip("#").lower()
+    return "#" + ("".join(c * 2 for c in h) if len(h) == 3 else h)
+
+
+def skin(style: str, colors: dict, fonts: dict) -> dict:
+    """What a brand changes in a style's own stylesheet: each colour of the style's palette (style.yaml) and each of its
+    display/body/mono families, mapped to the theme's. Most styles write their palette into style.css directly, so this
+    is how a brand reaches them; everything else in the stylesheet (the style's mechanics) stays as it is."""
+    st = styles()[style]
+    final = dict(colors)
+    final.setdefault("accent_text", _css_rgb(_readable_accent(_rgb(colors["accent"]), _rgb(colors["ink"]),
+                                                              [_rgb(colors["bg"]), _rgb(colors["bg2"])], SMALL_TEXT)))
+    cmap: dict = {}
+    for role in SKIN_ORDER:            # a hex the style uses for two roles goes with the first (bg before accent)
+        old, new = st.get("colors", {}).get(role), final.get(role)
+        if old and new and HEX.fullmatch(str(old)) and HEX.fullmatch(str(new)) and _hex6(old) not in NEUTRALS:
+            cmap.setdefault(_hex6(old), _hex6(new))
+    fmap: dict = {}
+    for role in ("display", "body", "mono"):
+        old, new = st.get("fonts", {}).get(role), fonts.get(role)
+        if old and new:
+            fmap.setdefault(old, new)
+    return {"colors": {k: v for k, v in cmap.items() if k != v}, "fonts": {k: v for k, v in fmap.items() if k != v}}
+
+
+def reskin(css: str, sk: Optional[dict]) -> str:
+    """A style's stylesheet in the brand's colours and fonts (see skin), in one pass so no colour is swapped twice."""
+    if not sk:
+        return css
+    cmap = sk["colors"]
+    rgb = {tuple(int(o[i:i + 2], 16) for i in (1, 3, 5)): tuple(int(n[i:i + 2], 16) for i in (1, 3, 5))
+           for o, n in cmap.items()}
+
+    def swap_rgb(m: re.Match) -> str:
+        new = rgb.get((int(m.group(2)), int(m.group(4)), int(m.group(6))))
+        return m.group(0) if new is None else f"{m.group(1)}{new[0]}{m.group(3)}{new[1]}{m.group(5)}{new[2]}"
+    css = HEX.sub(lambda m: cmap.get(_hex6(m.group(0)), m.group(0)), css)
+    css = RGB.sub(swap_rgb, css)
+    for old, new in sk["fonts"].items():
+        css = re.sub(r"([\"'])" + re.escape(old) + r"\1", f'"{new}"', css)
+    return css
 
 
 def font_links(t: dict) -> list[str]:

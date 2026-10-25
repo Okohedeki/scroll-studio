@@ -19,7 +19,7 @@ HEX = re.compile(r"#[0-9a-fA-F]{6}")
 COLOURS = ("bg", "bg2", "ink", "accent", "accent2", "accent_ink")       # every preset sets them; a style may override any
 PRESET_KEYS = {"mode", "colors", "fonts", "display_weight", "em_italic", "radius", "display_em", "labels",
                "display_optical_size", "space", "type", "shade", "motion", "grain", "phone"}
-STYLE_KEYS = PRESET_KEYS | {"label", "about", "font_axes", "cuts"}
+STYLE_KEYS = PRESET_KEYS | {"label", "about", "font_axes", "cuts", "requires"}
 BLOCK_TYPES = {m.model_fields["type"].default for m in vars(spec).values()
                if isinstance(m, type) and issubclass(m, spec.BlockBase) and "type" in m.model_fields}
 BODY, ROLE_TEXT = 7.0, 4.5      # ink on the page: AAA for body copy; buttons and accent text: AA
@@ -93,6 +93,9 @@ def test_a_style_declares_only_known_tokens_and_is_readable(name):
     fonts = set(s.get("fonts", {}).values())
     assert not set(s.get("font_axes", {})) - fonts, f"engine/styles/{name}/style.yaml: font_axes for fonts it does not use: {set(s['font_axes']) - fonts}"
     assert s.get("cuts", True) in (True, False), f"engine/styles/{name}/style.yaml: cuts is true or false"
+    req = s.get("requires", {})
+    assert not set(req) - PRESET_KEYS, f"engine/styles/{name}/style.yaml: requires holds tokens only, not {set(req) - PRESET_KEYS}"
+    assert req.get("mode", s["mode"]) == s["mode"], f"engine/styles/{name}/style.yaml: requires a mode its own colours are not"
 
 
 @pytest.mark.parametrize("name", STYLES)
@@ -124,11 +127,14 @@ def test_the_readme_counts_the_styles_there_are():
 
 # ---------------------------------------------------------------- every style draws every block type
 
-def kitchen_sink(style: str | None) -> spec.Site:
+def kitchen_sink(style: str | None, brand: dict | None = None) -> spec.Site:
     """A page with every block type, a scene in each layout and a button, so a style meets everything a spec can hold."""
     btn = {"label": "Start", "href": "#"}
+    theme = {"style": style} if style else {}
+    if brand:
+        theme["from"] = brand
     return spec.Site.model_validate({
-        "name": "Conformance", "theme": {"style": style} if style else {},
+        "name": "Conformance", "theme": theme,
         "sections": [
             {"type": "hero", "id": "hero", "title": "One <em>page</em>", "body": "Every block.", "buttons": [btn]},
             {"type": "intro", "id": "intro", "title": "Intro", "body": "Words."},
@@ -161,3 +167,50 @@ def test_a_style_renders_every_block_type_with_one_h1_and_all_the_words(name):
     text = re.sub(r"<[^>]+>", " ", html)
     for word in ("Every block.", "Twelve", "Then", "A line.", "Because.", "Overlay", "Split", "Cards", "Done"):
         assert word in text, f"{name}: {word!r} from the spec is missing from the page (content must be real HTML text)"
+
+
+# ---------------------------------------------------------------- every style wears any brand (theme.from)
+# Three unrelated brands: a light one with its own surfaces, a dark one, and one that gives nothing but two loud colours.
+BRANDS = {
+    "light": {"colors": {"bg": "#fbfaf7", "ink": "#1b1b1f", "accent": "#0057b8"}, "fonts": {"display": "Fraunces", "body": "Inter"},
+              "radius": "6px"},
+    "dark": {"mode": "dark", "colors": {"bg": "#0d1117", "ink": "#e6edf3", "accent": "#2ea043", "accent2": "#a371f7"},
+             "fonts": {"display": "Sora", "body": "Manrope", "mono": "JetBrains Mono"}, "radius": "12px"},
+    "saturated": {"colors": {"accent": "#ff00a8", "accent2": "#ffe600"}, "fonts": {"display": "Unbounded"}, "radius": "0px"},
+}
+
+
+@pytest.mark.parametrize("brand", sorted(BRANDS))
+@pytest.mark.parametrize("name", [None] + STYLES)
+def test_a_style_wearing_a_brand_stays_readable_and_renders(name, brand):
+    site = kitchen_sink(name, BRANDS[brand])
+    t = T.resolve(site.theme)
+    where = f"{name or 'default look'} wearing the {brand} brand"
+    bad = colour_rules(where, t["mode"], t["colors"])
+    assert not bad, f"{where}: " + "; ".join(bad)
+    st = T.styles().get(name, {})
+    req = st.get("requires", {})
+    if name:
+        # styles draw words and shapes in the accents directly: each keeps the contrast the style's own accent has with
+        # what it meets on the page (the background, the button text), up to 7:1, or AA. Within 3%: a light background
+        # and dark button text pull an accent opposite ways, and a brand's ink and background may leave a hair less room
+        own, skin = st["colors"], t["skin"]["colors"]
+        for role in ("accent", "accent2"):
+            for other in ("bg", "accent_ink"):
+                need = min(ratio(own[role], own[other]), 7.0)
+                drawn = t["colors"]["bg"] if other == "bg" else skin.get(own[other].lower(), own[other])
+                if need >= 3 and drawn not in (t["colors"]["accent"], t["colors"]["accent2"]):
+                    got = ratio(t["colors"][role], drawn)
+                    assert got >= min(need * 0.97, ROLE_TEXT), f"{where}: {role} {t['colors'][role]} on {drawn} is {got}:1 (the style's own is {need}:1)"
+        assert t["mode"] == req.get("mode", t["mode"]), f"{where}: the style requires {req['mode']} but resolved {t['mode']}"
+        for role, fam in {**BRANDS[brand]["fonts"], **req.get("fonts", {})}.items():
+            assert t["fonts"][role] == fam, f"{where}: fonts.{role} is {t['fonts'][role]}, expected {fam}"
+        css = T.style_css(name, t)
+        for old, new in t["skin"]["colors"].items():   # the style's own palette is gone from its stylesheet
+            assert old not in css.lower() or old in t["skin"]["colors"].values(), f"{where}: {old} still in style.css"
+    T.css_vars(t)
+    html = page_html(site)
+    assert html.count("<h1") == 1, f"{where}: {html.count('<h1')} <h1> elements"
+    text = re.sub(r"<[^>]+>", " ", html)
+    for word in ("Every block.", "Twelve", "A line.", "Because.", "Done"):
+        assert word in text, f"{where}: {word!r} is missing from the page"

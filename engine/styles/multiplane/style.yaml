@@ -22,3 +22,6 @@ font_axes:
   DM Mono: "wght@400;500"
 display_weight: 500
 radius: 999px
+# What a brand (theme.from) cannot change here: the dark room its CSS is drawn for
+requires:
+  mode: dark

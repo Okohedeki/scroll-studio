@@ -18,3 +18,6 @@ font_axes:
   Nunito: "ital,wght@0,200..1000;1,200..1000"
 display_weight: 600
 radius: 32px
+# What a brand (theme.from) cannot change here: the light room its CSS is drawn for
+requires:
+  mode: light

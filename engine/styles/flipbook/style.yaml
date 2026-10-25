@@ -23,3 +23,6 @@ font_axes:
   Courier Prime: "ital,wght@0,400;0,700;1,400"
 display_weight: 700
 radius: 3px
+# What a brand (theme.from) cannot change here: the dark room its CSS is drawn for
+requires:
+  mode: dark

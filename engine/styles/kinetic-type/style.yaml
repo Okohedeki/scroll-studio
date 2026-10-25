@@ -21,3 +21,7 @@ font_axes:
   Instrument Serif: "ital@0;1"
 display_weight: 800
 radius: 0px
+# What a brand (theme.from) cannot change here: the light room its CSS is drawn for, and its display, body faces (the words breathe on Anybody's width axis)
+requires:
+  mode: light
+  fonts: { display: Anybody, body: Anybody }

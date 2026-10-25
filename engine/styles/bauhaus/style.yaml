@@ -19,3 +19,6 @@ font_axes:
   Jost: "ital,wght@0,100..900;1,100..900"
 display_weight: 700
 radius: 0px
+# What a brand (theme.from) cannot change here: the light room its CSS is drawn for
+requires:
+  mode: light

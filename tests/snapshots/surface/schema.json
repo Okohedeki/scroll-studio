@@ -590,6 +590,93 @@
    "title": "BeatFrame",
    "type": "object"
   },
+  "Brand": {
+   "additionalProperties": false,
+   "description": "A brand as tokens: what `theme.from` reads from a web page, a logo or a brand.yaml, or what you write yourself.\nMissing colours are derived from the ones given with the presets' contrast rules.",
+   "properties": {
+    "colors": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "description": "Brand colours as #hex: accent (the main brand colour) and any of accent2, bg, bg2, ink, accent_ink",
+     "title": "Colors",
+     "type": "object"
+    },
+    "fonts": {
+     "additionalProperties": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "$ref": "#/$defs/FontFile"
+       }
+      ]
+     },
+     "description": "Brand fonts by role (display, body, mono): a Google Fonts family or {file: ...} of the project's own",
+     "title": "Fonts",
+     "type": "object"
+    },
+    "logo": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "The brand's logo (an image file in the project), shown in the nav when nav.logo is not set",
+     "title": "Logo"
+    },
+    "mode": {
+     "anyOf": [
+      {
+       "enum": [
+        "light",
+        "dark"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "light or dark (default: what the colours say)",
+     "title": "Mode"
+    },
+    "radius": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Corner radius of buttons and cards, e.g. 6px",
+     "title": "Radius"
+    },
+    "source": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Where these tokens were read from (written by `studio brand`)",
+     "title": "Source"
+    }
+   },
+   "title": "Brand",
+   "type": "object"
+  },
   "CameraKey": {
    "additionalProperties": false,
    "properties": {
@@ -11210,6 +11297,22 @@
      "description": "Fonts by role (display, body, mono): a Google Fonts family, or a file of the project's own ({file: fonts/Brand.woff2}), served from the site either way",
      "title": "Fonts",
      "type": "object"
+    },
+    "from": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "$ref": "#/$defs/Brand"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Wear a brand: a web page URL, a logo image or a brand.yaml in the project (read once and kept in .build/brand/), or the brand's tokens themselves (what `studio brand` writes). Its colours, fonts, radius and logo go over the preset and the style; anything else set on theme still wins",
+     "title": "From"
     },
     "grain": {
      "anyOf": [

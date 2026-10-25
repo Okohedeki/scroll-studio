@@ -20,3 +20,6 @@ font_axes:
   DM Mono: "ital,wght@0,300;0,400;0,500;1,400"
 display_weight: 560
 radius: 999px
+# What a brand (theme.from) cannot change here: the light room its CSS is drawn for
+requires:
+  mode: light

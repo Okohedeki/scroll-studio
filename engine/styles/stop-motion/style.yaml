@@ -23,3 +23,6 @@ font_axes:
   Special Elite: ""
 display_weight: 600
 radius: 6px
+# What a brand (theme.from) cannot change here: the dark room its CSS is drawn for
+requires:
+  mode: dark
