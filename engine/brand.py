@@ -396,7 +396,10 @@ def page_brand(project: Project, page: str, base: str, log=print) -> dict:
     """Colours, fonts, radius and logo of a web page, from its markup and styles. Fonts are kept only when they are
     Google Fonts families (the page links them, or the engine knows them); a brand's own face is added as a file."""
     from html.parser import HTMLParser
-    from urllib.parse import urljoin
+    from urllib.parse import urljoin, urlparse
+
+    def google_fonts(href: str) -> bool:
+        return (urlparse(urljoin("https://x/", href)).hostname or "") == "fonts.googleapis.com"
 
     from .compile.themes import FONT_AXES
 
@@ -425,7 +428,7 @@ def page_brand(project: Project, page: str, base: str, log=print) -> dict:
     remote = base.startswith(("http://", "https://"))
     sheets = [a["href"] for t, a in p.tags if t == "link" and "stylesheet" in a.get("rel", "").lower() and a.get("href")]
     for href in sheets[:4]:          # the page's own stylesheets carry most of its look
-        if "fonts.googleapis.com" in href:
+        if google_fonts(href):
             continue
         try:
             css += "\n" + (_fetch(urljoin(base, href)) if remote else _local(project, base, href).read_text(encoding="utf-8"))
@@ -446,7 +449,7 @@ def page_brand(project: Project, page: str, base: str, log=print) -> dict:
     colors.update({k: v for k, v in acc.items() if k not in colors})
 
     google = {re.sub(r"\+", " ", f.split(":")[0]) for t, a in p.tags if t == "link"
-              for f in re.findall(r"family=([^&]+)", a.get("href", "")) if "fonts.googleapis.com" in a.get("href", "")}
+              for f in re.findall(r"family=([^&]+)", a.get("href", "")) if google_fonts(a.get("href", ""))}
 
     def family(selector: str):
         for v in _decl(_css_blocks(css, selector), "font-family"):
