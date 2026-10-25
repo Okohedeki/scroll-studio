@@ -1,0 +1,12 @@
+/* Driftmoss Outfitters: an invented brand for the remake tests (dark). */
+body { background: #0d1a20; color: #e9f1ef; font-family: "Work Sans", sans-serif; margin: 0; }
+h1, h2 { font-family: "Archivo", sans-serif; }
+.hero { min-height: 90vh; display: flex; align-items: center; }
+.highlight { color: #e8783a; }
+.button { border-radius: 4px; padding: 14px 24px; }
+.button--solid { background: #e8783a; color: #0d1a20; }
+.button--line { border: 2px solid #8cc7b8; color: #8cc7b8; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.card { background: #13262e; border-radius: 4px; padding: 20px; }
+.row { display: flex; gap: 12px; overflow-x: auto; }
+.figs .n { font-size: 56px; color: #8cc7b8; }

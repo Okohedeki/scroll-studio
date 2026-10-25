@@ -1382,6 +1382,51 @@
     }
    }
   },
+  "remake": {
+   "help": "Read a live landing page and write a new project that tells it as a scroll site: its hero picture as the",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--name"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "no_gpu": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--no-gpu"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "style": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--style"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "url": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "url"
+     ],
+     "required": true,
+     "type": "str"
+    }
+   }
+  },
   "schema": {
    "help": "Print the site.yaml JSON Schema.",
    "params": {}

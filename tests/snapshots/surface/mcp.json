@@ -1038,6 +1038,51 @@
    "type": "object"
   }
  },
+ "remake_site": {
+  "description": "Read a live landing page (public content only; its robots.txt is honoured) and write a new project that tells",
+  "input": {
+   "properties": {
+    "name": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Name"
+    },
+    "no_gpu": {
+     "default": false,
+     "title": "No Gpu",
+     "type": "boolean"
+    },
+    "style": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Style"
+    },
+    "url": {
+     "title": "Url",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "title": "remake_siteArguments",
+   "type": "object"
+  }
+ },
  "resolve_note": {
   "description": "Close a storyboard note with a short plain-language reply for the owner (what you understood and what you did, or",
   "input": {

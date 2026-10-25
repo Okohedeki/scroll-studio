@@ -1,6 +1,7 @@
 """`studio` command line.
 
   studio new my-site [--example lodestar-orbital]   create projects/my-site (from an example or a starter)
+  studio remake https://example.com/ [--name x] [--style bauhaus] [--no-gpu]   a live landing page told as a scroll site
   studio build my-site [--only hero,door] [--force] [--draft] [--yes] [--plan]
   studio storyboard my-site [--level sketch|stills|animatic] [--only id,id] [--motion] [--open]
   studio storyboard my-site --edit [--port 8971]    edit every shot in the browser: notes, captions, regenerate one image, play it
@@ -75,6 +76,32 @@ def new(name: str, example: Optional[str] = typer.Option(None, help="Copy an exa
         (dst / "inputs").mkdir(parents=True)
         (dst / "site.yaml").write_text(STARTER, encoding="utf-8")
     typer.echo(f"created {dst}\nnext: studio build {name} && studio preview {name}")
+
+
+@app.command()
+def remake(url: str, name: Optional[str] = typer.Option(None, help="Project name (default: from the site's address)"),
+           style: Optional[str] = typer.Option(None, help="Wear one of the styles (engine/styles/) over the brand"),
+           no_gpu: bool = typer.Option(False, "--no-gpu", help="Open with a laptop scene (photo parallax) even when "
+                                                               "a GPU is here")):
+    """Read a live landing page and write a new project that tells it as a scroll site: its hero picture as the
+    opening scene, its sections as blocks, its calls to action with their links, its brand in theme.from."""
+    from .project import BuildError
+    from .remake import remake as run
+    try:
+        r = run(url, name=name, style=style, gpu=False if no_gpu else None, log=typer.echo)
+    except (BuildError, ValueError) as e:
+        raise typer.BadParameter(str(e)) from None
+    typer.echo("sections: " + ", ".join(f"{s['id'] or '-'} ({s['type']})" for s in r["sections"]))
+    typer.echo(f"pictures: {len(r['images'])} saved in inputs/")
+    if r["brand"]:
+        b = r["brand"]
+        typer.echo("brand: " + " ".join(f"{k} {v}" for k, v in b.get("colors", {}).items() if k in ("accent", "bg", "ink"))
+                   + "".join(f", {k} font {v}" for k, v in b.get("fonts", {}).items()))
+    for n in r["notes"]:
+        typer.echo(f"note: {n}")
+    for w in r["warnings"]:
+        typer.echo(f"warning: {w}")
+    typer.echo(f"\n{r['notice']}\ncreated {r['path']}\nnext: " + "  then  ".join(r["next"]))
 
 
 @app.command()
