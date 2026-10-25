@@ -448,6 +448,7 @@ def test_the_example_builds_on_the_cpu_in_its_media(tmp_path):
     assert "ss-product__img--plate" in html
     assert any("composition: left side calm" in m for m in logs)
     assert any("medium: toile in #2f4fd8 on #f6f1e7" in m for m in logs)
-    assert sum("medium: risograph" in m for m in logs) == 2
-    for name in ("hero.jpg", "product.jpg", "band.jpg"):
+    assert sum("medium: risograph" in m for m in logs) == 6        # hero, two product panels, three feature cards
+    assert html.count('class="ss-feature__art"') == 3
+    for name in ("hero.jpg", "product.jpg", "invoices.jpg", "card-tax.jpg", "card-payroll.jpg", "card-cards.jpg", "band.jpg"):
         assert (root / "inputs" / name).stat().st_size < 1_500_000

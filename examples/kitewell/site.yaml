@@ -2,12 +2,14 @@
 #
 #   studio new kitewell --example kitewell
 #   studio build kitewell                  # no GPU needed: the pictures are in inputs/, the medium is applied on the CPU
+#   studio inspect kitewell --page         # the polish report: passes with no fails
 #
 # `imagery.medium: risograph` names a tested recipe (engine/medium.py): every generated still is asked for in riso
 # words and then printed in two inks taken from the brand (`theme.from`: accent cobalt, accent2 pink), posterised,
 # grained and a few pixels off register. The closing band is in toile, printed in the brand's accent on its cream.
 # The hero keeps its left side calm for the headline (`align: left`); the build measures it and says so.
-# Its clouds drift and its sky twinkles (`live:`, drawn by the page: still no GPU needed).
+# Its clouds drift and its sky twinkles (`live:`, drawn by the page: still no GPU needed). Two product panels and
+# three illustrated feature cards (`features.items[].image`) carry the same two inks down the page.
 #
 # inputs/ holds the raw Z-Image Turbo stills these were made from, before the medium was applied. With a GPU, swap a
 # `file:` for the `generate:` in the comment above it (and drop its `medium:` where the site's own is the same): the
@@ -58,11 +60,23 @@ sections:
     kicker: Forecast
     title: See the dip before it happens.
     body: When a quiet month is on its way, Kitewell shows you which invoices to chase and which payments can wait, so the balance never surprises you.
-    tags: [Invoice reminders, Payroll runs, VAT set aside, Card controls]
+    tags: [Ninety-day view, Dip alerts, What-if payments]
     image:
       # generate: A single kite on a long string climbing over a hill, its tail curling, a small person holding the string at the bottom
       # (1600x1280, seed 11)
       file: inputs/product.jpg
+      medium: risograph
+
+  - type: product
+    side: left
+    kicker: Invoices
+    title: Invoices that chase themselves.
+    body: Send an invoice from the forecast and Kitewell follows it up on the day it falls due, politely, then less politely, until the money lands.
+    tags: [Reminders on a schedule, Pay-by-link, Part payments]
+    image:
+      # generate: A flock of paper planes flying in a neat V formation over rolling hills toward a small town with a clock tower, a few round clouds
+      # (1600x1280, seed 14)
+      file: inputs/invoices.jpg
       medium: risograph
 
   - type: features
@@ -72,21 +86,38 @@ sections:
       - tag: Pots
         title: Tax set aside
         body: A share of every payment in goes to a VAT and corporation tax pot the moment it lands.
+        image:
+          # generate: A little piggy bank shaped like a house, coins dropping into its chimney, simple and centred on an open plain background
+          # (1280x960, seed 9)
+          file: inputs/card-tax.jpg
+          medium: risograph
       - tag: Payroll
         title: Pay day on time
         body: Run payroll from the account that holds the money, with the forecast showing what is left after.
+        image:
+          # generate: A paper envelope with bird wings flying above a row of little houses, simple and centred on an open plain background
+          # (1280x960, seed 5)
+          file: inputs/card-payroll.jpg
+          medium: risograph
       - tag: Cards
         title: A card for everyone
         body: Virtual and physical cards with limits per person, per supplier and per month.
+        image:
+          # generate: Three plastic bank payment cards with a little chip and a stripe, fanned out in a hand, a small sparkle star above them, simple and centred on an open plain background
+          # (1280x960, seed 23)
+          file: inputs/card-cards.jpg
+          medium: risograph
+          crop: [0, 0, 1, 0.97]
 
   - type: stats
+    surface: dark
     items:
       - { value: "90", label: days of cash flow drawn ahead }
       - { value: "7", label: days of warning before a dip }
-      - { value: "0", label: monthly fee for teams under ten }
+      - { value: "£0", label: monthly fee for teams under ten }
 
   - type: quote
-    text: We stopped opening the bank app with our eyes shut. The forecast tells us in March what April looks like.
+    text: The forecast told us in March <em>what April would look like.</em>
     who: Ama Boateng, founder of a fictional bakery chain
 
   - type: cta
@@ -97,10 +128,9 @@ sections:
     button: { label: Open an account, href: "#open" }
     backdrop:
       # generate: A narrow strip of pastoral riverside landscape along the very bottom edge of the picture, windmills, a stone bridge, a sailing barge, trees, a boy flying a kite. The upper three quarters of the picture are empty plain cream cotton with nothing printed on it
-      # (1920x1088, seed 6)
+      # (1920x1088, seed 6, with calm: center)
       file: inputs/band.jpg
       medium: toile
-      calm: center
 
 footer:
   left: Kitewell is a fictional company. A Scroll Studio example.

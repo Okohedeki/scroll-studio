@@ -133,6 +133,61 @@
   },
   {
    "id": null,
+   "type": "product",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-product",
+      "ss-product--left",
+      "ss-pose--beside"
+     ],
+     "text": {
+      "kicker": "Invoices",
+      "title": "Invoices that chase themselves.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-product__in"
+       ],
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-product__media"
+         ],
+         "data": {
+          "data-float": ""
+         },
+         "children": [
+          {
+           "tag": "img",
+           "class": [
+            "ss-product__img"
+           ]
+          }
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-product__copy",
+          "ss-reveal"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
    "type": "features",
    "markup": [
     {
@@ -151,6 +206,32 @@
        "class": [
         "ss-features",
         "ss-features--3"
+       ],
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-feature",
+          "ss-reveal",
+          "ss-feature--art"
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-feature",
+          "ss-reveal",
+          "ss-feature--art"
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-feature",
+          "ss-reveal",
+          "ss-feature--art"
+         ]
+        }
        ]
       }
      ]
@@ -165,7 +246,8 @@
      "tag": "section",
      "class": [
       "ss-block",
-      "ss-band"
+      "ss-band",
+      "ss-surface-dark"
      ],
      "children": [
       {
