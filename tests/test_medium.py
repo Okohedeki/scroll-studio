@@ -281,10 +281,13 @@ def test_light_inks_on_a_dark_paper_print_a_negative(name):
     assert medium.negative(pal) and pal["paper"] == medium.rgb(DEEP["bg"])
     img = Image.new("RGB", (480, 272), (8, 8, 12))
     ImageDraw.Draw(img).ellipse((300, 40, 420, 160), fill=(250, 248, 240))         # a white moon on a black sky
+    ImageDraw.Draw(img).rectangle((20, 20, 200, 120), fill=(28, 40, 108))             # and a deep blue wall
     out = np.asarray(medium.apply(img, name, pal, grain=0), np.float32)
     sky, moon = out[200:260, 20:200].reshape(-1, 3).mean(0), out[80:120, 340:380].reshape(-1, 3).mean(0)
     paper = np.array(pal["paper"], np.float32)
     assert np.abs(sky - paper).max() < 12, name                      # the dark of the picture is the bare paper
+    if name == "halftone":                                           # coloured or not: a dark colour is the stock too
+        assert np.abs(out[40:100, 40:180].reshape(-1, 3).mean(0) - paper).max() < 16
     assert medium._lum(tuple(moon)) > medium._lum(tuple(paper)) * 8 and moon.min() > 150, name   # its light is the light ink
 
 

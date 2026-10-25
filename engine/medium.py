@@ -460,7 +460,10 @@ def halftone(img, pal, seed=7, grain=0.25, period: Optional[float] = None):
     chroma = hsv[..., 1] * hsv[..., 2]                                # saturated and not dark
     tone = lum if negative(pal) else 1 - lum                          # on dark stock the light ink carries the light
     dark = 0.9 * _smooth(0.18, 1.0, tone) ** 1.15           # the darkest shadow keeps small holes: still a screen
-    dens = [dark] + [np.clip(_smooth(0.12, 0.7, chroma) * (1 - dark) * 0.85, 0, 1)] * (len(pal["inks"]) - 1)
+    colour = _smooth(0.12, 0.7, chroma) * (1 - dark) * 0.85
+    if negative(pal):           # light inks on dark stock: the dark of the picture is the stock, coloured or not
+        colour = colour * _smooth(0.12, 0.38, lum)
+    dens = [dark] + [np.clip(colour, 0, 1)] * (len(pal["inks"]) - 1)
     angles = [45, 15, 75, 0]
     layers = [(screen(_smooth(0.04, 0.96, d), period, angles[i % 4]), ink_)
               for i, (d, ink_) in enumerate(zip(dens, pal["inks"]))]
