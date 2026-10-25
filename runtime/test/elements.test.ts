@@ -81,6 +81,16 @@ describe("steps in split and cards", () => {
     expect(sec.querySelector<HTMLElement>("#st1")!.style.getPropertyValue("--on")).toBe("1.000");
   });
 
+  it("a card is emphasised while the middle of the screen is inside its step and dims over a tenth of the step either side", () => {
+    const { sec, els } = cards();
+    const on = (top: number) => { box(sec.querySelector("#st0")!, top, 400); els.measure([1, 1]); return sec.querySelector<HTMLElement>("#st0")!.style.getPropertyValue("--on"); };
+    expect(on(H / 2 + 100)).toBe("0.000");                // not reached yet
+    expect(on(H / 2 + 20)).toBe("0.500");                 // half way into the tenth before it
+    expect(on(H / 2 - 200)).toBe("1.000");                // inside
+    expect(on(H / 2 - 400 - 20)).toBe("0.500");           // half way out of the tenth after it
+    expect(on(H / 2 - 400 - 100)).toBe("0.000");          // passed
+  });
+
   it("a step with its own motion also says how far it has entered and left; one without does not", () => {
     const { sec, els } = cards([` data-enter="rise"`, ""]);
     const [a, b] = [sec.querySelector<HTMLElement>("#st0")!, sec.querySelector<HTMLElement>("#st1")!];
@@ -96,7 +106,7 @@ describe("steps in split and cards", () => {
     els.measure([1, 1]);
     expect(a.style.getPropertyValue("--in")).toBe("1.000");
     expect(a.style.getPropertyValue("--out")).toBe("0.500");
-    expect(a.style.getPropertyValue("--on")).toBe("1.000");         // the emphasis every step has is unchanged
+    expect(a.style.getPropertyValue("--on")).toBe("0.200");         // the emphasis every step has: dimming as it leaves
   });
 
   it("type-on splits a card's title into numbered words", () => {

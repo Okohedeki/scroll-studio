@@ -109,13 +109,16 @@ export class Elements {
     let total = 0, done = 0, active = -1;
     this.cards.forEach((c, i) => {
       const r = c.el.getBoundingClientRect();
-      const target = clamp((innerHeight * 0.5 - r.top) / Math.max(1, r.height));
+      const at = (innerHeight * 0.5 - r.top) / Math.max(1, r.height);   // how far the middle of the screen is through it
+      const target = clamp(at);
       this.stepVals[i] += (target - this.stepVals[i]) * follow;
       if (Math.abs(target - this.stepVals[i]) < 5e-4) this.stepVals[i] = target;
       const on = target > 0 && target < 1;
       c.el.classList.toggle("ss-active", on);
-      // card emphasis is a function of scroll position, not a timed fade, so it never trails a fast scroll
-      c.el.style.setProperty("--on", (clamp((target + 0.1) / 0.1) * clamp((1.1 - target) / 0.1)).toFixed(3));
+      // card emphasis is a function of scroll position, not a timed fade, so it never trails a fast scroll: full while
+      // the middle of the screen is inside the step, fading out over a tenth of the step either side (from the unclamped
+      // position: clamped, it never leaves 1)
+      c.el.style.setProperty("--on", (clamp((at + 0.1) / 0.1) * clamp((1.1 - at) / 0.1)).toFixed(3));
       if (c.moves) {
         // a step's own motion: it enters as its top rises from 90% to 55% down the screen and leaves as its bottom
         // rises from 60% to 20% (the card is pinned in between)

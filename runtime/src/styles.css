@@ -596,6 +596,8 @@ html:not(.js) .ss-strip { overflow-x: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
   .js .ss-reveal { opacity: 1; transform: none; }
+  /* a card's emphasis is not dimmed: every card stays readable (a step's own enter and exit keep their fade) */
+  .js .ss-step .ss-card { opacity: 1; }
   .js .ss-w > span { transition: none; }
   /* a step's own motion keeps only its fade */
   .js .ss-caption[data-enter] .ss-w > span { transition: none !important; }
