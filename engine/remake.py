@@ -766,8 +766,21 @@ def read_brand(project: Project, html: str, url: str, warnings: list, log: Calla
 
 # ---------------------------------------------------------------- the story
 
-STAT = re.compile(r"^[~≈<>+]?\s?[$€£¥]?\d[\d,.]*\s?(?:%|×|x|k|K|M|B|bn|m|h|hrs?|ms|s|min|"
-                  r"yrs?|years?|days?|/\d+|★|stars?|\+)*\+?$")
+# A figure such as "12k+", "4.8M", "99.9%", "3 days". The unit part repeats at most twice: its alternatives overlap
+# ("m", "s", "ms"), and an unbounded repeat would backtrack exponentially on hostile page text.
+_STAT = re.compile(r"^[~≈<>+]?\s?[$€£¥]?\d[\d,.]*\s?(?:%|×|x|k|K|M|B|bn|m|h|hrs?|ms|s|min|"
+                   r"yrs?|years?|days?|/\d+|★|stars?|\+){0,2}\+?$")
+
+
+class _Stat:
+    """`STAT.match(text)`, refusing anything longer than a figure could be before the pattern runs."""
+
+    @staticmethod
+    def match(text: str):
+        return _STAT.match(text) if len(text) <= 32 else None
+
+
+STAT = _Stat()
 STEP = re.compile(r"^(?:(?:step|phase|stage)\s*)?0?(\d{1,2})[.):]?$|^((?:19|20)\d{2})$", re.I)
 FAQ = re.compile(r"\bfaqs?\b|frequently asked|questions", re.I)
 QUOTE = re.compile(r"testimonial|quote|review|praise|customer-story", re.I)
