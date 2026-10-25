@@ -3,6 +3,7 @@
 label: Neo-brutalism
 about: A desk you fill up and can mess with. Every scroll threshold slaps something down with a spring and it stays there, feature cards stack into a deck, marquee bands race with your scroll, stickers and windows can be grabbed and flung, and every button sinks into the page.
 mode: light
+scene_blocks: [product, stats, timeline, quote, faq, cta]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#fff4e0'
   bg2: '#ffc900'

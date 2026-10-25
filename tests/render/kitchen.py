@@ -81,8 +81,8 @@ def spec(theme: dict) -> dict:
                        {"title": "Split second", "fact": "Second fact line"}]},
             {"type": "type", "id": "cards", "layout": "cards", "text": "Cards text.", "frame": "card",
              "steps": [{"title": "Cards caption", "body": "Cards body words.", "fact": "Cards fact line", "length": 0.8},
-                       {"title": "Cards second", "button": {"label": "Card button", "href": "#"}, "length": 0.8},
-                       {"block": "features", "items": [{"title": "Card feature", "body": "A block as a card."}], "length": 0.8}]},
+                       {"block": "features", "items": [{"title": "Card feature", "body": "A block as a card."}], "length": 0.8},
+                       {"title": "Cards second", "button": {"label": "Card button", "href": "#"}, "length": 0.8}]},
             {"type": "cta", "id": "cta", "title": "Ready when you are", "button": BTN},
         ],
     }

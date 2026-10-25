@@ -3,6 +3,7 @@ label: Pinscreen
 about: One lamp-lit board of pins holds the whole site, and every plate is a full pinscreen picture, deep blacks to soft greys, with sculpted numerals, the phone and your art modelled by the light. Scroll sends a wave through the board, a wall of pins that rolls out and leaves the next picture rippling behind it; headlines stay crisp in ivory over the pins, the mouse moves the lamp and pressing draws lines the board slowly pushes back.
 mode: dark
 cuts: false   # the style plays its own hand-over between sections: `transition:` is ignored (see engine/styles/README.md)
+scene_blocks: []   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#121212'
   bg2: '#1b1b1b'

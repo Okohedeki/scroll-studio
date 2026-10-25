@@ -3,6 +3,7 @@
 label: Split-flap
 about: A station departures board. Scrolling advances the station clock; at each section the whole timetable clatters up one row, flap by flap, and the boarding row opens its detail at the information desk below.
 mode: light
+scene_blocks: [stats, quote, faq, cta]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#e9e4d8'
   bg2: '#ddd7c9'

@@ -4,6 +4,7 @@ label: ASCII art
 about: A terminal session. Scrolling types each section's command at the prompt and prints the reply line by line (features as --help flags, numbers as neofetch, steps as a boot log, questions as a man page), with a live ASCII render of the product, a tmux status bar and keyboard shortcuts.
 mode: dark
 cuts: false   # the style plays its own hand-over between sections: `transition:` is ignored (see engine/styles/README.md)
+scene_blocks: [features, product, stats, timeline, quote, faq, cta]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#0d0a04'
   bg2: '#140f06'

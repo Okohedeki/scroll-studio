@@ -3,6 +3,7 @@
 label: Comic book
 about: Read it like a comic. Each section is a page of panels, and every scroll moves your eye to the next panel. Captions slide in, balloons pop up in order, and the camera pulls back to show the whole page before you turn it.
 mode: light
+scene_blocks: [quote]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#f3e9cf'
   bg2: '#fffbef'

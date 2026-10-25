@@ -3,6 +3,7 @@
 label: Kinetic type
 about: An instrument made of letters. Giant words inflate on their width and weight as they arrive and condense as they leave, lines skew and stretch with your scroll speed, marquees surge and reverse, and sections cut by colour inversion.
 mode: light
+scene_blocks: [product, faq, cta]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#f2efe8'
   bg2: '#e7e3da'

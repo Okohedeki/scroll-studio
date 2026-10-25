@@ -3,6 +3,7 @@
 label: Isometric
 about: A fixed-angle drone over a tiny model world that builds itself. Every section is a district on one map; the camera glides diagonally between them while tiles drop in and buildings extrude, stats rise as towers, a token drives the road between steps, and the last district holds a keycap button.
 mode: light
+scene_blocks: [quote, cta]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#cfe8f3'
   bg2: '#bfdcea'

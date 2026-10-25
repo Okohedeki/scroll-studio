@@ -113,10 +113,10 @@ def test_every_block_a_step_can_be_renders_in_a_scene():
 
 
 def test_a_style_draws_a_block_step_with_its_own_markup():
-    site = Site.model_validate({"name": "t", "theme": {"style": "bauhaus"}, "sections": [
+    site = Site.model_validate({"name": "t", "theme": {"style": "neo-brutalism"}, "sections": [
         {"id": "s", "type": "type", "text": "x", "steps": [{"title": "First"}, {**STATS, "show": [0.3, 0.6]}]}]})
     html = scene_part(page_html(site))
-    assert re.search(r'class="ss-caption ss-caption--block ss-caption--stats"[^>]*>\s*<section class="bh bh--stats"', html), html
+    assert re.search(r'class="ss-caption ss-caption--block ss-caption--stats"[^>]*>\s*<section class="nb-sec nb-c-pink nb-stats"', html), html
     assert "ss-reveal" not in html and "Twelve" in html
 
 

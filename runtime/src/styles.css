@@ -230,14 +230,20 @@ blockquote { hanging-punctuation: first last; }
 .ss-caption--block { transition: opacity .7s var(--ease); }
 .js .ss-caption--block:not(.ss-on) { opacity: 0; }
 .ss-caption--block.ss-on { pointer-events: auto; }
-:is(.ss-caption--block, .ss-card--block) > * { min-height: 0; }
+/* a block in a step is never a screen tall, whatever its own markup says for a section of the page */
+:is(.ss-caption--block, .ss-card--block) > * { min-height: 0 !important; height: auto !important; }
 :is(.ss-caption--block, .ss-card--block) > .ss-block { padding: 0; min-height: 0; background: none; border: 0; text-align: inherit; display: block; overflow: visible; }
 :is(.ss-caption--block, .ss-card--block) .ss-wrap { max-width: none; margin: 0; }
+/* a block card scrolls over the picture: in the default markup it is a panel of the page's own colours, so it reads whatever
+   is behind it */
+.ss-card--block > .ss-block { background: rgba(var(--bg-rgb), .94); color: var(--ink); padding: clamp(18px, 2vw, 28px); border-radius: var(--radius); }
 :is(.ss-caption--block, .ss-card--block) .ss-head { margin-bottom: 24px; }
 :is(.ss-caption--block, .ss-card--block) :is(.ss-stats, .ss-stats--2, .ss-stats--3) { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 24px; }
 :is(.ss-caption--block, .ss-card--block) .ss-v { font-size: calc(clamp(40px, 4.4vw, 72px) * var(--type-scale)); }
 :is(.ss-caption--block, .ss-card--block) :is(.ss-features, .ss-features--2, .ss-features--4, .ss-timeline, .ss-timeline--3, .ss-timeline--4, .ss-product__in, .ss-faq__in) { grid-template-columns: minmax(0, 1fr); }
-:is(.ss-caption--block, .ss-card--block) .ss-feature { min-height: 0; padding: 20px 22px; gap: 14px; }
+:is(.ss-caption--block, .ss-card--block) .ss-features { background: none; }
+:is(.ss-caption--block, .ss-card--block) .ss-features .ss-feature { min-height: 0; padding: 20px 22px; gap: 14px; background: none; color: inherit; }
+:is(.ss-caption--block, .ss-card--block) .ss-feature + .ss-feature { border-top: 1px solid var(--line); }
 :is(.ss-caption--block, .ss-card--block) .ss-tl { padding: 18px 0 14px; }
 :is(.ss-caption--block, .ss-card--block) .ss-gallery { grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 16px; }
 :is(.ss-caption--block, .ss-card--block) .ss-quote blockquote { font-size: calc(clamp(26px, 2.6vw, 42px) * var(--type-scale)); }

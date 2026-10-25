@@ -2,6 +2,7 @@
 label: Gradient mesh
 about: Weather. One slowly breathing colour field behind the page (a single WebGL canvas) that bookends the hero and the closing band, wakes in small patches on hover, ruffles when you scroll fast and quietly changes hue from chapter to chapter; around it, calm editorial whitespace. Nothing pins, snaps or cuts.
 mode: light
+scene_blocks: [stats, quote, faq, cta, gallery]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#f6f9fc'
   bg2: '#ffffff'

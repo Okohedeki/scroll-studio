@@ -76,7 +76,7 @@ sections:
       - block: quote
         text: "I stopped losing the <em>half-thoughts.</em> They are right where I left them."
         who: A reader in the Margin beta
-        at: { x: 0.5, y: 0.16, w: 0.42, align: right }
+        at: { x: 0.07, y: 0.16, w: 0.38 }
         enter: fade
         exit: fade
         state: { wide: true }

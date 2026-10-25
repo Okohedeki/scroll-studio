@@ -3,6 +3,7 @@
 label: Liquid morph
 about: Nothing cuts, everything becomes. One glossy blob morphs into each section's idea, stretches and wobbles with your scroll speed, divides into the stats and fuses through the features, while section edges arrive as moving liquid surfaces.
 mode: light
+scene_blocks: [quote, faq]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#fff4ec'
   bg2: '#efe7ff'

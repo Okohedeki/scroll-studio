@@ -3,6 +3,7 @@
 label: Smears
 about: "Spider-Verse timing for a page. Everything holds on twos: the page is sampled twelve times a second, nothing glides, and in the one frame where a pose changes the headline, the cards and the buttons are drawn as a smear (stretched along the move, with colour plates trailing). Scroll faster and the smear becomes multiples; there is no blur anywhere, and out-of-focus things are the ones whose colour plates have slipped. Crossing into the next section while moving breaks the picture into one impact frame of flat colour and speed lines, and each section is a different dimension with its own print texture."
 mode: dark
+scene_blocks: [features, stats, quote, faq, gallery]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#12062b'
   bg2: '#1b0a42'

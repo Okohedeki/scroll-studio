@@ -4,6 +4,7 @@ label: Pixel art
 about: The site is a side-scrolling game. A title screen says PRESS START; each scroll notch walks a sprite through the level in whole pixels, features pop out of ? blocks as ITEM GET! cards, the testimonial is an NPC whose dialog advances a notch at a time, stats are an RPG status sheet and the call to action is COURSE CLEAR and a CONTINUE? menu. A READ AS PAGE switch shows it as a plain manual.
 mode: dark
 cuts: false   # the style plays its own hand-over between sections: `transition:` is ignored (see engine/styles/README.md)
+scene_blocks: [features, product, stats, timeline, quote, faq, cta]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#1d2b53'
   bg2: '#111a36'

@@ -3,6 +3,7 @@
 label: Blueprint
 about: One living drawing sheet. A plotter pen at constant speed drafts the product as you scroll (construction lines, outlines, dimensions whose values are the claims, leaders to a bill of materials) while the camera pans from view to view; the title block counts the sheets and the finale is an APPROVED stamp.
 mode: dark
+scene_blocks: [features, product, timeline, quote, cta]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#11427a'
   bg2: '#0e3a6b'

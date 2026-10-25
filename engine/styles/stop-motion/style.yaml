@@ -3,6 +3,7 @@
 label: Stop-motion
 about: "A miniature set shot one exposure at a time. The page only moves while you scroll, and each notch of scroll is one frame on the animator's counter: set pieces are felt, card and clay, nudged into place in jumpy poses with their surfaces boiling, nothing moves between exposures, and between sections the set is struck and dressed again. Poke a puppet and it hops; switch on the onion skin to see the last frame."
 mode: dark
+scene_blocks: []   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#0b0705'
   bg2: '#14100b'

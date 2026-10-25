@@ -3,6 +3,7 @@
 label: Bauhaus
 about: One pinned poster that recomposes as you scroll. A red circle, a black bar, a yellow triangle and a blue square slide, rotate and re-dock into a new designed layout for every section; the circle that was the sun becomes the pie chart and finally the button.
 mode: light
+scene_blocks: []   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#efe8da'
   bg2: '#e6ddca'

@@ -3,6 +3,7 @@
 label: Neon glow
 about: The lights come on as you arrive. A walk down a night street where each section's headline is a tube sign, unlit glass until you reach it, then it stutters on and floods the wall with its colour while the one behind you dims. Features light in sequence, stats are segmented tube numerals, and the call to action is the OPEN sign.
 mode: dark
+scene_blocks: [stats, timeline, quote, faq, cta]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#0b0a0e'
   bg2: '#16131a'

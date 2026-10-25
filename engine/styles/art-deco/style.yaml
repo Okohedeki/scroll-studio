@@ -2,6 +2,7 @@
 label: Art deco
 about: An opening night. Scroll parts gold-lacquered doors on the centre axis to reveal a spotlit headline under a fanning sunburst; every scene unfolds symmetrically from the centre, features are dealt in mirrored pairs, stats are billed on a marquee with chasing bulbs, an elevator dial sweeps floor by floor, and doors close and reopen between scenes until the ADMIT ONE invitation.
 mode: dark
+scene_blocks: [features, quote, faq]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#0b0b0c'
   bg2: '#121110'

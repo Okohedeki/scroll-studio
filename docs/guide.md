@@ -124,11 +124,13 @@ to begin" line), with `surface` for its colours over a lighter or darker picture
       - block: quote
         text: "I stopped losing the <em>half-thoughts.</em>"
         who: A reader in the beta
-        at: { x: 0.5, y: 0.16, w: 0.42, align: right }
+        at: { x: 0.07, y: 0.16, w: 0.38 }
         show: [0.7, 0.9]
 ```
 
-In split and cards the block is the card. A style that draws a block its own way draws it that way in a scene too.
+In split and cards the block is the card. A style that draws a block its own way draws it that way in a scene too,
+for the types its markup works for there (`scene_blocks` in the style's `style.yaml`); the others are drawn with the
+default markup in the style's colours and fonts.
 Fields that only make sense for a section of its own (`nav_label`, `backdrop`, `transition`) are refused on a step.
 
 Specs from before 1.5 keep building the same page: `place: top-right` is `at: top-right`, `at: [0.3, 0.46]` is

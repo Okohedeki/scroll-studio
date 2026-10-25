@@ -3,6 +3,7 @@
 label: Scratch film
 about: "Drawn and scratched straight onto film stock (Len Lye, Norman McLaren, Brakhage's Mothlight). The screen is the gate and the page is a strip of film being pulled through it: the text steps through a perforation at a time and seats when you stop, a new scratched or dyed drawing is projected on every frame, the strip runs down the edge with its sprockets and a drawn soundtrack, sections are spliced, and the pointer is a needle that scratches the emulsion. A Hold switch stops the projector; Sound plays the drawn track."
 mode: dark
+scene_blocks: [product, stats, timeline, quote, faq, gallery]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#070707'
   bg2: '#0e0e0d'

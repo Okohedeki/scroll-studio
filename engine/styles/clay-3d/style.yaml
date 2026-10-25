@@ -2,6 +2,7 @@
 label: Clay 3D
 about: Soft toys on a table. Everything has mass and squish; cards drop in and squash on landing, tiles wobble like jelly when you fling the page, a clay buddy tumbles and hops from tray to tray, and candy buttons push in under your finger.
 mode: light
+scene_blocks: [features, stats, timeline, quote, faq, cta, gallery]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#f4eeff'
   bg2: '#fbf8ff'

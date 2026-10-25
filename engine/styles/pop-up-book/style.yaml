@@ -4,6 +4,7 @@ label: Pop-up book
 about: A 90-degree stage pop-up book on a lamp-lit table. Scrolling turns the board pages, and the opening angle drives every paper mechanism, so each scene folds up out of the gutter on parallel folds while the one before folds flat behind the turning leaf. Pull-tabs raise the figures, a wheel turns the timeline, flaps lift for answers, and the button is the last tab.
 mode: dark
 cuts: false   # the style plays its own hand-over between sections: `transition:` is ignored (see engine/styles/README.md)
+scene_blocks: [features, product, stats, timeline, quote, faq, cta]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#2a2421'
   bg2: '#211c1a'

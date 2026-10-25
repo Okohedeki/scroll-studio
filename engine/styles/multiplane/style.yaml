@@ -4,6 +4,7 @@ label: Multiplane
 about: >-
   A stack of painted glass plates at real depths under one camera, and scrolling is the crank. Between sections the camera trucks in through the stack, near plates and the words pass the lens and the next stack emerges from the mist, with the focus pulled to the plate the words are on. Inside a list a foreground plate of trunks sweeps past at speed to change the words. The pointer slides the camera and rests to pull focus.
 mode: dark
+scene_blocks: []   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#14111f'
   bg2: '#1b1729'

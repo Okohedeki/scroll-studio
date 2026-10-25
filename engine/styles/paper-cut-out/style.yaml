@@ -3,6 +3,7 @@
 label: Paper cut-out
 about: "Flat paper on an animation stand, cut out and pinned. Every section is a sheet held by a brass pin; scrolling swings the top sheet aside like a card on a pin, and the pieces on the sheets hang from their own pins and swing with the speed you scroll. A jointed paper arm points at what the scroll has reached, and you can take the hand and move it."
 mode: light
+scene_blocks: []   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#efe6d2'
   bg2: '#e4d7bb'

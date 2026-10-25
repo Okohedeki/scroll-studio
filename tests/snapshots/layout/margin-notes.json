@@ -240,13 +240,12 @@
            "tag": "div",
            "class": [
             "ss-captions",
-            "ss-captions--box",
-            "ss-captions--align-right"
+            "ss-captions--box"
            ],
            "style": {
-            "--x": "0.5",
+            "--x": "0.07",
             "--y": "0.16",
-            "--w": "0.42"
+            "--w": "0.38"
            },
            "children": [
             {
@@ -468,11 +467,11 @@
      {
       "block": "quote",
       "at": {
-       "x": 0.5,
+       "x": 0.07,
        "y": 0.16,
-       "w": 0.42,
+       "w": 0.38,
        "h": null,
-       "align": "right"
+       "align": "left"
       },
       "show": [
        0.785,

@@ -4,6 +4,7 @@ label: Paint on glass
 about: >-
   One wet painting on a pane of lit glass, never cut. Scrolling is the painter's hand: the brush lays strokes from one scene's painting into the next, coarse first, each stroke dragging the old paint into the new colour, and scrolling back paints toward the earlier scene. Stop and the painting stops half reworked. Headlines are brushed in, numbers run, the pointer is a finger that smears the wet paint.
 mode: dark
+scene_blocks: [product, stats, quote, cta]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#0b0e16'
   bg2: '#10141f'

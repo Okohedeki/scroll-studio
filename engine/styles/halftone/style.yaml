@@ -2,6 +2,7 @@
 label: Halftone
 about: Reading a freshly printed paper. A front page with a masthead and a lead story in columns; pictures that resolve from coarse dots to a fine screen as they reach reading position, with a printer's loupe on hover; section fronts that print plate by plate in CMYK; classifieds, dot-field infographics, letters to the editor and a clip-out coupon.
 mode: light
+scene_blocks: [features, product, stats, timeline, quote, faq, cta, gallery]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#f3efe6'
   bg2: '#ebe5d8'

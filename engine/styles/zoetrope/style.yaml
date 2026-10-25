@@ -6,6 +6,7 @@ label: Zoetrope
 about: A prize wheel of cards on a strobe zoetrope. Every element of the page is a printed card with its own animated figure; spin the wheel and the figures come alive under the strobe, it slows with real inertia and lands on one card, and a click opens the card with its full content.
 mode: light
 cuts: false   # the style plays its own hand-over between sections: `transition:` is ignored (see engine/styles/README.md)
+scene_blocks: []   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#f3ead6'
   bg2: '#eadfc6'

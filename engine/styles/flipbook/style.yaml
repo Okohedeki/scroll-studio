@@ -5,6 +5,7 @@ label: Flipbook
 about: A pad of animation paper. Every notch of the wheel releases one page, which curls up and over; each section is a run of pages whose pencil drawing animates as you thumb through and whose headline is lettered in by hand. Grab the corner to flip a page yourself.
 mode: dark
 cuts: false   # the style plays its own hand-over between sections: `transition:` is ignored (see engine/styles/README.md)
+scene_blocks: []   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#1f2427'
   bg2: '#262c30'

@@ -3,6 +3,7 @@
 label: Retro VHS
 about: A tape on a 4:3 TV. Scroll is the transport, so the on-screen display reads PLAY, PAUSE, SEARCH or REW with a running tape counter; every section arrives mistracked and locks, nav jumps are channel changes, and the call to action is ● REC.
 mode: dark
+scene_blocks: [product, stats, quote, faq, cta]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#121016'
   bg2: '#0b0a0e'

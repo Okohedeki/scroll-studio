@@ -2,6 +2,7 @@
 label: Glassmorphism
 about: Windows over a living world. Every word sits on frosted glass while a saturated colour world drifts behind at its own speed and changes hue section by section; a pinned glass lens holds still while the product turns beneath it, and feature layers fan apart in depth.
 mode: dark
+scene_blocks: [stats, quote, faq, cta]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#0b0b1a'
   bg2: '#13112e'

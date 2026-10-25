@@ -4,6 +4,7 @@ label: Sand
 about: One sand picture on a warm light table, never cut. Each scroll swings the side of a hand across it in an arm's arc, piling the old scene into a ridge and leaving the next behind it, words uncovered with the sand; a fingertip carves the headlines, a pinch of sand pours the numbers, and your pointer draws furrows that stay until the next sweep.
 mode: light
 cuts: false   # the style plays its own hand-over between sections: `transition:` is ignored (see engine/styles/README.md)
+scene_blocks: []   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#f2d8a4'
   bg2: '#ebc98e'

@@ -4,6 +4,7 @@ label: Particles
 about: One handful of living sand. The same swarm of points re-forms into every section's subject (the headline, the phone, the numbers, the logo), migrating through a turbulent swirl as you scroll; the pointer is a hand in the sand.
 mode: light
 cuts: false   # the style plays its own hand-over between sections: `transition:` is ignored (see engine/styles/README.md)
+scene_blocks: [faq]   # drawn its own way as steps inside a scene; other types use the default markup there
 colors:
   bg: '#f3f1ec'
   bg2: '#e9e6df'
