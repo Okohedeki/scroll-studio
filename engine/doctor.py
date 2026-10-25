@@ -227,11 +227,22 @@ def laptop_summary() -> dict:
     return {"no_gpu": no_gpu, "gpu_stack": gpu_stack}
 
 
+def marks(encoding: str | None) -> tuple[str, str]:
+    """The tick and cross for an output that can show them; plain text where it can't (a cp1252 Windows console, or
+    output redirected to a file in that code page), which would otherwise stop the report with UnicodeEncodeError."""
+    try:
+        "✓✗".encode(encoding or "utf-8")
+        return "✓", "✗"
+    except (LookupError, UnicodeEncodeError):
+        return "ok", "no"
+
+
 def report(verify: bool = False) -> None:
     from rich.console import Console
     from rich.markup import escape
     from rich.table import Table
     console = Console()
+    yes, no = marks(console.encoding)
     summary = laptop_summary()
     for title, key in (("Without a GPU you can build:", "no_gpu"), ("Needs the GPU stack (ComfyUI, Blender):", "gpu_stack")):
         table = Table(title=title, title_justify="left", show_header=False, box=None, pad_edge=False)
@@ -239,7 +250,7 @@ def report(verify: bool = False) -> None:
             table.add_column(overflow="fold")
         for row in summary[key]:
             note = escape(row["detail"]) + (f"  [yellow]Install: {escape(row['fix'])}[/]" if row.get("fix") else "")
-            table.add_row("[green]✓[/]" if row["ok"] else "[red]✗[/]", escape(row["label"]), f"[dim]{escape(row['uses'])}[/]", note)
+            table.add_row(f"[green]{yes}[/]" if row["ok"] else f"[red]{no}[/]", escape(row["label"]), f"[dim]{escape(row['uses'])}[/]", note)
         console.print(table)
         console.print()
     console.print("No GPU? `studio new my-site --laptop` makes a site that builds on this machine (docs/laptop.md).")
@@ -248,5 +259,5 @@ def report(verify: bool = False) -> None:
     for c in ("", "Check", "Detail", "Needed by"):
         t.add_column(c)
     for c in checks() + (verify_models() if verify else []):
-        t.add_row("[green]✓[/]" if c["ok"] else "[red]✗[/]", c["name"], str(c["detail"]), c["needed_by"])
+        t.add_row(f"[green]{yes}[/]" if c["ok"] else f"[red]{no}[/]", c["name"], str(c["detail"]), c["needed_by"])
     console.print(t)

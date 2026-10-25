@@ -179,3 +179,10 @@ def test_doctor_prints_both_lists(monkeypatch, capsys):
     out = capsys.readouterr().out
     assert "Without a GPU you can build:" in out and "Needs the GPU stack" in out and "studio new my-site --laptop" in out
     assert ".[vector]" in out                                           # square brackets are not swallowed as markup
+
+
+def test_doctor_marks_fall_back_where_the_console_cannot_show_them():
+    from engine.doctor import marks
+    assert marks("utf-8") == ("✓", "✗")
+    assert marks("cp1252") == ("ok", "no")
+    assert marks("no-such-codec") == ("ok", "no")
