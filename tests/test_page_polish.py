@@ -106,6 +106,14 @@ def test_a_face_cut_by_the_frame_is_partly_inside_it():
     assert M.face_overlap((10, 10, 20, 20), (15, 0, 40, 40)) == 0.5 and M.face_overlap((10, 10, 20, 20), (30, 0, 40, 40)) == 0.0
 
 
+def test_a_face_is_placed_on_the_screen_through_the_crop():
+    window, rect = (0.25, 0.0, 0.75, 1.0), (0.0, 0.0, 400.0, 800.0)               # the middle half of the picture fills the box
+    assert M.face_on_screen((0.4, 0.2, 0.5, 0.3), window, rect) == pytest.approx([120.0, 160.0, 200.0, 240.0])
+    assert M.face_on_screen((0.1, 0.2, 0.2, 0.3), window, rect) is None              # outside the frame
+    cut = M.face_on_screen((0.2, 0.2, 0.3, 0.3), window, rect)                      # half of it is in
+    assert cut[0] == 0.0 and cut[2] == pytest.approx(40.0)
+
+
 def test_overlap_is_a_share_of_the_smaller_box():
     assert M.overlap((0, 0, 100, 20), (0, 10, 100, 30)) == 0.5
     assert M.overlap((0, 0, 100, 20), (0, 20, 100, 40)) == 0.0
@@ -281,6 +289,155 @@ def test_the_table_lists_sections_findings_and_fixes():
     assert "fail: 1 fail, 0 warn" in out and "hero" in out and "1 fail 0 warn" in out and "clean" in out
     assert "FAIL  hero | phone | contrast" in out and "fix: move it with `place: left`" in out
     assert "sheet-desktop.jpg" in out and "not checked: faces: none" in out
+
+
+# ---------------------------------------------------------------- the whole check against a browser made of stand-ins
+
+class FakeTag:
+    def __init__(self, page, css):
+        self.page, self.css = page, css
+
+    def evaluate(self, js):
+        if "remove" in js and self.css in self.page.styles:
+            self.page.styles.remove(self.css)
+
+
+class FakePage:
+    """What `inspect_page` asks of a Playwright page, answered from made-up facts: a plan of sections, the text blocks seen at
+    each scroll position, the pictures, and a screenshot that is noisy without the page's words, flat with them, and brighter
+    again with the scrims hidden. A browser-free test of the glue: stops, hiding words, measuring, findings, sheets, report."""
+
+    def __init__(self, viewport):
+        self.vp, self.y, self.styles = viewport, 0, []
+        w, h, dpr, _ = P.VIEWPORTS[viewport]
+        self.size = (int(w * dpr), int(h * dpr))
+        self.dpr, self.h = dpr, h
+
+    def item(self, text, role, section, y, **kw):
+        w = P.VIEWPORTS[self.vp][0]
+        box = [w * 0.2, y, w * 0.8, y + 40]
+        it = {"text": text, "sel": "p", "role": role, "size": 17 if role == "body" else 60, "weight": 400,
+              "color": [255, 255, 255, 1.0], "section": section, "caption": False, "hero": section == "hero", "side": "center",
+              "rect": box, "seen": [box], "nlines": 2, "chars": [90, 30], "over": ["img"], "veils": 1, "device": False}
+        it.update(kw)
+        return it
+
+    def evaluate(self, js, *a):
+        if js == P.PLAN_JS:
+            return {"docH": 3000, "sections": [{"label": "hero", "kind": "hero", "scene": False, "top": 0, "height": 900, "ys": [0]},
+                                               {"label": "story", "kind": "scene", "scene": True, "top": 900, "height": 900, "ys": [900]}]}
+        if js == P.IMAGES_JS:
+            return [{"path": "/hero.png", "natural": [320, 180], "box": [1440, 900], "fit": "cover", "at": [0.5, 0.5], "doc": [0, 0],
+                     "section": "hero"}]
+        if js == P.COLLECT_JS:
+            if self.y == 0:
+                items = [self.item("Sleep care built around you", "headline", "hero", 300),
+                         self.item("A paragraph that is far too wide for comfortable reading " * 3, "body", "hero", 380),
+                         self.item("Start", "cta", "hero", 800),
+                         self.item("Overlapping", "label", "hero", 392),
+                         self.item("Menu", "label", "nav", 10)]
+                over = {"px": 60, "culprits": ["#wide in hero (reaches 500 px)"], "section": "hero"}
+                cta = {"label": "Start", "top": self.h + 10.0, "bottom": self.h + 50.0, "fold": float(self.h), "box": [1, 2, 3, 4],
+                       "section": "hero"}
+                return {"items": items, "overflow": over, "ctas": [cta], "veils": 1}
+            return {"items": [self.item("A caption", "body", "story", 300, caption=True, over=[], chars=[50, 30]),
+                              self.item("A phone line", "body", "story", 500, device=True, over=[])],
+                    "overflow": None, "ctas": [], "veils": 0}
+        if isinstance(js, str) and js.startswith("scrollTo(0, "):
+            self.y = int(js[len("scrollTo(0, "):-1])
+        elif "pp-hit" in str(js) and "remove" in str(js):
+            self.styles.remove(P.HIT)
+        return None
+
+    def wait_for_timeout(self, ms):
+        pass
+
+    def add_style_tag(self, content):
+        self.styles.append(content)
+        return FakeTag(self, content)
+
+    def screenshot(self):
+        import io
+        w, h = self.size
+        if P.NO_SCRIM in self.styles:
+            img = np.full((h, w, 3), 235, np.uint8)               # the picture without its scrims: bright, flat
+        elif P.NO_TEXT in self.styles:
+            img = np.where(np.arange(w)[None, :, None] % 4 < 2, 40, 150).astype(np.uint8) * np.ones((h, 1, 3), np.uint8)
+        else:
+            img = np.full((h, w, 3), 90, np.uint8)
+        buf = io.BytesIO()
+        Image.fromarray(img).save(buf, "PNG")
+        return buf.getvalue()
+
+
+class FakeContext:
+    def close(self):
+        pass
+
+
+class FakeBrowser:
+    def close(self):
+        pass
+
+
+def fake_browser(monkeypatch):
+    import playwright.sync_api as pw
+
+    class FakePlaywright:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+    monkeypatch.setattr(pw, "sync_playwright", lambda: FakePlaywright())
+    monkeypatch.setattr(P, "_chromium", lambda p: FakeBrowser())
+    monkeypatch.setattr(P, "_open", lambda browser, base, viewport: (FakeContext(), FakePage(viewport)))
+
+
+def test_the_report_is_assembled_from_what_the_browser_reads(tmp_path, monkeypatch):
+    dist = tmp_path / "dist"
+    dist.mkdir()
+    (dist / "index.html").write_text("<!doctype html><title>x</title>", encoding="utf-8")
+    Image.new("RGB", (320, 180), (20, 20, 20)).save(dist / "hero.png")
+    fake_browser(monkeypatch)
+    monkeypatch.setattr(P, "detect_faces", lambda rgb: [(0.3, 0.3, 0.5, 0.5)])          # a face behind the headline
+    log: list[str] = []
+    r = P.inspect_page(Project(tmp_path), log=log.append)
+    assert r["summary"]["verdict"] == "fail" and r["summary"]["sections"] == 2 and len(log) == 4
+    got = {(f["section"], f["viewport"], f["check"]) for f in r["findings"]}
+    assert {("hero", "desktop", "contrast"), ("hero", "desktop", "busy"), ("hero", "desktop", "line-length"),
+            ("hero", "desktop", "overflow"), ("hero", "desktop", "cta-fold"), ("hero", "desktop", "overlap"),
+            ("hero", "desktop", "upscaled"), ("hero", "desktop", "scrim"), ("hero", "desktop", "text-over-face")} <= got
+    assert not [f for f in r["findings"] if f["section"] == "story"]            # a phone mock's text is not the page's type
+    assert any(f["section"] == "nav" for f in r["findings"]) and not any(f["check"] == "overlap" and f["section"] == "nav" for f in r["findings"])
+    folder = tmp_path / ".build" / "inspect" / "page"
+    saved = json.loads((folder / "report.json").read_text(encoding="utf-8"))
+    assert saved["summary"] == r["summary"] and saved["text_over_pictures"] and saved["pictures"][0]["upscale"] > 4
+    assert {p.name for p in folder.glob("*.jpg")} >= {"sheet-desktop.jpg", "sheet-phone.jpg", "desktop-00.jpg", "phone-01.jpg"}
+    rows = [t for t in saved["text_over_pictures"] if t["viewport"] == "desktop" and t["role"] == "headline"]
+    assert rows[0]["busy"] >= 90 and rows[0]["without_scrim"]["shift"] > 0.1
+    only = P.inspect_page(Project(tmp_path), only="story", log=log.append)
+    assert only["summary"]["stops"]["desktop"] == 1 and not only["findings"]
+    with pytest.raises(P.Nothing, match="no section 'nope'"):
+        P.inspect_page(Project(tmp_path), only="nope", log=log.append)
+
+
+def test_a_missing_build_or_chromium_is_said_plainly(tmp_path):
+    with pytest.raises(P.Nothing, match="studio build"):
+        P.inspect_page(Project(tmp_path), log=print)
+
+    class Chromium:
+        def launch(self, **kw):
+            raise RuntimeError("Executable doesn't exist at /nowhere\nrun playwright install")
+
+    class Playwright:
+        chromium = Chromium()
+    with pytest.raises(P.Nothing, match="playwright install chromium"):
+        P._chromium(Playwright())
+
+
+def test_no_faces_are_found_in_a_flat_picture():
+    assert P.detect_faces(solid((90, 90, 90), 400, 300)) == []
 
 
 # ---------------------------------------------------------------- the command

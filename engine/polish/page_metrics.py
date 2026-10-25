@@ -139,6 +139,17 @@ def face_in_frame(face: tuple[float, float, float, float], window: tuple[float, 
     return max(0.0, w) * max(0.0, h) / area if area > 0 else 1.0
 
 
+def face_on_screen(face: tuple[float, float, float, float], window: tuple[float, float, float, float],
+                   rect: tuple[float, float, float, float]) -> Optional[list[float]]:
+    """Where a face (x0, y0, x1, y1 in 0-1 of the picture) lands on screen, given the part of the picture the box shows
+    (`window`, 0-1) and the box's own rectangle on screen. None when it falls outside the box."""
+    sx, sy = (rect[2] - rect[0]) / max(window[2] - window[0], 1e-6), (rect[3] - rect[1]) / max(window[3] - window[1], 1e-6)
+    box = [rect[0] + (face[0] - window[0]) * sx, rect[1] + (face[1] - window[1]) * sy,
+           rect[0] + (face[2] - window[0]) * sx, rect[1] + (face[3] - window[1]) * sy]
+    box = [max(box[0], rect[0]), max(box[1], rect[1]), min(box[2], rect[2]), min(box[3], rect[3])]
+    return box if box[2] > box[0] and box[3] > box[1] else None
+
+
 def face_overlap(face: tuple[float, float, float, float], box: tuple[float, float, float, float]) -> float:
     """Share (0-1) of a face box that a box of text covers (both x0, y0, x1, y1 in the same units)."""
     w, h = min(face[2], box[2]) - max(face[0], box[0]), min(face[3], box[3]) - max(face[1], box[1])

@@ -285,7 +285,7 @@ def detect_faces(rgb: np.ndarray) -> Optional[list[tuple[float, float, float, fl
 def _walk(page, plan: dict, stops: list[dict], viewport: str, out: Path, log: Callable[[str], None]) -> dict:
     """Photograph every stop and read the page at it. Returns {stops, items, text, overflow, cta}: each stop's
     screenshot path, every piece of text (and those over a picture with their measurements), and the layout facts."""
-    w, h, dpr, _ = VIEWPORTS[viewport]
+    dpr = VIEWPORTS[viewport][2]
     items, text, overflow, ctas = [], [], [], []
     for n, stop in enumerate(stops):
         page.evaluate(f"scrollTo(0, {stop['y']})")
@@ -309,12 +309,11 @@ def _walk(page, plan: dict, stops: list[dict], viewport: str, out: Path, log: Ca
                 veil.evaluate("e => e.remove()")
             tag.evaluate("e => e.remove()")
             _settle(page, 60)
-        faces = detect_faces(clean) if clean is not None else None
         for it in facts["items"]:
             it["shot"] = n
             it["viewport"] = viewport
             if it["over"] and clean is not None:
-                it["measure"] = _measure(it, clean, raw, dpr, faces, (w, h))
+                it["measure"] = _measure(it, clean, raw, dpr)
                 text.append(it)
         items += facts["items"]
         if facts["overflow"]:
@@ -324,9 +323,9 @@ def _walk(page, plan: dict, stops: list[dict], viewport: str, out: Path, log: Ca
     return {"stops": stops, "items": items, "text": text, "overflow": overflow, "cta": ctas}
 
 
-def _measure(it: dict, clean: np.ndarray, raw: Optional[np.ndarray], dpr: float, faces, size) -> dict:
+def _measure(it: dict, clean: np.ndarray, raw: Optional[np.ndarray], dpr: float) -> dict:
     """The picture behind one piece of text: busy-ness of its box, contrast against the pixels behind each line, the same
-    with the scrims hidden, how busy each third of the shot is across its rows, and the faces its lines cover."""
+    with the scrims hidden, and how busy each third of the shot is across its rows."""
     busy = M.busyness(_crop(clean, it["rect"], dpr))
     behind = np.concatenate([_crop(clean, b, dpr).reshape(-1, 3) for b in it["seen"]])
     r, g, b, a = it["color"]
@@ -338,9 +337,6 @@ def _measure(it: dict, clean: np.ndarray, raw: Optional[np.ndarray], dpr: float,
         m["raw"] = rc
     rows = (int(it["rect"][1] * dpr), int(it["rect"][3] * dpr))
     m["calm"] = M.calmest_side(clean, rows)
-    if faces:
-        W, H = size
-        m["faces"] = [f for f in faces if any(M.face_overlap((f[0] * W, f[1] * H, f[2] * W, f[3] * H), tuple(b)) >= 0.2 for b in it["seen"])]
     return m
 
 
@@ -354,11 +350,20 @@ def _text_findings(text: list[dict]) -> list[dict]:
                                 "caption": it["caption"], "hero": it["hero"], "section": it["section"],
                                 "viewport": it["viewport"], "shot": it["shot"], "box": it["rect"], "busy": m["busy"],
                                 "contrast": m["contrast"], "raw": m.get("raw"), "calm": m["calm"], "side": it["side"]})
-        if m.get("faces"):
-            out.append(M.finding("warn", "text-over-face", it["section"], it["viewport"],
-                                 f"{it['role']} \"{it['text'][:34]}\" sits across a face in the picture",
-                                 "move the caption off the face with `place: left` or `right`, or regenerate the shot with "
-                                 "the subject on the other side", it["shot"], it["rect"]))
+    return out
+
+
+def _face_findings(items: list[dict], images: list[dict]) -> list[dict]:
+    """Text across a face: each face a picture holds, placed on the screenshot, against the lines of text at that stop."""
+    out = []
+    for im in images:
+        for face in im.get("faces_screen") or []:
+            for it in items:
+                if (it["viewport"], it["shot"]) == (im["viewport"], im["shot"]) and it["section"] != "nav" and                         any(M.face_overlap(tuple(face), tuple(line)) >= 0.2 for line in it["seen"]):
+                    out.append(M.finding("warn", "text-over-face", it["section"], it["viewport"],
+                                         f"{it['role']} \"{it['text'][:34]}\" sits across a face in {im['src']}",
+                                         "move the caption off the face with `place: left` or `right`, or regenerate the shot "
+                                         "with the subject on the other side", it["shot"], it["rect"], subject=it["text"][:60]))
     return out
 
 
@@ -420,7 +425,7 @@ def _image_facts(imgs: list[dict], stops: list[dict], viewport: str, dist: Path,
         rect = ([im["doc"][0], im["doc"][1] - stops[n]["y"], im["doc"][0] + im["box"][0], im["doc"][1] - stops[n]["y"] + im["box"][1]]
                 if n is not None else None)
         file = dist / unquote(im["path"]).lstrip("/")
-        face = None
+        face, faces_screen = None, []
         if file.exists():
             if file not in faces_cache:
                 try:
@@ -430,8 +435,10 @@ def _image_facts(imgs: list[dict], stops: list[dict], viewport: str, dist: Path,
             window = M.crop_window(tuple(im["natural"]), tuple(im["box"]), im["fit"], tuple(im["at"]))
             shares = [M.face_in_frame(f, window) for f in faces_cache[file] or []]
             face = min((s for s in shares if s > 0), default=None)
+            if rect and im["fit"] in ("cover", "fill"):
+                faces_screen = [b for f in faces_cache[file] or [] if (b := M.face_on_screen(f, window, rect))]
         out.append({"src": file.name, "section": im["section"], "viewport": viewport, "natural": im["natural"], "box": im["box"],
-                    "dpr": dpr, "fit": im["fit"], "shot": n, "rect": rect, "face": face,
+                    "dpr": dpr, "fit": im["fit"], "shot": n, "rect": rect, "face": face, "faces_screen": faces_screen,
                     "upscale": M.upscale(tuple(im["natural"]), tuple(im["box"]), dpr, im["fit"])})
     return out
 
@@ -549,6 +556,8 @@ def inspect_page(project, only: Optional[str] = None, log: Callable[[str], None]
             findings += M.layout_findings(section, vp, o["shot"], None, None, [o])
     for im in images:
         findings += M.image_findings(im)
+    for wk in walked.values():
+        findings += _face_findings(wk["items"], images)
     findings = _dedupe([f for f in findings if not only or f["section"] == only])
     order = {s: i for i, s in enumerate(list(sections) + ["nav", "page"])}
     findings.sort(key=lambda f: (f["severity"] != "fail", order.get(f["section"], 99), f["viewport"], f["check"]))
@@ -572,7 +581,7 @@ def inspect_page(project, only: Optional[str] = None, log: Callable[[str], None]
                                       "text": it["text"][:80], "size": it["size"], "busy": it["measure"]["busy"],
                                       "contrast": it["measure"]["contrast"], "without_scrim": it["measure"].get("raw"),
                                       "shot": it["shot"]} for wk in walked.values() for it in wk["text"]],
-              "pictures": [{k: v for k, v in im.items() if k not in ("rect", "shot")} for im in images],
+              "pictures": [{k: v for k, v in im.items() if k not in ("rect", "shot", "faces_screen")} for im in images],
               "stops": {vp: [{"n": i + 1, "y": s["y"], "sections": s["sections"], "file": s["path"]} for i, s in enumerate(wk["stops"])]
                         for vp, wk in walked.items()},
               "sheets": {vp: p.name for vp, p in sheets.items() if p}, "folder": str(out), "skipped": skipped}
