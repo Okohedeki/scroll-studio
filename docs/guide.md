@@ -131,6 +131,45 @@ theme:
   phone: 820                                              # one phone width for the stylesheet and the runtime
 ```
 
+## Remake a landing page
+
+```bash
+studio remake https://example.com/ [--name my-remake] [--style bauhaus] [--no-gpu]
+```
+
+`studio remake` reads a live landing page and writes a new project that tells it as a scroll site. The page is opened
+in headless Chromium (Playwright; a plain request when Chromium is not installed), and the parts that are page furniture
+are left out: the nav, the page footer, cookie banners, popups, hidden and screen-reader-only text, tracking pixels.
+What remains is cut at the page's `<section>`s, or at its section headings when it has none, and each part becomes the
+block its shape calls for:
+
+| On the page | In site.yaml |
+|---|---|
+| The h1 with its eyebrow, subhead, buttons and largest picture | The opening scene: that picture as a photo parallax with the headline over it |
+| Questions (`<details>`, a `<dl>`, headings ending in `?`) | `faq` |
+| A `<blockquote>` or a testimonial | `quote`, with who said it |
+| Figures with labels (12k+ teams, 99.9% uptime) | `stats` |
+| Numbered steps (01, 02, Step 3) | `timeline` |
+| Cards or a list under a heading | `features` (plus an `intro` when the heading has copy of its own) |
+| Three or more photos | `strip` |
+| A heading with copy and one picture | `product`, its picture beside the copy, short list items as tags |
+| A short heading with a button | `cta` |
+| A heading with copy | `intro` |
+
+The page's own words are kept, emphasis included, and every button keeps its link: links to a part of the page point
+at that section here, the rest at the original site. The page's description becomes a line of kinetic type after the
+opening when it says something the hero does not, and the site ends on a call to action with the hero's button. A
+row of client logos is left out. The pictures (photos only, at most 12, scaled to 2560 px) are saved in `inputs/`, and
+the brand is read with `theme.from` and written into site.yaml as tokens you can edit. `--style` puts any of the
+styles on the brand. With a GPU here the opening can be a film whose one shot starts from the hero picture; `--no-gpu`
+keeps it a photo parallax, which needs only the CPU. Every section builds with storyboard stand-ins first:
+`studio storyboard my-remake --level sketch`.
+
+Only public pages are read. The site's `robots.txt` is asked first, for the page and for every host a picture comes
+from, under the user agent `ScrollStudio-remake`; a page it disallows is refused. Nothing is uploaded anywhere. The
+words, pictures and brand belong to the site's owner: a remake is for your own use, or for use with their permission,
+and the command says so when it finishes. Claude can do the same in conversation with the MCP tool `remake_site`.
+
 ## Direction boards: pitch it before you build it
 
 A studio does not start with the build. It shows the client three or six different ideas of what the site could be, side

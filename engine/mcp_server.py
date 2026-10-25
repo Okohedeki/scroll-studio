@@ -109,6 +109,21 @@ def create_project(name: str, example: Optional[str] = None) -> dict:
 
 
 @mcp.tool()
+def remake_site(url: str, name: Optional[str] = None, style: Optional[str] = None, no_gpu: bool = False) -> dict:
+    """Read a live landing page (public content only; its robots.txt is honoured) and write a new project that tells
+    it as a scroll site: the hero picture as the opening scene, the sections as blocks, the calls to action with their
+    links, the brand as theme.from tokens, the pictures in inputs/. style: one of list_styles. Returns the project,
+    its sections, warnings and next steps. The content belongs to the site's owner: tell the user the remake is for
+    their own use or with the owner's permission."""
+    from .remake import remake
+    try:
+        return remake(url, name=name, style=style, gpu=False if no_gpu else None, projects=PROJECTS,
+                      log=lambda m: print(m, file=sys.stderr))
+    except BuildError as e:
+        raise ValueError(str(e)) from None
+
+
+@mcp.tool()
 def spec_schema(part: Optional[str] = None) -> dict:
     """JSON Schema of site.yaml. part = a scene/block type (film, artwork, scene3d, sequence, parallax, type, inside,
     intro, features, stats, timeline, quote, cta, gallery) or 'Site'/'Theme'/'Step'/'Hud' to get just that definition."""

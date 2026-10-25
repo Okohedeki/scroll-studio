@@ -28,6 +28,7 @@
 | Cinemagraphs, light from dawn to night | Zoetrope, stop-motion, paint on glass | Storyboard before you render |
 | Fly inside your product's 3D model | Pop-up book, multiplane, Spider-Verse smears | A polish report on every film |
 | Miniature worlds, maps, charts, live 3D | Film cuts between any two sections | Claude drives it all through MCP |
+| Photo parallax from your own pictures | Any brand, from a page, a logo or a brand.yaml | Remake a live landing page: `studio remake <url>` |
 
 Every image and video is made with open models on your machine (Z-Image, Qwen-Image-Edit, LTX-2.3, Wan 2.2, SeedVR2,
 Blender). The output is plain HTML, CSS and JS you can host anywhere. The [examples](docs/examples.md) show what each
@@ -95,6 +96,7 @@ https://github.com/Okohedeki/scroll-studio/blob/main/docs/INSTALL.md
 
 ```bash
 studio new my-site                 # a starter site.yaml
+studio remake https://example.com/ # or start from a live landing page, told as a scroll site
 studio directions my-site          # six art directions; --pick one
 studio storyboard my-site --edit   # sketches, stills and an animatic before any video render
 studio build my-site               # cached stage by stage: change one thing, rebuild one thing

@@ -1,0 +1,18 @@
+/* Quillfern: an invented brand for the remake tests. */
+:root { --brand-primary: #5b3cc4; --warm: #f2a541; }
+html, body { background-color: #faf8f4; color: #1c1a24; font-family: "Inter", system-ui, sans-serif; margin: 0; }
+h1, h2, h3 { font-family: "Fraunces", Georgia, serif; }
+.eyebrow { color: #5b3cc4; text-transform: uppercase; letter-spacing: .1em; font-size: 13px; }
+.btn { border-radius: 999px; padding: 12px 20px; background: #5b3cc4; color: #fff; text-decoration: none; }
+.btn-ghost { background: transparent; color: #5b3cc4; }
+.hero { padding: 96px 6vw; }
+.hero h1 em { color: #5b3cc4; font-style: normal; }
+.hero-shot { width: 100%; height: auto; border-radius: 16px; }
+.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.card { background: #fff; border-radius: 16px; padding: 24px; }
+.product { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; }
+.numbers { display: flex; gap: 48px; background: #5b3cc4; color: #fff; }
+.stat strong { display: block; font-size: 48px; color: #f2a541; }
+.cookie-consent { position: fixed; bottom: 0; left: 0; right: 0; background: #1c1a24; color: #fff; }
+.skip-link { position: absolute; left: -9999px; }
+.site-footer { color: #6b6878; }

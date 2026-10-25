@@ -413,7 +413,7 @@ def page_brand(project: Project, page: str, base: str, log=print) -> dict:
             self.tags.append((tag, a))
             self._in_style = tag == "style"
             if a.get("style"):
-                self.styles.append(a["style"])
+                self.styles.append("[style] {" + a["style"].replace("{", "").replace("}", "") + "}")   # a rule of its own
 
         def handle_endtag(self, tag):
             self._in_style = False if tag == "style" else self._in_style
@@ -435,6 +435,7 @@ def page_brand(project: Project, page: str, base: str, log=print) -> dict:
         except Exception as e:      # a missing or unreachable stylesheet: the page's inline styles still count
             log(f"  note: stylesheet {href[:60]} not read ({e.__class__.__name__})")
 
+    css = re.sub(r"/\*.*?\*/", "", css, flags=re.S)      # a comment before a rule would hide its selector
     colors: dict = {}
     root = _css_blocks(css, r"html|body|:root")
     for prop, role in (("background-color", "bg"), ("background", "bg"), ("color", "ink")):
@@ -507,23 +508,29 @@ def _save_logo(project: Project, url: str) -> str:
     return out.relative_to(project.root).as_posix()
 
 
+def theme_tokens(tokens: dict) -> dict:
+    """A brand's tokens as theme.from writes them out: a complete, contrast-checked palette (with the mode it implies),
+    then fonts, radius, logo and source, in that order."""
+    from .compile.themes import brand_palette
+    tokens = dict(tokens)
+    if tokens.get("colors"):
+        tokens["colors"], tokens["mode"] = brand_palette(tokens["colors"], tokens.get("mode"))
+    return {k: tokens[k] for k in ("mode", "colors", "fonts", "radius", "logo", "source") if tokens.get(k)}
+
+
 def write_brand(project: Project, ref: str, dry_run: bool = False, log=print) -> dict:
     """`studio brand --from`: read the brand afresh and write its tokens into site.yaml as theme.from (a complete,
     contrast-checked palette, its fonts, radius and logo), so they can be edited; the source is kept as `source`."""
     from ruamel.yaml.comments import CommentedMap
 
-    from .compile.themes import brand_palette
-    tokens = brand_from(project, ref, refresh=True, log=log)
-    if tokens.get("colors"):
-        tokens["colors"], tokens["mode"] = brand_palette(tokens["colors"], tokens.get("mode"))
+    tokens = theme_tokens(brand_from(project, ref, refresh=True, log=log))
     y = _yaml()
     original = project.spec_path.read_text(encoding="utf-8")
     doc = y.load(original)
     theme = doc.get("theme")
     if theme is None:
         theme = doc["theme"] = CommentedMap()
-    order = ("mode", "colors", "fonts", "radius", "logo", "source")
-    theme["from"] = CommentedMap((k, tokens[k]) for k in order if tokens.get(k))
+    theme["from"] = CommentedMap(tokens.items())
     text_out = _dump(y, doc, original)
     import yaml as _pyyaml
     Site.model_validate(_pyyaml.safe_load(text_out))     # never write an invalid spec
