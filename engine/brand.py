@@ -260,3 +260,270 @@ def apply_brand(project: Project, logo_rel: str, mode: str = "light", dry_run: b
     if not dry_run:
         project.spec_path.write_text(text_out, encoding="utf-8")
     return {"colors": cols, "palette": palette}
+
+
+# ---------------------------------------------------------------- a brand from a page, a logo or a brand.yaml (theme.from)
+IMAGE_TYPES = (".png", ".jpg", ".jpeg", ".webp", ".svg")
+UA = {"User-Agent": "Mozilla/5.0 (compatible; ScrollStudio brand reader)"}
+MAX_FETCH = 4_000_000            # bytes: a page, a stylesheet or a logo larger than this is not read
+
+
+def _kind(ref: str) -> str:
+    if ref.startswith(("http://", "https://")):
+        return "url"
+    suffix = Path(ref).suffix.lower()
+    if suffix in (".yaml", ".yml"):
+        return "yaml"
+    if suffix in (".html", ".htm"):
+        return "html"
+    if suffix in IMAGE_TYPES:
+        return "image"
+    raise BuildError(f"theme.from {ref[:60]!r}: give a web page (https://...), a page saved as .html, a logo image "
+                     f"({', '.join(IMAGE_TYPES)}) or a brand.yaml")
+
+
+def _fetch(url: str, binary: bool = False):
+    """One request, only ever for a URL the spec or the command names (theme.from, studio brand --from)."""
+    import requests
+    from .safety import check_url
+    check_url(url, "theme.from")
+    r = requests.get(url, headers=UA, timeout=20, stream=True)
+    r.raise_for_status()
+    data = r.raw.read(MAX_FETCH + 1, decode_content=True)
+    if len(data) > MAX_FETCH:
+        raise BuildError(f"{url[:80]} is larger than {MAX_FETCH // 1_000_000} MB; not read")
+    return data if binary else data.decode(r.encoding or "utf-8", errors="replace")
+
+
+def brand_from(project: Project, ref: str, refresh: bool = False, log=print) -> dict:
+    """The brand tokens `theme.from` names, as a Brand token set (engine/spec.py). Read once and kept in
+    .build/brand/: a file is read again when it changes, a web page only when `refresh` (studio brand --from)."""
+    import hashlib
+    import json
+
+    from .spec import Brand
+    kind = _kind(ref)
+    stamp = ref
+    if kind != "url":
+        src = project.path(ref)
+        if not src.is_file():
+            raise BuildError(f"theme.from: {ref} not found in the project folder")
+        stamp += hashlib.sha1(src.read_bytes()).hexdigest()
+    cache = project.build / "brand" / (hashlib.sha1(stamp.encode()).hexdigest()[:16] + ".json")
+    if cache.exists() and not refresh:
+        return json.loads(cache.read_text(encoding="utf-8"))
+    if kind == "yaml":
+        import yaml
+        raw = yaml.safe_load(project.path(ref).read_text(encoding="utf-8")) or {}
+        tokens = Brand.model_validate(raw).model_dump(mode="json", exclude_none=True)
+    elif kind == "image":
+        tokens = {"colors": logo_colors(project.path(ref)), "logo": ref}
+    else:
+        if kind == "url":
+            log(f"theme.from: reading {ref}")
+            page, base = _fetch(ref), ref
+        else:
+            page, base = project.path(ref).read_text(encoding="utf-8", errors="replace"), ref
+        tokens = page_brand(project, page, base, log)
+    tokens["source"] = ref
+    tokens = Brand.model_validate(tokens).model_dump(mode="json", exclude_none=True)     # what a page says is data
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    cache.write_text(json.dumps(tokens, indent=1), encoding="utf-8")
+    return tokens
+
+
+def _chroma(c) -> float:
+    import colorsys
+    h, l, s = colorsys.rgb_to_hls(*(v / 255 for v in c))
+    return s * (1 - abs(2 * l - 1))
+
+
+def _brand_accents(pal: list[tuple[tuple, float]], named: tuple = ()) -> dict:
+    """The accent (a colour the source names as its brand colour, else the most colourful one with a fair share) and,
+    if there is one, a second brand colour of another hue."""
+    import colorsys
+    ranked = [(c, 1.0) for c in named] + sorted(pal, key=lambda cs: _chroma(cs[0]) * (0.35 + cs[1]), reverse=True)
+    if not ranked:
+        return {}
+    accent = ranked[0][0]
+    hue = colorsys.rgb_to_hls(*(v / 255 for v in accent))[0]
+    other = next((c for c, _ in ranked[1:] if _chroma(c) > 0.25
+                  and abs(colorsys.rgb_to_hls(*(v / 255 for v in c))[0] - hue) > 0.08), None)
+    return {"accent": _hex(accent), **({"accent2": _hex(other)} if other else {})}
+
+
+def _hexes(text: str) -> list[tuple]:
+    out = []
+    for h in re.findall(r"#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b", text):
+        h = "".join(c * 2 for c in h) if len(h) == 3 else h
+        out.append(tuple(int(h[i:i + 2], 16) for i in (0, 2, 4)))
+    return out
+
+
+def _shares(cols: list[tuple]) -> list[tuple[tuple, float]]:
+    from collections import Counter
+    n = Counter(cols)
+    return [(c, k / max(len(cols), 1)) for c, k in n.most_common(40)]
+
+
+def logo_colors(path: Path) -> dict:
+    """A logo's brand colours: an SVG's own fills and strokes, or a raster's main colours (_palette)."""
+    if path.suffix.lower() == ".svg":
+        text = path.read_text(encoding="utf-8", errors="replace")
+        pal = [(c, s) for c, s in _shares(_hexes(text)) if 30 < sum(c) / 3 < 235 or _chroma(c) > 0.2]
+    else:
+        pal = _palette(path)
+    cols = _brand_accents(pal)
+    if not cols:
+        raise BuildError(f"{path.name}: found no brand colour in it")
+    return cols
+
+
+def _css_blocks(css: str, selector: str) -> str:
+    """The declarations of every rule whose selector list names `selector` (body, h1, button...)."""
+    out = []
+    for sel, body in re.findall(r"([^{}]+)\{([^{}]*)\}", css):
+        if any(re.fullmatch(selector, s.strip(), re.I) for s in sel.split(",")):
+            out.append(body)
+    return ";".join(out)
+
+
+def _decl(body: str, prop: str) -> list[str]:
+    return [v.strip() for v in re.findall(rf"(?<![\w-]){prop}\s*:\s*([^;]+)", body, re.I)]
+
+
+def page_brand(project: Project, page: str, base: str, log=print) -> dict:
+    """Colours, fonts, radius and logo of a web page, from its markup and styles. Fonts are kept only when they are
+    Google Fonts families (the page links them, or the engine knows them); a brand's own face is added as a file."""
+    from html.parser import HTMLParser
+    from urllib.parse import urljoin
+
+    from .compile.themes import FONT_AXES
+
+    class Tags(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.tags, self.styles, self._in_style = [], [], False
+
+        def handle_starttag(self, tag, attrs):
+            a = {k: (v or "") for k, v in attrs}
+            self.tags.append((tag, a))
+            self._in_style = tag == "style"
+            if a.get("style"):
+                self.styles.append(a["style"])
+
+        def handle_endtag(self, tag):
+            self._in_style = False if tag == "style" else self._in_style
+
+        def handle_data(self, data):
+            if self._in_style:
+                self.styles.append(data)
+
+    p = Tags()
+    p.feed(page)
+    css = "\n".join(p.styles)
+    remote = base.startswith(("http://", "https://"))
+    sheets = [a["href"] for t, a in p.tags if t == "link" and "stylesheet" in a.get("rel", "").lower() and a.get("href")]
+    for href in sheets[:4]:          # the page's own stylesheets carry most of its look
+        if "fonts.googleapis.com" in href:
+            continue
+        try:
+            css += "\n" + (_fetch(urljoin(base, href)) if remote else _local(project, base, href).read_text(encoding="utf-8"))
+        except Exception as e:      # a missing or unreachable stylesheet: the page's inline styles still count
+            log(f"  note: stylesheet {href[:60]} not read ({e.__class__.__name__})")
+
+    colors: dict = {}
+    root = _css_blocks(css, r"html|body|:root")
+    for prop, role in (("background-color", "bg"), ("background", "bg"), ("color", "ink")):
+        for v in _decl(root, prop):
+            h = _hexes(v)
+            if h and role not in colors:
+                colors[role] = _hex(h[0])
+    named = [_hexes(v) for k, v in re.findall(r"--([\w-]*(?:brand|primary|accent)[\w-]*)\s*:\s*([^;]+)", css, re.I)]
+    meta = [_hexes(a.get("content", "")) for t, a in p.tags if t == "meta" and a.get("name", "").lower() == "theme-color"]
+    picked = tuple(c[0] for c in meta + named if c)       # what the page itself calls its brand colour comes first
+    acc = _brand_accents(_shares(_hexes(css)), picked)
+    colors.update({k: v for k, v in acc.items() if k not in colors})
+
+    google = {re.sub(r"\+", " ", f.split(":")[0]) for t, a in p.tags if t == "link"
+              for f in re.findall(r"family=([^&]+)", a.get("href", "")) if "fonts.googleapis.com" in a.get("href", "")}
+
+    def family(selector: str):
+        for v in _decl(_css_blocks(css, selector), "font-family"):
+            first = v.split(",")[0].strip().strip("\"'")
+            if first in google or first in FONT_AXES:
+                return first
+        return None
+    fonts = {k: f for k, f in (("display", family(r"h1|h2|h1 *\.?[\w-]*|\.?[\w-]*title|\.?[\w-]*heading")),
+                               ("body", family(r"html|body|:root|p")), ("mono", family(r"code|pre|kbd"))) if f}
+
+    radius = None
+    rads = [r for v in _decl(_css_blocks(css, r"button|\.btn[\w-]*|\.button[\w-]*|a\.btn[\w-]*"), "border-radius")
+            for r in re.findall(r"^\d+(?:\.\d+)?(?:px|rem|em)$", v.split()[0])]
+    if rads:
+        radius = "999px" if rads[0].endswith("px") and float(rads[0][:-2]) >= 99 else rads[0]
+
+    logo = None
+    cands = [a.get("src") for t, a in p.tags if t == "img" and a.get("src")
+             and re.search(r"logo", " ".join((a.get("src"), a.get("alt", ""), a.get("class", ""), a.get("id", ""))), re.I)]
+    cands += [a.get("href") for t, a in p.tags if t == "link" and re.search(r"\bicon\b", a.get("rel", ""), re.I)
+              and a.get("href", "").lower().endswith(".svg")]
+    for src in cands:
+        if src.startswith("data:"):
+            continue
+        try:
+            logo = _save_logo(project, urljoin(base, src)) if remote else str(_local(project, base, src).relative_to(project.root.resolve()).as_posix())
+            break
+        except Exception as e:
+            log(f"  note: logo {src[:60]} not used ({e.__class__.__name__})")
+    out = {"colors": colors, "fonts": fonts}
+    if radius:
+        out["radius"] = radius
+    if logo:
+        out["logo"] = logo
+    return out
+
+
+def _local(project: Project, page_ref: str, href: str) -> Path:
+    """A file a saved page links to, relative to the page and inside the project."""
+    if href.startswith(("http://", "https://", "//", "data:")):
+        raise BuildError(f"{href[:60]} is not a file beside the page")
+    return project.path(str(Path(page_ref).parent / href.split("?")[0].split("#")[0]))
+
+
+def _save_logo(project: Project, url: str) -> str:
+    """A web page's logo, kept in .build/brand/ so the built site serves it itself."""
+    import hashlib
+    suffix = Path(url.split("?")[0]).suffix.lower()
+    if suffix not in IMAGE_TYPES:
+        raise BuildError(f"{url[:60]} is not an image ({', '.join(IMAGE_TYPES)})")
+    data = _fetch(url, binary=True)
+    out = project.build / "brand" / ("logo-" + hashlib.sha1(data).hexdigest()[:12] + suffix)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_bytes(data)
+    return out.relative_to(project.root).as_posix()
+
+
+def write_brand(project: Project, ref: str, dry_run: bool = False, log=print) -> dict:
+    """`studio brand --from`: read the brand afresh and write its tokens into site.yaml as theme.from (a complete,
+    contrast-checked palette, its fonts, radius and logo), so they can be edited; the source is kept as `source`."""
+    from ruamel.yaml.comments import CommentedMap
+
+    from .compile.themes import brand_palette
+    tokens = brand_from(project, ref, refresh=True, log=log)
+    if tokens.get("colors"):
+        tokens["colors"], tokens["mode"] = brand_palette(tokens["colors"], tokens.get("mode"))
+    y = _yaml()
+    original = project.spec_path.read_text(encoding="utf-8")
+    doc = y.load(original)
+    theme = doc.get("theme")
+    if theme is None:
+        theme = doc["theme"] = CommentedMap()
+    order = ("mode", "colors", "fonts", "radius", "logo", "source")
+    theme["from"] = CommentedMap((k, tokens[k]) for k in order if tokens.get(k))
+    text_out = _dump(y, doc, original)
+    import yaml as _pyyaml
+    Site.model_validate(_pyyaml.safe_load(text_out))     # never write an invalid spec
+    if not dry_run:
+        project.spec_path.write_text(text_out, encoding="utf-8")
+    return tokens

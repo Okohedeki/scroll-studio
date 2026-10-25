@@ -347,11 +347,30 @@ def copy_import(name: str, deck: Path, dry_run: bool = typer.Option(False, help=
 
 
 @app.command()
-def brand(name: str, logo: str = typer.Option(..., help="Logo file inside the project (png, svg rendered as png, jpg)"),
-          mode: str = typer.Option("light", help="light or dark"), dry_run: bool = False):
-    """Set the theme's colours from a logo (contrast-checked) and use it as the nav logo."""
-    from .brand import apply_brand
-    from .project import Project
+def brand(name: str, logo: Optional[str] = typer.Option(None, help="Logo file inside the project (png, svg rendered as png, jpg)"),
+          mode: str = typer.Option("light", help="light or dark"), dry_run: bool = False,
+          from_: Optional[str] = typer.Option(None, "--from", help="Read a brand from a web page URL, a saved .html page, "
+                                                                   "a logo image or a brand.yaml, and write its tokens "
+                                                                   "into site.yaml as theme.from")):
+    """Set the theme's colours from a logo (contrast-checked) and use it as the nav logo, or (--from) write a brand's
+    colours, fonts, radius and logo into theme.from, where they can be edited."""
+    from .brand import apply_brand, write_brand
+    from .project import BuildError, Project
+    if (logo is None) == (from_ is None):
+        raise typer.BadParameter("give --logo or --from")
+    if from_ is not None:
+        try:
+            t = write_brand(Project(resolve(name)), from_, dry_run=dry_run, log=typer.echo)
+        except BuildError as e:
+            raise typer.BadParameter(str(e)) from None
+        for group in ("colors", "fonts"):
+            for k, v in t.get(group, {}).items():
+                typer.echo(f"  {group}.{k}: {v}")
+        for k in ("mode", "radius", "logo"):
+            if t.get(k):
+                typer.echo(f"  {k}: {t[k]}")
+        typer.echo("written to theme.from" + (" (dry run)" if dry_run else ""))
+        return
     if mode not in ("light", "dark"):
         raise typer.BadParameter("mode is light or dark")
     r = apply_brand(Project(resolve(name)), logo, mode=mode, dry_run=dry_run)

@@ -72,6 +72,32 @@
    "type": "object"
   }
  },
+ "brand_from": {
+  "description": "Read a brand from a web page URL, a saved .html page, a logo image or a brand.yaml in the project (colours,",
+  "input": {
+   "properties": {
+    "dry_run": {
+     "default": false,
+     "title": "Dry Run",
+     "type": "boolean"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "source": {
+     "title": "Source",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project",
+    "source"
+   ],
+   "title": "brand_fromArguments",
+   "type": "object"
+  }
+ },
  "brand_from_logo": {
   "description": "Set theme colours from a logo inside the project (contrast-checked) and use it as the nav logo.",
   "input": {

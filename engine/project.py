@@ -91,7 +91,11 @@ class Project:
             return yaml.safe_load(f) or {}
 
     def load(self) -> Site:
-        return Site.model_validate(self.raw())
+        site = Site.model_validate(self.raw())
+        if isinstance(site.theme.from_, str):      # a brand source: its tokens, read once and kept in .build/brand/
+            from .brand import brand_from
+            site.theme._brand = brand_from(self, site.theme.from_)
+        return site
 
     def save(self, data: dict | Site) -> None:
         if isinstance(data, Site):

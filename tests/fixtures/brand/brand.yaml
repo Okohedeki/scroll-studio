@@ -1,0 +1,5 @@
+# A made-up brand written by hand, for tests/test_brand_from.py.
+mode: dark
+colors: { accent: "#e4572e", bg: "#101418", ink: "#f1efe9" }
+fonts: { display: Sora, body: Manrope }
+radius: 2px

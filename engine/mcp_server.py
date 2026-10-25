@@ -593,6 +593,14 @@ def brand_from_logo(project: str, logo: str, mode: str = "light", dry_run: bool 
     return apply_brand(_find(project), logo, mode=mode, dry_run=dry_run)
 
 
+@mcp.tool()
+def brand_from(project: str, source: str, dry_run: bool = False) -> dict:
+    """Read a brand from a web page URL, a saved .html page, a logo image or a brand.yaml in the project (colours,
+    fonts, radius, logo) and write its tokens into site.yaml as theme.from, where they can be edited."""
+    from .brand import write_brand
+    return write_brand(_find(project), source, dry_run=dry_run, log=lambda m: None)
+
+
 # ---------------------------------------------------------------- inside: the product as the set
 
 @mcp.tool()

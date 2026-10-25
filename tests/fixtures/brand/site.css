@@ -1,0 +1,6 @@
+/* The made-up brand's stylesheet, linked from page.html. */
+h1, h2 { font-family: "Fraunces", Georgia, serif; font-weight: 700; }
+.btn { display: inline-block; padding: 12px 20px; border-radius: 10px; background: #0b6e4f; color: #ffffff; }
+.btn:hover { background: #095a41; }
+code, pre { font-family: "Fernwick Mono", monospace; }
+footer { color: #1d2a24; border-top: 1px solid #e5dccb; }

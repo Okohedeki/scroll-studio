@@ -1,7 +1,7 @@
 {
  "commands": {
   "brand": {
-   "help": "Set the theme's colours from a logo (contrast-checked) and use it as the nav logo.",
+   "help": "Set the theme's colours from a logo (contrast-checked) and use it as the nav logo, or (--from) write a brand's",
    "params": {
     "dry_run": {
      "default": false,
@@ -14,6 +14,16 @@
      "required": false,
      "type": "boolean"
     },
+    "from_": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--from"
+     ],
+     "required": false,
+     "type": "str"
+    },
     "logo": {
      "default": null,
      "kind": "option",
@@ -21,7 +31,7 @@
      "opts": [
       "--logo"
      ],
-     "required": true,
+     "required": false,
      "type": "str"
     },
     "mode": {

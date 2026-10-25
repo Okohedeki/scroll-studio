@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- A made-up logo for tests/test_brand_from.py: a green bean and a sun. -->
+  <circle cx="44" cy="20" r="12" fill="#f2a541"/>
+  <ellipse cx="28" cy="38" rx="16" ry="22" fill="#0b6e4f"/>
+  <path d="M28 18 C 22 30, 34 46, 28 58" stroke="#fbf7ef" stroke-width="3" fill="none"/>
+</svg>
