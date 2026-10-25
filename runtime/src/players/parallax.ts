@@ -8,6 +8,7 @@
  */
 import type { PlayerFactory } from "../lib/types";
 import { clamp, easeInOut, loadImage, reducedMotion, smooth } from "../lib/util";
+import { baseGlsl, POINTER_GLSL, pointerEnv, readPointer, trackPointer, uniforms as pointerUniforms, type PointerCfg } from "../lib/pointer";
 import { WORLD_GLSL } from "../lib/worldGlsl";
 import { contrastWith, inkFor, layout, PAD, probeStyle, rasterize, type Layout, type WorldStyle } from "../lib/worldText";
 
@@ -15,12 +16,19 @@ const VS = `#version 300 es
 in vec2 p; out vec2 uv;
 void main(){ uv = vec2(p.x * .5 + .5, .5 - p.y * .5); gl_Position = vec4(p, 0., 1.); }`;
 
-const FS = `#version 300 es
+// pointer (lib/pointer.ts): PTR_MODE 0 none, 1 lens, 2 light; PTR_LAYER 1 the photo's colour through `base`, 2 a second picture
+const fragment = (ptr: PointerCfg | null) => `#version 300 es
 precision highp float;
 in vec2 uv; out vec4 o;
 #define PAD ${PAD.toFixed(3)}
+#define PTR_MODE ${ptr ? (ptr.mode === "light" ? 2 : 1) : 0}
+#define PTR_LAYER ${ptr?.layer === "picture" ? 2 : 1}
+#define RELIEF 0.08
 ${WORLD_GLSL}
-uniform sampler2D imgA, depA, imgB, depB, mskA, mskB, uText;
+${ptr ? POINTER_GLSL : ""}
+${ptr ? `vec3 ptrBase(vec3 c, vec3 bl) { return ${baseGlsl(ptr.base)}; }` : ""}
+uniform sampler2D imgA, depA, imgB, depB, mskA, mskB, uText, layA, layB;
+uniform float hasLayA, hasLayB;
 uniform vec2 scaleA, scaleB;      // cover-fit uv scale per image
 uniform vec3 camA, camB;          // x, y offset and zoom per chapter
 uniform float mixAB, strength, focusA, focusB;
@@ -31,7 +39,7 @@ uniform int uKindT[2];
 uniform mat3 uMT[2];
 uniform vec4 uBoxT[2], uCellT[2], uAT[2], uBT[2];
 
-vec3 sampleView(sampler2D img, sampler2D dep, sampler2D msk, vec2 sc, vec3 cam, float focus, int v){
+vec3 sampleView(sampler2D img, sampler2D dep, sampler2D msk, sampler2D lay, float hasLay, vec2 sc, vec3 cam, float focus, int v){
   vec2 c = (uv - .5) / (sc * cam.z) + .5;
   vec2 dir = cam.xy * strength;
   // solve uv' + (d(uv') - focus) * dir = c by fixed-point iteration: near pixels move further
@@ -61,11 +69,30 @@ vec3 sampleView(sampler2D img, sampler2D dep, sampler2D msk, vec2 sc, vec3 cam, 
       else col = worldSurface(col, ink, cov, col, near, locl, pl, texture(msk, q).r, uBT[v], uOnT[v], uInT[v], lc.x);
     }
   }
+#if PTR_MODE == 1
+  // the lens: the second layer through a soft circle under the pointer (on screen), sampled through the same depth warp as
+  // the photo so it lines up whatever the camera does; outside it, the photo in the base look
+  float lm = ptrLens(uv) * uPtrStr;
+  vec3 outside = ptrBase(col, ${ptr?.base === "blur" ? "textureLod(img, q, 3.5).rgb" : "col"});
+#if PTR_LAYER == 2
+  col = hasLay > 0.5 ? ptrRim(mix(outside, texture(lay, q).rgb, lm), uv) : outside;
+#else
+  col = ptrRim(mix(outside, col, lm), uv);
+#endif
+#elif PTR_MODE == 2
+  // the torch: the depth map's gradient is the surface's slope, in picture heights (x scaled by the photo's aspect)
+  // (read a little blurred, from a smaller mip, so the light follows the big shapes and not the depth map's steps)
+  vec2 ts = 4.0 / vec2(textureSize(dep, 0));
+  float gx = textureLod(dep, q + vec2(ts.x, 0.0), 1.5).r - textureLod(dep, q - vec2(ts.x, 0.0), 1.5).r;
+  float gy = textureLod(dep, q + vec2(0.0, ts.y), 1.5).r - textureLod(dep, q - vec2(0.0, ts.y), 1.5).r;
+  vec2 grad = vec2(gx / (2.0 * ts.x) / (sc.x / sc.y * uPtrAsp), gy / (2.0 * ts.y)) * RELIEF;
+  col = ptrLight(col, uv, texture(dep, q).r, grad);
+#endif
   return col;
 }
 void main(){
-  vec3 a = sampleView(imgA, depA, mskA, scaleA, camA, focusA, 0);
-  vec3 b = mixAB > 0.001 ? sampleView(imgB, depB, mskB, scaleB, camB, focusB, 1) : a;
+  vec3 a = sampleView(imgA, depA, mskA, layA, hasLayA, scaleA, camA, focusA, 0);
+  vec3 b = mixAB > 0.001 ? sampleView(imgB, depB, mskB, layB, hasLayB, scaleB, camB, focusB, 1) : a;
   vec3 c = mix(a, b, mixAB);
   float v = smoothstep(1.15, .35, length((uv - .5) * vec2(1.1, 1.)));
   o = vec4(c * mix(1., v, grade), 1.);
@@ -100,12 +127,13 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   ctx.visual.appendChild(canvas);
   const gl = canvas.getContext("webgl2", { antialias: false, preserveDrawingBuffer: true });
   if (!gl) throw new Error("no webgl2");
-  const chapters: { img: WebGLTexture; dep: WebGLTexture; msk: WebGLTexture; w: number; h: number; focus: number; move: string }[] = [];
+  const ptr = readPointer(ctx.section, cfg);
+  const chapters: { img: WebGLTexture; dep: WebGLTexture; msk: WebGLTexture; lay: WebGLTexture | null; w: number; h: number; focus: number; move: string }[] = [];
 
   const sh = (type: number, src: string) => { const s = gl.createShader(type)!; gl.shaderSource(s, src); gl.compileShader(s);
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) || "shader"); return s; };
   const prog = gl.createProgram()!;
-  gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS));
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fragment(ptr)));
   gl.linkProgram(prog); gl.useProgram(prog);
   gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
@@ -115,9 +143,14 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   const u = { imgA: U("imgA"), depA: U("depA"), imgB: U("imgB"), depB: U("depB"), scaleA: U("scaleA"), scaleB: U("scaleB"),
     camA: U("camA"), camB: U("camB"), mixAB: U("mixAB"), strength: U("strength"), focusA: U("focusA"), focusB: U("focusB"), grade: U("grade"),
     mskA: U("mskA"), mskB: U("mskB"), uText: U("uText"), on: U("uOnT[0]"), inn: U("uInT[0]"), kind: U("uKindT[0]"), m: U("uMT[0]"),
-    box: U("uBoxT[0]"), cell: U("uCellT[0]"), A: U("uAT[0]"), B: U("uBT[0]") };
+    box: U("uBoxT[0]"), cell: U("uCellT[0]"), A: U("uAT[0]"), B: U("uBT[0]"),
+    hasLayA: U("hasLayA"), hasLayB: U("hasLayB"), ptrC: U("uPtrC"), ptrR: U("uPtrR"), ptrAsp: U("uPtrAsp") };
   gl.uniform1i(u.imgA, 0); gl.uniform1i(u.depA, 1); gl.uniform1i(u.imgB, 2); gl.uniform1i(u.depB, 3);
   gl.uniform1i(u.mskA, 4); gl.uniform1i(u.mskB, 5); gl.uniform1i(u.uText, 6);
+  gl.uniform1i(U("layA"), 7); gl.uniform1i(U("layB"), 8);
+  if (ptr) {
+    gl.uniform1f(U("uPtrSoft"), ptr.softness); gl.uniform1f(U("uPtrStr"), ptr.strength); gl.uniform3fv(U("uPtrCol"), ptr.color);
+  }
 
   function texture(im: HTMLImageElement | null) {
     const t = gl!.createTexture()!;
@@ -133,8 +166,11 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   }
   let loaded = 0;
   await Promise.all(cfg.chapters.map(async (ch: any, i: number) => {
-    const [im, dp, mk] = await Promise.all([loadImage(ch.image), loadImage(ch.depth), ch.world?.mask ? loadImage(ch.world.mask) : Promise.resolve(null)]);
-    chapters[i] = { img: texture(im), dep: texture(dp), msk: texture(mk), w: im.naturalWidth, h: im.naturalHeight, focus: ch.focus ?? 0.5, move: ch.move || cfg.move || "dolly" };
+    const layer = ptr?.layer === "picture" ? ptr.layers[i] : null;     // the lens's second picture for this photo, if any
+    const [im, dp, mk, ly] = await Promise.all([loadImage(ch.image), loadImage(ch.depth), ch.world?.mask ? loadImage(ch.world.mask) : Promise.resolve(null),
+      layer ? loadImage(layer).catch(() => null) : Promise.resolve(null)]);
+    chapters[i] = { img: texture(im), dep: texture(dp), msk: texture(mk), lay: ly ? texture(ly) : null, w: im.naturalWidth, h: im.naturalHeight,
+      focus: ch.focus ?? 0.5, move: ch.move || cfg.move || "dolly" };
     ctx.progress(++loaded / cfg.chapters.length);
   }));
 
@@ -216,7 +252,13 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     cw = canvas.width = Math.max(1, Math.round(r.width * dpr)); ch = canvas.height = Math.max(1, Math.round(r.height * dpr));
     gl!.viewport(0, 0, cw, ch);
     fits();
+    drawn = "";            // resizing clears the canvas: the next update draws whatever it is
+    track?.dirty();
   }
+  // the pointer's lens or light (lib/pointer.ts): it moves only when the pointer does, and the canvas is redrawn only then
+  const track = ptr ? trackPointer(canvas, { rest: ptr.rest, radius: ptr.radius }, pointerEnv()) : null;
+  const white = texture(null);
+  let drawn = "";
   resize();
   (((window as any).__ssWorld ||= {}) as Record<string, any>).live = live;
 
@@ -245,6 +287,7 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   return {
     resize,
     update(s) {
+      track?.update(s.t);
       // chapter c plays across step steps[c]; the next chapter fades in over the first 18% of its step
       let c = 0;
       for (let k = 0; k < steps.length; k++) if ((s.steps[steps[k]] ?? 0) > 0) c = k;
@@ -261,7 +304,17 @@ const factory: PlayerFactory = async (cfg, ctx) => {
       };
       const a = B && fade >= 1 ? B : A || B!, b = B || A!;
       const ka = a === B ? c : prev;
+      // nothing changed since the last frame (the scroll and the pointer are still): the canvas keeps what it shows
+      const key = `${ka}|${c}|${local.toFixed(4)}|${fade.toFixed(4)}|${px.toFixed(4)}|${py.toFixed(4)}|${track ? track.pos.join(",") : ""}`;
+      if (key === drawn) return;
+      drawn = key;
       bind(0, a.img); bind(1, a.dep); bind(2, b.img); bind(3, b.dep); bind(4, a.msk); bind(5, b.msk);
+      bind(7, a.lay || white); bind(8, b.lay || white);
+      gl.uniform1f(u.hasLayA, a.lay ? 1 : 0); gl.uniform1f(u.hasLayB, b.lay ? 1 : 0);
+      if (track && ptr) {
+        const pu = pointerUniforms(track.pos, ptr.radius, canvas.getBoundingClientRect(), null);
+        gl.uniform2fv(u.ptrC, pu.centre); gl.uniform1f(u.ptrR, pu.radius); gl.uniform1f(u.ptrAsp, pu.aspect);
+      }
       gl.uniform2fv(u.scaleA, cover(a)); gl.uniform2fv(u.scaleB, cover(b));
       gl.uniform3fv(u.camA, camFor(ka, ka === c ? local : 1));
       gl.uniform3fv(u.camB, camFor(c, local));

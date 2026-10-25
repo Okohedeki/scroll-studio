@@ -7,16 +7,21 @@
  * of a 2x2 grid) encoded with the same frame rate, frame count and GOP. A seek is issued to both at the middle of the same
  * frame, and the canvas is only drawn when BOTH have landed, so a mask frame is never drawn over a different film frame.
  * Returns null when WebGL2 is unavailable (the caller then plays the colour film as it is).
+ *
+ * The pointer (`pointer:` on the film, lib/pointer.ts) is drawn in the same pass: a lens brings the film's colour in under the
+ * pointer as well as in the regions, a light darkens the film and follows the pointer with a pool of warm light. A film with
+ * a pointer and no reveal plays through here too, with no regions.
  */
 import type { PlayerContext, Player } from "../lib/types";
 import { clamp, follow, hexToRgb, isMobile, reducedMotion } from "../lib/util";
 import { fetchBlobURL } from "../lib/util";
 import { amountsAt, type RevealKey } from "../lib/revealKeys";
+import { POINTER_GLSL, pointerEnv, readPointer, trackPointer, uniforms as pointerUniforms, type PointerCfg } from "../lib/pointer";
 
 interface MaskVideo { video: string; mobile?: string; regions: string[]; cols: number; rows: number; tile: [number, number] }
 interface Cfg {
-  video: string; videoMobile?: string;
-  reveal: { base: string; strength: number; ease: string; regions: string[]; keys: RevealKey[]; feather: number; masks: MaskVideo[]; fps: number };
+  video: string; videoMobile?: string; fps?: number;
+  reveal?: { base: string; strength: number; ease: string; regions: string[]; keys: RevealKey[]; feather: number; masks: MaskVideo[]; fps: number };
 }
 
 const VERT = `#version 300 es
@@ -24,7 +29,8 @@ in vec2 aPos; out vec2 vUv;
 void main() { vUv = vec2(aPos.x * 0.5 + 0.5, 0.5 - aPos.y * 0.5); gl_Position = vec4(aPos, 0.0, 1.0); }`;
 
 /** The fragment shader for one reveal config: the base look, and one mask lookup per region (tile of an atlas). */
-function fragment(rv: Cfg["reveal"], tints: boolean): string {
+type RevealCfg = NonNullable<Cfg["reveal"]>;
+function fragment(rv: RevealCfg, tints: boolean, ptr: PointerCfg | null = null): string {
   const lines: string[] = [];
   let r = 0;
   rv.masks.forEach((m, g) => {
@@ -38,7 +44,8 @@ function fragment(rv: Cfg["reveal"], tints: boolean): string {
     });
   });
   const base = rv.base;
-  const baseCode = base === "mono" ? "vec3 b = vec3(lum(c));"
+  const baseCode = base === "none" ? "vec3 b = c;"
+    : base === "mono" ? "vec3 b = vec3(lum(c));"
     : base === "dim" ? "vec3 b = mix(c, vec3(lum(c)), 0.55) * 0.55;"
     : base === "blur" ? "vec3 b = blurred();"
     : "float l = lum(c); vec3 b = l < 0.5 ? uTint * (l * 2.0) : uTint + (1.0 - uTint) * (l * 2.0 - 1.0);";
@@ -52,6 +59,7 @@ uniform vec2 uInset[${Math.max(1, rv.masks.length)}];
 uniform float uAmt[${Math.max(1, rv.regions.length)}];
 uniform float uStrength; uniform vec3 uTint; uniform float uBlur; uniform vec2 uAspect;
 float lum(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }
+${ptr ? POINTER_GLSL : ""}
 vec3 blurred() {
   vec3 acc = texture(uFilm, vUv).rgb; float w = 1.0;
   for (int i = 0; i < 16; i++) {
@@ -67,7 +75,10 @@ void main() {
 ${lines.join("\n")}
   k *= uStrength;
   ${baseCode}
+${ptr?.mode === "lens" ? "  k = max(k, ptrLens(vUv) * uPtrStr);" : ""}
   o = vec4(mix(b, c, k), 1.0);
+${ptr?.mode === "lens" ? "  o.rgb = ptrRim(o.rgb, vUv);" : ""}
+${ptr?.mode === "light" ? "  o.rgb = ptrLight(o.rgb, vUv, 1.0, vec2(0.0));" : ""}
 }`;
 }
 
@@ -95,7 +106,9 @@ async function load(v: HTMLVideoElement, url: string, onProgress: (f: number) =>
 }
 
 export default async function reveal(cfg: Cfg, ctx: PlayerContext): Promise<Player | null> {
-  const rv = cfg.reveal;
+  const ptr = readPointer(ctx.section, cfg, cfg.reveal?.base);
+  // a film with a pointer and no reveal: no regions, the base look is the pointer's (a light shows the film as it is)
+  const rv: RevealCfg = cfg.reveal ?? { base: ptr?.base ?? "none", strength: 1, ease: "smooth", regions: [], keys: [], feather: 0, masks: [], fps: cfg.fps ?? 24 };
   const canvas = document.createElement("canvas");
   const gl = canvas.getContext("webgl2", { alpha: false, antialias: false, powerPreference: "high-performance" });
   if (!gl) return null;
@@ -122,7 +135,7 @@ export default async function reveal(cfg: Cfg, ctx: PlayerContext): Promise<Play
   try {
     prog = gl.createProgram()!;
     gl.attachShader(prog, compile(gl, gl.VERTEX_SHADER, VERT));
-    gl.attachShader(prog, compile(gl, gl.FRAGMENT_SHADER, fragment(rv, rv.base[0] === "#")));
+    gl.attachShader(prog, compile(gl, gl.FRAGMENT_SHADER, fragment(rv, rv.base[0] === "#", ptr)));
     gl.linkProgram(prog);
     if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog) || "link failed");
   } catch (err) {
@@ -164,6 +177,14 @@ export default async function reveal(cfg: Cfg, ctx: PlayerContext): Promise<Play
   gl.uniform1f(gl.getUniformLocation(prog, "uBlur"), 0.012);
   gl.uniform2f(gl.getUniformLocation(prog, "uAspect"), 1, w0 / h0);
   ctx.visual.appendChild(canvas);
+  // the pointer: the canvas is the film's size shown with object-fit: cover, so the lens is mapped through that
+  const track = ptr ? trackPointer(canvas, { rest: ptr.rest, radius: ptr.radius }, pointerEnv()) : null;
+  const uPtr = { c: gl.getUniformLocation(prog, "uPtrC"), r: gl.getUniformLocation(prog, "uPtrR"), asp: gl.getUniformLocation(prog, "uPtrAsp") };
+  if (ptr) {
+    gl.uniform1f(gl.getUniformLocation(prog, "uPtrSoft"), ptr.softness);
+    gl.uniform1f(gl.getUniformLocation(prog, "uPtrStr"), ptr.strength);
+    gl.uniform3fv(gl.getUniformLocation(prog, "uPtrCol"), ptr.color);
+  }
 
   const ids = rv.regions;
   const amt = new Float32Array(Math.max(1, ids.length));
@@ -179,6 +200,10 @@ export default async function reveal(cfg: Cfg, ctx: PlayerContext): Promise<Play
   function draw(a: Record<string, number>) {
     ids.forEach((id, i) => { amt[i] = a[id] ?? 0; });
     gl!.uniform1fv(uAmt, amt);
+    if (track && ptr) {
+      const pu = pointerUniforms(track.pos, ptr.radius, canvas.getBoundingClientRect(), { w: canvas.width, h: canvas.height });
+      gl!.uniform2fv(uPtr.c, pu.centre); gl!.uniform1f(uPtr.r, pu.radius); gl!.uniform1f(uPtr.asp, pu.aspect);
+    }
     gl!.drawArrays(gl!.TRIANGLES, 0, 3);
     drawnAmt = Array.from(amt).join(",");
   }
@@ -219,14 +244,16 @@ export default async function reveal(cfg: Cfg, ctx: PlayerContext): Promise<Play
 
   let current = 0;
   return {
+    resize() { track?.dirty(); },
     update(s) {
+      const moved = track ? track.update(s.t) : false;
       amounts = amountsAt(rv.keys, ids, s.p, rv.ease, reducedMotion);
       const target = s.p * (frames - 1) / fps;
       current += (target - current) * follow;
       const fi = clamp(Math.round(current * fps), 0, frames - 1);
       debug.p = s.p; debug.amounts = amounts;
       if (fi !== shown && !busy) seek(fi);
-      else if (!busy && ids.map((id) => Math.fround(amounts[id] ?? 0)).join(",") !== drawnAmt) draw(amounts);
+      else if (!busy && (moved || ids.map((id) => Math.fround(amounts[id] ?? 0)).join(",") !== drawnAmt)) draw(amounts);
     },
   };
 }
