@@ -6,8 +6,9 @@ recipe in two halves:
   * prompt words for Z-Image Turbo (what the picture is made of, its inks named in words), added where `imagery:` is
     added to every prompt (engine/imagery.py), and
   * a deterministic post-process over the generated still (numpy + OpenCV, CPU, seconds), which is what makes a page
-    read as one hand: risograph is separated into two inks, posterised, grained and misregistered; toile and engraving
-    are printed in one ink on paper; halftone is a real dot screen; gouache is flattened into a few matte colours.
+    read as one hand: risograph is separated into two inks, its tints screened by grain and one drum misregistered;
+    toile and engraving are printed in one ink on paper; halftone is a real dot screen; gouache is flattened into
+    matte shapes; watercolour pools on its paper; ink is brush work with washes in the accent.
 
 The inks come from the theme (`theme.from` brand tokens included): a toile is printed in the brand's accent, a
 risograph in accent and accent2, an engraving in the text colour. `imagery.inks` / `imagery.paper` override them.
@@ -50,7 +51,8 @@ RECIPES: dict[str, Recipe] = {r.name: r for r in (
            0.6, ("accent", "accent2")),
     Recipe("toile",
            "Toile de Jouy illustration, single-colour copperplate engraving printed in {inks} on {paper} cotton, fine "
-           "line hatching, delicate pastoral scene, monochrome, the picture fills the whole canvas to every edge, no border, no frame, no text",
+           "line hatching, delicate pastoral scene, monochrome, the picture fills the whole canvas to every edge, "
+           "no border, no frame, no text",
            0.35, ("accent",)),
     Recipe("engraving",
            "Antique copper engraving, intaglio etching, fine crosshatching and parallel line shading, {inks} ink on "
@@ -70,8 +72,8 @@ RECIPES: dict[str, Recipe] = {r.name: r for r in (
            "{inks} on {paper}, vintage print, the picture fills the whole canvas to every edge, no border, no text",
            0.25, ("dark", "accent")),
     Recipe("ink",
-           "Brush and ink drawing, bold sumi ink line work and solid fills, dry brush texture, ink washes, on {paper} "
-           "paper, minimal, full-bleed, no border, no seal, no signature, no text",
+           "Brush and ink drawing, bold sumi ink line work and solid fills, dry brush texture, ink washes in {inks}, "
+           "on {paper} paper, minimal, full-bleed, no border, no seal, no signature, no text",
            0.3, ("dark", "accent")),
 )}
 NAMES = tuple(RECIPES)
@@ -147,8 +149,7 @@ def _ink_on(c, paper, least: float) -> tuple[int, int, int]:
     return col
 
 
-def palette(name: str, colors: dict, mode: Optional[str] = None, inks: Optional[list] = None,
-            paper: Optional[str] = None) -> dict:
+def palette(name: str, colors: dict, inks: Optional[list] = None, paper: Optional[str] = None) -> dict:
     """{'paper': rgb, 'inks': [rgb, ...]} the medium prints with, from the theme's resolved colours.
 
     Roles: accent and accent2 are the brand's colours; dark is the darker of the text and the background (the text on
@@ -233,9 +234,11 @@ def prompt_head(name: str, pal: Optional[dict] = None) -> str:
 
 CALM_WORDS = {
     "left": "The main subject sits in the right third of the picture; the whole left half is open, quiet space, one "
-            "flat even colour with nothing in it and no gradient (plain sky or empty ground), the horizon low",
+            "flat even colour with nothing in it and no gradient (plain sky or empty ground); the horizon and the "
+            "ground stay in the bottom fifth of the picture",
     "right": "The main subject sits in the left third of the picture; the whole right half is open, quiet space, one "
-            "flat even colour with nothing in it and no gradient (plain sky or empty ground), the horizon low",
+             "flat even colour with nothing in it and no gradient (plain sky or empty ground); the horizon and the "
+             "ground stay in the bottom fifth of the picture",
     "center": "The subject stays small near the edges and the bottom; the middle of the picture is open, quiet space, "
               "one flat even colour with nothing in it",
     "top": "The main subject sits in the lower third; the upper half is open, quiet sky, one flat even colour",
@@ -279,9 +282,10 @@ def _grain_field(shape, seed: int, salt: int) -> np.ndarray:
 
 
 def _shift(a: np.ndarray, dx: float, dy: float) -> np.ndarray:
+    """`a` moved by whole pixels (a drum is off register by whole pixels; no new tints at the edges)."""
     import cv2
-    m = np.float32([[1, 0, dx], [0, 1, dy]])
-    return cv2.warpAffine(a, m, (a.shape[1], a.shape[0]), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+    m = np.float32([[1, 0, round(dx)], [0, 1, round(dy)]])
+    return cv2.warpAffine(a, m, (a.shape[1], a.shape[0]), flags=cv2.INTER_NEAREST, borderMode=cv2.BORDER_REPLICATE)
 
 
 def _f(c) -> np.ndarray:
@@ -294,7 +298,9 @@ def _luma(img: np.ndarray) -> np.ndarray:
 
 def _levels(lum: np.ndarray, lo_pct: float = 1, hi_pct: float = 99) -> np.ndarray:
     lo, hi = np.percentile(lum, [lo_pct, hi_pct])
-    return np.clip((lum - lo) / max(1e-3, hi - lo), 0, 1)
+    if hi - lo < 0.15:              # a nearly flat picture keeps its tone instead of being stretched to black or white
+        return np.clip(lum, 0, 1)
+    return np.clip((lum - lo) / (hi - lo), 0, 1)
 
 
 def _smooth(e0: float, e1: float, x: np.ndarray) -> np.ndarray:
@@ -311,44 +317,34 @@ def _print(paper, layers: list[tuple[np.ndarray, tuple]]) -> np.ndarray:
     return out
 
 
-def separate(img: np.ndarray, paper, inks: list) -> list[np.ndarray]:
-    """How much of each ink (0-1) a picture needs at every pixel, so the inks printed on the paper come closest to it
-    (least squares in optical density, inks never negative)."""
-    eps = 1 / 255
-    pap = np.maximum(_f(paper), eps)
-    od = -np.log(np.clip(img, eps, 1) / pap)                         # H, W, 3
-    m = np.stack([-np.log(np.clip(_f(i) / pap, eps, 1)) for i in inks], 1)   # 3, k
-    m = np.maximum(m, 1e-3)
-    if len(inks) == 1:
-        d = (od @ m[:, 0]) / float(m[:, 0] @ m[:, 0])
-        return [np.clip(d, 0, 1)]
-    flat = od.reshape(-1, 3)
-    d = flat @ np.linalg.pinv(m).T                                    # unconstrained
-    for i in range(len(inks)):                                        # a negative ink: solve without it
-        neg = d[:, i] < 0
-        if neg.any():
-            rest = [j for j in range(len(inks)) if j != i]
-            sub = m[:, rest]
-            d[neg] = 0
-            d[np.ix_(neg, rest)] = flat[neg] @ np.linalg.pinv(sub).T
-    d = np.clip(d, 0, 1)
-    # darker than the inks it was matched with: the other inks overprint to reach it (navy roofs on a blue sky stay
-    # roofs, printed blue over pink, instead of vanishing into the sky)
-    target = _luma(np.clip(img, 0, 1)).reshape(-1)
-    inkf = [_f(i) for i in inks]
-    for _ in range(2):
-        cov = np.ones((len(flat), 3), np.float32) * _f(paper)
-        for j, c in enumerate(inkf):
-            cov *= 1 - d[:, j:j + 1] * (1 - c)
-        lum = _luma(cov)
-        short = np.clip(lum - target, 0, None)              # how much darker the picture is than the print
-        for j, c in enumerate(inkf):
-            drop = max(1e-3, float(_luma((1 - c)[None])[0]))  # what a full layer of this ink takes off
-            room = 1 - d[:, j]
-            add = np.minimum(room, short / drop) * (short > 0.06)
-            d[:, j] += add
-            short = np.clip(short - add * drop * lum, 0, None)
-    return [d[:, i].reshape(img.shape[:2]) for i in range(len(inks))]
+def separate(img: np.ndarray, paper, inks: list, overlap: float = 6.0) -> list[np.ndarray]:
+    """How much of each ink (0-1) a picture needs at every pixel: the printable mix of the inks on the paper (each ink
+    in steps of a tenth) that looks closest to the pixel (CIELAB), where laying one ink over another costs `overlap`
+    units of colour difference times the smaller of the two. So a flat tint prints in one ink, as a printer would set
+    it, and two inks meet only where the picture needs their mix (a blend, a dark overprint)."""
+    import cv2
+    from skimage.color import rgb2lab
+    k = len(inks)
+    steps = {1: 21, 2: 11, 3: 6}.get(k, 4)
+    grid = np.stack(np.meshgrid(*[np.linspace(0, 1, steps)] * k, indexing="ij"), -1).reshape(-1, k).astype(np.float32)
+    mix = np.ones((len(grid), 3), np.float32) * _f(paper)
+    for j in range(k):
+        mix *= 1 - grid[:, j:j + 1] * (1 - _f(inks[j]))
+    lab_mix = rgb2lab(mix[None])[0].astype(np.float32)
+    srt = np.sort(grid, 1)
+    cost_mix = overlap * srt[:, :-1].sum(1) if k > 1 else np.zeros(len(grid), np.float32)
+    h, w = img.shape[:2]
+    small = cv2.resize(img, (max(1, w // 2), max(1, h // 2)), interpolation=cv2.INTER_AREA) if w > 64 else img
+    lab = rgb2lab(np.clip(small, 0, 1)).reshape(-1, 3).astype(np.float32)
+    best = np.empty(len(lab), np.int32)
+    for s in range(0, len(lab), 65536):                                # in chunks, to bound memory
+        part = lab[s:s + 65536]
+        dist = np.sqrt(((part[:, None, :] - lab_mix[None]) ** 2).sum(-1)) + cost_mix[None]
+        best[s:s + 65536] = np.argmin(dist, 1)
+    d = grid[best].reshape(small.shape[0], small.shape[1], k)
+    if small is not img:
+        d = cv2.resize(d, (w, h), interpolation=cv2.INTER_LINEAR).reshape(h, w, k)
+    return [np.clip(d[..., j], 0, 1) for j in range(k)]
 
 
 # ---------------------------------------------------------------- the post-processes (float RGB 0-1 in and out)
@@ -429,8 +425,10 @@ def screen(d: np.ndarray, period: float, angle: float) -> np.ndarray:
     u = (x * np.cos(a) + y * np.sin(a)) / period
     v = (-x * np.sin(a) + y * np.cos(a)) / period
     spot = (np.cos(2 * np.pi * u) + np.cos(2 * np.pi * v)) / 2
-    t = 1 - 2 * _blur(d, period / 3)
-    return np.clip((spot - t) / (2 * np.pi / period) + 0.5, 0, 1)
+    db = _blur(d, period / 3)
+    t = 1 - 2 * db
+    cov = np.clip((spot - t) / (2 * np.pi / period) + 0.5, 0, 1)
+    return cov * np.clip(db * 40, 0, 1)            # no tone, no dot (not even the anti-aliased half pixel)
 
 
 def halftone(img, pal, seed=7, grain=0.25, period: Optional[float] = None):
@@ -442,7 +440,7 @@ def halftone(img, pal, seed=7, grain=0.25, period: Optional[float] = None):
     lum = _levels(_luma(img), 1, 99)
     hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
     chroma = hsv[..., 1] * hsv[..., 2]                                # saturated and not dark
-    dark = _smooth(0.18, 1.0, 1 - lum) ** 1.15
+    dark = 0.9 * _smooth(0.18, 1.0, 1 - lum) ** 1.15        # the darkest shadow keeps small holes: still a screen
     dens = [dark] + [np.clip(_smooth(0.12, 0.7, chroma) * (1 - dark) * 0.85, 0, 1)] * (len(pal["inks"]) - 1)
     angles = [45, 15, 75, 0]
     layers = [(screen(_smooth(0.04, 0.96, d), period, angles[i % 4]), ink_)
@@ -488,8 +486,10 @@ def watercolour(img, pal, seed=7, grain=0.5):
     h, w = img.shape[:2]
     white = np.maximum(np.percentile(img.reshape(-1, 3), 99.5, axis=0), 0.5)
     dens = np.clip(1 - img / white, 0, 1)                            # pigment per channel
+    bare = dens.max(-1) < 0.03                                       # untouched paper stays the paper
     flat = _harmonise((1 - dens).reshape(-1, 3), pal, 0.25).reshape(h, w, 3)
     dens = 1 - flat
+    dens[bare] = 0
     edge = np.clip(dens - _blur(dens, w / 400), 0, 1)                # pooled at the inside of a wash's edge
     dens = np.clip(dens + 0.7 * edge, 0, 1)
     if grain > 0:
@@ -612,12 +612,12 @@ def site_palette(project, name: str, im=None) -> dict:
     try:
         site = project.load()
         t = themes.resolve(site.theme)
-        colors, mode = t["colors"], t["mode"]
+        colors = t["colors"]
     except Exception:          # a spec that does not load is reported by the build; the medium still has its defaults
-        colors, mode = {}, None
+        colors = {}
     inks = getattr(im, "inks", None) or None
     paper = getattr(im, "paper", None)
-    return palette(name, colors, mode, inks, paper)
+    return palette(name, colors, inks, paper)
 
 
 def key(name: str, pal: dict, grain: Optional[float], calm_side: Optional[str]) -> list:
