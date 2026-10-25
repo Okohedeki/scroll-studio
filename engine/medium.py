@@ -140,11 +140,13 @@ RISO_INKS = {"fluorescent pink": (255, 72, 176), "yellow": (255, 232, 0), "orang
 
 
 def _ink_on(c, paper, least: float) -> tuple[int, int, int]:
-    """`c`, darkened just enough to stand `least` contrast against `paper` (a pale ink would vanish)."""
+    """`c`, darkened just enough to stand `least` contrast against `paper` (a pale ink would vanish); on a dark paper a
+    light ink is lightened instead (a dark one is left alone: it is not the medium's main ink there)."""
     h, l, s = _hls(c)
     col = rgb(c)
-    while contrast(col, paper) < least and l > 0.05:
-        l -= 0.03
+    up = _lum(col) > _lum(paper)
+    while contrast(col, paper) < least and (0.05 < l < 0.95):
+        l += 0.03 if up else -0.03
         col = _from_hls(h, l, s)
     return col
 
@@ -308,12 +310,26 @@ def _smooth(e0: float, e1: float, x: np.ndarray) -> np.ndarray:
     return t * t * (3 - 2 * t)
 
 
+def negative(pal: dict) -> bool:
+    """A light main ink on a darker paper (`imagery.paper: bg` on a dark site): the print is a negative, so the inks
+    go where the picture is light, as a screen print in opaque light inks on dark stock does."""
+    return _lum(pal["inks"][0]) > _lum(pal["paper"])
+
+
+def _lay(out: np.ndarray, cov: np.ndarray, ink, paper) -> np.ndarray:
+    """One ink laid over what is printed so far. An ink darker than the paper multiplies (transparent riso and
+    letterpress inks); one lighter than the paper is opaque and covers it, since multiplied it would vanish."""
+    c = _f(ink)
+    if _lum(ink) > _lum(paper):
+        return out * (1 - cov) + c * cov
+    return out * (1 - cov * (1 - c))
+
+
 def _print(paper, layers: list[tuple[np.ndarray, tuple]]) -> np.ndarray:
-    """Inks overprinted on paper: each layer a coverage map (0-1) of one ink; inks multiply like transparent riso or
-    letterpress inks do."""
+    """Inks overprinted on paper: each layer a coverage map (0-1) of one ink (see _lay)."""
     out = np.ones(layers[0][0].shape + (3,), np.float32) * _f(paper)
     for cov, ink in layers:
-        out *= 1 - cov[..., None] * (1 - _f(ink))
+        out = _lay(out, cov[..., None], ink, paper)
     return out
 
 
@@ -329,7 +345,7 @@ def separate(img: np.ndarray, paper, inks: list, overlap: float = 6.0) -> list[n
     grid = np.stack(np.meshgrid(*[np.linspace(0, 1, steps)] * k, indexing="ij"), -1).reshape(-1, k).astype(np.float32)
     mix = np.ones((len(grid), 3), np.float32) * _f(paper)
     for j in range(k):
-        mix *= 1 - grid[:, j:j + 1] * (1 - _f(inks[j]))
+        mix = _lay(mix, grid[:, j:j + 1], inks[j], paper)
     lab_mix = rgb2lab(mix[None])[0].astype(np.float32)
     srt = np.sort(grid, 1)
     cost_mix = overlap * srt[:, :-1].sum(1) if k > 1 else np.zeros(len(grid), np.float32)
@@ -385,7 +401,8 @@ def mono(img, pal, seed=7, grain=0.35, contrast_=1.0, gamma=1.0):
     """One ink on paper, the picture's tone as how much ink (toile, engraving)."""
     h, w = img.shape[:2]
     lum = _levels(_luma(img), 0.5, 99.5) ** gamma
-    d = np.clip(0.5 + (1 - lum - 0.5) * contrast_, 0, 1)
+    tone = lum if negative(pal) else 1 - lum          # how much ink: the dark of the picture, or its light on dark stock
+    d = np.clip(0.5 + (tone - 0.5) * contrast_, 0, 1)
     if grain > 0:      # ink sits unevenly in the grain of the plate and the paper
         d = d * (1 - 0.12 * grain * _noise((h, w), seed, max(0.6, w / 2000), 3))
     out = _print(pal["paper"], [(d, pal["inks"][0])])
@@ -405,7 +422,8 @@ def engraving(img, pal, seed=7, grain=0.35):
 def ink(img, pal, seed=7, grain=0.3):
     """Black (the dark ink) where the brush is loaded, the washes in the accent: ink and one colour."""
     h, w = img.shape[:2]
-    d = 1 - _levels(_luma(img), 0.5, 99.5)
+    lum = _levels(_luma(img), 0.5, 99.5)
+    d = lum if negative(pal) else 1 - lum
     black = _smooth(0.42, 0.62, d)
     wash = np.clip(_smooth(0.06, 0.42, d) - black, 0, 1) * 0.8
     if grain > 0:
@@ -440,7 +458,8 @@ def halftone(img, pal, seed=7, grain=0.25, period: Optional[float] = None):
     lum = _levels(_luma(img), 1, 99)
     hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
     chroma = hsv[..., 1] * hsv[..., 2]                                # saturated and not dark
-    dark = 0.9 * _smooth(0.18, 1.0, 1 - lum) ** 1.15        # the darkest shadow keeps small holes: still a screen
+    tone = lum if negative(pal) else 1 - lum                          # on dark stock the light ink carries the light
+    dark = 0.9 * _smooth(0.18, 1.0, tone) ** 1.15           # the darkest shadow keeps small holes: still a screen
     dens = [dark] + [np.clip(_smooth(0.12, 0.7, chroma) * (1 - dark) * 0.85, 0, 1)] * (len(pal["inks"]) - 1)
     angles = [45, 15, 75, 0]
     layers = [(screen(_smooth(0.04, 0.96, d), period, angles[i % 4]), ink_)

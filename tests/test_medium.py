@@ -270,6 +270,32 @@ def test_ink_is_black_line_work_with_washes_in_the_accent():
     assert hue.max() > 0.15 and acc[2] > acc[0]
 
 
+DEEP = {"bg": "#16142b", "ink": "#efe7da", "accent": "#ff7a59", "accent2": "#8fb8ff"}
+
+
+@pytest.mark.parametrize("name", ["halftone", "engraving", "toile", "ink", "risograph"])
+def test_light_inks_on_a_dark_paper_print_a_negative(name):
+    """`imagery.paper: bg` on a dark site with light inks: the inks cover the paper where the picture is light (opaque,
+    as a screen print on dark stock), instead of multiplying into it and vanishing."""
+    pal = medium.palette(name, DEEP, inks=["ink", "accent"], paper="bg")
+    assert medium.negative(pal) and pal["paper"] == medium.rgb(DEEP["bg"])
+    img = Image.new("RGB", (480, 272), (8, 8, 12))
+    ImageDraw.Draw(img).ellipse((300, 40, 420, 160), fill=(250, 248, 240))         # a white moon on a black sky
+    out = np.asarray(medium.apply(img, name, pal, grain=0), np.float32)
+    sky, moon = out[200:260, 20:200].reshape(-1, 3).mean(0), out[80:120, 340:380].reshape(-1, 3).mean(0)
+    paper = np.array(pal["paper"], np.float32)
+    assert np.abs(sky - paper).max() < 12, name                      # the dark of the picture is the bare paper
+    assert medium._lum(tuple(moon)) > medium._lum(tuple(paper)) * 8 and moon.min() > 150, name   # its light is the light ink
+
+
+def test_a_light_paper_prints_as_it_always_did():
+    pal = medium.palette("halftone", BRAND)
+    assert not medium.negative(pal)
+    layers = [(np.full((4, 4), 0.5, np.float32), pal["inks"][0])]
+    want = np.array(pal["paper"], np.float32) / 255 * (1 - 0.5 * (1 - np.array(pal["inks"][0], np.float32) / 255))
+    assert np.allclose(medium._print(pal["paper"], layers)[0, 0], want)
+
+
 def test_gouache_and_watercolour_lean_toward_the_brand():
     from skimage.color import rgb2lab
     for name in ("gouache", "watercolour"):

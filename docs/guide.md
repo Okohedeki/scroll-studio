@@ -417,7 +417,7 @@ read as one hand:
 | `watercolour` | dark, accent, accent2 | The picture's white becomes the paper, pigment pools at the edge of each wash and granulates, colours lean toward the brand's |
 | `ink` | the dark and the accent | Black brush work where the ink is loaded, the washes in the accent |
 
-The paper is the theme's background when it is pale, else a warm off-white. A model asked for a print often draws the
+The paper is the theme's background when it is pale, else a warm off-white. On a dark site, `imagery.paper: bg` with light `inks` (`[ink, accent]`) prints on the dark itself: the print becomes a negative, the light inks laid opaque where the picture is light, like a screen print on dark stock (halftone, engraving, toile, ink and risograph). A model asked for a print often draws the
 sheet's margin too; it is cut away so the picture runs to the edges. Set the inks yourself with `imagery.inks` (#hex or
 theme roles: accent, accent2, ink, bg, bg2, dark) and `imagery.paper`; `imagery.grain` (0-1) sets how much paper and
 ink texture. The other `imagery:` parts (light, mood, palette in words) still apply.

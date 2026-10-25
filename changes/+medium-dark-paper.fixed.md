@@ -1,0 +1,1 @@
+A named medium printed on a dark paper (`imagery.paper: bg` on a dark site, with light `inks`) now prints a negative: the light inks cover the paper where the picture is light, as a screen print on dark stock, instead of multiplying into the paper and vanishing. Halftone, engraving, toile, ink and risograph all work on a deep colour.
