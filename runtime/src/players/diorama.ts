@@ -6,6 +6,7 @@
  * turns the view a little; reduced motion shows one still view per place; the page scrolls normally throughout.
  */
 import * as THREE from "three";
+import { readElements } from "../lib/elements";
 import type { PlayerFactory } from "../lib/types";
 import { cssVar, isMobile, reducedMotion } from "../lib/util";
 import type { DioramaCfg, Plan, PropRec } from "./diorama/types";
@@ -243,13 +244,14 @@ const factory: PlayerFactory = async (cfgIn, ctx) => {
   pinsEl.className = "ss-dio-pins";
   visual.appendChild(pinsEl);
   const stepEls = [...ctx.section.querySelectorAll<HTMLElement>(".ss-step, .ss-caption")];
+  const order = readElements(ctx.section, ctx.data).map((e) => e.step);     // page order -> step (lib/elements.ts)
   const pins = plan.places.map((pl, i) => {
     const b = document.createElement("button");
     b.type = "button"; b.className = "ss-dio-pin"; b.setAttribute("aria-label", `Go to ${pl.name}`);
     b.innerHTML = `<i>${i + 1}</i><span>${pl.name.replace(/</g, "&lt;")}</span>`;
     const si = plan.steps.findIndex((s) => s === i);
     b.addEventListener("click", () => {
-      const el = stepEls[si];
+      const el = stepEls[order.indexOf(si)];
       if (el) el.scrollIntoView({ block: "center", behavior: reducedMotion ? "auto" : "smooth" });
     });
     pinsEl.appendChild(b);

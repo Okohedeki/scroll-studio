@@ -189,6 +189,22 @@ describe("captions and the HUD", () => {
     expect(at(1)).toEqual(["✓", "Complete"]);
   });
 
+  it("progress follows the step whose caption is on, wherever the layout model put its caption in the page", async () => {
+    const h = { kind: "progress", scales: ["Getting ready"] };
+    const steps = [{ kicker: "Step 01", title: "Placed", length: 1 }, { kicker: "Step 02", title: "Left to the layout", length: 1 }];
+    // step 0 has its own place (`at`), so its caption comes after step 1's in the page (engine/layout.py in_order)
+    const layout = { elements: [{ step: 1, show: [0.4, 0.6] }, { step: 0, show: [0.1, 0.3] }] };
+    const inner = `<b data-pnum></b><b data-ptitle></b><div class="ss-caption" data-from="0.4" data-to="0.6"></div>
+      <div class="ss-captions ss-captions--top-right"><div class="ss-caption" data-from="0.1" data-to="0.3"></div></div>
+      <script type="application/json" class="ss-layout">${JSON.stringify(layout)}</script>`;
+    const f = await boot({ markup: scene({ data: { hud: hud(h), steps }, inner }), reduced: true });
+    box($("#s1"), 0, 5 * H);
+    await settle();
+    const at = (p: number) => { box($(".ss-track"), -p * 4 * H, 5 * H); f.step(); return [$("[data-pnum]").textContent, $("[data-ptitle]").textContent]; };
+    expect(at(0.2)).toEqual(["01", "Placed"]);
+    expect(at(0.5)).toEqual(["02", "Left to the layout"]);
+  });
+
   it("scale: the label interpolates in log space across the steps, unless the player sets its own", async () => {
     const h = { kind: "scale", scales: ["1 m", "100 m", "10 km"] };
     const steps = [{ title: "a", intro: true, length: 1 }, { title: "b", length: 1 }, { title: "c", length: 1 }];

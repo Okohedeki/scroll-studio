@@ -13,6 +13,7 @@
  *   - the section's colours (ink, accent, the shade behind captions) follow the sky.
  * Reduced motion: one still per step, no drift, no mist movement. No WebGL: the stills as images, one per step.
  */
+import { readElements } from "../lib/elements";
 import type { PlayerFactory } from "../lib/types";
 import { clamp, isMobile, lerp, loadImage, reducedMotion, smooth } from "../lib/util";
 
@@ -221,8 +222,7 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   };
 
   // each headline keeps the colours of its own time of day, so its ink never passes through grey while the light changes
-  const steps: any[] = ctx.data.steps || [];
-  const order = [...steps.map((_, i) => i).filter((i) => !steps[i].place), ...steps.map((_, i) => i).filter((i) => steps[i].place)];
+  const els = readElements(sec, ctx.data);          // which step each caption is, and its window (lib/elements.ts)
   const capEls = [...sec.querySelectorAll<HTMLElement>(".ss-caption")];
   const cardEls = [...sec.querySelectorAll<HTMLElement>(".ss-step")];
   const tint = (el: HTMLElement | undefined, ti: number) => {
@@ -233,11 +233,11 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     st.setProperty("--accent", `rgb(${rgbStr(T.accent)})`); st.setProperty("--accent-text", `rgb(${rgbStr(T.accent)})`); st.setProperty("--em-color", `rgb(${rgbStr(T.em)})`);
     st.setProperty("--line", `rgba(${rgbStr(T.ink)}, .14)`);
   };
-  capEls.forEach((el, k) => tint(el, cfg.stepTimes[order[k]] ?? 0));
+  capEls.forEach((el, k) => tint(el, cfg.stepTimes[els[k]?.step ?? k] ?? 0));
   cardEls.forEach((el, k) => tint(el, cfg.stepTimes[k] ?? 0));
 
   // the shade behind the text is there while a headline is: between headlines the picture is left bare
-  const wins: [number, number][] = steps.map((s) => (s.at ? [s.at[0], s.at[1]] : [0, 1]));
+  const wins: [number, number][] = els.map((e) => e.show);
   let lastShade = -1;
   const shade = (p: number) => {
     if (sec.dataset.layout === "cards" || (ctx.data as any).layout !== "overlay") return;
