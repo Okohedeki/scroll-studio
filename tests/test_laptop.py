@@ -68,7 +68,7 @@ def test_the_laptop_starter_builds_with_no_gpu_stack(laptop):
     assert r.exit_code == 0, r.output
     root = laptop / "my-site"
     site = Project(root).load()
-    assert site.theme.style in themes.styles()
+    assert site.theme.style is None, "brand first: the starter wears no style until the user picks one"
     types = [s.type for s in site.sections]
     assert {"type", "intro", "features", "stats", "cta"} <= set(types) and not set(types) & {"film", "sequence", "inside", "light"}
     out = compiler.build_site(Project(root), log=lambda m: None)
