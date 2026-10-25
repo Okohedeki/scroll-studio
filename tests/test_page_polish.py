@@ -599,3 +599,40 @@ def test_a_page_that_never_gets_ready_says_so(chromium, tmp_path, monkeypatch):
     monkeypatch.setattr(pw.Page, "wait_for_function", lambda self, expr, timeout=None, **k: orig(self, expr, timeout=500, **k))
     with pytest.raises(P.Nothing, match="never became ready"):
         P.inspect_page(Project(tmp_path), log=lambda m: None)
+
+
+def test_a_tall_overlay_caption_on_a_phone_stops_below_the_nav(chromium, tmp_path):
+    """An overlay caption is centred a quarter of the way down a phone; a tall one used to grow up under the nav."""
+    from playwright.sync_api import sync_playwright
+
+    from engine.compile import compiler, fonts
+    from engine.serve import serve
+    root = tmp_path / "site"
+    root.mkdir()
+    spec = {"name": "Tall", "theme": {"preset": "paper"}, "sections": [
+        {"id": "desk", "type": "diorama", "layout": "overlay", "world": {"kind": "desk", "seed": 4},
+         "places": [{"name": "Notebook", "kind": "notebook"}],
+         "steps": [{"intro": True, "at": "left", "kicker": "Kicker", "title": "A headline long enough to take three lines",
+                    "body": LONG, "button": {"label": "Go", "href": "#"}}]},
+        {"type": "cta", "title": "End"}]}
+    (root / "site.yaml").write_text(yaml.safe_dump(spec, sort_keys=False), encoding="utf-8")
+    saved = fonts.vendor
+    fonts.vendor = lambda links, dist, log=print: None
+    try:
+        compiler.build_site(Project(root), log=lambda m: None)
+    finally:
+        fonts.vendor = saved
+    httpd = serve(root / "dist", 0, background=True)
+    try:
+        with sync_playwright() as p:
+            b = p.chromium.launch()
+            page = b.new_page(viewport={"width": 390, "height": 844}, reduced_motion="reduce")
+            page.goto(f"http://127.0.0.1:{httpd.server_address[1]}/", wait_until="load")
+            page.wait_for_timeout(800)
+            nav = page.eval_on_selector(".ss-nav", "e => e.getBoundingClientRect().bottom")
+            top = page.eval_on_selector("#desk .ss-caption", "e => e.getBoundingClientRect().top")
+            b.close()
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+    assert top >= nav, f"the caption starts at {top:.0f}px, under the nav that ends at {nav:.0f}px"

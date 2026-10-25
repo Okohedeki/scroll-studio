@@ -593,6 +593,9 @@ html:not(.js) .ss-strip { overflow-x: auto; }
   .ss-telemetry { top: auto; bottom: 14vh; transform: none; width: 170px; }
   .ss-telemetry .ss-events { display: none; }
   .ss-captions { top: 26%; }
+  /* a caption centred on that line grows both ways: a tall one stops at the nav instead of running up under it */
+  .ss-captions:not(:is(.ss-captions--top, .ss-captions--bottom, .ss-captions--box, .ss-captions--grid, .ss-captions--top-left,
+    .ss-captions--top-right, .ss-captions--bottom-left, .ss-captions--bottom-right)) > .ss-caption { transform: translateY(max(-50%, calc(96px - 26svh))); }
   .ss-overlay .ss-shade { background: linear-gradient(to bottom, rgba(var(--bg-rgb), .75), transparent 55%), linear-gradient(to top, rgba(var(--bg-rgb), .7), transparent 30%); }
   .ss-split-grid { grid-template-columns: 1fr; }
   .ss-split .ss-pin { order: -1; height: 60svh; padding-top: 60px; gap: 8px; z-index: 5; background: linear-gradient(var(--bg) 96%, rgba(var(--bg-rgb), 0)); }   /* opaque under the chart's source line */
