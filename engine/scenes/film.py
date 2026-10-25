@@ -393,9 +393,12 @@ def beats_film(sec: FilmScene, ctx: BuildContext) -> Path:
                     from ..camera_beats import make_frames as camera_frames
                     from ..animate import NEGATIVE
                     seed = b.camera.seed if b.camera.seed is not None else b.seed if b.motion_seed is None else b.motion_seed
+                    from ..camera_moves import negative as move_negative, phrase as move_phrase
+                    said = move_phrase(b.camera)
                     frames = camera_frames(ctx.project, sec, bi, still, bdir,
-                                           f"{imagery.treat(ctx.project, b.prompt, video=True) or 'The subject of the image'}. {b.motion}. Smooth natural motion.",
-                                           NEGATIVE, seed, wan_settings(ctx.options.get("site_wan")), ctx.log)
+                                           f"{imagery.treat(ctx.project, b.prompt, video=True) or 'The subject of the image'}. {b.motion}. "
+                                           + (f"{said}. " if said else "") + "Smooth natural motion.",
+                                           move_negative(b.camera, NEGATIVE), seed, wan_settings(ctx.options.get("site_wan")), ctx.log)
                 else:
                     frames = animate(still, imagery.treat(ctx.project, b.prompt, video=True), b.motion, b.seconds, b.seed if b.motion_seed is None else b.motion_seed,
                                      bdir, ctx.log, size=(W, H), strength=b.strength, end_image=end, model=model, wan=wan)

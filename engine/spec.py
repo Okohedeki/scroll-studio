@@ -1654,12 +1654,71 @@ class CameraMove(Model):
         return {"keys": v} if isinstance(v, list) else v
 
 
+CameraMoveName = Literal["static", "dolly-in", "dolly-out", "crash-zoom", "dolly-zoom", "orbit-left", "orbit-right",
+                         "crane-up", "crane-down", "fpv", "whip-pan", "push-through"]
+
+CAMERA_MOVE_DOC = (
+    "A named camera move (engine/camera_moves.py), flown through the start image's depth and followed by the video model "
+    "like keyed moves: static (locked-off tripod), dolly-in / dolly-out (the camera travels toward or away from `at`, near "
+    "things grow faster than far ones), crash-zoom (a sudden lens zoom into `at`, then a hold), dolly-zoom (vertigo: the "
+    "subject keeps its size while the background swells), orbit-left / orbit-right (an arc around the subject, which stays "
+    "put while the foreground and background slide past each other), crane-up / crane-down (the camera rises or sinks, "
+    "tilting to keep the subject), fpv (a drone flying forward with a banking roll), whip-pan (a fast pan with motion "
+    "blur), push-through (a deep push past the foreground into the scene beyond). See docs/scenes.md for which read "
+    "clearly on LTX-2.3")
+
+
+class CameraPreset(CameraMove):
+    """A named camera move on a generated beat: `camera: dolly-in`, or `camera: {move: orbit-left, amount: 0.8, at: [0.4,
+    0.5]}`. Everything a keyed move takes (backend, subjects, soften, guide_strength, res, anchor, match, seed) applies;
+    the camera path comes from the move instead of `keys`."""
+    move: CameraMoveName = Field(..., description=CAMERA_MOVE_DOC)
+    keys: list[FreezeKey] = Field(default_factory=list, description="Not used by a named move (its path is the move's): "
+                                  "leave it out")
+    amount: float = Field(1.0, ge=0.25, le=2.0, description="How far the move goes: 1 is the tested recipe, 0.5 half as "
+                          "far, 1.5 further (a deeper push, a wider arc, a faster zoom)")
+    at: Optional[tuple[float, float]] = Field(None, description="The point the move is about, x y in 0-1 of the start image "
+                                              "(the subject): where a dolly or a zoom goes, what an orbit or a crane keeps "
+                                              "still, what a dolly zoom keeps the same size. Default: the centre")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _bare_name(cls, v):
+        return {"move": v} if isinstance(v, str) else v
+
+    @model_validator(mode="after")
+    def _named(self):
+        if self.keys:
+            raise ValueError(f"camera move '{self.move}': a named move has no `keys` (its path is the move's); write keys "
+                             "without `move` for a keyed camera")
+        if self.at is not None and not all(0 <= v <= 1 for v in self.at):
+            raise ValueError(f"camera move '{self.move}': `at` {list(self.at)} must be x y inside 0-1")
+        if self.continues:
+            raise ValueError(f"camera move '{self.move}': a named move starts its own shot; `continues` carries keyed "
+                             "cameras across a cut (write keys)")
+        return self
+
+
+def _camera_in(v):
+    """`camera:` as written: a move's name or a mapping with `move` is a named move, keys (a list or a mapping) a keyed
+    one."""
+    if isinstance(v, str) or (isinstance(v, dict) and "move" in v):
+        return CameraPreset.model_validate(v)
+    return v
+
+
 # ---------------------------------------------------------------------------------------------------------------
 
 
 def _check_camera(b) -> None:
     """Validate a generated beat's `camera:` (keys inside the frame, going forward in time)."""
     c = b.camera
+    if isinstance(c, CameraPreset):
+        if b.trim:
+            raise ValueError(f"beat '{b.id}': `trim` cannot be combined with `camera` (the move is timed over the whole clip)")
+        if b.end_image is not None:
+            raise ValueError(f"beat '{b.id}': `end_image` cannot be combined with `camera` (the camera path decides the last frame)")
+        return
     ks = c.keys
     for i, k in enumerate(ks):
         x0, y0, x1, y1 = k.box
@@ -1704,10 +1763,16 @@ class Beat(Model):
     freeze: Optional[Freeze] = Field(None, description="A frozen moment instead of a generated clip: one frame, upscaled, "
                                                        "with a 2.5D camera moving through it, rendered offline in seconds "
                                                        "(see Freeze). prompt, motion, image and end_image are not used")
-    camera: Optional[CameraMove] = Field(None, description="A keyed camera move on this moving beat (see CameraMove): "
-                                                         "`camera: {keys: [{t: 0, box: [0,0,1,1]}, {t: 0.5, box: [...]}, ...]}`. "
-                                                         "The crowd keeps moving, the camera does what the keys say. Needs an "
-                                                         "`image` (or a `prompt` to make one); not for a frozen moment")
+    camera: Optional[Union[CameraMove, CameraPreset, CameraMoveName]] = Field(
+        None, description="A camera move on this moving beat: a named move (`camera: dolly-in`, or `{move: orbit-left, "
+                          "amount: 0.8}`, see CameraPreset) or keys (see CameraMove): `camera: {keys: [{t: 0, box: "
+                          "[0,0,1,1]}, {t: 0.5, box: [...]}, ...]}`. The crowd keeps moving, the camera does what the move "
+                          "or the keys say. Needs an `image` (or a `prompt` to make one); not for a frozen moment")
+
+    @field_validator("camera", mode="before")
+    @classmethod
+    def _camera_named(cls, v):
+        return _camera_in(v)
 
     @model_validator(mode="after")
     def _generated_or_frozen(self):

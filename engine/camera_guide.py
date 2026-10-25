@@ -41,7 +41,12 @@ VERSION = 5
 # ---------------------------------------------------------------- the path
 
 def camera_path(move) -> CameraPath:
-    """The beat's own CameraPath (same keys, same easing as a frozen moment's)."""
+    """The beat's own CameraPath (same keys, same easing as a frozen moment's). A named move's path is the view part of
+    its rig (engine/camera_moves.py), as dense keys under linear easing."""
+    from . import camera_moves as cm
+    preset = cm.preset_of(move)
+    if preset:
+        return CameraPath(cm.view_keys(*preset), "linear")
     return CameraPath(move.keys, move.ease)
 
 
@@ -125,19 +130,32 @@ def _gray3(a: np.ndarray) -> np.ndarray:
 
 
 def render_streams(rgb: np.ndarray, depth: np.ndarray, people: Optional[np.ndarray], move, plan: CameraPlan, *,
-                   size: tuple[int, int], n_frames: int, soften: float, seed: int = 7, device: Optional[str] = None):
+                   size: tuple[int, int], n_frames: int, soften: float, seed: int = 7, device: Optional[str] = None,
+                   rgb_full: Optional[np.ndarray] = None):
     """Yield (guide depth, pure-camera rgb, static-world mask) frames (uint8 arrays: HxWx3, HxWx3, HxW) of the camera
     flown through the image. `n_frames` frames, the camera at t = i / (n - 1); the three streams use one camera path
-    and one geometry, so they agree pixel for pixel."""
+    and one geometry, so they agree pixel for pixel. A named move (engine/camera_moves.py) flies its own rig; its
+    pure-camera stream is sampled from `rgb_full` when given (the start image at full size, so a crop stays sharp)."""
     W, H = size
     geom = soften_subjects(depth, people, soften) if people is not None else depth
-    kw = dict(size=size, seconds=n_frames / FPS, parallax=move.parallax, dolly=move.dolly, ease="linear", seed=seed,
-              device=device)
-    keys = plan.keys(n_frames)
-    g_d = fz.render_frames(_gray3(geom), geom, keys, **kw)
-    g_c = fz.render_frames(np.asarray(rgb), geom, keys, **kw)
     stat = (255 - (people if people is not None else np.zeros((H, W), np.uint8))).astype(np.uint8)
-    g_m = fz.render_frames(np.repeat(stat[..., None], 3, axis=2), geom, keys, **kw)
+    from . import camera_moves as cm
+    preset = cm.preset_of(move)
+    if preset:
+        name, amount, at = preset
+        cams = cm.rig(name, n_frames, amount, at)
+        kw = dict(size=size, focus=cm.focus_depth(depth, at), blur=cm.RECIPES[name].blur, device=device, move=name,
+                  amount=amount, at=at)
+        g_d = cm.render(_gray3(geom), geom, cams, **kw)
+        g_c = cm.render(np.asarray(rgb if rgb_full is None else rgb_full), geom, cams, **kw)
+        g_m = cm.render(np.repeat(stat[..., None], 3, axis=2), geom, cams, **kw)
+    else:
+        kw = dict(size=size, seconds=n_frames / FPS, parallax=move.parallax, dolly=move.dolly, ease="linear", seed=seed,
+                  device=device)
+        keys = plan.keys(n_frames)
+        g_d = fz.render_frames(_gray3(geom), geom, keys, **kw)
+        g_c = fz.render_frames(np.asarray(rgb), geom, keys, **kw)
+        g_m = fz.render_frames(np.repeat(stat[..., None], 3, axis=2), geom, keys, **kw)
     for d, c, m in zip(g_d, g_c, g_m):
         yield d, c, m[..., 0]
 
@@ -153,7 +171,7 @@ class Guide:
 
 def write_guide(out_dir: Path, rgb: np.ndarray, depth: np.ndarray, people: Optional[np.ndarray], move, plan: CameraPlan, *,
                 size: tuple[int, int], n_frames: int, fps: int, soften: float, seed: int = 7,
-                name: str = "guide", log: Callable = print) -> Guide:
+                name: str = "guide", log: Callable = print, rgb_full: Optional[np.ndarray] = None) -> Guide:
     """Render the three guide videos into `out_dir` (lossless-ish H.264, `fps` frames a second)."""
     import subprocess
     from .config import settings
@@ -166,7 +184,8 @@ def write_guide(out_dir: Path, rgb: np.ndarray, depth: np.ndarray, people: Optio
                                        "-pix_fmt", "rgb24", "-s", f"{W}x{H}", "-r", str(fps), "-i", "-", "-c:v", "libx264",
                                        "-crf", "10", "-preset", "fast", "-pix_fmt", "yuv420p", str(p)], stdin=subprocess.PIPE))
     try:
-        for d, c, m in render_streams(rgb, depth, people, move, plan, size=size, n_frames=n_frames, soften=soften, seed=seed):
+        for d, c, m in render_streams(rgb, depth, people, move, plan, size=size, n_frames=n_frames, soften=soften, seed=seed,
+                                      rgb_full=rgb_full):
             procs[0].stdin.write(d.tobytes())
             procs[1].stdin.write(c.tobytes())
             procs[2].stdin.write(np.repeat(m[..., None], 3, axis=2).tobytes())

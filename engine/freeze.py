@@ -292,19 +292,34 @@ class Renderer:
             prev_gap, prev_d = gap, d
         return star
 
-    def frame(self, cx: float, cy: float, w: float, sx: float, sy: float, e: float, f: float):
+    def _rolled(self, o, roll: float):
+        """The view grid `o` turned by `roll` radians about the view's centre (in pixels, so the turn is not skewed by the
+        frame's aspect): a camera banking. The grid is in square units (x in widths, y in heights)."""
+        c, s = math.cos(roll), math.sin(roll)
+        a = self.W / self.H
+        x, y = o[..., 0], o[..., 1]
+        return self.torch.stack([c * x - s * y / a, s * x * a + c * y], dim=-1)
+
+    def frame(self, cx: float, cy: float, w: float, sx: float, sy: float, e: float, f: float, roll: float = 0.0):
         """One frame (3, H, W) float 0-255. The camera views the square (cx, cy, w), is shifted (sx, sy) view-widths per
-        unit of depth against the focus plane `f`, and pushes near things in by `e` per unit of depth."""
+        unit of depth against the focus plane `f`, and pushes near things in by `e` per unit of depth. `roll` banks the
+        camera clockwise by that many radians (the picture turns the other way); 0 is the unchanged render."""
         torch = self.torch
         F = torch.nn.functional
         c = torch.tensor([cx, cy], device=self.dev)
+        o_full, o_solve = (self.o, self.o_solve) if not roll else (self._rolled(self.o, roll), self._rolled(self.o_solve, roll))
         if sx or sy or e:
             s = torch.tensor([sx, sy], device=self.dev)
-            star = self._march(c, s, w, e, f)[None, None]
+            keep = self.o_solve
+            self.o_solve = o_solve
+            try:
+                star = self._march(c, s, w, e, f)[None, None]
+            finally:
+                self.o_solve = keep
             star = F.interpolate(star, size=(self.H, self.W), mode="bilinear", align_corners=False)[0, 0]
-            u = self._source_at(c, s, w, e, f, star, self.o)
+            u = self._source_at(c, s, w, e, f, star, o_full)
         else:
-            u = c + w * self.o
+            u = c + w * o_full
         grid = self._grid(u.clamp(0, 1))
         ratio = max(w * self.src_w / self.W, 1e-6)          # source pixels per output pixel
         lod = min(max(math.log2(ratio), 0.0), len(self.levels) - 1)

@@ -20,6 +20,7 @@ from typing import Callable, Optional
 import numpy as np
 
 from . import camera_guide as cg
+from . import camera_moves as cm
 from .animate import FPS
 from .freeze_beats import _cached, digest
 from .project import BuildError
@@ -168,12 +169,18 @@ def guide_for(project, sec, i: int, still: Path, bdir: Path, log: Callable = pri
     gkey = {"plate": _sha(plate_of(project, sec, i, still)), "subjects": move.subjects if people is not None else None, "move": move.model_dump(mode="json", include={"parallax", "dolly", "soften"}),
             "plan": [plan.lo, plan.hi, [[k.t, list(k.box), k.hold, move.ease] for k in move.keys]],
             "chain": key_of(sec, i).get("chain"), "frames": frames, "fps": fps, "size": size, "v": cg.VERSION}
+    preset = cm.preset_of(move)
+    rgb_full = None
+    if preset:      # only for a named move, so the guides of keyed moves keep their cache
+        gkey["preset"] = [*preset[:2], list(preset[2]) if preset[2] else None, cm.VERSION]
+        from PIL import Image
+        rgb_full = np.asarray(Image.open(plate_of(project, sec, i, still)).convert("RGB"))
     stamp = bdir / "guide.json"
     paths = [bdir / "guide.mp4", bdir / "guide_rgb.mp4", bdir / "guide_static.mp4"]
     if not (stamp.exists() and stamp.read_text() == digest(gkey) and all(p.exists() for p in paths)):
         t0 = time.time()
         cg.write_guide(bdir, rgb, depth, people, move, plan, size=size, n_frames=frames, fps=fps,
-                       soften=move.soften * size[0], seed=b.seed)
+                       soften=move.soften * size[0], seed=b.seed, rgb_full=rgb_full)
         stamp.write_text(digest(gkey))
         log(f"  guide: {frames} frames at {size[0]}x{size[1]} in {time.time() - t0:.1f}s")
     else:
@@ -195,7 +202,12 @@ def make_frames(project, sec, i: int, still: Path, bdir: Path, text: str, negati
     backend, size = info["backend"], info["size"]
     beat_size = (sec.beat_res[0] // 32 * 32, sec.beat_res[1] // 32 * 32)
     gstill = bdir / "_cam_gen_still.png"
-    Image.open(still).convert("RGB").resize(size, Image.LANCZOS).save(gstill)
+    preset = cm.preset_of(move)
+    full = preset is None or cm.starts_full(*preset)
+    if full:
+        Image.open(still).convert("RGB").resize(size, Image.LANCZOS).save(gstill)
+    else:           # a named move that starts on a crop (dolly-out, orbit ...): its first frame is the pure camera's first
+        Image.fromarray(cg.read_video(guide.rgb, size)[0]).save(gstill)
     if backend == "ltx":
         anchors = _anchors(guide, size, move.anchor, bdir) if move.anchor > 0 else None
         pngs = cg.generate_ltx(gstill, guide.depth, text, negative, size, guide.frames, seed, bdir, move.guide_strength, log,
@@ -240,7 +252,7 @@ def make_frames(project, sec, i: int, still: Path, bdir: Path, text: str, negati
             out.append(dst)
     # the first frame IS the start image (the model re-encodes it a little): a beat that starts on the last frame of the one
     # before joins it with no step at all
-    if out and Image.open(still).size == tuple(beat_size):
+    if out and full and Image.open(still).size == tuple(beat_size):
         shutil.copy(still, out[0])
     return out
 
