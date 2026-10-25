@@ -1,0 +1,99 @@
+# Kitewell: a fictional fintech landing page in one medium, the example for art-directed heroes (`imagery.medium`).
+#
+#   studio new kitewell --example kitewell
+#   studio build kitewell                  # no GPU needed: the pictures are in inputs/, the medium is applied on the CPU
+#
+# `imagery.medium: risograph` names a tested recipe (engine/medium.py): every generated still is asked for in riso
+# words and then printed in two inks taken from the brand (`theme.from`: accent cobalt, accent2 pink), posterised,
+# grained and a few pixels off register. The closing band is in toile, printed in the brand's accent on its cream.
+# The hero keeps its left side calm for the headline (`align: left`); the build measures it and says so.
+#
+# inputs/ holds the raw Z-Image Turbo stills these were made from, before the medium was applied. With a GPU, swap a
+# `file:` for the `generate:` in the comment above it (and drop its `medium:` where the site's own is the same): the
+# composition rule then also regenerates the hero (next seeds, or mirrored) when its headline side comes out busy.
+name: Kitewell
+description: Business banking for small teams, with cash flow you can see coming. A concept site.
+theme:
+  preset: paper
+  from:
+    mode: light
+    colors: { bg: "#f6f1e7", bg2: "#ece4d3", ink: "#16203a", accent: "#2f4fd8", accent2: "#ff6c8f", accent_ink: "#ffffff" }
+    fonts: { display: Bricolage Grotesque, body: Inter }
+    radius: 999px
+imagery:
+  medium: risograph
+nav:
+  cta: { label: Open an account, href: "#open" }
+sections:
+  - type: hero
+    align: left
+    badge: Now open to teams in the UK
+    title: Cash flow, <em>with the wind behind it.</em>
+    body: Kitewell is the business account that sees the month ahead. Invoices, payroll and tax, laid out before they land.
+    buttons:
+      - { label: Open an account, href: "#open" }
+      - { label: See how it works, href: "#how" }
+    image:
+      # generate: Paper planes and a big kite rising into the sky above a small city of rooftops at the bottom right, a few soft round clouds
+      # (1920x1088, seed 7; the composition rule kept the third try, seed 2007: the first two were busy on the left)
+      file: inputs/hero.jpg
+      medium: risograph
+
+  - type: intro
+    id: how
+    nav_label: How it works
+    kicker: The month ahead
+    title: Every payment you know about, on one line.
+    body: Connect your invoices and payroll once. Kitewell draws the next ninety days of money in and money out, and tells you a week early when a dip is coming.
+
+  - type: product
+    side: right
+    kicker: Forecast
+    title: See the dip before it happens.
+    body: When a quiet month is on its way, Kitewell shows you which invoices to chase and which payments can wait, so the balance never surprises you.
+    tags: [Invoice reminders, Payroll runs, VAT set aside, Card controls]
+    image:
+      # generate: A single kite on a long string climbing over a hill, its tail curling, a small person holding the string at the bottom
+      # (1600x1280, seed 11)
+      file: inputs/product.jpg
+      medium: risograph
+
+  - type: features
+    kicker: Built for small teams
+    title: The account that does the sums.
+    items:
+      - tag: Pots
+        title: Tax set aside
+        body: A share of every payment in goes to a VAT and corporation tax pot the moment it lands.
+      - tag: Payroll
+        title: Pay day on time
+        body: Run payroll from the account that holds the money, with the forecast showing what is left after.
+      - tag: Cards
+        title: A card for everyone
+        body: Virtual and physical cards with limits per person, per supplier and per month.
+
+  - type: stats
+    items:
+      - { value: "90", label: days of cash flow drawn ahead }
+      - { value: "7", label: days of warning before a dip }
+      - { value: "0", label: monthly fee for teams under ten }
+
+  - type: quote
+    text: We stopped opening the bank app with our eyes shut. The forecast tells us in March what April looks like.
+    who: Ama Boateng, founder of a fictional bakery chain
+
+  - type: cta
+    id: open
+    surface: light
+    kicker: Open in ten minutes
+    title: Give your money a <em>tailwind.</em>
+    button: { label: Open an account, href: "#open" }
+    backdrop:
+      # generate: A narrow strip of pastoral riverside landscape along the very bottom edge of the picture, windmills, a stone bridge, a sailing barge, trees, a boy flying a kite. The upper three quarters of the picture are empty plain cream cotton with nothing printed on it
+      # (1920x1088, seed 6)
+      file: inputs/band.jpg
+      medium: toile
+      calm: center
+
+footer:
+  left: Kitewell is a fictional company. A Scroll Studio example.
