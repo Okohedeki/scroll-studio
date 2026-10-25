@@ -232,3 +232,9 @@ html.pc-live .pc-tag { --oy: 0px; }
 
 /* ---------------------------------------------------------------- reduced motion */
 @media (prefers-reduced-motion: reduce) { .pc-btn, .pc-arrow, .pc-head a span { transition: none; } .pc-cue { display: none !important; } }
+/* the landing page kit: the signup button on a sheet keeps the black ink on the sheet's amber; the logos and signup blocks
+   lie loose on the mat, so they take the bone paper colour for their words */
+.pc-sheet .ss-kit .ss-btn--hot { color: var(--black); }
+html.style-paper-cut-out main > :is(.ss-logos-block, .ss-signup-block) { color: var(--bone); --ink: var(--bone); --ink-2: rgba(239, 230, 210, .88);
+  --ink-3: rgba(239, 230, 210, .78); --line: rgba(239, 230, 210, .22); --bg: var(--mat); }
+html.style-paper-cut-out main > :is(.ss-logos-block, .ss-signup-block) :is(em, .ss-kicker) { color: var(--amber); }

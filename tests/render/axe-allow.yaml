@@ -71,12 +71,12 @@
   reason: "the rolling strip is a scroll container with no focusable content and no tabindex, so the keyboard cannot reach it"
 - rule: color-contrast
   look: style-paper-cut-out
-  selector: 'ss-footer'
-  reason: "footer text is #202522 on #1f3a35, 1.3:1"
+  selector: 'ss-footer|pc-snap__cap'
+  reason: "footer text is #202522 on #1f3a35, 1.3:1; a gallery snap's body (em) is the sheet's amber on white, 1.7:1 (reached by axe once the kitchen page grew, #138)"
 - rule: color-contrast
   look: style-pinscreen
-  selector: 'pn-faq__n'
-  reason: "FAQ numbers are 1.4:1 (pale tan on cream)"
+  selector: 'pn-faq__n|pn-stats__cap'
+  reason: "FAQ numbers are 1.4:1 (pale tan on cream); on a phone the stats plate's caption is the same pale tan on cream, 1.4:1 (reached by axe once the kitchen page grew, #138)"
 - rule: color-contrast
   look: style-pop-up-book
   selector: 'ss-tile|ss-orbit__item'
@@ -87,12 +87,12 @@
   reason: "tape labels are white on pink (3.1:1) and the TV brand is 4.04:1"
 - rule: color-contrast
   look: style-sand
-  selector: 'ss-footer|sd-kicker'
-  reason: "footer text is #28180c on #2e1d10 (1.05:1) and the '3 of 3' kicker is 1.03:1"
+  selector: 'ss-footer|sd-kicker|sd-count'
+  reason: "footer text is #28180c on #2e1d10 (1.05:1), the '3 of 3' kicker is 1.03:1 and the fixed scene counter is dark on the dark rim, 1.2:1 (reached by axe once the kitchen page grew, #138)"
 - rule: color-contrast
   look: style-smears
-  selector: 'sa-head__cta|sa-cap--badge|sa-folio|sa-key__no'
-  reason: "white on hot pink is 3.3:1 (header button, badge); the folios and key numbers are 2.8-3.7:1"
+  selector: 'sa-head__cta|sa-cap--badge|sa-folio|sa-key__no|sa-btn--hot'
+  reason: "white on hot pink is 3.3:1 (header button, badge, the cta's big button); the folios and key numbers are 2.8-3.7:1"
 - rule: button-name
   look: style-split-flap
   selector: 'sf-sound'

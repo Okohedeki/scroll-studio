@@ -40,7 +40,7 @@
     {% if b.badge %}<span class="cl-pill cl-pill--badge cl-drop" style="--d: 0">{{ b.badge }}</span>{% endif %}
     <{{ hx }} class="cl-h1" data-cl-words>{{ b.title | rich }}</{{ hx }}>
     {% if b.body %}<p class="cl-lede cl-drop" style="--d: 5">{{ b.body | rich }}</p>{% endif %}
-    {% if b.buttons %}<div class="cl-btns cl-drop" style="--d: 7">{% for l in b.buttons %}{{ candy(l, loop.first) }}{% endfor %}</div>{% endif %}{{ base.hero_kit(b, e) }}
+    {% if b.buttons %}<div class="cl-btns cl-drop" style="--d: 7">{% for l in b.buttons %}{{ candy(l, loop.first) }}{% endfor %}</div>{% endif %}{% if b.kit %}{{ base.hero_kit(b, e) }}{% endif %}
   </div>
   <div class="cl-hero__seat" data-seat aria-hidden="true"></div>
   {% if media or b.device %}

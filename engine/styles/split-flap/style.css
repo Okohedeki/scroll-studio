@@ -368,3 +368,5 @@ html.style-split-flap .ss-btn { border-radius: 3px; font-family: "Barlow Condens
 .sf-cue { display: flex; align-items: center; gap: 14px; margin-top: clamp(40px, 8vh, 90px); font: 500 13px/1.4 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: #4a4843; }
 .sf-cue b { display: inline-grid; place-items: center; width: 34px; height: 34px; border: 1.5px solid #151515; border-radius: 50%; font: 600 16px/1 var(--font-mono); color: #151515; }
 html:not(.js) .sf-cue { display: none; }
+/* the landing page kit's blocks on the wall: emphasis in the words' own colour (the board's amber is for the board) */
+html.style-split-flap main > :is(.ss-logos-block, .ss-signup-block) em { color: inherit; font-style: italic; }

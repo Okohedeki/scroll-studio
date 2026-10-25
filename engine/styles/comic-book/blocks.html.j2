@@ -34,7 +34,7 @@
         {% if b.badge %}<p class="cb-corner"><span>{{ b.badge }}</span></p>{% endif %}
         {% if b.body %}{{ cap(b.body, 0, "cb-cap--lead") }}{% endif %}
         {{ head(e, "cb-mast", b.title) }}
-        {% if b.buttons %}<div class="cb-btns">{% for l in b.buttons %}<a class="cb-btn{% if loop.first %} cb-btn--hot{% endif %}" href="{{ l.href }}">{{ l.label }}</a>{% endfor %}</div>{% endif %}{{ base.hero_kit(b, e) }}
+        {% if b.buttons %}<div class="cb-btns">{% for l in b.buttons %}<a class="cb-btn{% if loop.first %} cb-btn--hot{% endif %}" href="{{ l.href }}">{{ l.label }}</a>{% endfor %}</div>{% endif %}{% if b.kit %}{{ base.hero_kit(b, e) }}{% endif %}
       </div>
       <div class="cb-splash__art">
         {% if b.device %}<div class="cb-tv">{{ base.phone(b.device, e.screen, e.clip) }}</div>

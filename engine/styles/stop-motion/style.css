@@ -365,3 +365,6 @@ html.style-stop-motion .ss-footer a { color: #f2c14e; }
   .sm-btn, .sm-arrow, .sm-head__mark span, .sm-head__nav a span { transition: none; }
   .sm-hud, .sm-cue { display: none !important; }
 }
+/* the landing page kit's small words lie on the dark table, a shade darker than the page: one tier brighter */
+html.style-stop-motion :is(.ss-logos, .ss-signup, .ss-rating) { --ink-3: var(--ink-2); }
+html.style-stop-motion main > :is(.ss-logos-block, .ss-signup-block) .ss-kicker { color: var(--mustard); }

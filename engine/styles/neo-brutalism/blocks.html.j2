@@ -29,7 +29,7 @@
     </div>
     {% call win("readme.txt", "nb-hero__win nb-c-white", 'data-nb-slap data-nb-drag tabindex="0" aria-label="Window: readme"') %}
       {% if b.body %}<p class="nb-lede">{{ b.body | rich }}</p>{% endif %}
-      {% if b.buttons %}<div class="nb-btns">{% for l in b.buttons %}{{ btn(l, loop.first) }}{% endfor %}</div>{% endif %}{{ base.hero_kit(b, e) }}
+      {% if b.buttons %}<div class="nb-btns">{% for l in b.buttons %}{{ btn(l, loop.first) }}{% endfor %}</div>{% endif %}{% if b.kit %}{{ base.hero_kit(b, e) }}{% endif %}
     {% endcall %}
     {% if b.device %}{% call win("app", "nb-hero__app nb-c-sky", 'data-nb-slap data-nb-drag tabindex="0" aria-label="Window: app"') %}{{ base.phone(b.device, e.screen, e.clip) }}{% endcall %}{% endif %}
     <div class="nb-stickers" aria-hidden="true">

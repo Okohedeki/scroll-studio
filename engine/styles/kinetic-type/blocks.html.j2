@@ -18,7 +18,7 @@
   {{ head(e, "kt-giant kt-hero__title", b.title, 'data-kt-fill data-kt-arrive data-kt-pack="95"') }}
   <div class="kt-hero__foot">
     {% if b.body %}<p class="kt-body">{{ b.body | rich }}</p>{% endif %}
-    {% if b.buttons %}<div class="kt-btns">{% for l in b.buttons %}{{ btn(l, loop.first) }}{% endfor %}</div>{% endif %}{{ base.hero_kit(b, e) }}
+    {% if b.buttons %}<div class="kt-btns">{% for l in b.buttons %}{{ btn(l, loop.first) }}{% endfor %}</div>{% endif %}{% if b.kit %}{{ base.hero_kit(b, e) }}{% endif %}
   </div>
   {% if b.device %}<div class="kt-hero__device">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
 </section>
