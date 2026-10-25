@@ -44,6 +44,7 @@ Every example is a `site.yaml` in [`examples/`](../examples/) and rebuilds with 
 | **Vector line art** | `vector` | [Wunderkammer](../examples/wunderkammer/site.yaml) | Dürer's *Rhinoceros* re-cut line by line |
 | **Kinetic type** | `type` | [FORM/26](../examples/form-conference/site.yaml) | A conference site told in moving type |
 | **Photo parallax** | `parallax` | [Casa Alta](../examples/casa-alta/site.yaml) | A cliff hotel's photos given depth and a slow camera |
+| **Landing page kit** | `badge`, `rating`, `signup`, `logos`, `frame` | [Larkspur](../examples/larkspur/site.yaml) | A framed hero on calm art with a badge link, icon buttons, a rating, figures and a logo strip; no GPU |
 | **Stacked panels** | `stack` layout | [Hushwell](../examples/hushwell/site.yaml) | Full-screen panels slide over each other |
 | **Thirty-two styles** | `theme.style` | [Halcyon](../examples/halcyon/site.yaml) | One product page as thirty-two experiences (`studio looks`) |
 

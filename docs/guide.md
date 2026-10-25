@@ -14,7 +14,8 @@ studio build harbour-hotel && studio record harbour-hotel   # final build + an M
 ```
 
 A spec is a theme, a nav and a list of sections. Scenes are the scroll-driven visuals; blocks (`hero`, `intro`,
-`product`, `features`, `stats`, `timeline`, `strip`, `orbit`, `quote`, `faq`, `cta`, `gallery`) are the content between them.
+`product`, `features`, `stats`, `timeline`, `strip`, `orbit`, `quote`, `faq`, `cta`, `gallery`, `logos`, `signup`) are the content
+between them.
 Set `layout: stack` and every section becomes a full-screen panel that slides up over the one before it (see
 [Hushwell](../examples/hushwell/site.yaml)); `surface: dark | light | accent` recolours a single section:
 
@@ -109,6 +110,65 @@ Specs from before 1.5 keep building the same page: `place: top-right` is `at: to
 lengths are each step's share of the scroll. Where a scene frames its subject beside the copy (an `inside` stop's part,
 a `diorama` place), the subject takes the side the copy's `at` leaves free, unless the scene's `side` (or the place's)
 says otherwise.
+
+## Landing page pieces
+
+The small pieces most current landing pages are made of come with the engine, drawn in the theme's tokens (and a
+surface's), so they follow a preset, a style or a brand like everything else. [Larkspur](../examples/larkspur/site.yaml)
+uses all of them and builds on a laptop with no GPU.
+
+```yaml
+sections:
+  - type: hero
+    align: left
+    frame: card                     # the hero as a rounded card on a border in the theme's accents (wide screens)
+    badge: { tag: New, text: Field notes are here, href: "#news" }    # a pill above the headline; or just words
+    title: Notes that <em>write themselves.</em>
+    body: One sentence that says what it is and who it is for.
+    buttons:
+      - { label: Start free, href: "#join", icon: arrow }                 # the primary, with an arrow
+      - { label: Watch the film, href: "#film", icon: play, look: ghost } # a ghost secondary with a play icon
+    rating: { score: 4.9, text: from 860 reviews }                       # stars filled to the score, and its source
+    signup: { action: "https://forms.example.com/notes", placeholder: you@company.com, button: Join the beta }
+    stats:                                                               # a row of figures parted by thin rules
+      - { value: 93%, label: of notes kept }
+      - { value: "12", label: languages }
+    logos:                                                               # a strip of partner logos in one colour
+      title: Used by teams at
+      items:
+        - { name: Northwind, image: inputs/logos/northwind.svg }
+        - { name: Halden }                                               # no image: the name as a wordmark
+  - type: stats
+    look: divided                   # the same quiet row of figures as a section of its own
+    items: [{ value: 3.1x, label: faster drafts }, { value: "40", label: languages }]
+  - type: logos
+    title: Partners
+    items: [{ name: Quanta, image: inputs/logos/quanta.svg }, { name: Orbitly }]
+  - type: signup
+    title: Hear about the <em>next release.</em>
+    action: mailto:hello@example.com
+    button: Keep me posted
+    note: One letter a month.
+```
+
+- **Buttons** take `icon: arrow | play | external | none` and `look: solid | ghost`, wherever a button is drawn by the
+  default markup (hero, product, intro, cta, a caption's button, the nav's). Left out, a button is the one the engine
+  has always drawn. `external` opens a new tab and says so to screen readers.
+- **`badge`** is words, or `{text, href, tag, icon}`: a link with an arrow, a filled tag in front ("New") or a `dot`.
+  A scene's step takes one too, above its headline, and the layout model places it with the step (`at`, `show`,
+  `enter`, `exit`).
+- **`rating`**: `score`, `out_of` (5), `text`, an optional `href`, and `stars: false` for the score alone.
+- **`signup`** is a plain HTML form: it posts to the `action` you name (a newsletter's or a form service's URL; `method`,
+  the field `name` and `hidden` fields are there for what the service expects) or, with `mailto:`, opens an email.
+  There is no server; the browser checks the address. The field has a real label (`label`) for screen readers.
+- **`logos`**: SVGs or transparent PNG/WebP files are shown as silhouettes in the theme's text colour (`tint: original`
+  keeps their colours); a picture without transparency is shown in greys; a logo with no image is set as a wordmark.
+- **`frame: card`** works on a hero and on any scene (overlay and cards frame their stage, split its picture). On a phone
+  the section stays full-bleed.
+
+A hero that uses any of these is set in the kit's type scale and spacing (a calmer headline, a measured lede, the pieces
+in a steady rhythm); a hero that uses none looks as it always has. Every style renders the pieces: a style with its own
+hero markup places them with `base.hero_kit(b, e)` in its own layout, and keeps its own badge and buttons.
 
 ## Themes and brands
 

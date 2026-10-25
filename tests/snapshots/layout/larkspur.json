@@ -1,0 +1,373 @@
+{
+ "example": "larkspur",
+ "root": {
+  "class": [
+   "mode-light",
+   "layout-flow",
+   "hero-media",
+   "hero-frame"
+  ]
+ },
+ "cuts": [],
+ "sections": [
+  {
+   "id": "top",
+   "type": "hero",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-hero",
+      "ss-hero--left",
+      "ss-surface-dark",
+      "ss-hero--media",
+      "ss-hero--kit",
+      "ss-frame-card"
+     ],
+     "id": "top",
+     "text": {
+      "title": "Campaigns that sound like you, drafted i",
+      "title_tag": "h1"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-hero__media"
+       ]
+      },
+      {
+       "tag": "div",
+       "class": [
+        "ss-hero__shade"
+       ]
+      },
+      {
+       "tag": "div",
+       "class": [
+        "ss-hero__in"
+       ],
+       "children": [
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--play"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        }
+       ]
+      },
+      {
+       "tag": "div",
+       "class": [
+        "ss-hero__logos"
+       ],
+       "children": [
+        {
+         "tag": "span",
+         "class": [
+          "ss-logo",
+          "ss-logo--mono"
+         ],
+         "style": {
+          "-webkit-mask-image": "url('standin')",
+          "mask-image": "url('standin')"
+         }
+        },
+        {
+         "tag": "span",
+         "class": [
+          "ss-logo",
+          "ss-logo--mono"
+         ],
+         "style": {
+          "-webkit-mask-image": "url('standin')",
+          "mask-image": "url('standin')"
+         }
+        },
+        {
+         "tag": "span",
+         "class": [
+          "ss-logo",
+          "ss-logo--mono"
+         ],
+         "style": {
+          "-webkit-mask-image": "url('standin')",
+          "mask-image": "url('standin')"
+         }
+        },
+        {
+         "tag": "span",
+         "class": [
+          "ss-logo",
+          "ss-logo--mono"
+         ],
+         "style": {
+          "-webkit-mask-image": "url('standin')",
+          "mask-image": "url('standin')"
+         }
+        },
+        {
+         "tag": "span",
+         "class": [
+          "ss-logo",
+          "ss-logo--mono"
+         ],
+         "style": {
+          "-webkit-mask-image": "url('standin')",
+          "mask-image": "url('standin')"
+         }
+        },
+        {
+         "tag": "span",
+         "class": [
+          "ss-logo",
+          "ss-logo--mono"
+         ],
+         "style": {
+          "-webkit-mask-image": "url('standin')",
+          "mask-image": "url('standin')"
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "how",
+   "type": "features",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ],
+     "id": "how",
+     "text": {
+      "kicker": "How it works",
+      "title": "One brief in. Every channel out.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-features",
+        "ss-features--3"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "customers",
+   "type": "stats",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-band"
+     ],
+     "id": "customers",
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-stats",
+        "ss-stats--4",
+        "ss-stats--divided"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "quote",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "join",
+   "type": "signup",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-signup-block"
+     ],
+     "id": "join",
+     "text": {
+      "kicker": "Early access",
+      "title": "Try Larkspur on your next launch.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "button",
+       "class": [
+        "ss-btn",
+        "ss-btn--hot",
+        "ss-btn--kit"
+       ]
+      },
+      {
+       "tag": "svg",
+       "class": [
+        "ss-icon",
+        "ss-icon--star"
+       ]
+      },
+      {
+       "tag": "svg",
+       "class": [
+        "ss-icon",
+        "ss-icon--star"
+       ]
+      },
+      {
+       "tag": "svg",
+       "class": [
+        "ss-icon",
+        "ss-icon--star"
+       ]
+      },
+      {
+       "tag": "svg",
+       "class": [
+        "ss-icon",
+        "ss-icon--star"
+       ]
+      },
+      {
+       "tag": "svg",
+       "class": [
+        "ss-icon",
+        "ss-icon--star"
+       ]
+      },
+      {
+       "tag": "svg",
+       "class": [
+        "ss-icon",
+        "ss-icon--star"
+       ]
+      },
+      {
+       "tag": "svg",
+       "class": [
+        "ss-icon",
+        "ss-icon--star"
+       ]
+      },
+      {
+       "tag": "svg",
+       "class": [
+        "ss-icon",
+        "ss-icon--star"
+       ]
+      },
+      {
+       "tag": "svg",
+       "class": [
+        "ss-icon",
+        "ss-icon--star"
+       ]
+      },
+      {
+       "tag": "svg",
+       "class": [
+        "ss-icon",
+        "ss-icon--star"
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,90 @@
+# Larkspur: a landing page built from the landing page kit, with no GPU and no model (a laptop builds it in seconds).
+# The opening is the hero most current landing pages share: a framed card on a border in the theme's accents, a pill
+# badge that links to the news, a left-aligned headline over calm art, a primary button with an arrow and a ghost button
+# with a play icon, a rating line, a row of figures parted by thin rules and a strip of partner logos in one colour.
+# The art is a gradient the engine renders itself; the logos are SVG files in inputs/logos/ (fictional companies).
+name: Larkspur
+description: Campaigns that sound like your brand, drafted in an afternoon. A concept site for the landing page kit.
+theme:
+  preset: studio
+  colors: { bg: "#f6f5f1", bg2: "#eceae4", ink: "#15141b", accent: "#5a48e8", accent2: "#f2a27c", accent_ink: "#ffffff" }
+  fonts: { display: Inter Tight, body: Inter, mono: JetBrains Mono }
+  display_weight: 600
+  radius: 999px
+  labels: plain
+nav:
+  links:
+    - { label: Product, href: "#how" }
+    - { label: Customers, href: "#customers" }
+    - { label: Pricing, href: "#join" }
+  cta: { label: Start free, href: "#join" }
+sections:
+  - type: hero
+    id: top
+    frame: card
+    align: left
+    badge: { tag: New, text: Brand Voices is here, href: "#how" }
+    title: Campaigns that sound like <em>you</em>, drafted in an afternoon.
+    body: Larkspur turns one brief into on-brand copy for every channel, reviewed by your team before anything ships.
+    buttons:
+      - { label: Start free, href: "#join", icon: arrow }
+      - { label: Watch the film, href: "#how", icon: play, look: ghost }
+    rating: { score: 4.9, text: "from 1,180 brand teams" }
+    stats:
+      - { value: 93%, label: of first drafts approved }
+      - { value: "60", label: channels and formats }
+      - { value: 2 h, label: to a human reply }
+    logos:
+      title: Trusted by brand teams at
+      items:
+        - { name: Northwind, image: inputs/logos/northwind.svg }
+        - { name: Halden, image: inputs/logos/halden.svg }
+        - { name: Lumen, image: inputs/logos/lumen.svg }
+        - { name: Kestrel & Co, image: inputs/logos/kestrel.svg }
+        - { name: Quanta, image: inputs/logos/quanta.svg }
+        - { name: Orbitly, image: inputs/logos/orbitly.svg }
+    image:
+      gradient:
+        colors: ["#1c1b3f", "#3d3270", "#8a5b8e", "#e59a7f"]
+        angle: 168
+        glows:
+          - { x: 0.82, y: 0.86, color: "#ffc39a", radius: 0.42, strength: 0.7 }
+          - { x: 0.12, y: 0.08, color: "#2a3d8f", radius: 0.5, strength: 0.6 }
+          - { x: 0.6, y: 0.45, color: "#b06aa8", radius: 0.35, strength: 0.35 }
+        grain: 0.03
+      size: [2400, 1350]
+
+  - type: features
+    id: how
+    nav_label: Product
+    kicker: How it works
+    title: One brief in. <em>Every channel</em> out.
+    items:
+      - { tag: "01", title: Brief once, body: "Write what the campaign is for and who it is for. Larkspur asks the questions a good strategist would." }
+      - { tag: "02", title: Draft in your voice, body: "Brand Voices learns from the copy you already love, so every draft sounds like you and nobody else." }
+      - { tag: "03", title: Review together, body: "Comments, approvals and version history in one place; nothing ships until a person says so." }
+
+  - type: stats
+    id: customers
+    look: divided
+    items:
+      - { value: "3.2", unit: x, label: more campaigns a quarter }
+      - { value: "11", unit: h, label: saved per launch }
+      - { value: "92", unit: "%", label: of teams renew }
+      - { value: "40", unit: "+", label: languages }
+
+  - type: quote
+    text: We used to spend a week on launch copy. Now the first draft is waiting when the brief is, and it sounds like us.
+    who: Head of brand, a Larkspur customer
+
+  - type: signup
+    id: join
+    kicker: Early access
+    title: Try Larkspur on <em>your next launch.</em>
+    body: Leave your work email and we will set up a workspace with your brand voice in it.
+    action: mailto:hello@larkspur.example
+    label: Work email
+    placeholder: you@company.com
+    button: Get early access
+    note: No card needed. We reply within a working day.
+    rating: { score: 4.9, text: "from 1,180 brand teams" }
