@@ -205,6 +205,19 @@ describe("captions and the HUD", () => {
     expect(at(0.5)).toEqual(["02", "Left to the layout"]);
   });
 
+  it("progress: a block shown as a step (no title in the section data) gives its number and an empty title", async () => {
+    const h = { kind: "progress", scales: ["Getting ready"] };
+    const steps = [{ kicker: "Step 01", title: "Words", length: 1 }, { block: "stats", items: [], length: 1 }];
+    const inner = `<b data-pnum></b><b data-ptitle></b><div class="ss-caption" data-from="0.1" data-to="0.3"></div>
+      <div class="ss-caption ss-caption--block" data-from="0.4" data-to="0.6"><section class="ss-block"></section></div>`;
+    const f = await boot({ markup: scene({ data: { hud: hud(h), steps: steps as any }, inner }), reduced: true });
+    box($("#s1"), 0, 5 * H);
+    await settle();
+    const at = (p: number) => { box($(".ss-track"), -p * 4 * H, 5 * H); f.step(); return [$("[data-pnum]").textContent, $("[data-ptitle]").textContent]; };
+    expect(at(0.2)).toEqual(["01", "Words"]);
+    expect(at(0.5)).toEqual(["1", ""]);
+  });
+
   it("scale: the label interpolates in log space across the steps, unless the player sets its own", async () => {
     const h = { kind: "scale", scales: ["1 m", "100 m", "10 km"] };
     const steps = [{ title: "a", intro: true, length: 1 }, { title: "b", length: 1 }, { title: "c", length: 1 }];

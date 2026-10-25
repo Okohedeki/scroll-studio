@@ -105,6 +105,32 @@ always has ([Margin](../examples/margin-notes/site.yaml) uses all of them):
   window opens and closes; on a card they follow its place on the screen as it scrolls in and out. With reduced motion
   only the fade is kept.
 
+Every layout shows the whole caption: `kicker`, `title`, `body`, `fact`, `button` and `hint` (an intro step's "scroll
+to begin" line), with `surface` for its colours over a lighter or darker picture.
+
+**Any block as a step.** A step is a caption unless it says `block:`. With `block: stats`, `quote`, `features`,
+`timeline`, `cta`, `gallery`, `product` or `faq` it shows that block, written with the block's own fields beside
+`block:`, and is placed with `at`, timed with `show` and moved with `enter` and `exit` like any other step:
+
+```yaml
+    steps:
+      - { title: "Your best ideas are <em>in the margins.</em>", intro: true }
+      - block: stats
+        items:
+          - { value: "0", label: "notifications, ever" }
+          - { value: "100", unit: "%", label: "of it works offline" }
+        at: { grid: "2 / span 7", row: bottom }
+        enter: rise
+      - block: quote
+        text: "I stopped losing the <em>half-thoughts.</em>"
+        who: A reader in the beta
+        at: { x: 0.5, y: 0.16, w: 0.42, align: right }
+        show: [0.7, 0.9]
+```
+
+In split and cards the block is the card. A style that draws a block its own way draws it that way in a scene too.
+Fields that only make sense for a section of its own (`nav_label`, `backdrop`, `transition`) are refused on a step.
+
 Specs from before 1.5 keep building the same page: `place: top-right` is `at: top-right`, `at: [0.3, 0.46]` is
 `show: [0.3, 0.46]`, `layout` and `side` are named arrangements of the stage and the copy column, and split and cards
 lengths are each step's share of the scroll. Where a scene frames its subject beside the copy (an `inside` stop's part,

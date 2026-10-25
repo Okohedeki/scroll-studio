@@ -225,6 +225,27 @@ blockquote { hanging-punctuation: first last; }
 .js .ss-step .ss-w > span { transform: none; transition: none; }
 .js .ss-step[data-enter=type-on] .ss-w > span { opacity: clamp(0, calc(var(--in, 1) * var(--n, 1) - var(--i, 0)), 1); }
 
+/* a block as a step (`block: stats` ...): its own markup, fitted to the caption's box or the card. Over a stage it fades in
+   and out with its window and takes the pointer only while it is on. */
+.ss-caption--block { transition: opacity .7s var(--ease); }
+.js .ss-caption--block:not(.ss-on) { opacity: 0; }
+.ss-caption--block.ss-on { pointer-events: auto; }
+:is(.ss-caption--block, .ss-card--block) > * { min-height: 0; }
+:is(.ss-caption--block, .ss-card--block) > .ss-block { padding: 0; min-height: 0; background: none; border: 0; text-align: inherit; display: block; overflow: visible; }
+:is(.ss-caption--block, .ss-card--block) .ss-wrap { max-width: none; margin: 0; }
+:is(.ss-caption--block, .ss-card--block) .ss-head { margin-bottom: 24px; }
+:is(.ss-caption--block, .ss-card--block) :is(.ss-stats, .ss-stats--2, .ss-stats--3) { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 24px; }
+:is(.ss-caption--block, .ss-card--block) .ss-v { font-size: calc(clamp(40px, 4.4vw, 72px) * var(--type-scale)); }
+:is(.ss-caption--block, .ss-card--block) :is(.ss-features, .ss-features--2, .ss-features--4, .ss-timeline, .ss-timeline--3, .ss-timeline--4, .ss-product__in, .ss-faq__in) { grid-template-columns: minmax(0, 1fr); }
+:is(.ss-caption--block, .ss-card--block) .ss-feature { min-height: 0; padding: 20px 22px; gap: 14px; }
+:is(.ss-caption--block, .ss-card--block) .ss-tl { padding: 18px 0 14px; }
+:is(.ss-caption--block, .ss-card--block) .ss-gallery { grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr)); gap: 16px; }
+:is(.ss-caption--block, .ss-card--block) .ss-quote blockquote { font-size: calc(clamp(26px, 2.6vw, 42px) * var(--type-scale)); }
+:is(.ss-caption--block, .ss-card--block) .ss-cta .ss-display { font-size: calc(clamp(40px, 5.4vw, 86px) * var(--type-scale)); }
+:is(.ss-caption--block, .ss-card--block) .ss-cta .ss-btn { margin-top: 28px; }
+:is(.ss-caption--block, .ss-card--block) .ss-product__media { min-height: 0; }
+:is(.ss-caption--block, .ss-card--block) .ss-product__img { max-height: 36vh; }
+
 /* ---------------------------------------------------------------- blocks */
 .ss-block { position: relative; padding: clamp(90px, 14vh, 160px) var(--gutter); }
 .ss-band { background: var(--bg-2); border-block: 1px solid var(--line); }

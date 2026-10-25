@@ -157,7 +157,7 @@ class Scene {
       const real = st && !st.intro;
       const done = p >= 0.999;
       if (H.pnum) H.pnum.textContent = real ? st!.kicker?.match(/\d+/)?.[0] ?? String(active) : done ? "✓" : "—";
-      if (H.ptitle) H.ptitle.textContent = real ? st!.title.replace(/<[^>]+>/g, "") : done ? "Complete" : (h.scales[0] || "");
+      if (H.ptitle) H.ptitle.textContent = real ? (st!.title || "").replace(/<[^>]+>/g, "") : done ? "Complete" : (h.scales[0] || "");
       if (H.pbar) H.pbar.style.transform = `scaleX(${p})`;
       if (H.ppct) H.ppct.textContent = String(Math.round(p * 100));
     }
@@ -174,7 +174,7 @@ let cuts: import("./lib/cuts").CutsApi | null = null;
 if (document.getElementById("ss-cuts")) import("./lib/cuts").then((m) => { cuts = m.makeCuts(); });
 // The nav reads in the colours of the section under it: a dark film on a light site gets a dark nav, and back.
 const surfaced = [...document.querySelectorAll<HTMLElement>("main [class*='ss-surface-']")]
-  .filter((el) => el.matches("section, .ss-panel, .ss-backdrop"));
+  .filter((el) => el.matches("section, .ss-panel, .ss-backdrop") && !el.closest(".ss-caption--block, .ss-card--block"));   // not a block shown as a step
 let navSurface = "";
 function surfaceUnderNav() {
   if (!nav) return;

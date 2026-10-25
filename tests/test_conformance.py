@@ -19,7 +19,7 @@ HEX = re.compile(r"#[0-9a-fA-F]{6}")
 COLOURS = ("bg", "bg2", "ink", "accent", "accent2", "accent_ink")       # every preset sets them; a style may override any
 PRESET_KEYS = {"mode", "colors", "fonts", "display_weight", "em_italic", "radius", "display_em", "labels",
                "display_optical_size", "space", "type", "shade", "motion", "grain", "phone"}
-STYLE_KEYS = PRESET_KEYS | {"label", "about", "font_axes", "cuts", "requires"}
+STYLE_KEYS = PRESET_KEYS | {"label", "about", "font_axes", "cuts", "requires", "scene_blocks"}
 BLOCK_TYPES = {m.model_fields["type"].default for m in vars(spec).values()
                if isinstance(m, type) and issubclass(m, spec.BlockBase) and "type" in m.model_fields}
 BODY, ROLE_TEXT = 7.0, 4.5      # ink on the page: AAA for body copy; buttons and accent text: AA
@@ -110,6 +110,9 @@ def test_a_style_overrides_only_real_block_types_and_has_its_own_motion(name):
     if "hero" in types:
         assert "base.hero_kit(b, e" in t, (f"engine/styles/{name}/blocks.html.j2 draws its own hero but not the landing page "
                                             f"kit: call {{{{ base.hero_kit(b, e) }}}} after its buttons (engine/styles/README.md)")
+    scene = T.styles()[name].get("scene_blocks")
+    assert scene is None or (isinstance(scene, list) and not set(scene) - types), \
+        f"engine/styles/{name}/style.yaml: scene_blocks lists block types the style renders ({sorted(types)}), not {scene}"
 
 
 @pytest.mark.parametrize("name", STYLES)
@@ -161,7 +164,8 @@ def kitchen_sink(style: str | None, brand: dict | None = None) -> spec.Site:
             {"type": "orbit", "id": "orbit", "title": "Orbit", "center": "Core", "items": [{"label": "x"}, {"label": "y"}, {"label": "z"}]},
             {"type": "faq", "id": "faq", "items": [{"q": "Why?", "a": "Because."}]},
             {"type": "type", "id": "words", "steps": [{"title": "Overlay", "badge": {"text": "Fresh", "icon": "dot"},
-                                                        "button": dict(btn, icon="arrow")}]},
+                                                        "button": dict(btn, icon="arrow")},
+                                                      {"block": "stats", "show": [0.5, 1], "items": [{"value": "9", "label": "Stepstat"}]}]},
             {"type": "type", "id": "split", "layout": "split", "steps": [{"title": "Split", "fact": "f"}]},
             {"type": "type", "id": "cards", "layout": "cards", "frame": "card", "steps": [{"title": "Cards", "body": "c", "badge": "Card pill"}]},
             {"type": "cta", "id": "cta", "title": "Done", "button": btn},
@@ -181,7 +185,7 @@ def test_a_style_renders_every_block_type_with_one_h1_and_all_the_words(name):
     text = re.sub(r"<[^>]+>", " ", html)
     for word in ("Every block.", "Twelve", "Then", "A line.", "Because.", "Overlay", "Split", "Cards", "Done",
                  "Fresh kits", "Watch", "from 900 makers", "Join", "Uptime", "9 days", "Northwind", "Teams", "Partners",
-                 "Acme", "Stay close", "from readers", "Fresh", "Card pill"):
+                 "Acme", "Stay close", "from readers", "Fresh", "Card pill", "Stepstat"):
         assert word in text, f"{name}: {word!r} from the spec is missing from the page (content must be real HTML text)"
 
 

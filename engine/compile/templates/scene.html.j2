@@ -22,17 +22,32 @@
   {% if st.hint %}<div class="ss-hint">{{ st.hint }}</div>{% endif %}
 {% endmacro %}
 
-{% macro card(step, i, n) %}
+{# A block shown as a step (`block: stats` ...): the style's markup for that block when it has its own (`kit`, from
+   site.html.j2), else the default; `e` is its media as a block section's (engine/compile/compiler.py), with `in_step`. #}
+{% macro stepblock(el, n, ex, kit) %}
+{% set e = (ex.steps_x[el.index] if ex and ex.steps_x else none) or {"first": false, "in_step": true} %}
+{% if kit and kit.sblocks and el.step.block in kit.btypes %}{{ kit.sblocks.render(el.step.content, e, blocks, {"index0": el.index, "index": el.index + 1, "first": false, "last": false, "length": n}) }}
+{% else %}{{ blocks.render(el.step.content, e) }}{% endif %}
+{% endmacro %}
+
+{% macro card(el, n, ex, kit) %}
+{% set step = el.step %}
+{% if step.content %}<div class="ss-card ss-card--block ss-card--{{ step.block }}">{{ stepblock(el, n, ex, kit) }}</div>
+{% else %}
 <div class="ss-card{% if step.surface %} ss-surface-{{ step.surface }}{% endif %}">
 {{ caption(step, false) }}
 </div>
+{% endif %}
 {% endmacro %}
 
-{% macro ocap(el) %}
+{% macro ocap(el, n, ex, kit) %}
 {% set st = el.step %}
+{% if st.content %}<div class="ss-caption ss-caption--block ss-caption--{{ st.block }}" data-from="{{ el.show[0] }}" data-to="{{ el.show[1] }}"{{ motion(el) }}>{{ stepblock(el, n, ex, kit) }}</div>
+{% else %}
 <div class="ss-caption{% if st.surface %} ss-surface-{{ st.surface }}{% endif %}{% if st.world %} ss-has-world{% endif %}" data-from="{{ el.show[0] }}" data-to="{{ el.show[1] }}"{% if st.world %} data-world="{{ el.index }}"{% endif %}{{ motion(el) }}>
 {{ caption(st, true) }}
 </div>
+{% endif %}
 {% endmacro %}
 
 {% macro hud(h) %}
@@ -53,7 +68,9 @@
 {% endmacro %}
 
 {% import "journey.html.j2" as jy %}
-{% macro render(s, cfg, sdata, ex=none) %}
+{% import "blocks.html.j2" as blocks %}
+{% macro render(s, cfg, sdata, ex=none, kit=none) %}
+{% set n = (s.steps or []) | length %}
 {% if s.journey %}{{ jy.render(s, cfg, sdata, ex, ex.first if ex else false) }}{% else %}
 {% set lay = placed(s) %}
 <section class="ss-scene ss-{{ lay.kind }} ss-side-{{ lay.side }} ss-type-{{ s.type }} ss-shade-{{ s.shade }}{% if s.surface %} ss-surface-{{ s.surface }}{% endif %}{% if s.type == "type" and s.size == "display" %} ss-type--display{% endif %}{% if s.frame %} ss-frame-card{% endif %}" id="{{ s.id }}" data-scene="{{ s.type }}">
@@ -63,9 +80,9 @@
       <div class="ss-visual">{% if cfg.poster %}<img class="ss-poster" src="{{ cfg.poster }}" alt="">{% endif %}</div>
       <div class="ss-shade"></div>
       <div class="ss-captions">
-        {% for el in lay.in_order %}{% if el.auto %}{{ ocap(el) }}{% endif %}{% endfor %}
+        {% for el in lay.in_order %}{% if el.auto %}{{ ocap(el, n, ex, kit) }}{% endif %}{% endfor %}
       </div>
-      {% for el in lay.in_order %}{% if not el.auto %}<div class="ss-captions ss-captions--{{ el.spot }}{% if el.row %} ss-captions--row-{{ el.row }}{% endif %}{% if el.align %} ss-captions--align-{{ el.align }}{% endif %}"{% if el.style %} style="{{ el.style }}"{% endif %}>{{ ocap(el) }}</div>
+      {% for el in lay.in_order %}{% if not el.auto %}<div class="ss-captions ss-captions--{{ el.spot }}{% if el.row %} ss-captions--row-{{ el.row }}{% endif %}{% if el.align %} ss-captions--align-{{ el.align }}{% endif %}"{% if el.style %} style="{{ el.style }}"{% endif %}>{{ ocap(el, n, ex, kit) }}</div>
       {% endif %}{% endfor %}
       {{ hud(s.hud) }}
       {% if s.cue %}<div class="ss-cue">{{ s.cue }}</div>{% endif %}
@@ -75,7 +92,7 @@
 {% elif lay.kind == "split" %}
   <div class="ss-split-grid">
     <div class="ss-steps">
-      {% for el in lay.in_order %}{% set st = el.step %}<article class="ss-step{% if st.intro %} ss-intro{% endif %}{% if st.world %} ss-has-world{% endif %}{{ at(el) }}"{% if st.world %} data-world="{{ el.index }}"{% endif %}{{ motion(el) }} style="--h: {{ st.length | vh }}{% if el.style %}; {{ el.style }}{% endif %}">{{ card(st, el.index, s.steps | length) }}</article>{% endfor %}
+      {% for el in lay.in_order %}{% set st = el.step %}<article class="ss-step{% if st.intro %} ss-intro{% endif %}{% if st.world %} ss-has-world{% endif %}{{ at(el) }}"{% if st.world %} data-world="{{ el.index }}"{% endif %}{{ motion(el) }} style="--h: {{ st.length | vh }}{% if el.style %}; {{ el.style }}{% endif %}">{{ card(el, n, ex, kit) }}</article>{% endfor %}
     </div>
     <div class="ss-pin">
       <div class="ss-visual"></div>
@@ -90,7 +107,7 @@
     {{ hud(s.hud) }}
   </div>
   <div class="ss-steps ss-steps--over">
-    {% for el in lay.in_order %}{% set st = el.step %}<article class="ss-step{% if st.intro %} ss-intro{% endif %}{% if st.world %} ss-has-world{% endif %}{{ at(el) }}"{% if st.world %} data-world="{{ el.index }}"{% endif %}{{ motion(el) }} style="--h: {{ st.length | vh }}{% if el.style %}; {{ el.style }}{% endif %}">{{ card(st, el.index, s.steps | length) }}</article>{% endfor %}
+    {% for el in lay.in_order %}{% set st = el.step %}<article class="ss-step{% if st.intro %} ss-intro{% endif %}{% if st.world %} ss-has-world{% endif %}{{ at(el) }}"{% if st.world %} data-world="{{ el.index }}"{% endif %}{{ motion(el) }} style="--h: {{ st.length | vh }}{% if el.style %}; {{ el.style }}{% endif %}">{{ card(el, n, ex, kit) }}</article>{% endfor %}
   </div>
 {% endif %}
   <script type="application/json" class="ss-config">{{ cfg | tojson }}</script>

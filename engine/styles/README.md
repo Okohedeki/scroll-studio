@@ -12,7 +12,7 @@ anti-patterns, and a one-paragraph UX signature) is in [docs/styles/](../../docs
 ```
 engine/styles/<name>/
   style.yaml        label, about, mode, colors, fonts, font_axes (Google css2 specs for its fonts), radius,
-                    optional requires (tokens a brand may not change, below) and cuts.
+                    optional requires (tokens a brand may not change, below), cuts and scene_blocks (below).
                     fonts beyond display/body/mono (e.g. masthead: UnifrakturMaguntia) are loaded and exposed as
                     --font-<role> CSS variables
   style.css         everything visual, scoped under html.style-<name>
@@ -76,6 +76,14 @@ to the wrapper (flipbook letters it in as one unit). The badge prints as its wor
 your markup shows `b.badge`; a badge's link, button icons and the ghost look are drawn by the default markup, and a
 style keeps its own badge and buttons. `frame: card` is drawn by the default hero and by every scene. The `logos` and
 `signup` blocks fall back to the default markup in every style.
+
+The same macro draws a block shown as a step inside a scene (`block: stats` ...). Then `e.in_step` is true, `e.first`
+is false (a step never holds the page's `<h1>`), `loop` is the step's place in its scene, and the markup sits inside the
+scene's caption box (`.ss-caption--block`) or card (`.ss-card--block`): size it to that box, not to the screen. Your
+runtime does not see it as a section of the page (it is inside a scene), so it must read without your section motion.
+A style whose markup for a type only works as a page section lists the types that do work in `style.yaml`:
+`scene_blocks: [stats, quote]` (`[]`: none); the others are drawn with the default markup inside a scene, in your
+tokens. Leave it out and every type you render is drawn your way in scenes too.
 
 ### chrome.html.j2
 

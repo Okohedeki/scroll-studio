@@ -14,9 +14,10 @@ VERSION = 2
 
 def build(sec: ParallaxScene, ctx: BuildContext, theme: dict) -> dict:
     from ..backends import depth as depthmod
-    # every step with an image is a chapter (an intro step may have one); other non-intro steps are an error
-    if any(s.image is None for s in sec.steps if not s.intro):
-        raise BuildError(f"parallax section '{sec.id}': every non-intro step needs an `image`")
+    # every step with an image is a chapter (an intro step may have one); other caption steps are an error (a block step
+    # shows its block over the chapter it sits in)
+    if any(s.image is None for s in sec.steps if not s.intro and s.content is None):
+        raise BuildError(f"parallax section '{sec.id}': every non-intro caption step needs an `image`")
     idx = [i for i, s in enumerate(sec.steps) if s.image is not None]
     if not idx:
         raise BuildError(f"parallax section '{sec.id}' has no images")

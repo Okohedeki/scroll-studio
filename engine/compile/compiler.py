@@ -48,6 +48,9 @@ def _env(style_dir: Optional[Path] = None, skin: Optional[dict] = None) -> Envir
     env.filters["countable"] = lambda v: bool(re.fullmatch(r"\d+(\.\d+)?", str(v).replace(",", "")))
     # the layout model: every placement field compiled into one form (engine/layout.py)
     env.globals.update(placed=layout.scene_layout, stop_spot=layout.stop_spot)
+    # the block types the style draws its own way when they are steps inside a scene (style.yaml `scene_blocks`;
+    # None: every type its blocks.html.j2 renders)
+    env.globals["scene_blocks"] = themes.styles().get(style_dir.name, {}).get("scene_blocks") if style_dir is not None else None
     return env
 
 
@@ -312,12 +315,15 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         cinemagraph_of(ref, poster)
         live_of(ref, poster, src, out)
         return poster
+    def tiles(b):
+        """A gallery with its tiles' pictures written into the site."""
+        def tile(img):
+            return block_image(img, 900) if isinstance(img, ImageInput) else publish(img)
+        return b.model_copy(update={"items": [it.model_copy(update={"image": tile(it.image), "video": publish(it.video)})
+                                              for it in b.items]})
     for e in sections:
         if e["s"].type == "gallery":
-            def tile(img):
-                return block_image(img, 900) if isinstance(img, ImageInput) else publish(img)
-            e["s"] = e["s"].model_copy(update={"items": [it.model_copy(update={"image": tile(it.image), "video": publish(it.video)})
-                                                         for it in e["s"].items]})
+            e["s"] = tiles(e["s"])
     def block_media(s) -> dict:
         """The media a block shows (images resized and written as WebP, files copied in), keyed as the templates read them."""
         x = {"backdrop": block_image(getattr(s, "backdrop", None), 2400)}
@@ -386,11 +392,13 @@ def build_site(project: Project, log: Callable[[str], None] = print,
 
     # Stats bound to chart data: the number comes from the same file the chart draws
     charts = {e["s"].id: e for e in sections if e["scene"] and e["s"].type == "chart"}
-    for e in sections:
-        if e["s"].type != "stats" or not any(st.data for st in e["s"].items):
-            continue
+
+    def bound(b):
+        """A stats block with the numbers that come from a chart read in."""
+        if not any(st.data for st in b.items):
+            return b
         items = []
-        for st in e["s"].items:
+        for st in b.items:
             if st.data:
                 ch = charts.get(st.data.section)
                 if not ch:
@@ -408,14 +416,33 @@ def build_site(project: Project, log: Callable[[str], None] = print,
                 st = st.model_copy(update={"value": f"{v:.{st.data.decimals}f}"})
                 log(f"  stat '{st.label}' = {st.value} (from {st.data.section}/{st.data.series} {at})")
             items.append(st)
-        e["s"] = e["s"].model_copy(update={"items": items})
+        return b.model_copy(update={"items": items})
+    for e in sections:
+        if e["s"].type == "stats":
+            e["s"] = bound(e["s"])
 
     # CTA backgrounds can borrow a scene's final frame
     finals = {e["s"].id: (e["config"] or {}).get("end") for e in sections if e["scene"]}
+
+    def cta_bg(b) -> Optional[str]:
+        bg = b.background
+        return (finals.get(bg[6:]) if bg.startswith("scene:") else publish(bg)) if bg else None
     for e in sections:
-        bg = getattr(e["s"], "background", None)
-        if e["s"].type == "cta" and bg:
-            e["bg"] = finals.get(bg[6:]) if bg.startswith("scene:") else publish(bg)
+        if e["s"].type == "cta" and e["s"].background:
+            e["bg"] = cta_bg(e["s"])
+
+    # Blocks shown as steps in a scene (`block: stats` ...): their media and data as a block section's, for the scene
+    # template (`steps_x`, by step)
+    for e in sections:
+        steps = (getattr(e["s"], "steps", None) or []) if e["scene"] else []
+        if not any(st.content is not None for st in steps):
+            continue
+        e["steps_x"] = [None] * len(steps)
+        for k, st in enumerate(steps):
+            if st.content is None:
+                continue
+            b = st.content = bound(st.content) if st.block == "stats" else tiles(st.content) if st.block == "gallery" else st.content
+            e["steps_x"][k] = {**block_media(b), "bg": cta_bg(b) if b.type == "cta" else None, "first": False, "in_step": True}
 
     # film grammar between sections (`transition:`): which joins get their own stretch of scroll (engine/cuts.py)
     from .. import cuts as cuts_mod

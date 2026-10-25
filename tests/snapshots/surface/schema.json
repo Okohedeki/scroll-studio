@@ -12034,7 +12034,14 @@
   },
   "Step": {
    "additionalProperties": false,
-   "description": "One beat of copy that scrolls past the scene.",
+   "description": "One beat of copy that scrolls past the scene: a caption, or any block (`block:`).",
+   "if": {
+    "properties": {
+     "block": {
+      "const": "caption"
+     }
+    }
+   },
    "properties": {
     "at": {
      "anyOf": [
@@ -12099,6 +12106,23 @@
      "default": null,
      "description": "A small pill above the headline: words, or `{text, href, tag, icon}` for a link with a 'New' tag or a dot",
      "title": "Badge"
+    },
+    "block": {
+     "default": "caption",
+     "description": "What the step shows: caption (the default: kicker, title, body, fact, hint, button) or a block, with that block's own fields beside `block:` (features, stats, timeline, quote, cta, gallery, product, faq). A block step is placed with `at` and timed with `show` like any other step; a style that draws the block its own way draws it that way here too",
+     "enum": [
+      "caption",
+      "features",
+      "stats",
+      "timeline",
+      "quote",
+      "cta",
+      "gallery",
+      "product",
+      "faq"
+     ],
+     "title": "Block",
+     "type": "string"
     },
     "body": {
      "anyOf": [
@@ -12304,14 +12328,18 @@
      "title": "Surface"
     },
     "title": {
-     "description": "Headline; <em>…</em> marks the accent words",
+     "default": "",
+     "description": "Headline; <em>…</em> marks the accent words. Every caption step has one",
      "title": "Title",
      "type": "string"
     }
    },
-   "required": [
-    "title"
-   ],
+   "required": [],
+   "then": {
+    "required": [
+     "title"
+    ]
+   },
    "title": "Step",
    "type": "object"
   },

@@ -12,8 +12,8 @@ import re
 from dataclasses import dataclass
 from typing import Annotated, Any, Literal, Optional, Union
 
-from pydantic import (BaseModel, ConfigDict, Discriminator, Field, PrivateAttr, Tag, field_validator, model_serializer,
-                      model_validator)
+from pydantic import (BaseModel, ConfigDict, Discriminator, Field, PrivateAttr, Tag, ValidationError, field_validator,
+                      model_serializer, model_validator)
 
 from .safety import CSS_NAME, FONT_NAME, SAFE_ID, check_url, css_value_ok
 
@@ -824,11 +824,36 @@ FRAME_DOC = ("card: present the section as a rounded card inset on a border in t
 EXIT_DOC = ("How the step leaves: fade, rise (the words rise away), wipe (cleared to the right), type-on (gone at once), "
             "scale or none. Default: the layout's own")
 
+# ---- any block as a step (docs/design/1.5-make-it-yours.md §3): `block: stats` with the stats block's own fields, placed
+# with `at` and timed with `show` like any step. kicker/title/body is the `caption` block, the default.
+STEP_BLOCKS = ("caption", "features", "stats", "timeline", "quote", "cta", "gallery", "product", "faq")
+StepBlock = Literal["caption", "features", "stats", "timeline", "quote", "cta", "gallery", "product", "faq"]
+_STEP_OWN = ("block", "at", "show", "enter", "exit", "length", "state")    # what every step has, whatever it shows
+_STEP_MIRROR = ("kicker", "title", "body")       # a block's words the step carries too (storyboards, trailers, the HUD)
+_SECTION_ONLY = ("nav_label", "backdrop", "transition")
+BLOCK_DOC = ("What the step shows: caption (the default: kicker, title, body, fact, hint, button) or a block, with that "
+             "block's own fields beside `block:` (features, stats, timeline, quote, cta, gallery, product, faq). A block "
+             "step is placed with `at` and timed with `show` like any other step; a style that draws the block its own "
+             "way draws it that way here too")
+
+
+def _step_block_models() -> dict:
+    return {"features": FeaturesBlock, "stats": StatsBlock, "timeline": TimelineBlock, "quote": QuoteBlock,
+            "cta": CtaBlock, "gallery": GalleryBlock, "product": ProductBlock, "faq": FaqBlock}
+
+
+def _step_schema(schema: dict) -> None:
+    """A caption step needs its title; a block step has its block's fields instead (JSON Schema says so with if/then)."""
+    schema["required"] = [r for r in schema.get("required", []) if r != "title"]
+    schema["if"] = {"properties": {"block": {"const": "caption"}}}
+    schema["then"] = {"required": ["title"]}
+
 
 class Step(Model):
-    """One beat of copy that scrolls past the scene."""
+    """One beat of copy that scrolls past the scene: a caption, or any block (`block:`)."""
+    model_config = ConfigDict(extra="forbid", json_schema_extra=_step_schema)
     kicker: Optional[str] = None
-    title: str = Field(..., description="Headline; <em>…</em> marks the accent words")
+    title: str = Field("", description="Headline; <em>…</em> marks the accent words. Every caption step has one")
     body: Optional[str] = None
     fact: Optional[str] = Field(None, description="Small print under the body (mono)")
     at: Optional[At] = Field(None, description=AT_DOC)
@@ -868,29 +893,75 @@ class Step(Model):
     show: Optional[tuple[float, float]] = Field(None, description=SHOW_DOC)
     enter: Optional[Motion] = Field(None, description=ENTER_DOC)
     exit: Optional[Motion] = Field(None, description=EXIT_DOC)
+    block: StepBlock = Field("caption", description=BLOCK_DOC)
+    _content: Optional["BlockBase"] = PrivateAttr(None)
+
+    @model_validator(mode="wrap")
+    @classmethod
+    def _block_fields(cls, v, handler):
+        """A block step's fields, other than the ones every step has, are the block's: validated as that block (so a typo
+        is reported against it) and kept as `content`."""
+        model = _step_block_models().get(v.get("block")) if isinstance(v, dict) else None
+        if model is None:                           # a caption, or a block name the field itself reports
+            return handler(v)
+        kind, fields = v["block"], {k: x for k, x in v.items() if k not in _STEP_OWN}
+        for k in _SECTION_ONLY:
+            if k in fields:
+                raise ValueError(f"a {kind} step: `{k}` belongs to a section of its own, not to a step in a scene")
+        try:
+            content = model.model_validate({**fields, "type": kind})
+        except ValidationError as e:
+            raise ValueError(f"a {kind} step: " + "; ".join(
+                f"{'.'.join(str(x) for x in er['loc']) or kind}: {er['msg']}" for er in e.errors())) from None
+        own = {k: x for k, x in v.items() if k in _STEP_OWN}
+        own.update({k: getattr(content, k) for k in _STEP_MIRROR if isinstance(getattr(content, k, None), str)})
+        step = handler(own)
+        step._content = content
+        return step
+
+    @property
+    def content(self) -> Optional["BlockBase"]:
+        """The block a block step shows (None for a caption)."""
+        return self._content
+
+    @content.setter
+    def content(self, block: "BlockBase") -> None:      # the compiler swaps in the block with its media written
+        self._content = block
+
+    @property
+    def label(self) -> str:
+        """How messages name the step: its title, or the block it shows."""
+        return self.title[:40] or f"({self.block})"
 
     @model_validator(mode="after")
     def _placement(self):
+        if self.block == "caption" and "title" not in self.model_fields_set:
+            raise ValueError("a caption step needs a `title` (or `block:` and that block's fields)")
         if self.show is not None:
             a, b = self.show
             if not 0 <= a < b <= 1:
-                raise ValueError(f"step '{self.title[:40]}': show {list(self.show)} must be [from, to] with 0 <= from < to <= 1")
+                raise ValueError(f"step '{self.label}': show {list(self.show)} must be [from, to] with 0 <= from < to <= 1")
             if isinstance(self.at, tuple):
-                raise ValueError(f"step '{self.title[:40]}': `at: [from, to]` is the older way to write `show`; give one of them")
+                raise ValueError(f"step '{self.label}': `at: [from, to]` is the older way to write `show`; give one of them")
         if self.corner is not None and self.at is not None and not isinstance(self.at, tuple):
-            raise ValueError(f"step '{self.title[:40]}': `place: {self.corner}` is the older way to write `at: {self.corner}`; "
+            raise ValueError(f"step '{self.label}': `place: {self.corner}` is the older way to write `at: {self.corner}`; "
                              f"give one of them")
         return self
 
     @model_serializer(mode="wrap")
-    def _dump(self, handler):
+    def _dump(self, handler, info):
         """The layout fields are left out while unset, so a spec written before them dumps (and is embedded in the page)
-        exactly as it did."""
+        exactly as it did. A block step dumps as it is written: the step's own fields with the block's beside them."""
         d = handler(self)
         if isinstance(d, dict):
             for k in ("show", "enter", "exit", "badge"):
                 if d.get(k, 0) is None:
                     del d[k]
+            if d.get("block") == "caption":
+                del d["block"]
+            if self.content is not None:
+                block = self.content.model_dump(mode=info.mode, exclude={"type", *_SECTION_ONLY})
+                d = {**{k: d[k] for k in _STEP_OWN if k in d}, **block}
         return d
 
 
@@ -1036,11 +1107,11 @@ class SceneBase(Model):
         if self.layout in ("split", "cards"):
             for st in self.steps:
                 if st.show is not None:
-                    raise ValueError(f"scene '{self.id}', step '{st.title[:40]}': in a {self.layout} layout a step shows "
+                    raise ValueError(f"scene '{self.id}', step '{st.label}': in a {self.layout} layout a step shows "
                                      f"while it scrolls past, so `show` has nothing to time; set its `length` (scroll "
                                      f"distance) instead, or use `layout: overlay`")
                 if self.layout == "split" and isinstance(st.at, (AtBox, AtGrid)):
-                    raise ValueError(f"scene '{self.id}', step '{st.title[:40]}': in a split layout the copy keeps its "
+                    raise ValueError(f"scene '{self.id}', step '{st.label}': in a split layout the copy keeps its "
                                      f"column beside the picture, so `at` takes a spot (left, center, right, top, bottom "
                                      f"...); a box or a grid slot needs `layout: cards` or `overlay`")
         return self

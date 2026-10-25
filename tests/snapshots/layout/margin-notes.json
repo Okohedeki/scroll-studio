@@ -64,8 +64,8 @@
               "ss-caption"
              ],
              "data": {
-              "data-from": "0.0217",
-              "data-to": "0.159"
+              "data-from": "0.0165",
+              "data-to": "0.1211"
              },
              "text": {
               "kicker": "Margin",
@@ -93,8 +93,8 @@
               "ss-surface-light"
              ],
              "data": {
-              "data-from": "0.201",
-              "data-to": "0.3292",
+              "data-from": "0.153",
+              "data-to": "0.2506",
               "data-enter": "wipe"
              },
              "text": {
@@ -119,8 +119,8 @@
               "ss-surface-light"
              ],
              "data": {
-              "data-from": "0.3696",
-              "data-to": "0.4978",
+              "data-from": "0.2815",
+              "data-to": "0.3791",
               "data-enter": "type-on",
               "data-exit": "fade"
              },
@@ -152,8 +152,8 @@
               "ss-surface-light"
              ],
              "data": {
-              "data-from": "0.5383",
-              "data-to": "0.6665",
+              "data-from": "0.4099",
+              "data-to": "0.5075",
               "data-enter": "scale"
              },
              "text": {
@@ -178,8 +178,8 @@
               "ss-surface-light"
              ],
              "data": {
-              "data-from": "0.707",
-              "data-to": "0.8352",
+              "data-from": "0.5383",
+              "data-to": "0.636",
               "data-enter": "fade",
               "data-exit": "wipe"
              },
@@ -188,6 +188,88 @@
               "title": "Every note, on its own shelf.",
               "title_tag": "h2"
              }
+            }
+           ]
+          },
+          {
+           "tag": "div",
+           "class": [
+            "ss-captions",
+            "ss-captions--grid",
+            "ss-captions--row-bottom"
+           ],
+           "style": {
+            "--col": "2 / span 7"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-caption",
+              "ss-caption--block",
+              "ss-caption--stats"
+             ],
+             "data": {
+              "data-from": "0.6657",
+              "data-to": "0.7563",
+              "data-enter": "rise"
+             },
+             "children": [
+              {
+               "tag": "section",
+               "class": [
+                "ss-block",
+                "ss-band"
+               ],
+               "children": [
+                {
+                 "tag": "div",
+                 "class": [
+                  "ss-wrap",
+                  "ss-stats",
+                  "ss-stats--3"
+                 ]
+                }
+               ]
+              }
+             ]
+            }
+           ]
+          },
+          {
+           "tag": "div",
+           "class": [
+            "ss-captions",
+            "ss-captions--box",
+            "ss-captions--align-right"
+           ],
+           "style": {
+            "--x": "0.5",
+            "--y": "0.16",
+            "--w": "0.42"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-caption",
+              "ss-caption--block",
+              "ss-caption--quote"
+             ],
+             "data": {
+              "data-from": "0.785",
+              "data-to": "0.8756",
+              "data-enter": "fade",
+              "data-exit": "fade"
+             },
+             "children": [
+              {
+               "tag": "section",
+               "class": [
+                "ss-block"
+               ]
+              }
+             ]
             }
            ]
           },
@@ -204,8 +286,8 @@
               "ss-caption"
              ],
              "data": {
-              "data-from": "0.8728",
-              "data-to": "0.9827",
+              "data-from": "0.9031",
+              "data-to": "0.9868",
               "data-enter": "rise"
              },
              "text": {
@@ -239,8 +321,8 @@
       "body": "A notes app that keeps the asides, the arrows and the questions you scribble beside the work.",
       "fact": null,
       "at": [
-       0.0217,
-       0.159
+       0.0165,
+       0.1211
       ],
       "length": 1.5,
       "intro": true,
@@ -270,8 +352,8 @@
       "image": null,
       "state": {},
       "show": [
-       0.201,
-       0.3292
+       0.153,
+       0.2506
       ],
       "enter": "wipe"
      },
@@ -290,8 +372,8 @@
       "image": null,
       "state": {},
       "show": [
-       0.3696,
-       0.4978
+       0.2815,
+       0.3791
       ],
       "enter": "type-on",
       "exit": "fade"
@@ -317,8 +399,8 @@
       "image": null,
       "state": {},
       "show": [
-       0.5383,
-       0.6665
+       0.4099,
+       0.5075
       ],
       "enter": "scale"
      },
@@ -337,11 +419,76 @@
       "image": null,
       "state": {},
       "show": [
-       0.707,
-       0.8352
+       0.5383,
+       0.636
       ],
       "enter": "fade",
       "exit": "wipe"
+     },
+     {
+      "block": "stats",
+      "at": {
+       "grid": "2 / span 7",
+       "row": "bottom",
+       "align": "left"
+      },
+      "show": [
+       0.6657,
+       0.7563
+      ],
+      "enter": "rise",
+      "length": 1.3,
+      "state": {
+       "wide": true
+      },
+      "id": null,
+      "band": false,
+      "surface": null,
+      "items": [
+       {
+        "value": "0",
+        "unit": null,
+        "label": "notifications, ever",
+        "data": null
+       },
+       {
+        "value": "1",
+        "unit": "s",
+        "label": "from the dock to a blank page",
+        "data": null
+       },
+       {
+        "value": "100",
+        "unit": "%",
+        "label": "of it works offline",
+        "data": null
+       }
+      ]
+     },
+     {
+      "block": "quote",
+      "at": {
+       "x": 0.5,
+       "y": 0.16,
+       "w": 0.42,
+       "h": null,
+       "align": "right"
+      },
+      "show": [
+       0.785,
+       0.8756
+      ],
+      "enter": "fade",
+      "exit": "fade",
+      "length": 1.3,
+      "state": {
+       "wide": true
+      },
+      "id": null,
+      "band": false,
+      "surface": null,
+      "text": "I stopped losing the <em>half-thoughts.</em> They are right where I left them.",
+      "who": "A reader in the Margin beta"
      },
      {
       "kicker": "Margin",
@@ -358,8 +505,8 @@
       "image": null,
       "state": {},
       "show": [
-       0.8728,
-       0.9827
+       0.9031,
+       0.9868
       ],
       "enter": "rise"
      }

@@ -213,6 +213,11 @@ def _entries(site: Site, cuts_cfg: list[dict]) -> list[dict]:
             e["jx"] = {st.id: [_media(b) for b in st.blocks] for st in sec.journey.stops}
         if sec.type == "cta" and getattr(sec, "background", None):
             e["bg"] = "standin"
+        steps = getattr(sec, "steps", None) or []
+        if any(st.content is not None for st in steps):      # blocks shown as steps, with their media as the compiler keys it
+            e["steps_x"] = [None if st.content is None else
+                            {**_media(st.content), "bg": "standin" if getattr(st.content, "background", None) else None,
+                             "first": False, "in_step": True} for st in steps]
         entries.append(e)
     for c in cuts_cfg:
         entries[c["a"]]["cut_out"], entries[c["b"]]["cut_in"] = c["n"], c["n"]

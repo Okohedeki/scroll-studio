@@ -1,7 +1,8 @@
 # Margin: a notes app pitched on a miniature desk, and the example for placing words (docs/guide.md, "Placing words").
 # Every step says where it sits and how it arrives with the layout model: `at` (a named spot, a box on the stage or a slot
 # on the 12-column grid), `enter` and `exit`. The diorama times the steps itself (each one is on screen while the camera
-# rests at its place), so no step needs a `show`; give one to time a caption by hand.
+# rests at its place), so no step needs a `show`; give one to time a caption by hand. A step can also be any block
+# (`block: stats`, `block: quote` ...) with that block's own fields, placed and timed the same way.
 # Scene type `diorama`: laid out on the CPU in seconds, drawn live in the page. No GPU, no models, nothing to render.
 #
 #   studio build examples/margin-notes
@@ -63,6 +64,23 @@ sections:
         surface: light
         exit: wipe
         length: 1.4
+      - block: stats                                     # any block can be a step: the stats block's own fields
+        items:
+          - { value: "0", label: "notifications, ever" }
+          - { value: "1", unit: s, label: "from the dock to a blank page" }
+          - { value: "100", unit: "%", label: "of it works offline" }
+        at: { grid: "2 / span 7", row: bottom }
+        enter: rise
+        state: { wide: true }                            # the camera pulls back over the whole desk
+        length: 1.3
+      - block: quote
+        text: "I stopped losing the <em>half-thoughts.</em> They are right where I left them."
+        who: A reader in the Margin beta
+        at: { x: 0.5, y: 0.16, w: 0.42, align: right }
+        enter: fade
+        exit: fade
+        state: { wide: true }
+        length: 1.3
       - kicker: Margin
         title: "Bring your <em>own margins.</em>"
         at: center

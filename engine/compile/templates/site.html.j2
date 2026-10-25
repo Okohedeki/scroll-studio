@@ -157,6 +157,8 @@
 {% if style_blocks %}{% import "style/blocks.html.j2" as sblocks %}{% set btypes = sblocks.types %}{% else %}{% set btypes = [] %}{% endif %}
 {% if style_scenes %}{% import "style/scenes.html.j2" as sscenes %}{% set stypes = sscenes.types %}{% else %}{% set stypes = [] %}{% endif %}
 {% if style_chrome %}{% import "style/chrome.html.j2" as chrome %}{% endif %}
+{# blocks shown as steps inside scenes (`block: stats` ...) use the style's markup too #}
+{% set kit = {"sblocks": sblocks if style_blocks else none, "btypes": btypes if scene_blocks is none else (btypes | select("in", scene_blocks) | list)} %}
 
 <header class="ss-nav" id="ss-nav"><div class="ss-nav__in">
   <a class="ss-wordmark" href="#">
@@ -177,7 +179,7 @@
 {% if e.cut_out is not none %}<div class="ss-cutw ss-cutw--out" data-cut-out="{{ e.cut_out }}" style="--cut-l: {{ cuts[e.cut_out].length }}"><div class="ss-cutpin ss-cutpin--out{{ surface }}">{% endif %}
 {% if stack %}<div class="ss-panel{{ surface }}{% if e.s.type == 'hero' %} ss-panel--hero{% endif %}{% if e.backdrop %} ss-backdrop{% endif %}"{% if e.backdrop %} style="background-image: url({{ e.backdrop }})"{% endif %}>
 {% elif e.backdrop %}<div class="ss-backdrop{{ surface }}" style="background-image: url({{ e.backdrop }})">{% endif %}
-{% if e.scene %}{% if e.s.type in stypes %}{{ sscenes.render(e.s, e.config, e.sdata, scene) }}{% else %}{{ scene.render(e.s, e.config, e.sdata, e) }}{% endif %}{% elif e.s.type in btypes %}{{ sblocks.render(e.s, e, blocks, loop) }}{% else %}{{ blocks.render(e.s, e) }}{% endif %}
+{% if e.scene %}{% if e.s.type in stypes %}{{ sscenes.render(e.s, e.config, e.sdata, scene) }}{% else %}{{ scene.render(e.s, e.config, e.sdata, e, kit) }}{% endif %}{% elif e.s.type in btypes %}{{ sblocks.render(e.s, e, blocks, loop) }}{% else %}{{ blocks.render(e.s, e) }}{% endif %}
 {% if stack or e.backdrop %}</div>{% endif %}
 {% if e.cut_out is not none %}</div><div class="ss-cutgap" aria-hidden="true"></div></div>{% endif %}
 {% if e.cut_in is not none %}</div><div class="ss-cutgap" aria-hidden="true"></div></div>{% endif %}
