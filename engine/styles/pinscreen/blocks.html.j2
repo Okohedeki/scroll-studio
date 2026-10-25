@@ -26,7 +26,7 @@
       {% if b.badge %}{{ label(b.badge) }}{% endif %}
       {% if e.first %}<h1 class="pn-head pn-hero__title" data-pin="halo">{{ b.title | rich }}</h1>{% else %}<h2 class="pn-head pn-hero__title" data-pin="halo">{{ b.title | rich }}</h2>{% endif %}
       {% if b.body %}<p class="pn-lede">{{ b.body | rich }}</p>{% endif %}
-      {{ btns(b.buttons) }}
+      {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
     </div>
     <div class="pn-subject">
     {% if b.device %}<div class="pn-phonebox" data-pin="phone" data-origin>{{ base.phone(b.device, e.screen, e.clip) }}</div>

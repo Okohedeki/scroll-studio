@@ -22,7 +22,7 @@
       {% if b.badge %}<p class="mp-badge">{{ b.badge }}</p>{% endif %}
       {% if e.first %}<h1 class="mp-title">{{ b.title | rich }}</h1>{% else %}<h2 class="mp-title">{{ b.title | rich }}</h2>{% endif %}
       {% if b.body %}<p class="mp-lede">{{ b.body | rich }}</p>{% endif %}
-      {{ btns(b.buttons) }}
+      {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
     </div></div>
     {% if b.device %}<div class="mp-plane mp-prop" data-mp-d="0.84" data-side="r">{{ base.phone(b.device, e.screen, e.clip) }}</div>
     {% elif e.img %}<div class="mp-plane mp-prop" data-mp-d="1.16" data-side="r"><figure class="mp-cel"><img src="{{ e.img }}" alt="" fetchpriority="high"></figure></div>

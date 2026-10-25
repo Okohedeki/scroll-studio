@@ -19,7 +19,7 @@
     <{{ h }} class="px-logo">{{ b.title | rich }}</{{ h }}>
     <p class="px-start" aria-hidden="true">Press start</p>
     {% if b.body %}<p class="px-body px-title__body">{{ b.body | rich }}</p>{% endif %}
-    {{ menu(b.buttons, " px-menu--title") }}
+    {{ menu(b.buttons, " px-menu--title") }}{{ base.hero_kit(b, e) }}
     {% if b.device %}<div class="px-tv px-tv--hero">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
   </div>
 

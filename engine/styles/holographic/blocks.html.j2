@@ -25,7 +25,7 @@
       {% if b.badge %}<p class="hg-chip"><i aria-hidden="true"></i>{{ b.badge }}</p>{% endif %}
       {% if e.first %}<h1 class="hg-h1 hg-sheen">{{ b.title | rich }}</h1>{% else %}<h2 class="hg-h1 hg-sheen">{{ b.title | rich }}</h2>{% endif %}
       {% if b.body %}<p class="hg-lede">{{ b.body | rich }}</p>{% endif %}
-      {{ btns(b.buttons) }}
+      {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
     </div>
     <div class="hg-pedestal hg-pedestal--hero">
       {% if b.device %}

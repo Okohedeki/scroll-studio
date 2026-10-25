@@ -19,7 +19,7 @@
     {% if b.badge %}<p class="wf-kicker">{{ b.badge }}</p>{% endif %}
     {% if e.first %}<h1 class="wf-head wf-plot">{{ b.title | rich }}</h1>{% else %}<h2 class="wf-head wf-plot">{{ b.title | rich }}</h2>{% endif %}
     {% if b.body %}<p class="wf-body">{{ b.body | rich }}</p>{% endif %}
-    {{ btns(b.buttons) }}
+    {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
   </div>
   {% if b.device %}<figure class="wf-device" data-device>{{ base.phone(b.device, e.screen, e.clip) }}</figure>{% endif %}
 </section>

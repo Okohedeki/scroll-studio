@@ -168,6 +168,7 @@ html.style-wireframe-3d .ss-block:not(.wf-st) .ss-display, html.style-wireframe-
 html.style-wireframe-3d .ss-tile, html.style-wireframe-3d .ss-feature { border: 1px solid var(--ln2); border-radius: 0; background: transparent; box-shadow: none; }
 html.style-wireframe-3d .ss-tile img { filter: grayscale(1) contrast(1.4); }
 html.style-wireframe-3d .ss-btn { border-radius: 0; font-family: "JetBrains Mono", monospace; text-transform: uppercase; letter-spacing: .1em; background: transparent; backdrop-filter: none; }
+html.style-wireframe-3d .ss-signup .ss-btn--hot { color: var(--hi); border-color: var(--hi); }   /* a signup button (the landing page kit), outlined like the drawing's own */
 html.style-wireframe-3d .ss-kicker { font-family: "JetBrains Mono", monospace; color: var(--hi); }
 html.style-wireframe-3d .ss-footer { position: relative; z-index: 6; background: var(--bgc); border-top: 1px solid var(--ln2); font: 500 11px "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--ln2); }
 html.style-wireframe-3d .ss-footer__in { padding: 26px 18px 30px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 18px; }

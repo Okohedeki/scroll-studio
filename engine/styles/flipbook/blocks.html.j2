@@ -18,7 +18,7 @@
   {% if b.badge %}<span class="fb-label" data-fb-unit>{{ b.badge }}</span>{% endif %}
   <{{ h }} class="fb-h fb-h--hero" data-fb-write="chars">{{ b.title | rich }}</{{ h }}>
   {% if b.body %}<p class="fb-body" data-fb-write="words">{{ b.body | rich }}</p>{% endif %}
-  {{ boxes(b.buttons) }}
+  {{ boxes(b.buttons) }}{{ base.hero_kit(b, e, "data-fb-unit") }}
   {% if e.img %}<img class="fb-img" src="{{ e.img }}" alt="" data-fb-img>{% endif %}
 
 {% elif b.type == "intro" %}

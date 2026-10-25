@@ -16,7 +16,7 @@
     {% if b.badge %}<p class="bh-cap bh-slide" data-from="t">{{ b.badge }}</p>{% endif %}
     {% if e.first %}<h1 class="bh-head bh-words">{{ b.title | rich }}</h1>{% else %}<h2 class="bh-head bh-words">{{ b.title | rich }}</h2>{% endif %}
     {% if b.body %}<p class="bh-body bh-slide" data-from="b">{{ b.body | rich }}</p>{% endif %}
-    {% if b.buttons %}<div class="bh-slide" data-from="r">{{ btns(b.buttons) }}</div>{% endif %}
+    {% if b.buttons %}<div class="bh-slide" data-from="r">{{ btns(b.buttons) }}</div>{% endif %}{{ base.hero_kit(b, e) }}
     {% if b.device %}<figure class="bh-device bh-slide" data-from="r">{{ base.phone(b.device, e.screen, e.clip) }}</figure>{% endif %}
   </div>
 </section>

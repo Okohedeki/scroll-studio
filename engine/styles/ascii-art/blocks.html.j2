@@ -39,7 +39,7 @@
     {% if b.badge %}<p class="tx-l tx-dim">{{ b.badge }}</p>{% endif %}
     <{{ h }} class="tx-l tx-h tx-h--1"><span class="tx-hash" aria-hidden="true"># </span>{{ b.title | rich }}</{{ h }}>
     {% if b.body %}<p class="tx-l tx-p">{{ b.body | rich }}</p>{% endif %}
-    {{ btns(b.buttons) }}
+    {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
     {% if b.device %}{{ tuiphone(b.device) }}{% endif %}
     {% if e.img %}<figure class="tx-l tx-img"><img src="{{ e.img }}" alt=""></figure>{% endif %}
   </div>

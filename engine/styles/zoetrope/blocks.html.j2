@@ -23,7 +23,7 @@
       {% if b.badge %}<span class="zt-kicker">{{ b.badge }}</span>{% endif %}
       <{{ h }} class="zt-h zt-h--hero">{{ b.title | rich }}</{{ h }}>
       {% if b.body %}<p class="zt-lede">{{ b.body | rich }}</p>{% endif %}
-      {{ tickets(b.buttons) }}
+      {{ tickets(b.buttons) }}{{ base.hero_kit(b, e) }}
       {% if e.img %}<img class="zt-img" src="{{ e.img }}" alt="" data-zt-img>{% endif %}
       {% if b.device %}<div class="zt-device">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
     </div>

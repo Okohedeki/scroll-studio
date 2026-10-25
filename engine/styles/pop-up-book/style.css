@@ -371,6 +371,21 @@ html.pb-live .pb-spread--timeline .pb-steps { position: absolute; width: 1px; he
 .pb-plate img, .pb-plate video { width: 100%; height: 100%; object-fit: cover; display: block; }
 .pb-cover--plate .pb-cover__title { font-size: calc(var(--u) * 7.4); }
 .pb-cover__phone { position: absolute; right: -8%; bottom: -6%; transform: rotate(6deg); }
+/* the landing page kit (base.hero_kit), printed on the paper in the book's own inks; on the cover the label makes room for it */
+.pb-spread .ss-kit { --ink: var(--print); --ink-rgb: 37, 29, 23; --ink-2: var(--print-2); --ink-3: var(--print-2); --line: rgba(37, 29, 23, .24);
+  --accent-text: var(--red); --bg: var(--paper); --logo-h: max(16px, calc(var(--u) * 2.6)); margin: 0; color: var(--print); font-family: "Literata", Georgia, serif; }
+.pb-spread .ss-kit .ss-kit__part { margin-top: calc(var(--u) * 1.4); }
+.pb-cover__label:has(.ss-kit) { top: 6%; bottom: 11%; gap: calc(var(--u) * 1.2); padding-block: calc(var(--u) * 3.4); }
+.pb-cover__label:has(.ss-kit) .pb-cover__title { font-size: calc(var(--u) * 6.2); }
+.pb-cover__label:has(.ss-kit) .pb-plate { width: 44%; }
+.pb-cover .ss-kit .ss-kit__part:first-child { margin-top: 0; }
+.pb-cover .ss-kit .ss-kit__part { margin-top: calc(var(--u) * .9); }
+.pb-cover .ss-kit .ss-figure__v { font-size: max(16px, calc(var(--u) * 3.4)); }
+.pb-cover .ss-kit :is(.ss-figure__l, .ss-rating, .ss-logos__title, .ss-signup__note) { font-size: max(11px, calc(var(--u) * 1.6)); margin-top: 2px; }
+.pb-cover .ss-kit .ss-logos { gap: calc(var(--u) * .8); }
+.pb-cover .ss-kit .ss-logo--word { font-size: max(13px, calc(var(--u) * 2.3)); }
+.pb-cover .ss-kit :is(.ss-signup input, .ss-signup .ss-btn) { font-size: max(12px, calc(var(--u) * 1.8)); padding-block: max(6px, calc(var(--u) * 1)); }
+
 .pb-cover__phone .ss-phone { width: calc(var(--u) * 18); }
 .pb-cover__cue { position: absolute; left: 0; right: 0; bottom: 4.5%; margin: 0; display: flex; flex-direction: column; align-items: center; gap: calc(var(--u) * .6);
   font: 600 max(10px, calc(var(--u) * 1.55))/1 "Literata", serif; letter-spacing: .26em; text-transform: uppercase; color: var(--gold); }

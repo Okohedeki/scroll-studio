@@ -38,7 +38,7 @@
       <{{ hx }} class="dc-h1" data-dc-rise data-dc-hero><span class="dc-gild">{{ b.title | rich }}</span></{{ hx }}>
       <i class="dc-rule dc-rule--wide" aria-hidden="true"><b>◆</b></i>
       {% if b.body %}<p class="dc-lede">{{ b.body | rich }}</p>{% endif %}
-      {% if b.buttons %}<div class="dc-btns">{% for l in b.buttons %}{{ stepbtn(l, loop.first) }}{% endfor %}</div>{% endif %}
+      {% if b.buttons %}<div class="dc-btns">{% for l in b.buttons %}{{ stepbtn(l, loop.first) }}{% endfor %}</div>{% endif %}{{ base.hero_kit(b, e) }}
       {% if b.device %}<div class="dc-niche dc-niche--hero">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
     </div>
   </div>

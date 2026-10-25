@@ -24,7 +24,7 @@
       {% if b.badge %}{{ kicker(b.badge) }}{% endif %}
       {% if e.first %}<h1 class="sd-head sd-hero__title" data-sand="write">{{ b.title | rich }}</h1>{% else %}<h2 class="sd-head sd-hero__title" data-sand="write">{{ b.title | rich }}</h2>{% endif %}
       {% if b.body %}<p class="sd-lede sd-ink">{{ b.body | rich }}</p>{% endif %}
-      {{ btns(b.buttons) }}
+      {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
     </div>
     {% if b.device %}<div class="sd-phone" data-sand="phone">{{ base.phone(b.device, e.screen, e.clip) }}</div>
     {% elif e.img %}<figure class="sd-pic" data-sand="sil"><img src="{{ e.img }}" alt="" fetchpriority="high"></figure>

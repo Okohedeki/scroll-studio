@@ -66,6 +66,17 @@ contrast rules on each.
 Types not listed fall back to the default markup (and should still be styled). Filters: `| rich` (allows
 `<em>`, `<b>`, `<i>`, `<br>`), `| vh`, `| countable`.
 
+**The landing page kit in a style's own hero.** A hero may carry a rating, an inline signup, a row of figures and a logo
+strip (docs/guide.md, "Landing page pieces"). A style that draws its own hero calls `{{ base.hero_kit(b, e) }}` once,
+after its buttons (the conformance test checks it): it writes nothing for a hero without the pieces, and otherwise one
+`<div class="ss-kit">` in the default markup. Inside it the text takes the colour of the style's own text around it
+(`currentColor`), so give the container the colour your copy has there; place and size the block in `style.css`
+(`.xx-hero .ss-kit { ... }`) where it fits your layout. `base.hero_kit(b, e, "data-xx-unit")` adds your own attributes
+to the wrapper (flipbook letters it in as one unit). The badge prints as its words (`New · ...` with a tag) wherever
+your markup shows `b.badge`; a badge's link, button icons and the ghost look are drawn by the default markup, and a
+style keeps its own badge and buttons. `frame: card` is drawn by the default hero and by every scene. The `logos` and
+`signup` blocks fall back to the default markup in every style.
+
 ### chrome.html.j2
 
 ```jinja

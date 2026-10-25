@@ -40,7 +40,7 @@
     {{ slate(b.badge, "sf-slate--badge") }}
     {{ head(b, e, "", "sf-title--hero") }}
     {% if b.body %}<div class="sf-plate sf-cut sf-lede"><p>{{ b.body | rich }}</p></div>{% endif %}
-    {{ btns(b.buttons) }}
+    {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
   </div>
   <div class="sf-hero__prop">
     {% if e.img or e.video %}

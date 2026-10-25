@@ -35,7 +35,7 @@
       <div class="ht-lead__story">
         <p class="ht-byline">By the newsroom · Staff report</p>
         {% if b.body %}<p class="ht-deck ht-dropcap">{{ b.body | rich }}</p>{% endif %}
-        {{ jumps(b.buttons) }}
+        {{ jumps(b.buttons) }}{{ base.hero_kit(b, e) }}
         {% if b.device %}<div class="ht-lead__device">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
       </div>
     </div>

@@ -19,7 +19,7 @@
     {% if b.badge %}<p class="lq-badge"><i aria-hidden="true"></i>{{ b.badge }}</p>{% endif %}
     {% if e.first %}<h1 class="lq-h1 lq-melt">{{ b.title | rich }}</h1>{% else %}<h2 class="lq-h1 lq-melt">{{ b.title | rich }}</h2>{% endif %}
     {% if b.body %}<p class="lq-lede">{{ b.body | rich }}</p>{% endif %}
-    {{ btns(b.buttons) }}
+    {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
   </div>
   {% if media %}<div class="lq-hero__media lq-blobmask">{% if e.video %}<video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video>{% else %}<img src="{{ e.img }}" alt="" fetchpriority="high">{% endif %}</div>{% endif %}
   {% if b.device %}<div class="lq-hero__phone">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}

@@ -24,7 +24,7 @@
       {% if b.badge %}<span class="gl-chip"><i aria-hidden="true"></i>{{ b.badge }}</span>{% endif %}
       <{{ hx }} class="gl-h1">{{ b.title | rich }}</{{ hx }}>
       {% if b.body %}<p class="gl-lede">{{ b.body | rich }}</p>{% endif %}
-      {{ btns(b.buttons) }}
+      {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
     </div>
   </div>
   <div class="gl-cue" aria-hidden="true"><span></span></div>

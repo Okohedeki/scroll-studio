@@ -41,7 +41,7 @@
     {% if b.badge %}<p class="ai-badge">{{ b.badge }}</p>{% endif %}
     {{ head(e, "ai-titlecard", b.title) }}
     {% if b.body %}<p class="ai-sub ai-sub--title">{{ b.body | rich }}</p>{% endif %}
-    {{ buttons(b.buttons) }}
+    {{ buttons(b.buttons) }}{{ base.hero_kit(b, e) }}
     {% if b.device %}<div class="ai-device">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
     <span id="ai-after-title" class="ai-anchor"></span>
   {% endcall %}

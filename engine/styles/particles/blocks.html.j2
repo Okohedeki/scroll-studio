@@ -25,7 +25,7 @@
     {% if b.device %}<div class="px-hero__phone px-resolve" data-form="phone">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
     <div class="px-hero__foot px-copy">
       {% if b.body %}<p class="px-lede">{{ b.body | rich }}</p>{% endif %}
-      {{ btns(b.buttons) }}
+      {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
     </div>
     <p class="px-micro px-hint px-copy" aria-hidden="true"><i></i>Scroll, and the matter re-forms</p>
   </div>

@@ -151,6 +151,15 @@ html.style-stop-motion main { position: relative; z-index: 1; }
 .sm-set--hero .sm-cast { grid-template-columns: minmax(0, 1.18fr) minmax(0, .82fr); gap: clamp(16px, 4vw, 60px); align-items: center; padding-top: 110px; }
 .sm-hero__text { display: flex; flex-direction: column; align-items: flex-start; gap: clamp(14px, 2.2svh, 26px); position: relative; z-index: 2; margin-bottom: 8svh; }
 .sm-hero__prop { position: relative; align-self: stretch; display: grid; place-items: center; z-index: 1; }
+/* the landing page kit in the hero (base.hero_kit): one more card pinned to the set, and the headline a size down so the
+   column still fits the camera */
+.sm-hero__text:has(> .ss-kit) { margin-bottom: 0; gap: clamp(10px, 1.6svh, 18px); }
+.sm-hero__text:has(> .ss-kit) .sm-title--hero { font-size: clamp(44px, 5.4vw, 92px); }
+.sm-hero__text > .ss-kit { margin: 0; padding: clamp(14px, 1.6vw, 20px) clamp(16px, 1.8vw, 24px); border-radius: 5px; background: var(--card) var(--grain);
+  background-size: 160px 160px; color: var(--brown); --logo-h: 20px; box-shadow: 0 10px 22px -12px rgba(0, 0, 0, .55); }
+.sm-hero__text > .ss-kit .ss-kit__part { margin-top: 12px; }
+.sm-hero__text > .ss-kit .ss-kit__part:first-child { margin-top: 0; }
+.sm-hero__text > .ss-kit .ss-figure__v { font-size: 26px; }
 .sm-hero__prop .sm-frame { width: min(100%, 36vw); margin-top: -6svh; }
 .sm-hero__prop .sm-puppet, .sm-hero__prop .sm-stand { margin-top: 18svh; }
 .sm-hero__prop .sm-sun { margin-top: -4svh; }

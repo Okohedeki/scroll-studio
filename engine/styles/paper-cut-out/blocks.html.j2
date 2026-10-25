@@ -39,7 +39,7 @@
     {{ label(b.badge) }}
     {{ head(b, e, "", "pc-title--hero") }}
     {% if b.body %}<p class="pc-p pc-note pc-lede" data-pc="note" data-from="r">{{ b.body | rich }}</p>{% endif %}
-    {{ btns(b.buttons) }}
+    {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
   </div>
   <div class="pc-hero__prop">
     {% if e.img or e.video %}

@@ -41,7 +41,7 @@
     {% if b.badge %}<p class="bp-field" data-pen="9"><b>DWG TITLE</b> {{ b.badge }}</p>{% endif %}
     {% if e.first %}<h1 class="bp-title bp-letter" data-pen="1" data-leader="top">{{ b.title | rich }}</h1>{% else %}<h2 class="bp-title bp-letter" data-pen="1" data-leader="top">{{ b.title | rich }}</h2>{% endif %}
     {% if b.body %}<p class="bp-note bp-letter" data-pen="8"><b>NOTE 1.</b> {{ b.body | rich }}</p>{% endif %}
-    {{ btns(b.buttons) }}
+    {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
   </div>
   <figure class="bp-draw">{% if b.device %}<div class="bp-device">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% else %}{{ elevation(3) }}{% endif %}</figure>
   {{ vhead(no, "GENERAL ARRANGEMENT", "SCALE 1:1") }}

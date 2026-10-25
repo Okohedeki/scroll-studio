@@ -42,7 +42,7 @@
       <h1 class="pb-cover__title">{{ b.title | rich }}</h1>
       <span class="pb-rule" aria-hidden="true"></span>
       {% if b.body %}<p class="pb-cover__body">{{ b.body | rich }}</p>{% endif %}
-      {{ btns(b.buttons, "pb-btns--cover") }}
+      {{ btns(b.buttons, "pb-btns--cover") }}{{ base.hero_kit(b, e) }}
       {% if b.device %}<div class="pb-cover__phone">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
     </div>
     <p class="pb-cover__cue" aria-hidden="true"><span>Scroll to open the book</span><i></i></p>
@@ -60,7 +60,7 @@
     <div class="pb-print pb-print--side">
       {% if b.badge %}<p class="pb-kicker">{{ b.badge }}</p>{% endif %}
       {% if b.body %}<p class="pb-body">{{ b.body | rich }}</p>{% endif %}
-      {{ btns(b.buttons) }}
+      {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
     </div>
     {{ folio(loop, "wall") }}
   </div>

@@ -27,6 +27,15 @@ html.style-flipbook .ss-nav { display: none; }
 html.style-flipbook em { color: var(--fb-red-2); font-style: normal; }
 html.style-flipbook .ss-footer { position: relative; z-index: 7; padding: 22px 0 28px; font-family: var(--font-body); font-size: 13.5px; color: rgba(236, 230, 216, .72); background: var(--fb-desk); }
 
+/* the landing page kit in a hero (base.hero_kit) is lettered on the paper: the page's lead and red, not the desk's tokens,
+   and set small so a page still holds it */
+.fb-page .ss-kit { --ink: var(--fb-lead); --ink-rgb: 47, 47, 51; --ink-2: var(--fb-lead-2); --ink-3: var(--fb-lead-2); --line: rgba(47, 47, 51, .24);
+  --accent-text: var(--fb-red); --bg: var(--fb-paper); --logo-h: 20px; margin-top: 16px; color: var(--fb-lead); }
+.fb-page .ss-kit .ss-kit__part { margin-top: 12px; }
+.fb-page .ss-kit .ss-figure__v { font-size: 24px; }
+.fb-page .ss-kit .ss-logos { gap: 8px; }
+.fb-page .ss-kit .ss-logo--word { font-size: 16px; }
+
 /* ---------------------------------------------------------------- the lid band */
 .fb-lid { position: fixed; inset: 0 0 auto 0; z-index: 30; display: flex; align-items: center; gap: 22px; padding: 12px var(--gutter); padding-top: max(12px, env(safe-area-inset-top));
   background: linear-gradient(rgba(31, 36, 39, .96), rgba(31, 36, 39, .7) 70%, rgba(31, 36, 39, 0)); }

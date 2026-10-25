@@ -161,6 +161,14 @@ html.style-bauhaus :focus-visible { outline: 3px solid var(--blue); outline-offs
 .bh-go span::after { content: ""; display: block; width: 26px; height: 4px; background: currentColor; margin: 14px auto 0; transition: transform .22s cubic-bezier(.7, 0, .3, 1); }
 .bh-go:hover span::after { transform: rotate(90deg); }
 
+/* the landing page kit in a hero (base.hero_kit): its own paper block in the open part of the poster, square and flat */
+.bh--hero .bh-poster > .ss-kit { grid-column: 9 / 13; grid-row: 2 / 8; align-self: center; justify-self: start; margin: 0 24px 0 0; padding: 22px 24px 24px;
+  background: var(--paper); color: var(--black); position: relative; z-index: 2; max-width: 100%; }
+.bh--hero:has(.bh-device) .bh-poster > .ss-kit { grid-column: 2 / 9; grid-row: 8; align-self: start; padding: 0; background: none; }
+.bh--hero .ss-kit > .ss-kit__part:first-child { margin-top: 0; }
+.bh--hero .ss-kit .ss-kit__part { margin-top: 20px; }
+.bh--hero .ss-kit :is(.ss-signup__row, .ss-btn) { border-radius: 0; }
+
 /* ---------------------------------------------------------------- static primitives (no JavaScript) */
 .bh-static { position: absolute; inset: 0 0 0 var(--strip); overflow: hidden; pointer-events: none; z-index: 0; }
 .bh-static i { position: absolute; display: block; }
@@ -315,6 +323,9 @@ html.style-bauhaus .ss-orbit__item.is-primary { background: var(--red); color: #
   .bh--hero .bh-body { grid-column: 1 / 7; grid-row: 10 / 12; padding: 0 20px; }
   .bh--hero .bh-poster > div.bh-slide { grid-column: 1 / 7; grid-row: 12; padding: 0 20px; align-self: start; }
   .bh--hero .bh-device { display: none; }
+  .bh--hero .bh-poster > .ss-kit { grid-column: 1 / 7; grid-row: 1 / 6; align-self: start; justify-self: stretch; margin: 12px 20px 0; padding: 14px 16px; --logo-h: 18px; }
+  .bh--hero .ss-kit .ss-kit__part { margin-top: 10px; }
+  .bh--hero .ss-kit .ss-figure__v { font-size: 22px; }
   .bh--intro .bh-margin { grid-column: 1 / 7; grid-row: 5 / 6; padding: 0 20px 10px; }
   .bh--intro .bh-head { grid-column: 1 / 7; grid-row: 6 / 9; padding: 0 20px; }
   .bh--intro .bh-body { grid-column: 1 / 7; grid-row: 9 / 13; padding: 0 20px; }

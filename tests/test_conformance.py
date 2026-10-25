@@ -107,6 +107,9 @@ def test_a_style_overrides_only_real_block_types_and_has_its_own_motion(name):
     assert types and not types - BLOCK_TYPES, f"engine/styles/{name}/blocks.html.j2: unknown block types {types - BLOCK_TYPES}"
     for default in ("ss-reveal", "data-count"):
         assert default not in t, f"engine/styles/{name}/blocks.html.j2 uses the default motion `{default}` (rule 2)"
+    if "hero" in types:
+        assert "base.hero_kit(b, e" in t, (f"engine/styles/{name}/blocks.html.j2 draws its own hero but not the landing page "
+                                            f"kit: call {{{{ base.hero_kit(b, e) }}}} after its buttons (engine/styles/README.md)")
 
 
 @pytest.mark.parametrize("name", STYLES)
@@ -128,18 +131,28 @@ def test_the_readme_counts_the_styles_there_are():
 # ---------------------------------------------------------------- every style draws every block type
 
 def kitchen_sink(style: str | None, brand: dict | None = None) -> spec.Site:
-    """A page with every block type, a scene in each layout and a button, so a style meets everything a spec can hold."""
+    """A page with every block type, a scene in each layout and a button, so a style meets everything a spec can hold
+    (the landing page kit too: a badge link, button icons and a ghost, rating, signup, figures, logos, framed cards)."""
     btn = {"label": "Start", "href": "#"}
+    ghost = {"label": "Watch", "href": "#", "icon": "play", "look": "ghost"}
     theme = {"style": style} if style else {}
     if brand:
         theme["from"] = brand
     return spec.Site.model_validate({
         "name": "Conformance", "theme": theme,
         "sections": [
-            {"type": "hero", "id": "hero", "title": "One <em>page</em>", "body": "Every block.", "buttons": [btn]},
+            {"type": "hero", "id": "hero", "title": "One <em>page</em>", "body": "Every block.", "buttons": [btn, ghost],
+             "badge": {"text": "Fresh kits", "href": "#", "tag": "New"}, "frame": "card",
+             "rating": {"score": 4.6, "text": "from 900 makers"}, "signup": {"action": "mailto:hi@example.com", "button": "Join"},
+             "stats": [{"value": "61%", "label": "Uptime"}, {"value": "9 days", "label": "Support"}],
+             "logos": {"title": "Trusted by", "items": [{"name": "Northwind"}, {"name": "Lumen", "href": "#"}]}},
             {"type": "intro", "id": "intro", "title": "Intro", "body": "Words."},
             {"type": "features", "id": "features", "items": [{"title": "A"}, {"title": "B", "body": "b"}, {"title": "C"}]},
             {"type": "stats", "id": "stats", "items": [{"value": "12", "label": "Twelve"}, {"value": "3", "unit": "%", "label": "Three"}]},
+            {"type": "stats", "id": "figures", "look": "divided", "items": [{"value": "350", "label": "Teams"}, {"value": "9", "label": "Nine"}]},
+            {"type": "logos", "id": "logos", "title": "Partners", "items": [{"name": "Acme"}, {"name": "Globex", "image": "logos/globex.svg"}]},
+            {"type": "signup", "id": "signup", "title": "Stay close", "body": "Letters.", "action": "https://example.com/join",
+             "rating": {"score": 5, "text": "from readers"}},
             {"type": "timeline", "id": "timeline", "items": [{"when": "2024", "title": "Then"}, {"when": "2026", "title": "Now"}]},
             {"type": "quote", "id": "quote", "text": "A line.", "who": "Someone"},
             {"type": "gallery", "id": "gallery", "items": [{"title": "One", "href": "#"}, {"title": "Two", "href": "#"}]},
@@ -147,9 +160,10 @@ def kitchen_sink(style: str | None, brand: dict | None = None) -> spec.Site:
             {"type": "strip", "id": "strip", "items": [{"image": "a.jpg", "caption": "a"}, {"image": "b.jpg"}]},
             {"type": "orbit", "id": "orbit", "title": "Orbit", "center": "Core", "items": [{"label": "x"}, {"label": "y"}, {"label": "z"}]},
             {"type": "faq", "id": "faq", "items": [{"q": "Why?", "a": "Because."}]},
-            {"type": "type", "id": "words", "steps": [{"title": "Overlay", "button": btn}]},
+            {"type": "type", "id": "words", "steps": [{"title": "Overlay", "badge": {"text": "Fresh", "icon": "dot"},
+                                                        "button": dict(btn, icon="arrow")}]},
             {"type": "type", "id": "split", "layout": "split", "steps": [{"title": "Split", "fact": "f"}]},
-            {"type": "type", "id": "cards", "layout": "cards", "steps": [{"title": "Cards", "body": "c"}]},
+            {"type": "type", "id": "cards", "layout": "cards", "frame": "card", "steps": [{"title": "Cards", "body": "c", "badge": "Card pill"}]},
             {"type": "cta", "id": "cta", "title": "Done", "button": btn},
         ]})
 
@@ -165,7 +179,9 @@ def test_a_style_renders_every_block_type_with_one_h1_and_all_the_words(name):
     html = page_html(site)
     assert html.count("<h1") == 1, f"{name}: the page must have exactly one <h1> (README rule 1), found {html.count('<h1')}"
     text = re.sub(r"<[^>]+>", " ", html)
-    for word in ("Every block.", "Twelve", "Then", "A line.", "Because.", "Overlay", "Split", "Cards", "Done"):
+    for word in ("Every block.", "Twelve", "Then", "A line.", "Because.", "Overlay", "Split", "Cards", "Done",
+                 "Fresh kits", "Watch", "from 900 makers", "Join", "Uptime", "9 days", "Northwind", "Teams", "Partners",
+                 "Acme", "Stay close", "from readers", "Fresh", "Card pill"):
         assert word in text, f"{name}: {word!r} from the spec is missing from the page (content must be real HTML text)"
 
 

@@ -223,6 +223,10 @@ those with an existing one is a reskin and is not merged. The full contract is
 
 - A new block type is a model in `engine/spec.py` (subclass `BlockBase`), markup in `blocks.html.j2`, CSS in
   `runtime/src/styles.css`, and a decision for every style: styled by the default markup, or given its own.
+- A style that draws its own hero calls `{{ base.hero_kit(b, e) }}` after its buttons, so the landing page kit (rating,
+  signup, figures, logos) reaches every style ([engine/styles/README.md](engine/styles/README.md)).
+- New fields keep old specs building the same page: a template adds markup or a class only when the field is set, and a
+  field added to a model whose dump is embedded or keyed is left out of the dump while unset.
 - Templates take every value from the spec and the theme tokens (`var(--ink)`, `var(--accent)` ...), never a
   hard-coded colour, size or string.
 

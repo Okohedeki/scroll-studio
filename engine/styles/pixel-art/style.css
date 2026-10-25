@@ -298,3 +298,5 @@ html.px-game .px-generic .ss-orbit__stage { max-height: 50vh; }
 /* a hero further down the page is a level title card */
 html.px-game .px-sec--hero ~ .px-sec--hero .px-logo { font-size: clamp(22px, 3.6vw, 44px); }
 html.px-page .px-hud__stat, html:not(.px-game) .px-again { display: none !important; }
+/* the landing page kit in the hero (base.hero_kit): figures a size the pixel face can hold side by side on a phone */
+html.style-pixel-art .ss-kit .ss-figure__v { font-size: clamp(16px, 4.4vw, 28px); letter-spacing: 0; }

@@ -18,10 +18,10 @@
     {% if media %}<div class="gm-zone__media">{% if e.video %}<video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video>{% else %}<img src="{{ e.img }}" alt="" fetchpriority="high">{% endif %}</div>{% endif %}
   </div>
   <div class="gm-hero__in">
-    {% if b.badge %}<span class="gm-badge"><b>{{ b.badge.split('·')[0] | trim }}</b>{% if '·' in b.badge %}<span>{{ b.badge.split('·', 1)[1] | trim }}</span>{% endif %}</span>{% endif %}
+    {% if b.badge %}{% set bt = b.badge | string %}<span class="gm-badge"><b>{{ bt.split('·')[0] | trim }}</b>{% if '·' in bt %}<span>{{ bt.split('·', 1)[1] | trim }}</span>{% endif %}</span>{% endif %}
     <{{ hx }} class="gm-h1" data-gm-lines>{{ b.title | rich }}</{{ hx }}>
     {% if b.body %}<p class="gm-lede gm-rise" style="--d: 3">{{ b.body | rich }}</p>{% endif %}
-    <div class="gm-rise" style="--d: 4">{{ btns(b.buttons) }}</div>
+    <div class="gm-rise" style="--d: 4">{{ btns(b.buttons) }}</div>{{ base.hero_kit(b, e) }}
   </div>
   {% if b.device %}<div class="gm-hero__phone" data-gm-par="0.92">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
 </section>

@@ -23,7 +23,7 @@
     <div class="ng-mount">{{ sign("h1" if e.first else "h2", b.title, "ng-sign--hero") }}</div>
     <div class="ng-hero__foot">
       {% if b.body %}<div class="ng-plaque"><p>{{ b.body | rich }}</p></div>{% endif %}
-      {{ btns(b.buttons) }}
+      {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
     </div>
   </div>
   {% if media %}<div class="ng-window ng-hero__window">{% if e.video %}<video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video>{% else %}<img src="{{ e.img }}" alt="" fetchpriority="high">{% endif %}</div>{% endif %}

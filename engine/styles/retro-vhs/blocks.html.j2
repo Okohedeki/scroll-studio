@@ -15,7 +15,7 @@
   {% if b.badge %}<p class="vhs-osdline">{{ b.badge }}</p>{% endif %}
   <{{ h }} class="vhs-title vhs-title--hero" data-type>{{ b.title | rich }}</{{ h }}>
   {% if b.body %}<p class="vhs-lede">{{ b.body | rich }}</p>{% endif %}
-  {{ vcr(b.buttons) }}
+  {{ vcr(b.buttons) }}{{ base.hero_kit(b, e) }}
   {% if b.device %}<div class="vhs-monitor vhs-monitor--hero vhs-media">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
 
 {% elif b.type == "intro" %}

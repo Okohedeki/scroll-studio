@@ -42,7 +42,7 @@
     {{ tape(b.badge, "slide-l", "sm-tape--badge") }}
     {{ head(b, e, "", "drop", "sm-title--hero") }}
     {% if b.body %}<p class="sm-p sm-card sm-lede" data-sm="slide-r">{{ b.body | rich }}</p>{% endif %}
-    {{ btns(b.buttons) }}
+    {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
   </div>
   <div class="sm-hero__prop">
     {% if e.img or e.video %}

@@ -33,7 +33,7 @@
   <div class="sf-desk__main">
     <{{ h }} class="sf-h sf-h--hero">{{ b.title | rich }}</{{ h }}>
     {% if b.body %}<p class="sf-lede">{{ b.body | rich }}</p>{% endif %}
-    {{ keys(b.buttons) }}
+    {{ keys(b.buttons) }}{{ base.hero_kit(b, e) }}
     {% if not loop.last %}<p class="sf-cue" aria-hidden="true"><b>↓</b> Scroll to advance the clock · next departure below</p>{% endif %}
     {% if b.device %}<div class="sf-bezel sf-bezel--hero">{{ base.phone(b.device, e.screen, e.clip) }}</div>{% endif %}
   </div>

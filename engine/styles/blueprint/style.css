@@ -237,6 +237,7 @@ html.style-blueprint .ss-block:not(.bp-view) .ss-display, html.style-blueprint .
 html.style-blueprint .ss-tile, html.style-blueprint .ss-feature, html.style-blueprint .ss-orbit__item { border: 1px solid var(--line-2); border-radius: 0; background: transparent; box-shadow: none; }
 html.style-blueprint .ss-tile img, html.style-blueprint .ss-strip img { filter: grayscale(1) sepia(1) hue-rotate(170deg) saturate(1.6) brightness(.9); border-radius: 0; }
 html.style-blueprint .ss-btn { border-radius: 0; font-family: "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: .1em; background: transparent; border-color: var(--line); backdrop-filter: none; }
+html.style-blueprint .ss-signup .ss-btn--hot { color: var(--hi); border-color: var(--hi); }   /* a signup button (the landing page kit), outlined like the drawing's own */
 html.style-blueprint .ss-kicker { font-family: "IBM Plex Mono", monospace; color: var(--hi); }
 html.style-blueprint main .ss-panel { position: relative !important; top: auto !important; }
 html.bp-live .bp-view.bp-foreign { display: block; padding: 110px 56px 150px; }

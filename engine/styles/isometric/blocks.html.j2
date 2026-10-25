@@ -15,7 +15,7 @@
     {% if b.badge %}<p class="iso-badge"><i aria-hidden="true"></i>{{ b.badge }}</p>{% endif %}
     {% if e.first %}<h1 class="iso-h1">{{ b.title | rich }}</h1>{% else %}<h2 class="iso-h1">{{ b.title | rich }}</h2>{% endif %}
     {% if b.body %}<p class="iso-lede">{{ b.body | rich }}</p>{% endif %}
-    {{ btns(b.buttons) }}
+    {{ btns(b.buttons) }}{{ base.hero_kit(b, e) }}
   </div>
   {% if b.device %}<figure class="iso-screen" data-screen>{{ base.phone(b.device, e.screen, e.clip) }}</figure>{% endif %}
 </section>
