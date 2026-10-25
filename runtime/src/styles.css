@@ -89,16 +89,16 @@ blockquote { hanging-punctuation: first last; }
 .ss-caption.ss-on .ss-btn { opacity: 1; pointer-events: auto; }
 .ss-eyebrow { color: var(--accent-text); display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
 .ss-eyebrow i { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 12px var(--accent); opacity: 0; transition: opacity .6s; }
-.ss-eyebrow span, .ss-caption .ss-body { opacity: 0; transition: opacity .6s var(--ease) .1s; }
+.ss-eyebrow span, .ss-caption :is(.ss-body, .ss-fact, .ss-hint) { opacity: 0; transition: opacity .6s var(--ease) .1s; }
 .ss-caption .ss-body { margin-top: 18px; }
 .ss-w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: .1em; margin-bottom: -.1em; }
 .js .ss-w > span { display: inline-block; transform: translateY(110%); transition: transform .9s var(--ease); }
 .js .ss-caption { visibility: hidden; }
 .js .ss-caption.ss-on, .js .ss-caption.ss-off { visibility: visible; }
 .ss-caption.ss-on .ss-w > span { transform: none; }
-.ss-caption.ss-on .ss-eyebrow span, .ss-caption.ss-on .ss-eyebrow i, .ss-caption.ss-on .ss-body { opacity: 1; }
+.ss-caption.ss-on .ss-eyebrow span, .ss-caption.ss-on .ss-eyebrow i, .ss-caption.ss-on :is(.ss-body, .ss-fact, .ss-hint) { opacity: 1; }
 .ss-caption.ss-off .ss-w > span { transform: translateY(-140%); transition-duration: .5s; transition-delay: 0s !important; }
-.ss-caption.ss-off .ss-eyebrow span, .ss-caption.ss-off .ss-eyebrow i, .ss-caption.ss-off .ss-body { opacity: 0; transition-delay: 0s; }
+.ss-caption.ss-off .ss-eyebrow span, .ss-caption.ss-off .ss-eyebrow i, .ss-caption.ss-off :is(.ss-body, .ss-fact, .ss-hint) { opacity: 0; transition-delay: 0s; }
 .ss-cue { position: absolute; left: 50%; bottom: 12vh; transform: translateX(-50%); font-family: var(--font-mono); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-2); }
 .ss-outro { position: absolute; inset: 0; background: var(--bg); opacity: 0; pointer-events: none; }
 
@@ -136,6 +136,10 @@ blockquote { hanging-punctuation: first last; }
 /* --on is set every frame from scroll position (runtime), so emphasis tracks the scroll exactly */
 .js .ss-step .ss-card { opacity: calc(.26 + .74 * var(--on, 0)); }
 .js .ss-step.ss-intro .ss-card { opacity: 1; }
+.ss-card .ss-btn { margin-top: 28px; }
+.ss-card.ss-surface-light, .ss-card.ss-surface-dark { color: var(--ink); isolation: isolate; }
+.ss-card.ss-surface-light::before, .ss-card.ss-surface-dark::before { content: ""; position: absolute; inset: -12% -14%; z-index: -1;
+  background: radial-gradient(closest-side, rgba(var(--bg-rgb), .62), rgba(var(--bg-rgb), .3) 55%, transparent); }
 .ss-step.ss-intro { display: flex; align-items: center; min-height: 100vh; min-height: 100svh; }
 .ss-step.ss-intro .ss-card { position: static; padding-top: 90px; }
 .ss-split .ss-pin { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 66px; gap: 18px; }

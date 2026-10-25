@@ -12122,7 +12122,7 @@
       }
      ],
      "default": null,
-     "description": "overlay layout: a button under the caption, e.g. the call to action on a film's last shot"
+     "description": "A button under the caption, e.g. the call to action on a film's last shot"
     },
     "enter": {
      "anyOf": [
@@ -12300,7 +12300,7 @@
       }
      ],
      "default": null,
-     "description": "overlay layout: this caption's colours, when the shot under it is lighter or darker than the rest of the scene (dark words on a bright sky: light), with a soft glow behind them",
+     "description": "This caption's colours, when the shot under it is lighter or darker than the rest of the scene (dark words on a bright sky: light), with a soft glow behind them",
      "title": "Surface"
     },
     "title": {

@@ -856,10 +856,10 @@ class Step(Model):
         """Where the caption sits when it is an ordinary overlay (`place: left`...)."""
         return self.place if isinstance(self.place, str) else None
     surface: Optional[Literal["light", "dark"]] = Field(
-        None, description="overlay layout: this caption's colours, when the shot under it is lighter or darker than the "
-                          "rest of the scene (dark words on a bright sky: light), with a soft glow behind them")
-    button: Optional[Link] = Field(None, description="overlay layout: a button under the caption, e.g. the call to "
-                                                     "action on a film's last shot")
+        None, description="This caption's colours, when the shot under it is lighter or darker than the rest of the "
+                          "scene (dark words on a bright sky: light), with a soft glow behind them")
+    button: Optional[Link] = Field(None, description="A button under the caption, e.g. the call to action on a film's "
+                                                     "last shot")
     badge: Optional[Union[str, Badge]] = Field(None, description="A small pill above the headline: words, or "
                                                "`{text, href, tag, icon}` for a link with a 'New' tag or a dot")
     image: Optional[ImageRef] = Field(None, description="parallax: this step's photo")

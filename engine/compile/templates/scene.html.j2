@@ -10,25 +10,28 @@
 {# a split/cards step placed with `at` #}
 {% macro at(el) %}{% if not el.auto %} ss-at ss-at--{{ el.spot }}{% if el.row %} ss-at--row-{{ el.row }}{% endif %}{% if el.align %} ss-at--align-{{ el.align }}{% endif %}{% endif %}{% endmacro %}
 
+{# One caption for every layout: kicker, title, body, fact, button and hint, whichever the step sets. Over a stage (`over`)
+   the kicker carries the dot and the title's words rise; in a split or cards card the kicker is the step's number line. #}
+{% macro caption(st, over) %}
+  {% if st.kicker %}{% if over %}<div class="ss-eyebrow"><i></i><span>{{ st.kicker | rich }}</span></div>{% else %}<div class="ss-num">{{ st.kicker | rich }}</div>{% endif %}{% endif %}
+  {% if st.badge %}{{ kit.badge(st.badge) }}{% endif %}
+  {% if st.intro %}<h1 class="ss-h1{% if over %} ss-split-words{% endif %}">{{ st.title | rich }}</h1>{% elif over %}<h2 class="ss-display ss-split-words">{{ st.title | rich }}</h2>{% else %}<h2 class="ss-h2">{{ st.title | rich }}</h2>{% endif %}
+  {% if st.body %}<p class="ss-body">{{ st.body | rich }}</p>{% endif %}
+  {% if st.fact %}<div class="ss-fact">{{ st.fact | rich }}</div>{% endif %}
+  {% if st.button %}{{ kit.btn(st.button, true) }}{% endif %}
+  {% if st.hint %}<div class="ss-hint">{{ st.hint }}</div>{% endif %}
+{% endmacro %}
+
 {% macro card(step, i, n) %}
-<div class="ss-card">
-  {% if step.kicker %}<div class="ss-num">{{ step.kicker | rich }}</div>{% endif %}
-  {% if step.badge %}{{ kit.badge(step.badge) }}{% endif %}
-  {% if step.intro %}<h1 class="ss-h1">{{ step.title | rich }}</h1>{% else %}<h2 class="ss-h2">{{ step.title | rich }}</h2>{% endif %}
-  {% if step.body %}<p class="ss-body">{{ step.body | rich }}</p>{% endif %}
-  {% if step.fact %}<div class="ss-fact">{{ step.fact | rich }}</div>{% endif %}
-  {% if step.hint %}<div class="ss-hint">{{ step.hint }}</div>{% endif %}
+<div class="ss-card{% if step.surface %} ss-surface-{{ step.surface }}{% endif %}">
+{{ caption(step, false) }}
 </div>
 {% endmacro %}
 
 {% macro ocap(el) %}
 {% set st = el.step %}
 <div class="ss-caption{% if st.surface %} ss-surface-{{ st.surface }}{% endif %}{% if st.world %} ss-has-world{% endif %}" data-from="{{ el.show[0] }}" data-to="{{ el.show[1] }}"{% if st.world %} data-world="{{ el.index }}"{% endif %}{{ motion(el) }}>
-  {% if st.kicker %}<div class="ss-eyebrow"><i></i><span>{{ st.kicker | rich }}</span></div>{% endif %}
-  {% if st.badge %}{{ kit.badge(st.badge) }}{% endif %}
-  {% if st.intro %}<h1 class="ss-h1 ss-split-words">{{ st.title | rich }}</h1>{% else %}<h2 class="ss-display ss-split-words">{{ st.title | rich }}</h2>{% endif %}
-  {% if st.body %}<p class="ss-body">{{ st.body | rich }}</p>{% endif %}
-  {% if st.button %}{{ kit.btn(st.button, true) }}{% endif %}
+{{ caption(st, true) }}
 </div>
 {% endmacro %}
 
