@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ site.lang }}"{% if theme.style %} data-style="{{ theme.style }}"{% endif %} class="mode-{{ theme.mode }} layout-{{ site.layout }}{% if theme.style %} style-{{ theme.style }}{% endif %}{% if sections and sections[0].s.type == 'hero' and (sections[0].img or sections[0].video) %} hero-media{% endif %}">
+<html lang="{{ site.lang }}"{% if theme.style %} data-style="{{ theme.style }}"{% endif %} class="mode-{{ theme.mode }} layout-{{ site.layout }}{% if theme.style %} style-{{ theme.style }}{% endif %}{% if sections and sections[0].s.type == 'hero' and (sections[0].img or sections[0].video) %} hero-media{% endif %}{% if sections and sections[0].s.frame %} hero-frame{% endif %}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -164,7 +164,7 @@
     <span>{{ site.name }}</span>
   </a>
   <nav class="ss-nav__links">{% for l in nav_links %}<a href="{{ l.href }}">{{ l.label }}</a>{% endfor %}</nav>
-  {% if site.nav.cta %}<a class="ss-btn" href="{{ site.nav.cta.href }}">{{ site.nav.cta.label }} <span class="ss-arrow">→</span></a>{% else %}<span></span>{% endif %}
+  {% if site.nav.cta and (site.nav.cta.icon or site.nav.cta.look) %}{{ blocks.btn(site.nav.cta) }}{% elif site.nav.cta %}<a class="ss-btn" href="{{ site.nav.cta.href }}">{{ site.nav.cta.label }} <span class="ss-arrow">→</span></a>{% else %}<span></span>{% endif %}
 </div></header>
 
 {% if style_chrome %}{{ chrome.top(site, sections, nav_links) }}{% endif %}

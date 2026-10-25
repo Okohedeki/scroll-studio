@@ -26,7 +26,8 @@ from .spec import Site
 
 # Fields that hold visible text (prompts, ids, paths and urls are left alone)
 TEXT_KEYS = {"title", "body", "kicker", "badge", "label", "text", "who", "note", "q", "a", "when", "hint", "caption",
-             "cue", "left", "right", "tag", "center", "status", "app", "button", "y_label", "source", "description"}
+             "cue", "left", "right", "tag", "center", "status", "app", "button", "y_label", "source", "description",
+             "placeholder"}
 LIST_KEYS = {"tags", "words"}
 SKIP_UNDER = {"prompt", "generate", "keyframes", "ltx", "take", "data", "state", "hud", "theme", "image", "video",
               "backdrop", "credit", "callouts", "imagery", "directions"}

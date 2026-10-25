@@ -1,6 +1,79 @@
 {# Static content blocks. Every block is complete without JavaScript; the runtime only adds reveals and count-ups. #}
 
-{% macro buttons(list) %}{% if list %}<div class="ss-btns">{% for l in list %}<a class="ss-btn{% if loop.first %} ss-btn--hot{% endif %}" href="{{ l.href }}">{{ l.label }}{% if loop.first %} <span class="ss-arrow">→</span>{% endif %}</a>{% endfor %}</div>{% endif %}{% endmacro %}
+{# ---- the landing page kit: icons, buttons, badges, rating, signup, figures and logos. Styles reach these as base.<name>. #}
+
+{# small line icons in the text's colour (24-unit grid, 1.8 stroke) #}
+{% macro icon(name) -%}
+{%- if name == "arrow" %}<svg class="ss-icon ss-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+{%- elif name == "external" %}<svg class="ss-icon ss-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16 17 7M9 7h8v8"/></svg>
+{%- elif name == "play" %}<svg class="ss-icon ss-icon--play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6.2v11.6c0 .7.8 1.2 1.4.8l9.1-5.8a1 1 0 0 0 0-1.6L9.9 5.4c-.6-.4-1.4.1-1.4.8Z"/></svg>
+{%- elif name == "chevron" %}<svg class="ss-icon ss-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="m10 7 5 5-5 5"/></svg>
+{%- elif name == "spark" %}<svg class="ss-icon ss-icon--spark" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c.5 4.3 2.2 6 6.5 6.5-4.3.5-6 2.2-6.5 6.5-.5-4.3-2.2-6-6.5-6.5 4.3-.5 6-2.2 6.5-6.5Z"/></svg>
+{%- elif name == "star" %}<svg class="ss-icon ss-icon--star" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2.8 2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3-4.6-4.4 6.3-.9Z"/></svg>
+{%- endif -%}
+{%- endmacro %}
+
+{# one button. Without `icon` or `look` it is the button the engine has always drawn (the primary with its arrow) #}
+{% macro btn(l, hot=false, cls="") -%}
+{%- if l.icon is none and l.look is none -%}
+<a class="ss-btn{% if hot %} ss-btn--hot{% endif %}{{ cls }}" href="{{ l.href }}">{{ l.label }}{% if hot %} <span class="ss-arrow">→</span>{% endif %}</a>
+{%- else -%}
+{%- set look = l.look or ("solid" if hot else "") -%}{%- set ic = l.icon or ("arrow" if hot else "none") -%}
+<a class="ss-btn ss-btn--kit{% if look == 'solid' %} ss-btn--hot{% elif look == 'ghost' %} ss-btn--ghost{% endif %}{{ cls }}" href="{{ l.href }}"{% if ic == "external" %} target="_blank" rel="noopener"{% endif %}>{% if ic == "play" %}{{ icon("play") }}{% endif %}<span>{{ l.label }}</span>{% if ic in ("arrow", "external") %}{{ icon(ic) }}{% endif %}{% if ic == "external" %}<span class="ss-sr"> (opens in a new tab)</span>{% endif %}</a>
+{%- endif -%}
+{%- endmacro %}
+
+{% macro buttons(list) %}{% if list %}<div class="ss-btns">{% for l in list %}{{ btn(l, loop.first) }}{% endfor %}</div>{% endif %}{% endmacro %}
+
+{# the pill above a headline: words, or a Badge (a link, a tag, a dot) #}
+{% macro badge(x) -%}
+{%- if x is string %}<span class="ss-badge">{{ x }}</span>
+{%- else %}{% set tag = "a" if x.href else "span" %}<{{ tag }} class="ss-badge ss-badge--kit"{% if x.href %} href="{{ x.href }}"{% endif %}>{% if x.tag %}<b class="ss-badge__tag">{{ x.tag }}</b>{% endif %}{% if x.icon == "dot" %}<i class="ss-badge__dot" aria-hidden="true"></i>{% elif x.icon == "spark" %}{{ icon("spark") }}{% endif %}<span class="ss-badge__text">{{ x.text }}</span>{% if x.href %}{{ icon("chevron") }}{% endif %}</{{ tag }}>
+{%- endif -%}
+{%- endmacro %}
+
+{# stars filled to the score, the score, and where it comes from #}
+{% macro rating(r) -%}
+{%- set tag = "a" if r.href else "div" -%}
+<{{ tag }} class="ss-rating"{% if r.href %} href="{{ r.href }}"{% endif %}>
+{%- if r.stars %}<span class="ss-stars" aria-hidden="true"><span class="ss-stars__row">{% for i in range(r.out_of) %}{{ icon("star") }}{% endfor %}</span><span class="ss-stars__fill" style="width: {{ (r.score / r.out_of * 100) | round(1) }}%">{% for i in range(r.out_of) %}{{ icon("star") }}{% endfor %}</span></span>{% endif -%}
+<b class="ss-rating__score">{{ "%g" | format(r.score) }}<span class="ss-sr"> out of {{ r.out_of }}</span></b>{% if r.text %}<span class="ss-rating__text">{{ r.text }}</span>{% endif %}</{{ tag }}>
+{%- endmacro %}
+
+{# an inline email field and its button: a plain form, checked by the browser; a mailto: action opens an email #}
+{% macro signup(f) -%}
+{%- set mail = f.action.lower().startswith("mailto:") -%}
+<form class="ss-signup" action="{{ f.action }}" method="{{ 'post' if mail else f.method }}"{% if mail %} enctype="text/plain"{% endif %}>
+<div class="ss-signup__row"><label class="ss-signup__field"><span class="ss-sr">{{ f.label }}</span><input type="email" name="{{ f.name }}" required autocomplete="email" placeholder="{{ f.placeholder or f.label }}"></label><button class="ss-btn ss-btn--hot ss-btn--kit" type="submit"><span>{{ f.button }}</span>{{ icon("arrow") }}</button></div>
+{%- for k, v in f.hidden.items() %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+{%- if f.note %}<p class="ss-signup__note">{{ f.note | rich }}</p>{% endif %}</form>
+{%- endmacro %}
+
+{# a row of figures with small labels, parted by thin rules #}
+{% macro figures(items) -%}
+<div class="ss-figures">{% for st in items %}<div class="ss-figure"><div class="ss-figure__v">{{ st.value }}{% if st.unit %}<sup>{{ st.unit }}</sup>{% endif %}</div><div class="ss-figure__l">{{ st.label }}</div></div>{% endfor %}</div>
+{%- endmacro %}
+
+{# a logo strip: imgs are what the compiler made of each logo's image ({src, mask}), in order #}
+{% macro logos(row, imgs) -%}
+<div class="ss-logos">{% if row.title %}<p class="ss-logos__title">{{ row.title }}</p>{% endif %}<ul class="ss-logos__row">
+{%- for lg in row.items %}{% set m = imgs[loop.index0] if imgs and loop.index0 < imgs | length else none %}<li>{% if lg.href %}<a href="{{ lg.href }}">{% endif %}
+{%- if m and m.src %}{% set mono = row.tint == "mono" %}<span class="ss-logo ss-logo--{{ ('mono' if m.mask else 'grey') if mono else 'own' }}"{% if mono and m.mask %} style="-webkit-mask-image: url('{{ m.src }}'); mask-image: url('{{ m.src }}')"{% endif %}><img src="{{ m.src }}" alt="{{ lg.name }}" loading="lazy"></span>
+{%- else %}<span class="ss-logo ss-logo--word">{{ lg.name }}</span>{% endif %}{% if lg.href %}</a>{% endif %}</li>{% endfor %}</ul></div>
+{%- endmacro %}
+
+{# what a hero holds under its buttons: rating, signup, figures #}
+{% macro hero_parts(b) -%}
+{%- if b.rating %}<div class="ss-kit__part ss-kit__rating">{{ rating(b.rating) }}</div>{% endif -%}
+{%- if b.signup %}<div class="ss-kit__part ss-kit__signup">{{ signup(b.signup) }}</div>{% endif -%}
+{%- if b.stats %}<div class="ss-kit__part ss-kit__figures">{{ figures(b.stats) }}</div>{% endif -%}
+{%- endmacro %}
+
+{# for a style's own hero: every kit piece the hero uses, in the default markup and the theme's tokens (one call after
+   its buttons: {{ base.hero_kit(b, e) }}; `attrs` adds the style's own attributes to the wrapper, e.g. "data-fb-unit") #}
+{% macro hero_kit(b, e, attrs="") -%}
+{%- if b.rating or b.signup or b.stats or b.logos %}<div class="ss-kit"{% if attrs %} {{ attrs | safe }}{% endif %}>{{ hero_parts(b) }}{% if b.logos %}<div class="ss-kit__part ss-kit__logos">{{ logos(b.logos, e.logos) }}</div>{% endif %}</div>{% endif -%}
+{%- endmacro %}
 
 {% macro phone(d, screen, clip=None) %}
 <div class="ss-phone" aria-hidden="true"><div class="ss-phone__screen">
@@ -26,7 +99,7 @@
   <div class="ss-reveal">
     {% if b.kicker %}<span class="ss-kicker">{{ b.kicker }}</span>{% endif %}
     {% if b.body %}<p class="ss-lede">{{ b.body | rich }}</p>{% endif %}
-    {% if b.button %}<a class="ss-btn ss-btn--hot" href="{{ b.button.href }}">{{ b.button.label }} <span class="ss-arrow">→</span></a>{% endif %}
+    {% if b.button %}{{ btn(b.button, true) }}{% endif %}
   </div>
 </div></section>
 
@@ -45,7 +118,7 @@
 </div></section>
 
 {% elif b.type == "stats" %}
-<section class="ss-block ss-band{{ band }}"{% if b.id %} id="{{ b.id }}"{% endif %}><div class="ss-wrap ss-stats ss-stats--{{ b.items | length }}">
+<section class="ss-block ss-band{{ band }}"{% if b.id %} id="{{ b.id }}"{% endif %}><div class="ss-wrap ss-stats ss-stats--{{ b.items | length }}{% if b.look == "divided" %} ss-stats--divided{% endif %}">
   {% for st in b.items %}
   <div class="ss-stat ss-reveal"><div class="ss-v"{% if st.value | countable %} data-count="{{ st.value | replace(',', '') }}"{% endif %}>{{ st.value }}{% if st.unit %}<sup>{{ st.unit }}</sup>{% endif %}</div><div class="ss-l">{{ st.label }}</div></div>
   {% endfor %}
@@ -70,7 +143,7 @@
   <div class="ss-cta__in">
     {% if b.kicker %}<span class="ss-kicker ss-reveal">{{ b.kicker }}</span>{% endif %}
     <h2 class="ss-display ss-reveal">{{ b.title | rich }}</h2>
-    {% if b.button %}<a class="ss-btn ss-btn--hot ss-reveal" href="{{ b.button.href }}">{{ b.button.label }} <span class="ss-arrow">→</span></a>{% endif %}
+    {% if b.button %}{{ btn(b.button, true, " ss-reveal") }}{% endif %}
   </div>
 </section>
 
@@ -89,14 +162,15 @@
 
 {% elif b.type == "hero" %}
 {% set media = e.img or e.video %}
-<section class="ss-block ss-hero ss-hero--{{ b.align }}{{ band }}{% if media and not b.surface %} ss-surface-{{ 'light' if e.calm and e.calm.tone == 'light' else 'dark' }} ss-hero--media{% endif %}{% if e.calm %} ss-hero--calm ss-hero--calm-{{ e.calm.side }}{% endif %}{% if b.device %} ss-hero--device{% endif %}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+<section class="ss-block ss-hero ss-hero--{{ b.align }}{{ band }}{% if media and not b.surface %} ss-surface-{{ 'light' if e.calm and e.calm.tone == 'light' else 'dark' }} ss-hero--media{% endif %}{% if e.calm %} ss-hero--calm ss-hero--calm-{{ e.calm.side }}{% endif %}{% if b.device %} ss-hero--device{% endif %}{% if b.kit %} ss-hero--kit{% endif %}{% if b.frame %} ss-frame-card{% endif %}"{% if b.id %} id="{{ b.id }}"{% endif %}>
   {% if media %}<div class="ss-hero__media">{% if e.video %}<video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video>{% else %}<img src="{{ e.img }}" alt="" fetchpriority="high">{% endif %}</div><div class="ss-hero__shade"></div>{% endif %}
   <div class="ss-hero__in">
-    {% if b.badge %}<span class="ss-badge">{{ b.badge }}</span>{% endif %}
+    {% if b.badge %}{{ badge(b.badge) }}{% endif %}
     {% if e.first %}<h1 class="ss-h1">{{ b.title | rich }}</h1>{% else %}<h2 class="ss-h1">{{ b.title | rich }}</h2>{% endif %}
     {% if b.body %}<p class="ss-lede">{{ b.body | rich }}</p>{% endif %}
-    {{ buttons(b.buttons) }}
+    {{ buttons(b.buttons) }}{{ hero_parts(b) }}
   </div>
+  {% if b.logos %}<div class="ss-hero__logos">{{ logos(b.logos, e.logos) }}</div>{% endif %}
   {% if b.device %}<div class="ss-hero__phone">{{ phone(b.device, e.screen, e.clip) }}</div>{% endif %}
 </section>
 
@@ -146,6 +220,19 @@
   <div class="ss-faq__list">
     {% for it in b.items %}<details class="ss-reveal"{% if loop.first %} open{% endif %}><summary>{{ it.q | rich }}</summary><p>{{ it.a | rich }}</p></details>{% endfor %}
   </div>
+</div></section>
+{% elif b.type == "logos" %}
+<section class="ss-block ss-logos-block{{ band }}"{% if b.id %} id="{{ b.id }}"{% endif %}><div class="ss-wrap ss-reveal">
+  {{ logos(b, e.logos) }}
+</div></section>
+
+{% elif b.type == "signup" %}
+<section class="ss-block ss-signup-block{{ band }}"{% if b.id %} id="{{ b.id }}"{% endif %}><div class="ss-wrap ss-signup-block__in ss-reveal">
+  {% if b.kicker %}<span class="ss-kicker">{{ b.kicker }}</span>{% endif %}
+  <h2 class="ss-h2">{{ b.title | rich }}</h2>
+  {% if b.body %}<p class="ss-lede">{{ b.body | rich }}</p>{% endif %}
+  <div class="ss-kit__part ss-kit__signup">{{ signup(b) }}</div>
+  {% if b.rating %}<div class="ss-kit__part ss-kit__rating">{{ rating(b.rating) }}</div>{% endif %}
 </div></section>
 {% endif %}
 {% endmacro %}

@@ -140,9 +140,115 @@ def _walk(node: Any, path: str, section: Optional[str], found: list[Deprecation]
 
 # ---------------------------------------------------------------- shared pieces
 
+ButtonIcon = Literal["arrow", "play", "external", "none"]
+
+
+def _drop_unset(d: Any, keys: tuple[str, ...]) -> Any:
+    """A dump with fields added after earlier specs were written left out while unset, so an old spec dumps (and is
+    embedded in the page, and keyed) exactly as it did."""
+    if isinstance(d, dict):
+        for k in keys:
+            if k in d and d[k] is None:
+                del d[k]
+    return d
+
+
 class Link(Model):
     label: str
     href: str = "#"
+    icon: Optional[ButtonIcon] = Field(None, description="An icon on the button: arrow (after the label), play (before "
+                                       "it), external (after it; the link opens in a new tab and says so to screen "
+                                       "readers) or none. Default: the primary button's arrow, as before")
+    look: Optional[Literal["solid", "ghost"]] = Field(None, description="solid: filled with the accent; ghost: "
+                                                      "transparent with a thin outline, for a secondary action. Default: "
+                                                      "the first button of a row is solid")
+
+    @model_serializer(mode="wrap")
+    def _dump(self, handler):
+        return _drop_unset(handler(self), ("icon", "look"))
+
+
+class Badge(Model):
+    """A small pill above a headline: 'Brand Voices is here', optionally a link, with a dot or a tag in front."""
+    text: str = Field(..., description="The words in the pill")
+    href: Optional[str] = Field(None, description="Make the pill a link (an arrow follows the words)")
+    tag: Optional[str] = Field(None, description="A short filled label before the words, e.g. 'New'")
+    icon: Optional[Literal["dot", "spark"]] = Field(None, description="A mark before the words: dot (a small accent dot) "
+                                                    "or spark")
+
+    def __str__(self) -> str:    # a style's own markup that shows the badge as words keeps working: "New · Brand Voices is here"
+        return f"{self.tag} · {self.text}" if self.tag else self.text
+
+
+class Rating(Model):
+    """A rating line: stars, the score and where it comes from ('4.9 from 860 reviews')."""
+    score: float = Field(..., ge=0, description="The score, e.g. 4.9")
+    out_of: int = Field(5, ge=1, le=10, description="The best score; also the number of stars")
+    text: Optional[str] = Field(None, description="Where the score comes from, e.g. 'from 860 reviews'")
+    href: Optional[str] = Field(None, description="Link the line to the reviews")
+    stars: bool = Field(True, description="Draw the stars (filled to the score)")
+
+    @model_validator(mode="after")
+    def _in_range(self):
+        if self.score > self.out_of:
+            raise ValueError(f"rating: score {self.score} is more than out_of {self.out_of}")
+        return self
+
+
+_LOGO_REF = re.compile(r"[\w./:%@~+-]{1,300}")
+
+
+class Logo(Model):
+    name: str = Field(..., description="The company's name: the image's alternative text, or set as a wordmark when "
+                                       "there is no image")
+    image: Optional[str] = Field(None, description="The logo: an SVG or a transparent PNG/WebP in the project (or an "
+                                                   "https URL). Shown as a single-colour silhouette in the theme's text "
+                                                   "colour; a picture without transparency is shown in greys")
+    href: Optional[str] = None
+
+    @field_validator("image")
+    @classmethod
+    def _plain_ref(cls, v):
+        if v is not None and (not _LOGO_REF.fullmatch(v) or v.lower().startswith(("javascript:", "data:"))):
+            raise ValueError(f"logo image {v[:60]!r}: give a project file or an https URL (letters, digits and ./-_ only)")
+        return v
+
+
+class LogoRow(Model):
+    """A strip of partner or customer logos, in one colour so they sit quietly together."""
+    title: Optional[str] = Field(None, description="A small line above the logos, e.g. 'Trusted by teams at'")
+    items: list[Logo] = Field(..., min_length=1)
+    tint: Literal["mono", "original"] = Field("mono", description="mono: every logo in the theme's text colour "
+                                              "(silhouettes; greys for pictures without transparency); original: their own colours")
+
+
+class SignupForm(Model):
+    """An inline email field and a button: a plain HTML form that posts to the address you name (a form service, a
+    newsletter's signup URL) or opens an email with `mailto:`. No server is involved; the browser checks the address."""
+    action: str = Field(..., description="Where the form goes: an https URL that accepts a form post, or "
+                                         "mailto:you@example.com")
+    method: Literal["post", "get"] = Field("post", description="How the form is sent (a mailto: form always posts)")
+    name: str = Field("email", pattern=r"^[A-Za-z][\w.\-\[\]]{0,63}$", description="The field name the service expects")
+    label: str = Field("Email address", description="The field's label, read by screen readers (and shown when the "
+                                                    "placeholder is empty)")
+    placeholder: Optional[str] = Field("you@example.com", description="Faint example text in the empty field")
+    button: str = Field("Sign up", description="The button's words")
+    note: Optional[str] = Field(None, description="Small print under the field, e.g. 'No spam. Leave any time.'")
+    hidden: dict[str, str] = Field(default_factory=dict, description="Extra hidden fields the service needs "
+                                                                     "(a list id, a redirect URL)")
+
+    @field_validator("action")
+    @classmethod
+    def _action(cls, v):
+        return check_url(v, "signup action")
+
+    @field_validator("hidden")
+    @classmethod
+    def _hidden(cls, v):
+        for k in v:
+            if not re.fullmatch(r"[A-Za-z][\w.\-\[\]]{0,63}", k):
+                raise ValueError(f"signup hidden field {k[:40]!r}: use letters, digits and . _ - [ ]")
+        return v
 
 
 class Glow(Model):
@@ -712,6 +818,9 @@ SHOW_DOC = ("When the step is on screen: from and to, 0-1 of the scene's progres
 ENTER_DOC = ("How the step arrives: fade, rise (the words rise into place), wipe (revealed from the left), type-on (word by "
              "word), scale (grows in) or none. Default: the layout's own, words rising over a stage and cards brightening "
              "as they reach the middle of the screen. With reduced motion only the fade is kept")
+FRAME_DOC = ("card: present the section as a rounded card inset on a border in the theme's accent colours (accent to "
+             "accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays "
+             "full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel")
 EXIT_DOC = ("How the step leaves: fade, rise (the words rise away), wipe (cleared to the right), type-on (gone at once), "
             "scale or none. Default: the layout's own")
 
@@ -751,6 +860,8 @@ class Step(Model):
                           "rest of the scene (dark words on a bright sky: light), with a soft glow behind them")
     button: Optional[Link] = Field(None, description="overlay layout: a button under the caption, e.g. the call to "
                                                      "action on a film's last shot")
+    badge: Optional[Union[str, Badge]] = Field(None, description="A small pill above the headline: words, or "
+                                               "`{text, href, tag, icon}` for a link with a 'New' tag or a dot")
     image: Optional[ImageRef] = Field(None, description="parallax: this step's photo")
     state: dict[str, Any] = Field(default_factory=dict,
         description="Scene-specific state for this step. chart: {show, focus, x, y, reveal, marks}; map: {center, zoom, pitch, bearing, route, marker}")
@@ -777,7 +888,7 @@ class Step(Model):
         exactly as it did."""
         d = handler(self)
         if isinstance(d, dict):
-            for k in ("show", "enter", "exit"):
+            for k in ("show", "enter", "exit", "badge"):
                 if d.get(k, 0) is None:
                     del d[k]
         return d
@@ -913,6 +1024,11 @@ class SceneBase(Model):
                                             "says so). A locked scene that was never rendered is rendered once. Unlock "
                                             "(or delete the render) to redo it")
     transition: Optional[Transition] = Field(None, description=TRANSITION_DOC)
+    frame: Optional[Literal["card"]] = Field(None, description=FRAME_DOC)
+
+    @model_serializer(mode="wrap")
+    def _dump(self, handler):
+        return _drop_unset(handler(self), ("frame",))
 
     @model_validator(mode="after")
     def _step_placement(self):
@@ -1630,7 +1746,7 @@ class FilmScene(SceneBase):
 
     @model_serializer(mode="wrap")
     def _journey_dump(self, handler, info):
-        d = handler(self)
+        d = _drop_unset(handler(self), ("frame",))     # replaces SceneBase._dump for films
         if self.journey is not None and isinstance(d, dict) and info.include is None:   # a field list (the compiler's) keeps them
             for k in ("beats", "steps", "length", "beat_fade", "beat_restore", "take"):
                 d.pop(k, None)
@@ -2331,6 +2447,15 @@ class Stat(Model):
 class StatsBlock(BlockBase):
     type: Literal["stats"] = "stats"
     items: list[Stat]
+    look: Literal["plain", "divided"] = Field("plain", description="plain: big figures; divided: a quieter row of "
+                                              "figures with small labels, parted by thin vertical rules")
+
+    @model_serializer(mode="wrap")
+    def _dump(self, handler):
+        d = handler(self)
+        if isinstance(d, dict) and d.get("look") == "plain":
+            del d["look"]
+        return d
 
 
 class TimelineItem(Model):
@@ -2378,9 +2503,12 @@ class GalleryBlock(BlockBase):
 
 
 class HeroBlock(BlockBase):
-    """A full-screen opening: headline over a photo or looping video, with an optional badge and buttons."""
+    """A full-screen opening: headline over a photo or looping video, with an optional badge and buttons. The landing
+    page kit adds a rating line, an inline email signup, a row of figures, a logo strip and a framed card; a hero that
+    uses any of them is set in the kit's type scale and spacing."""
     type: Literal["hero"] = "hero"
-    badge: Optional[str] = Field(None, description="Small pill above the headline (e.g. 'Now open in Lisbon')")
+    badge: Optional[Union[str, Badge]] = Field(None, description="Small pill above the headline (e.g. 'Now open in "
+                                               "Lisbon'), or `{text, href, tag, icon}` for a link with a 'New' tag or a dot")
     title: str
     body: Optional[str] = None
     buttons: list[Link] = Field(default_factory=list, description="The first is the primary button")
@@ -2388,6 +2516,23 @@ class HeroBlock(BlockBase):
     video: Optional[str] = Field(None, description="Background video file (muted, looping); image is its poster")
     align: Literal["center", "left"] = "center"
     device: Optional["Device"] = Field(None, description="A phone rising from the bottom edge under the copy")
+    rating: Optional[Rating] = Field(None, description="A rating line under the buttons: stars, score and source")
+    signup: Optional[SignupForm] = Field(None, description="An inline email field and button under the copy")
+    stats: list[Stat] = Field(default_factory=list, description="A row of figures with thin dividers under the copy")
+    logos: Optional[LogoRow] = Field(None, description="A strip of partner logos along the bottom of the hero")
+    frame: Optional[Literal["card"]] = Field(None, description=FRAME_DOC)
+
+    @property
+    def kit(self) -> bool:
+        """Whether the hero uses the landing page kit (and so its type scale and spacing)."""
+        return bool(self.frame or self.rating or self.signup or self.stats or self.logos or isinstance(self.badge, Badge))
+
+    @model_serializer(mode="wrap")
+    def _dump(self, handler):
+        d = _drop_unset(handler(self), ("rating", "signup", "logos", "frame"))
+        if isinstance(d, dict) and d.get("stats") == []:
+            del d["stats"]
+        return d
 
 
 class DeviceOption(Model):
@@ -2475,6 +2620,21 @@ class FaqBlock(BlockBase):
     kicker: Optional[str] = None
     title: str = "Questions"
     items: list[FaqItem]
+
+
+class LogosBlock(BlockBase, LogoRow):
+    """A strip of partner or customer logos, in one colour: 'Trusted by teams at ...'."""
+    type: Literal["logos"] = "logos"
+
+
+class SignupBlock(BlockBase, SignupForm):
+    """An email signup: a headline, a line of copy and an inline email field with its button (a plain HTML form that
+    posts to the `action` you name, or opens an email with `mailto:`), with an optional rating line under it."""
+    type: Literal["signup"] = "signup"
+    kicker: Optional[str] = None
+    title: str
+    body: Optional[str] = None
+    rating: Optional[Rating] = None
 
 
 # ---- the one-take page (engine/journey.py): kept together so it merges cleanly -----------------------------------
@@ -2667,7 +2827,7 @@ Section = Annotated[Union[
     FilmScene, ArtworkScene, Scene3DScene, SequenceScene, ParallaxScene, TypeScene, VectorScene, ChartScene, MapScene,
     SplatScene, CodeScene, ShowroomScene, DioramaScene, InsideScene, LightScene,
     IntroBlock, FeaturesBlock, StatsBlock, TimelineBlock, QuoteBlock, CtaBlock, GalleryBlock,
-    HeroBlock, ProductBlock, StripBlock, OrbitBlock, FaqBlock,
+    HeroBlock, ProductBlock, StripBlock, OrbitBlock, FaqBlock, LogosBlock, SignupBlock,
 ], Field(discriminator="type")]
 
 SCENE_TYPES = ("film", "artwork", "scene3d", "sequence", "parallax", "type", "vector", "chart", "map", "splat", "code",

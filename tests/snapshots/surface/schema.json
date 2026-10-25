@@ -198,6 +198,20 @@
      "description": "Where drawing starts: 'auto' (faces, then saliency) or [(x, y)] in 0-1 image coords",
      "title": "Focus"
     },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
+    },
     "hud": {
      "$ref": "#/$defs/Hud"
     },
@@ -456,6 +470,65 @@
     "grid"
    ],
    "title": "AtGrid",
+   "type": "object"
+  },
+  "Badge": {
+   "additionalProperties": false,
+   "description": "A small pill above a headline: 'Brand Voices is here', optionally a link, with a dot or a tag in front.",
+   "properties": {
+    "href": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Make the pill a link (an arrow follows the words)",
+     "title": "Href"
+    },
+    "icon": {
+     "anyOf": [
+      {
+       "enum": [
+        "dot",
+        "spark"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "A mark before the words: dot (a small accent dot) or spark",
+     "title": "Icon"
+    },
+    "tag": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "A short filled label before the words, e.g. 'New'",
+     "title": "Tag"
+    },
+    "text": {
+     "description": "The words in the pill",
+     "title": "Text",
+     "type": "string"
+    }
+   },
+   "required": [
+    "text"
+   ],
+   "title": "Badge",
    "type": "object"
   },
   "Beat": {
@@ -1084,6 +1157,20 @@
      "title": "Format",
      "type": "string"
     },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
+    },
     "hud": {
      "$ref": "#/$defs/Hud"
     },
@@ -1608,6 +1695,20 @@
      "minItems": 1,
      "title": "Files",
      "type": "array"
+    },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
     },
     "hud": {
      "$ref": "#/$defs/Hud"
@@ -2466,6 +2567,20 @@
      "default": null,
      "description": "'Scroll to …' hint shown at the start",
      "title": "Cue"
+    },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
     },
     "hud": {
      "$ref": "#/$defs/Hud"
@@ -3373,6 +3488,20 @@
      ],
      "default": null,
      "description": "`restore`: repair the faces in the whole film (GFPGAN) before it is encoded; beats can set it per beat. Off by default"
+    },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
     },
     "gop": {
      "default": 6,
@@ -4466,7 +4595,7 @@
   },
   "HeroBlock": {
    "additionalProperties": false,
-   "description": "A full-screen opening: headline over a photo or looping video, with an optional badge and buttons.",
+   "description": "A full-screen opening: headline over a photo or looping video, with an optional badge and buttons. The landing\npage kit adds a rating line, an inline email signup, a row of figures, a logo strip and a framed card; a hero that\nuses any of them is set in the kit's type scale and spacing.",
    "properties": {
     "align": {
      "default": "center",
@@ -4499,11 +4628,14 @@
        "type": "string"
       },
       {
+       "$ref": "#/$defs/Badge"
+      },
+      {
        "type": "null"
       }
      ],
      "default": null,
-     "description": "Small pill above the headline (e.g. 'Now open in Lisbon')",
+     "description": "Small pill above the headline (e.g. 'Now open in Lisbon'), or `{text, href, tag, icon}` for a link with a 'New' tag or a dot",
      "title": "Badge"
     },
     "band": {
@@ -4544,6 +4676,20 @@
      "default": null,
      "description": "A phone rising from the bottom edge under the copy"
     },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
+    },
     "id": {
      "anyOf": [
       {
@@ -4572,6 +4718,18 @@
      "description": "Background photo (file, URL or generate:)",
      "title": "Image"
     },
+    "logos": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/LogoRow"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "A strip of partner logos along the bottom of the hero"
+    },
     "nav_label": {
      "anyOf": [
       {
@@ -4583,6 +4741,38 @@
      ],
      "default": null,
      "title": "Nav Label"
+    },
+    "rating": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Rating"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "A rating line under the buttons: stars, score and source"
+    },
+    "signup": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/SignupForm"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "An inline email field and button under the copy"
+    },
+    "stats": {
+     "description": "A row of figures with thin dividers under the copy",
+     "items": {
+      "$ref": "#/$defs/Stat"
+     },
+     "title": "Stats",
+     "type": "array"
     },
     "surface": {
      "anyOf": [
@@ -5334,6 +5524,20 @@
      "minimum": -4,
      "title": "Exposure",
      "type": "number"
+    },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
     },
     "fstop": {
      "default": 11.0,
@@ -6852,6 +7056,20 @@
      "title": "Follow",
      "type": "boolean"
     },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
+    },
     "hold": {
      "default": 0.3,
      "description": "Share of each step the light holds still at its time (so a headline reads in its own light) before the next change begins",
@@ -7348,9 +7566,45 @@
      "title": "Href",
      "type": "string"
     },
+    "icon": {
+     "anyOf": [
+      {
+       "enum": [
+        "arrow",
+        "play",
+        "external",
+        "none"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "An icon on the button: arrow (after the label), play (before it), external (after it; the link opens in a new tab and says so to screen readers) or none. Default: the primary button's arrow, as before",
+     "title": "Icon"
+    },
     "label": {
      "title": "Label",
      "type": "string"
+    },
+    "look": {
+     "anyOf": [
+      {
+       "enum": [
+        "solid",
+        "ghost"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "solid: filled with the accent; ghost: transparent with a thin outline, for a secondary action. Default: the first button of a row is solid",
+     "title": "Look"
     }
    },
    "required": [
@@ -7562,6 +7816,212 @@
    "title": "Loader",
    "type": "object"
   },
+  "Logo": {
+   "additionalProperties": false,
+   "properties": {
+    "href": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Href"
+    },
+    "image": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "The logo: an SVG or a transparent PNG/WebP in the project (or an https URL). Shown as a single-colour silhouette in the theme's text colour; a picture without transparency is shown in greys",
+     "title": "Image"
+    },
+    "name": {
+     "description": "The company's name: the image's alternative text, or set as a wordmark when there is no image",
+     "title": "Name",
+     "type": "string"
+    }
+   },
+   "required": [
+    "name"
+   ],
+   "title": "Logo",
+   "type": "object"
+  },
+  "LogoRow": {
+   "additionalProperties": false,
+   "description": "A strip of partner or customer logos, in one colour so they sit quietly together.",
+   "properties": {
+    "items": {
+     "items": {
+      "$ref": "#/$defs/Logo"
+     },
+     "minItems": 1,
+     "title": "Items",
+     "type": "array"
+    },
+    "tint": {
+     "default": "mono",
+     "description": "mono: every logo in the theme's text colour (silhouettes; greys for pictures without transparency); original: their own colours",
+     "enum": [
+      "mono",
+      "original"
+     ],
+     "title": "Tint",
+     "type": "string"
+    },
+    "title": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "A small line above the logos, e.g. 'Trusted by teams at'",
+     "title": "Title"
+    }
+   },
+   "required": [
+    "items"
+   ],
+   "title": "LogoRow",
+   "type": "object"
+  },
+  "LogosBlock": {
+   "additionalProperties": false,
+   "description": "A strip of partner or customer logos, in one colour: 'Trusted by teams at ...'.",
+   "properties": {
+    "backdrop": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "$ref": "#/$defs/ImageInput"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Full-bleed image behind the whole section: a file, URL, generate: or gradient:. In the stack layout it is the panel's own backdrop. Pair with `surface` for legible text.",
+     "title": "Backdrop"
+    },
+    "band": {
+     "default": false,
+     "description": "Alternate background band",
+     "title": "Band",
+     "type": "boolean"
+    },
+    "id": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Id"
+    },
+    "items": {
+     "items": {
+      "$ref": "#/$defs/Logo"
+     },
+     "minItems": 1,
+     "title": "Items",
+     "type": "array"
+    },
+    "nav_label": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Nav Label"
+    },
+    "surface": {
+     "anyOf": [
+      {
+       "enum": [
+        "light",
+        "dark",
+        "accent"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Colour scheme for this section: dark inverts the theme, accent uses its soft accent colour. In the stack layout each section is a panel, so this sets the panel's colour.",
+     "title": "Surface"
+    },
+    "tint": {
+     "default": "mono",
+     "description": "mono: every logo in the theme's text colour (silhouettes; greys for pictures without transparency); original: their own colours",
+     "enum": [
+      "mono",
+      "original"
+     ],
+     "title": "Tint",
+     "type": "string"
+    },
+    "title": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "A small line above the logos, e.g. 'Trusted by teams at'",
+     "title": "Title"
+    },
+    "transition": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Transition"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "How this section hands over to the next one, in film grammar: cut, dissolve, wipe, iris, whip, match (a shared shape) or carry (an element travels over). Unset: the sections just follow one another. A bare name works: `transition: whip`. See Transition"
+    },
+    "type": {
+     "const": "logos",
+     "default": "logos",
+     "title": "Type",
+     "type": "string"
+    }
+   },
+   "required": [
+    "items"
+   ],
+   "title": "LogosBlock",
+   "type": "object"
+  },
   "MapScene": {
    "additionalProperties": false,
    "description": "A geographic journey on a live vector map. Each step's `state` moves the camera and draws routes:\n{center: [lng, lat], zoom, pitch, bearing, routes: {route_id: 0-1}}. Tiles come from OpenFreeMap (no key).",
@@ -7600,6 +8060,20 @@
      "description": "Darken and desaturate the base map to sit under a dark theme",
      "title": "Dark",
      "type": "boolean"
+    },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
     },
     "hud": {
      "$ref": "#/$defs/Hud"
@@ -8129,6 +8603,20 @@
      ],
      "title": "Depth Model",
      "type": "string"
+    },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
     },
     "hud": {
      "$ref": "#/$defs/Hud"
@@ -9534,6 +10022,63 @@
    "title": "QuoteBlock",
    "type": "object"
   },
+  "Rating": {
+   "additionalProperties": false,
+   "description": "A rating line: stars, the score and where it comes from ('4.9 from 860 reviews').",
+   "properties": {
+    "href": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Link the line to the reviews",
+     "title": "Href"
+    },
+    "out_of": {
+     "default": 5,
+     "description": "The best score; also the number of stars",
+     "maximum": 10,
+     "minimum": 1,
+     "title": "Out Of",
+     "type": "integer"
+    },
+    "score": {
+     "description": "The score, e.g. 4.9",
+     "minimum": 0,
+     "title": "Score",
+     "type": "number"
+    },
+    "stars": {
+     "default": true,
+     "description": "Draw the stars (filled to the score)",
+     "title": "Stars",
+     "type": "boolean"
+    },
+    "text": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Where the score comes from, e.g. 'from 860 reviews'",
+     "title": "Text"
+    }
+   },
+   "required": [
+    "score"
+   ],
+   "title": "Rating",
+   "type": "object"
+  },
   "Reveal": {
    "additionalProperties": false,
    "description": "Colour that comes in where the camera looks, driven by scroll. The film is rendered once in full colour; the page\nshows everything in the `base` look, and each region's colour is brought in through a tracked mask, in the browser\n(a WebGL shader draws each frame of the film with its masks from the same frame). Without WebGL the colour film\nplays as it is; with reduced motion each region jumps to colour as its moment arrives.",
@@ -9960,6 +10505,20 @@
      "description": "Extra beat on the last level, e.g. 'dock' for molecule docking",
      "title": "Final"
     },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
+    },
     "hud": {
      "$ref": "#/$defs/Hud"
     },
@@ -10172,6 +10731,20 @@
      "default": null,
      "description": "'Scroll to …' hint shown at the start",
      "title": "Cue"
+    },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
     },
     "frames": {
      "default": 120,
@@ -10417,6 +10990,20 @@
      "title": "Exposure",
      "type": "number"
     },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
+    },
     "hud": {
      "$ref": "#/$defs/Hud"
     },
@@ -10570,6 +11157,286 @@
     "id"
    ],
    "title": "ShowroomScene",
+   "type": "object"
+  },
+  "SignupBlock": {
+   "additionalProperties": false,
+   "description": "An email signup: a headline, a line of copy and an inline email field with its button (a plain HTML form that\nposts to the `action` you name, or opens an email with `mailto:`), with an optional rating line under it.",
+   "properties": {
+    "action": {
+     "description": "Where the form goes: an https URL that accepts a form post, or mailto:you@example.com",
+     "title": "Action",
+     "type": "string"
+    },
+    "backdrop": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "$ref": "#/$defs/ImageInput"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Full-bleed image behind the whole section: a file, URL, generate: or gradient:. In the stack layout it is the panel's own backdrop. Pair with `surface` for legible text.",
+     "title": "Backdrop"
+    },
+    "band": {
+     "default": false,
+     "description": "Alternate background band",
+     "title": "Band",
+     "type": "boolean"
+    },
+    "body": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Body"
+    },
+    "button": {
+     "default": "Sign up",
+     "description": "The button's words",
+     "title": "Button",
+     "type": "string"
+    },
+    "hidden": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "description": "Extra hidden fields the service needs (a list id, a redirect URL)",
+     "title": "Hidden",
+     "type": "object"
+    },
+    "id": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Id"
+    },
+    "kicker": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Kicker"
+    },
+    "label": {
+     "default": "Email address",
+     "description": "The field's label, read by screen readers (and shown when the placeholder is empty)",
+     "title": "Label",
+     "type": "string"
+    },
+    "method": {
+     "default": "post",
+     "description": "How the form is sent (a mailto: form always posts)",
+     "enum": [
+      "post",
+      "get"
+     ],
+     "title": "Method",
+     "type": "string"
+    },
+    "name": {
+     "default": "email",
+     "description": "The field name the service expects",
+     "pattern": "^[A-Za-z][\\w.\\-\\[\\]]{0,63}$",
+     "title": "Name",
+     "type": "string"
+    },
+    "nav_label": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Nav Label"
+    },
+    "note": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Small print under the field, e.g. 'No spam. Leave any time.'",
+     "title": "Note"
+    },
+    "placeholder": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": "you@example.com",
+     "description": "Faint example text in the empty field",
+     "title": "Placeholder"
+    },
+    "rating": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Rating"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null
+    },
+    "surface": {
+     "anyOf": [
+      {
+       "enum": [
+        "light",
+        "dark",
+        "accent"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Colour scheme for this section: dark inverts the theme, accent uses its soft accent colour. In the stack layout each section is a panel, so this sets the panel's colour.",
+     "title": "Surface"
+    },
+    "title": {
+     "title": "Title",
+     "type": "string"
+    },
+    "transition": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Transition"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "How this section hands over to the next one, in film grammar: cut, dissolve, wipe, iris, whip, match (a shared shape) or carry (an element travels over). Unset: the sections just follow one another. A bare name works: `transition: whip`. See Transition"
+    },
+    "type": {
+     "const": "signup",
+     "default": "signup",
+     "title": "Type",
+     "type": "string"
+    }
+   },
+   "required": [
+    "action",
+    "title"
+   ],
+   "title": "SignupBlock",
+   "type": "object"
+  },
+  "SignupForm": {
+   "additionalProperties": false,
+   "description": "An inline email field and a button: a plain HTML form that posts to the address you name (a form service, a\nnewsletter's signup URL) or opens an email with `mailto:`. No server is involved; the browser checks the address.",
+   "properties": {
+    "action": {
+     "description": "Where the form goes: an https URL that accepts a form post, or mailto:you@example.com",
+     "title": "Action",
+     "type": "string"
+    },
+    "button": {
+     "default": "Sign up",
+     "description": "The button's words",
+     "title": "Button",
+     "type": "string"
+    },
+    "hidden": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "description": "Extra hidden fields the service needs (a list id, a redirect URL)",
+     "title": "Hidden",
+     "type": "object"
+    },
+    "label": {
+     "default": "Email address",
+     "description": "The field's label, read by screen readers (and shown when the placeholder is empty)",
+     "title": "Label",
+     "type": "string"
+    },
+    "method": {
+     "default": "post",
+     "description": "How the form is sent (a mailto: form always posts)",
+     "enum": [
+      "post",
+      "get"
+     ],
+     "title": "Method",
+     "type": "string"
+    },
+    "name": {
+     "default": "email",
+     "description": "The field name the service expects",
+     "pattern": "^[A-Za-z][\\w.\\-\\[\\]]{0,63}$",
+     "title": "Name",
+     "type": "string"
+    },
+    "note": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Small print under the field, e.g. 'No spam. Leave any time.'",
+     "title": "Note"
+    },
+    "placeholder": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": "you@example.com",
+     "description": "Faint example text in the empty field",
+     "title": "Placeholder"
+    }
+   },
+   "required": [
+    "action"
+   ],
+   "title": "SignupForm",
    "type": "object"
   },
   "SpaceTokens": {
@@ -10771,6 +11638,20 @@
      "description": "Vertical field of view in degrees",
      "title": "Fov",
      "type": "number"
+    },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
     },
     "hud": {
      "$ref": "#/$defs/Hud"
@@ -11086,6 +11967,16 @@
      "title": "Items",
      "type": "array"
     },
+    "look": {
+     "default": "plain",
+     "description": "plain: big figures; divided: a quieter row of figures with small labels, parted by thin vertical rules",
+     "enum": [
+      "plain",
+      "divided"
+     ],
+     "title": "Look",
+     "type": "string"
+    },
     "nav_label": {
      "anyOf": [
       {
@@ -11192,6 +12083,22 @@
      "default": null,
      "description": "Where the step's words sit. A named spot: left, right, center, top, bottom, top-left, top-right, bottom-left, bottom-right (auto, the default, lets the layout decide). Or a box on the stage, `{x, y, w, h, align}` in 0-1 (x and y are its top-left corner). Or a slot on the theme's 12-column grid, `{grid: \"9 / span 4\", row: top | middle | bottom}`. Overlay scenes take all three; cards take all three for the card; split takes a spot (the copy stays in its column). Two numbers, `[from, to]`, are the older way to write `show`",
      "title": "At"
+    },
+    "badge": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "$ref": "#/$defs/Badge"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "A small pill above the headline: words, or `{text, href, tag, icon}` for a link with a 'New' tag or a dot",
+     "title": "Badge"
     },
     "body": {
      "anyOf": [
@@ -12807,6 +13714,20 @@
      "description": "'Scroll to …' hint shown at the start",
      "title": "Cue"
     },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
+    },
     "hud": {
      "$ref": "#/$defs/Hud"
     },
@@ -13063,6 +13984,20 @@
      "description": "Vectorising detail: higher keeps smaller specks (more paths, heavier page)",
      "title": "Detail",
      "type": "number"
+    },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
     },
     "hud": {
      "$ref": "#/$defs/Hud"
@@ -14010,6 +14945,7 @@
       "inside": "#/$defs/InsideScene",
       "intro": "#/$defs/IntroBlock",
       "light": "#/$defs/LightScene",
+      "logos": "#/$defs/LogosBlock",
       "map": "#/$defs/MapScene",
       "orbit": "#/$defs/OrbitBlock",
       "parallax": "#/$defs/ParallaxScene",
@@ -14018,6 +14954,7 @@
       "scene3d": "#/$defs/Scene3DScene",
       "sequence": "#/$defs/SequenceScene",
       "showroom": "#/$defs/ShowroomScene",
+      "signup": "#/$defs/SignupBlock",
       "splat": "#/$defs/SplatScene",
       "stats": "#/$defs/StatsBlock",
       "strip": "#/$defs/StripBlock",
@@ -14108,6 +15045,12 @@
      },
      {
       "$ref": "#/$defs/FaqBlock"
+     },
+     {
+      "$ref": "#/$defs/LogosBlock"
+     },
+     {
+      "$ref": "#/$defs/SignupBlock"
      }
     ]
    },

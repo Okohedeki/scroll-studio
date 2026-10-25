@@ -345,7 +345,38 @@ def build_site(project: Project, log: Callable[[str], None] = print,
             x["behind_clip"] = publish(s.behind.video) if s.behind and s.behind.video else None
         elif s.type == "strip":
             x["imgs"] = [block_image(it.image, 900) for it in s.items]
+        row = s if s.type == "logos" else getattr(s, "logos", None)
+        if row is not None:
+            x["logos"] = [logo_image(lg.image) for lg in row.items]
         return x
+
+    def logo_image(ref: Optional[str]) -> Optional[dict]:
+        """A logo for the strip: an SVG is copied in as it is, a picture resized to the height it is shown at. `mask`: it
+        has transparency, so the page can show it as a silhouette in the theme's text colour."""
+        if not ref:
+            return None
+        if ref.startswith(("http://", "https://")):
+            return {"src": ref, "mask": ref.lower().split("?")[0].endswith((".svg", ".png", ".webp"))}
+        if ref.lower().endswith(".svg"):
+            src = publish(ref)
+            return {"src": src, "mask": True} if src else None
+        src = project.path(ref)
+        if not src.exists():
+            log(f"  note: logo {ref} not found; its name is shown instead")
+            return None
+        from PIL import Image
+        st = src.stat()
+        out = media / f"logo-{hashlib.sha1(json.dumps([str(src), st.st_size, int(st.st_mtime), 1]).encode()).hexdigest()[:12]}.webp"
+        with Image.open(src) as im:
+            alpha = im.mode in ("RGBA", "LA", "PA") or (im.mode == "P" and "transparency" in im.info)
+            im = im.convert("RGBA" if alpha else "RGB")
+            alpha = alpha and im.getchannel("A").getextrema()[0] < 255
+            if not out.exists():
+                media.mkdir(parents=True, exist_ok=True)
+                if im.height > 160:
+                    im = im.resize((round(im.width * 160 / im.height), 160), Image.LANCZOS)
+                im.save(out, "WEBP", quality=90, method=6)
+        return {"src": f"assets/_media/{out.name}", "mask": alpha}
     for i, e in enumerate(sections):
         s = e["s"]
         e["first"] = i == 0   # only the opening section gets the page's h1

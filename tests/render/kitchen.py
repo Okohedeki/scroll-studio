@@ -23,9 +23,17 @@ def spec(theme: dict) -> dict:
         "nav": {"cta": BTN},
         "footer": {"left": "Footer left words", "right": "Footer right words"},
         "sections": [
-            {"type": "hero", "id": "hero", "nav_label": "Top", "badge": "Now open",
+            {"type": "hero", "id": "hero", "nav_label": "Top", "badge": {"text": "Now open", "href": "#intro", "tag": "New"},
              "title": "One <em>page</em> holds everything", "body": "Every block type appears once on this page.",
-             "buttons": [BTN, {"label": "Read more", "href": "#intro"}], "image": _grad(["#1d2b64", "#f8cdda"])},
+             "buttons": [dict(BTN, icon="arrow"), {"label": "Read more", "href": "#intro", "icon": "play", "look": "ghost"}],
+             "image": _grad(["#1d2b64", "#f8cdda"]), "frame": "card",
+             "rating": {"score": 4.6, "text": "from 1,400 readers"},
+             "signup": {"action": "mailto:hello@example.com", "label": "Your email", "button": "Get the letter",
+                        "note": "Signup note words."},
+             "stats": [{"value": "61%", "label": "Hero figure one"}, {"value": "35k", "label": "Hero figure two"},
+                       {"value": "9 days", "label": "Hero figure three"}],
+             "logos": {"title": "Logo strip title", "items": [{"name": "Northwind"}, {"name": "Lumen", "href": "#"},
+                                                              {"name": "Halden"}]}},
             {"type": "intro", "id": "intro", "nav_label": "Intro", "kicker": "Introduction", "title": "A short <em>introduction</em>",
              "body": "Paragraph text that explains the page in plain words."},
             {"type": "features", "id": "features", "nav_label": "Features", "kicker": "Features", "title": "Three features",
@@ -34,6 +42,13 @@ def spec(theme: dict) -> dict:
             {"type": "stats", "id": "stats", "items": [{"value": "12", "label": "Twelve things"},
                                                        {"value": "3", "unit": "%", "label": "Three percent"},
                                                        {"value": "480", "label": "Four hundred eighty"}]},
+            {"type": "stats", "id": "figures", "look": "divided", "items": [{"value": "36", "label": "Divided figure one"},
+                                                                            {"value": "7", "unit": "x", "label": "Divided figure two"}]},
+            {"type": "logos", "id": "logos", "title": "Partner logos", "items": [{"name": "Acme Works"}, {"name": "Globex"},
+                                                                                {"name": "Initech", "href": "#"}]},
+            {"type": "signup", "id": "signup", "kicker": "Letters", "title": "Stay in <em>touch</em>",
+             "body": "Signup block body words.", "action": "https://example.com/subscribe", "button": "Subscribe now",
+             "note": "Signup block note.", "rating": {"score": 4.9, "text": "from block readers"}},
             {"type": "timeline", "id": "timeline", "kicker": "History", "title": "How it went",
              "items": [{"when": "2024", "title": "Then we began", "body": "The first step."},
                        {"when": "2025", "title": "Later we grew"}, {"when": "2026", "title": "Now we ship"}]},
@@ -56,11 +71,11 @@ def spec(theme: dict) -> dict:
             {"type": "type", "id": "words", "nav_label": "Words", "mode": "reveal", "length": 3,
              "text": "Words light up in reading order as you scroll.",
              "steps": [{"kicker": "Overlay", "title": "Overlay <em>caption</em>", "body": "Overlay body words.",
-                        "button": BTN, "at": [0.1, 0.9]}]},
+                        "badge": {"text": "Caption badge", "icon": "dot"}, "button": dict(BTN, icon="external"), "at": [0.1, 0.9]}]},
             {"type": "type", "id": "split", "layout": "split", "text": "Split text.",
              "steps": [{"title": "Split caption", "body": "Split body words.", "fact": "Split fact line"},
                        {"title": "Split second", "fact": "Second fact line"}]},
-            {"type": "type", "id": "cards", "layout": "cards", "text": "Cards text.",
+            {"type": "type", "id": "cards", "layout": "cards", "text": "Cards text.", "frame": "card",
              "steps": [{"title": "Cards caption", "body": "Cards body words.", "fact": "Cards fact line"},
                        {"title": "Cards second", "button": {"label": "Card button", "href": "#"}}]},
             {"type": "cta", "id": "cta", "title": "Ready when you are", "button": BTN},
@@ -70,7 +85,7 @@ def spec(theme: dict) -> dict:
 
 # the text keys whose values the page must show as real HTML text
 _TEXT_KEYS = {"title", "body", "kicker", "label", "q", "a", "text", "who", "when", "caption", "fact", "badge",
-              "note", "center", "status", "unit", "left", "right"}
+              "note", "center", "status", "unit", "left", "right", "tag", "button", "name"}
 # a count-up shows its number only once it has finished: these are checked with reduced motion only
 _NUMBERS = {"value"}
 
@@ -88,7 +103,7 @@ def words(node: Any = None, numbers: bool = True) -> list[str]:
     def walk(n: Any, key: str = "") -> None:
         if isinstance(n, dict):
             for k, v in n.items():
-                if k in ("theme", "href", "image", "id", "nav_label", "mode", "layout", "at"):
+                if k in ("theme", "href", "image", "id", "nav_label", "mode", "layout", "at", "action", "icon", "look"):
                     continue
                 walk(v, k)
         elif isinstance(n, list):

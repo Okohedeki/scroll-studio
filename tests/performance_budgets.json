@@ -7,7 +7,7 @@
     "That only raises what is over or new and drops what is gone. To lower a budget after a change made something lighter, edit it here by hand."
   ],
   "runtime": {
-    "css": 123200,
+    "css": 141100,
     "entry": 44900,
     "total": 3617200,
     "chunks": {

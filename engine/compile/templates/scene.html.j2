@@ -2,6 +2,8 @@
    Where each step sits and when it shows comes from the layout model (engine/layout.py, `placed(s)`): every old and new
    placement field compiled into one Element per step. #}
 
+{% import "blocks.html.j2" as kit %}
+
 {# a step's own enter/exit motion, when it names one (runtime/src/styles.css) #}
 {% macro motion(el) %}{% if el.enter %} data-enter="{{ el.enter }}"{% endif %}{% if el.exit %} data-exit="{{ el.exit }}"{% endif %}{% endmacro %}
 
@@ -11,6 +13,7 @@
 {% macro card(step, i, n) %}
 <div class="ss-card">
   {% if step.kicker %}<div class="ss-num">{{ step.kicker | rich }}</div>{% endif %}
+  {% if step.badge %}{{ kit.badge(step.badge) }}{% endif %}
   {% if step.intro %}<h1 class="ss-h1">{{ step.title | rich }}</h1>{% else %}<h2 class="ss-h2">{{ step.title | rich }}</h2>{% endif %}
   {% if step.body %}<p class="ss-body">{{ step.body | rich }}</p>{% endif %}
   {% if step.fact %}<div class="ss-fact">{{ step.fact | rich }}</div>{% endif %}
@@ -22,9 +25,10 @@
 {% set st = el.step %}
 <div class="ss-caption{% if st.surface %} ss-surface-{{ st.surface }}{% endif %}{% if st.world %} ss-has-world{% endif %}" data-from="{{ el.show[0] }}" data-to="{{ el.show[1] }}"{% if st.world %} data-world="{{ el.index }}"{% endif %}{{ motion(el) }}>
   {% if st.kicker %}<div class="ss-eyebrow"><i></i><span>{{ st.kicker | rich }}</span></div>{% endif %}
+  {% if st.badge %}{{ kit.badge(st.badge) }}{% endif %}
   {% if st.intro %}<h1 class="ss-h1 ss-split-words">{{ st.title | rich }}</h1>{% else %}<h2 class="ss-display ss-split-words">{{ st.title | rich }}</h2>{% endif %}
   {% if st.body %}<p class="ss-body">{{ st.body | rich }}</p>{% endif %}
-  {% if st.button %}<a class="ss-btn ss-btn--hot" href="{{ st.button.href }}">{{ st.button.label }} <span class="ss-arrow">→</span></a>{% endif %}
+  {% if st.button %}{{ kit.btn(st.button, true) }}{% endif %}
 </div>
 {% endmacro %}
 
@@ -49,7 +53,7 @@
 {% macro render(s, cfg, sdata, ex=none) %}
 {% if s.journey %}{{ jy.render(s, cfg, sdata, ex, ex.first if ex else false) }}{% else %}
 {% set lay = placed(s) %}
-<section class="ss-scene ss-{{ lay.kind }} ss-side-{{ lay.side }} ss-type-{{ s.type }} ss-shade-{{ s.shade }}{% if s.surface %} ss-surface-{{ s.surface }}{% endif %}{% if s.type == "type" and s.size == "display" %} ss-type--display{% endif %}" id="{{ s.id }}" data-scene="{{ s.type }}">
+<section class="ss-scene ss-{{ lay.kind }} ss-side-{{ lay.side }} ss-type-{{ s.type }} ss-shade-{{ s.shade }}{% if s.surface %} ss-surface-{{ s.surface }}{% endif %}{% if s.type == "type" and s.size == "display" %} ss-type--display{% endif %}{% if s.frame %} ss-frame-card{% endif %}" id="{{ s.id }}" data-scene="{{ s.type }}">
 {% if lay.kind == "overlay" %}
   <div class="ss-track" style="height: {{ s.length | vh }}">
     <div class="ss-stage">
