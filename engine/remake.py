@@ -98,13 +98,17 @@ _SCROLL_JS = """async () => {
 }"""
 
 # What only the browser knows, written onto the elements so the one parser reads it: hidden elements (and fixed bars
-# such as cookie banners), an image's real size and source, and CSS background pictures of large elements.
+# such as cookie banners), an image's real size and source, CSS background pictures of large elements, and inline
+# elements the page sets as blocks (a figure in a <strong> over its label reads as two lines, not "1,400varieties").
 _MARK_JS = """() => {
   let n = 0;
+  const INLINE = new Set(['A', 'SPAN', 'STRONG', 'B', 'EM', 'I', 'SMALL', 'MARK', 'LABEL', 'CODE', 'SUP', 'SUB', 'U',
+                          'S', 'ABBR', 'TIME', 'CITE', 'Q', 'DATA', 'OUTPUT', 'BIG']);
   for (const el of (document.body ? document.body.querySelectorAll('*') : [])) {
     if (++n > 30000) break;
     const cs = getComputedStyle(el);
     if (cs.display === 'none' || cs.visibility === 'hidden') { el.setAttribute('data-ss-hidden', ''); continue; }
+    if (INLINE.has(el.tagName) && /^(block|flex|grid|list-item|table)$/.test(cs.display)) el.setAttribute('data-ss-block', '');
     const r = el.getBoundingClientRect();
     if (cs.position === 'fixed' && r.height < innerHeight * 0.5) { el.setAttribute('data-ss-hidden', ''); continue; }
     if (el.tagName === 'IMG') {
@@ -183,6 +187,11 @@ BLOCK = frozenset("address article aside blockquote details dialog dd div dl dt 
                   "h1 h2 h3 h4 h5 h6 header hr li main menu nav ol p pre section summary table tbody tfoot thead td "
                   "th tr ul".split())
 HEADINGS = frozenset("h1 h2 h3 h4 h5 h6".split())
+
+
+def _blockish(el) -> bool:
+    """A block of its own: a block tag, or an inline one the page set as a block (marked by the browser)."""
+    return el.tag in BLOCK or "data-ss-block" in el.attrs
 SKIP = frozenset("script style noscript template iframe svg canvas object embed select textarea input form nav dialog "
                  "head title meta link audio map button".split())
 _CLOSES = {"p": BLOCK, "li": {"li"}, "dt": {"dt", "dd"}, "dd": {"dt", "dd"}, "tr": {"tr"}, "td": {"td", "th", "tr"},
@@ -307,7 +316,7 @@ def _text(el: El, em: bool = False, leave: tuple = ()) -> str:
             out.append(" ")
         else:
             t = _text(k, em, leave)
-            if k.tag in BLOCK:
+            if _blockish(k):
                 out.append(f" {t} ")
             elif em and t and (k.tag in ("em", "i", "mark") or re.search(r"highlight|accent|gradient|emph", k.get("class"), re.I)):
                 out.append(f" <em>{t.replace('<em>', '').replace('</em>', '')}</em> ")
@@ -318,7 +327,7 @@ def _text(el: El, em: bool = False, leave: tuple = ()) -> str:
 
 
 def _inline_only(el: El) -> bool:
-    return not any(e.tag in BLOCK for e in el.iter() if e is not el and not _skip(e))
+    return not any(_blockish(e) for e in el.iter() if e is not el and not _skip(e))
 
 
 def _plain(t: str) -> str:
@@ -847,6 +856,8 @@ def _shape(seg: list[Ev]) -> _Shape:
             s.qas.append((e.title, e.text))
         elif e.kind == "quote":
             s.quotes.append([e.text, e.title])
+            who_next = not e.title                 # a testimonial whose name follows it in a line of its own
+            continue
         elif e.kind == "img":
             s.imgs.append(e.img)
         elif e.kind == "link" and _link_ok(e.href):
@@ -948,7 +959,7 @@ class _Story:
             return out
         step = {"intro": True, **({"kicker": kicker} if kicker else {}), "title": title,
                 **({"body": _clip(p.subhead, 260)} if p.subhead else {}), **({"button": button} if button else {}),
-                "at": [0.0, 0.7]}
+                "show": [0.0, 0.7]}
         if self.gpu:
             return [{"id": "open", "type": "film", "length": 3.0, "cue": "Scroll",
                      "beats": [{"id": "open", "image": hero.file, "seconds": 6,

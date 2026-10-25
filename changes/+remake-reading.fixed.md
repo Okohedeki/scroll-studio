@@ -1,0 +1,1 @@
+`studio remake` reads a row of figures whose numbers the page sets as blocks (`<strong>1,400</strong>varieties …`) as stats instead of one run-together line, keeps the name under a testimonial as who said it, and writes the opening caption's timing as `show:` rather than the older `at: [from, to]`.

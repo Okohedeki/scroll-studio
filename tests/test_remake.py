@@ -133,6 +133,25 @@ def test_decoration_pictures_count_and_buttons_inside_links_keep_their_words():
     assert logo_h1.headline == "Bread, slowly"                                         # the logo h1 is not the headline
 
 
+def test_figures_set_as_blocks_and_a_name_under_a_quote_are_read():
+    """A figure in a <strong> the page sets as a block (the browser marks it `data-ss-block`) is a line of its own, so a
+    row of them is stats, not "1,400varieties"; a testimonial's name in the line under the quote is who said it."""
+    page = rm.parse_page(
+        '<body><section><h1>Seeds by post</h1><p>Heirloom seeds for your plot, sent when it is time to sow.</p>'
+        '<img src="/hero.jpg" width="1920" height="1080"></section>'
+        '<section><div><strong data-ss-block>1,400</strong>varieties trialled on our own beds</div>'
+        '<div><strong data-ss-block>96%</strong>average germination last year</div>'
+        '<div><strong data-ss-block>11</strong>seasons of growing notes</div></section>'
+        '<section><blockquote>My clay soil finally grew carrots worth pulling, and the box knew it would.</blockquote>'
+        '<p class="who">Priya Lund, member since the second season</p></section></body>', "https://seeds.test/")
+    spec, _ = rm.story(page)
+    stats = by_type(spec, "stats")[0]["items"]
+    assert [(i["value"], i.get("unit"), i["label"]) for i in stats] == [
+        ("1,400", None, "varieties trialled on our own beds"), ("96", "%", "average germination last year"),
+        ("11", None, "seasons of growing notes")]
+    assert by_type(spec, "quote")[0]["who"] == "Priya Lund, member since the second season"
+
+
 def test_odd_markup_never_crashes():
     for html in ("", "<p>just text", "<html><body><div><h2>Only a heading", "<<<>>><h1>Hi</h2></p></li><section>",
                  "<body>" + "<div>" * 500 + "<h1>Deep</h1>" + "</div>" * 10, "<h1></h1><img><a href='javascript:x'>x</a>"):
@@ -152,6 +171,7 @@ def test_a_landing_page_becomes_a_project_with_its_story(tmp_path, serve):
     opener = spec["sections"][0]
     step = opener["steps"][0]
     assert step["image"] == "inputs/hero.jpg" and step["intro"] is True
+    assert step["show"] == [0.0, 0.7] and "at" not in step          # written the 1.5 way, not as the older `at: [a, b]`
     assert step["title"] == "Notes that <em>link themselves</em>" and step["kicker"] == "Research notebook"
     assert step["button"] == {"label": "Start free", "href": base + "signup"}            # the CTA with its link
     assert spec["nav"]["cta"]["href"] == base + "signup"
