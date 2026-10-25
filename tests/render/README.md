@@ -1,7 +1,9 @@
 # Render tests
 
-Every style and theme preset, built into a real page and loaded in Chromium: **32 styles + 10 presets = 42 looks**, each
-at a desktop (1280x800) and a phone (390x844) size. No GPU and no models: the page is a "kitchen sink" spec
+Every style and theme preset, built into a real page and loaded in Chromium: **32 styles + 10 presets = 42 looks**, plus
+**5 styles wearing a brand** (`brand-<style>`: `harness.BRAND_LOOKS`, the styles that draw colours in their runtime or
+templates, with a light or a dark `theme.from`), each at a desktop (1280x800) and a phone (390x844) size. A brand look has
+the problems recorded for its style, and one more check: the page carries the brand's palette as `--skin-<role>`. No GPU and no models: the page is a "kitchen sink" spec
 ([kitchen.py](kitchen.py)) with every block type and a `type` scene in each layout, built by the engine's own compiler
 and served by its own server. Per look and viewport:
 

@@ -33,6 +33,12 @@ and mono families (quoted) for the brand's faces. So:
   Colours that are not in the palette are the style's own (a CRT's phosphor green, a pin's brass) and stay, and so
   do pure black and white and `accent_ink` (unless it is also another palette colour, such as the background). The brand's accents are held to the contrast your own accent has with your
   background and your `accent_ink` (up to 7:1), so declare the `accent_ink` your stylesheet really sets on the accent.
+- **Colours you draw in code follow the same rule.** The swap also runs over the style's `.j2` templates, so a palette
+  hex written into markup (an SVG, a sign's colour) is the brand's. In `runtime/src/styles/<name>.ts`, a palette colour
+  is read with `skin(role, own)` from `_kit.ts` (`skinRgb`, `skinRgba` and `skinNum` for canvas, `rgba()` and three.js):
+  `role` is the key in `style.yaml`, `own` is the colour you draw today. With no brand the page sets nothing and `own`
+  comes back; with a brand the page sets `--skin-<role>` and the brand's colour does. Colours that are not in the
+  palette (a film's dyes, a console's greys, brass) and effects stay literal.
 - **Declare what a brand may not change** in `requires`, a token set laid over the brand. A style drawn for a light or
   dark room requires its `mode`; the brand's palette is then rebuilt in that mode around the brand's accents. A style
   whose mechanic is a typeface requires that face:

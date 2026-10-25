@@ -100,7 +100,7 @@ theme:
 ```
 
 **A brand on a style.** The style keeps its experience (its scroll mechanic, layout, transitions and pointer) and
-wears the brand: the brand's palette and faces replace the style's own, in the style's stylesheet too. A style can
+wears the brand: the brand's palette and faces replace the style's own, in its stylesheet, its templates and what its runtime draws (a poster's primaries, a sign's tubes). A style can
 require tokens in its `style.yaml`: most keep the light or dark room their drawing is made for, so a light brand on
 neon-glow is rebuilt dark around its accents, and a few keep the face their mechanic is built on (pixel-art's pixel
 fonts, neon-glow's tube lettering). Under a style the brand's accents keep the contrast the style's own accents have
