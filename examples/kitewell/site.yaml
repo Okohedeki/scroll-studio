@@ -7,6 +7,7 @@
 # words and then printed in two inks taken from the brand (`theme.from`: accent cobalt, accent2 pink), posterised,
 # grained and a few pixels off register. The closing band is in toile, printed in the brand's accent on its cream.
 # The hero keeps its left side calm for the headline (`align: left`); the build measures it and says so.
+# Its clouds drift and its sky twinkles (`live:`, drawn by the page: still no GPU needed).
 #
 # inputs/ holds the raw Z-Image Turbo stills these were made from, before the medium was applied. With a GPU, swap a
 # `file:` for the `generate:` in the comment above it (and drop its `medium:` where the site's own is the same): the
@@ -38,6 +39,12 @@ sections:
       # (1920x1088, seed 7; the composition rule kept the third try, seed 2007: the first two were busy on the left)
       file: inputs/hero.jpg
       medium: risograph
+      # living details (drawn by the page, no GPU): the two clouds drift to and fro, and the sky twinkles where its
+      # printed specks are brightest, in the theme's light colour
+      live:
+        - { kind: drift, box: [0.315, 0.255, 0.55, 0.44], softness: 0.1, strength: 0.5, speed: 0.8 }
+        - { kind: drift, box: [0.75, 0.29, 1.0, 0.53], softness: 0.12, speed: 0.65, angle: 180, strength: 0.5 }
+        - { kind: glint, box: [0.72, 0.0, 1.0, 0.33], count: 8 }
 
   - type: intro
     id: how

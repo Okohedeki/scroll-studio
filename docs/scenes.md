@@ -653,6 +653,54 @@ pixels the cinemagraph is not responsible for). Frame pacing: the video work is 
 about 0.3 ms a frame more with six cinemagraphs on the page), but measured on this machine while another process held the GPU at
 100% (ComfyUI rendering for other jobs) scrolling a page with playing cinemagraphs dropped about 15% of frames to 30 fps
 against 0-2% with them off; that run is a worst case and should be repeated on an idle GPU before a claim is made.
+
+### Living details: one small thing alive (`live:`)
+
+The lighter cousin of a cinemagraph: one small thing alive in a still illustration or photograph, drawn by the page itself,
+so nothing renders at build time and it works on a laptop with no GPU. Put `live:` on a hero, product, strip or gallery
+image, a section `backdrop`, or a parallax step's photo (up to four details per picture):
+
+```yaml
+image:
+  file: inputs/hero.jpg
+  live:
+    - { kind: drift, box: [0.315, 0.255, 0.55, 0.44], softness: 0.1, speed: 0.8 }   # a cloud, with room around it
+    - { kind: glint, box: [0.72, 0.0, 1.0, 0.33], count: 8 }                        # twinkles in the sky
+```
+
+| Kind | What the page draws |
+|---|---|
+| `sweep` | A soft band of light slides across the region along `angle`, once every 7 s (at `speed: 1`), dark between passes. With `origin` (0-1 of the region, may lie outside it) it is a beam turning round that point instead, once every 9 s. |
+| `glint` | `count` small four-pointed twinkles, each swelling and fading over about a second, staggered. They sit on the region's brightest small points, found at build time on the picture as shown (a speck brighter than what is around it), so they land on printed specks, stars or highlights and not on flat colour; a flat region spreads them evenly. |
+| `drift` | The region slides slowly to and fro along `angle` (16 s round, up to 0.035 picture heights at `strength: 1`) inside its soft edge. Give the box room around the thing: anything whose edge falls in the box's soft edge shows faintly twice. |
+| `rise` | Soft specks rise through the region, sway a little, flicker, and fade in from the bottom and out before the top (embers, bubbles, dust in a beam). `count` sets about how many. |
+| `flow` | A gentle wavy displacement with a faint shimmer: ripples that run along `angle` (water). |
+
+Each detail takes `speed` (0.1-4, 1 is calm), `strength` (0.05-1: brightness for the lights, distance for drift, ripple for
+flow), `softness` (the soft edge, a share of the box) and `color` (sweep, glint, rise): a theme token (`light`, `dark`,
+`accent`, `accent2`, `ink`, `bg`, `bg2`) or hex, resolved against the site's colours at build time. By default sweeps and
+glints use `light` (the lighter of the text and background colours) and rise uses `accent2`.
+
+**The region** is a `box` (x0, y0, x1, y1 in 0-1 of the picture), or a `prompt` ("the clouds", with `pick`) found by the
+same tooling as `edit.region` (Florence-2 + SAM 2.1 through ComfyUI, cached): the box becomes the found shape's extent and
+the page gets a small soft mask of it, so a drift moves the thing itself and the sky closes behind it. Without ComfyUI (and
+while planning or in a storyboard, which only use an already-found region) a detail falls back to its `box`, or is left out
+with a note when it has none.
+
+**On the page.** On a parallax photo the details are drawn inside the photo's own WebGL pass, on the photo's coordinates, so
+they follow the camera move and sit under type in the world; the module is loaded only when a chapter has details. On a plain
+picture the compiler marks the `<img>` (or the backdrop's element) with `data-live`, and `runtime/src/players/liveStill.ts`
+lays one WebGL canvas over it that redraws the picture only inside the regions (alpha everywhere else, so outside them the
+page shows the `<img>` itself), copying the image's own transform (a hero's slow zoom). Both draw at 30 frames a second
+only while the picture is on screen and the tab is visible; off screen nothing runs. With reduced motion, without WebGL2, or
+for a fit the layer does not know, nothing is drawn: the still picture. A page without `live:` builds exactly as it
+did, and the picture under it keeps its cache. `examples/kitewell` has it on its hero: two clouds drifting and the sky
+twinkling.
+
+Not here yet: a GPU path that renders `drift` or `flow` as a seamless video loop through the cinemagraph pipeline (use
+`cinemagraph:` for motion the page cannot draw, such as steam or a flame); regions are boxes or found masks, not tracked
+through a film.
+
 ### Type in the world (`place:`)
 
 A headline over a film is a caption: it floats on the glass, and the picture goes on behind it. Type in the world puts the
