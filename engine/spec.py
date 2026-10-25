@@ -334,6 +334,25 @@ class Cinemagraph(Model):
                                           "outline is not cut off at the edge of the region")
 
 
+# ---- art direction in one medium (engine/medium.py): a named medium is a tested local recipe -------------------------
+
+MEDIUM_NAMES = ("risograph", "toile", "engraving", "gouache", "watercolour", "halftone", "ink")
+MEDIUM_ALIASES = {"watercolor": "watercolour", "riso": "risograph", "toile de jouy": "toile",
+                  "copper engraving": "engraving", "etching": "engraving", "halftone dots": "halftone",
+                  "brush and ink": "ink"}
+MEDIUM_ROLES = ("accent", "accent2", "ink", "bg", "bg2", "dark", "light")
+CalmSide = Literal["left", "right", "center", "top", "bottom"]
+
+
+def medium_name(value: Optional[str]) -> Optional[str]:
+    """The named medium a string means (case and a few aliases forgiven), or None for a medium described in words."""
+    if not value:
+        return None
+    key = value.strip().lower().rstrip(".")
+    key = MEDIUM_ALIASES.get(key, key)
+    return key if key in MEDIUM_NAMES else None
+
+
 class ImageInput(Model):
     """An image the engine uses as input: a file in the project's inputs/, one generated locally, a gradient, or a
     still of the site's product."""
@@ -360,6 +379,37 @@ class ImageInput(Model):
         None, description="Make this picture a cinemagraph: only the thing named by `moves` moves (a video laid over the "
                           "still through a soft mask), everything else is held perfectly still. Works wherever the page "
                           "shows the image (hero, product, strip, gallery, a section backdrop)")
+    medium: Optional[str] = Field(
+        None, description="Draw this image in a named medium: " + ", ".join(MEDIUM_NAMES) + " (a tested recipe: the "
+                          "model's prompt plus a post-process in the theme's inks; see `imagery.medium`), over the "
+                          "site's own. Works on a file too (the post-process only). `none` leaves this image out of the "
+                          "site's named medium")
+    calm: Optional[CalmSide] = Field(
+        None, description="Keep this side of the picture calm for a headline: asked of the model, then measured; a busy "
+                          "result is mirrored or regenerated with the next seeds (a file is only checked). Set by "
+                          "itself on a hero in a named medium (its `align` side)")
+
+    @field_validator("medium")
+    @classmethod
+    def _a_named_medium(cls, v: Optional[str]) -> Optional[str]:
+        if v is None or v.strip().lower() == "none":
+            return None if v is None else "none"
+        name = medium_name(v)
+        if name is None:
+            raise ValueError(f"medium {v[:40]!r} is not a named medium: use one of {', '.join(MEDIUM_NAMES)} (or none); "
+                             "describe a look in words with `imagery.medium`")
+        return name
+
+    @model_serializer(mode="wrap")
+    def _late_fields(self, handler, info):
+        """`medium` and `calm` are left out of a dump while unset, so pages and caches made before they existed (a
+        scene's steps are embedded in its page) stay the same."""
+        d = handler(self)
+        if isinstance(d, dict):
+            for k in ("medium", "calm"):
+                if d.get(k, 0) is None:
+                    d.pop(k)
+        return d
 
 
 ImageRef = Union[str, ImageInput]   # a bare string is a file path
@@ -2905,15 +2955,44 @@ class Imagery(Model):
     a take's keyframes and segments); the prompt itself stays about the subject. Unset, nothing is added. A direction
     from `studio directions` writes this block when you pick it."""
     medium: str = Field(..., description="What the picture is made of, said first: '35mm film photograph, Kodak Portra "
-                                         "400, fine grain', 'gouache illustration on textured paper, flat shapes'")
+                                         "400, fine grain', 'gouache illustration on textured paper, flat shapes'. Or "
+                                         "a named medium, a tested recipe that also post-processes every generated "
+                                         "still in the theme's inks so the page reads as one hand: " +
+                                         ", ".join(MEDIUM_NAMES))
     light: Optional[str] = Field(None, description="The light: 'low golden-hour sun, long soft shadows', 'single window "
                                                    "light from the left, Vermeer'")
     lens: Optional[str] = Field(None, description="Lens and framing: '35mm, eye level, shallow depth of field'")
     mood: Optional[str] = Field(None, description="The feeling in a few words: 'unhurried, sun-warmed, quiet'")
     palette: Optional[str] = Field(None, description="Colour in words: 'muted terracotta, bone and sage'")
+    inks: list[str] = Field(default_factory=list, description="Named medium: the inks it prints with, #hex or theme "
+                                                              "roles (accent, accent2, ink, bg, bg2, dark). Default: "
+                                                              "the medium's own pick from the theme (risograph accent "
+                                                              "and accent2, toile accent, engraving the dark)")
+    paper: Optional[str] = Field(None, description="Named medium: the paper, #hex or a theme role. Default: the theme's "
+                                                   "background when it is pale, else a warm off-white")
+    grain: Optional[float] = Field(None, ge=0, le=1, description="Named medium: how much paper and ink texture, 0 none "
+                                                                 "to 1 (default: the medium's own)")
     restyle: bool = Field(True, description="Drop the medium, lens and light phrases already in a prompt ('photorealistic', "
                                             "'shot on 35mm', 'golden hour') for the parts set here, so the prompt does not "
                                             "contradict the shoot. Off: the parts are only added")
+
+
+    @field_validator("inks")
+    @classmethod
+    def _inks(cls, v: list[str]) -> list[str]:
+        if len(v) > 4:
+            raise ValueError("inks: at most four")
+        for c in v:
+            if c not in MEDIUM_ROLES and not re.fullmatch(r"#(?:[0-9a-fA-F]{3}){1,2}", c):
+                raise ValueError(f"inks: {c[:40]!r} is not a #hex colour or a theme role ({', '.join(MEDIUM_ROLES)})")
+        return v
+
+    @field_validator("paper")
+    @classmethod
+    def _paper(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None and v not in MEDIUM_ROLES and not re.fullmatch(r"#(?:[0-9a-fA-F]{3}){1,2}", v):
+            raise ValueError(f"paper: {v[:40]!r} is not a #hex colour or a theme role ({', '.join(MEDIUM_ROLES)})")
+        return v
 
 
 class Pool(Model):

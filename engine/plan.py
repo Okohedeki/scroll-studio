@@ -57,7 +57,8 @@ DEFAULTS = {
 }
 FLAT = 10.0                     # any other stage, per run
 IMAGES = {"beat frame": 3.0, "image": 15.0, "edit": 60.0, "product still": 25.0, "scene still": 150.0, "product model": 60.0,
-          "download": 5.0, "art": 240.0, "stand-in": 5.0}
+          "download": 5.0, "art": 240.0, "stand-in": 5.0,
+          "medium": 3.0}                # a named medium's post-process (engine/medium.py), on the CPU
 # what counts as heavy GPU work (a video model, SeedVR2, a Cycles pass over every frame): the build lists these first
 HEAVY = ("film:generate", "film:generate_wan", "film:restore", "film:product", "film:beat", "film:camera", "film:keyframes",
          "film:freeze_up", "film:freeze_zoom", "film:freeze_layers", "sequence:render", "inside:render", "film:reveal_track", "film:faces", "light:relight")
@@ -465,6 +466,9 @@ def plan_build(project: Project, only: Optional[Iterable[str]] = None, force: bo
                         plan.errors[sec.id] = f"{type(e).__name__}: {e}"
             if blocks:
                 for label, ref, alpha in image_refs(sec):
+                    if sec.type == "hero" and label == "image":     # with its calm side, as the compiler asks for it
+                        from .inputs import hero_image
+                        ref = hero_image(project, sec)[0]
                     try:
                         resolve_image(project, ref, quiet, alpha=alpha)
                     except WouldRender as e:

@@ -297,13 +297,23 @@ def build_site(project: Project, log: Callable[[str], None] = print,
         """The media a block shows (images resized and written as WebP, files copied in), keyed as the templates read them."""
         x = {"backdrop": block_image(getattr(s, "backdrop", None), 2400)}
         if s.type == "hero":
-            x["img"], x["video"] = block_image(s.image, 2400), publish(s.video)
+            from ..inputs import hero_image
+            img, side = hero_image(project, s)
+            x["img"], x["video"] = block_image(img, 2400), publish(s.video)
+            if side and x["img"] and not s.video:      # words over a calm side: their colour from the picture
+                from ..medium import tone
+                from PIL import Image
+                x["calm"] = {"side": side, "tone": tone(Image.open(media / Path(x["img"]).name), side)}
             x["screen"] = block_image(s.device.image, 800) if s.device and s.device.image else None
             x["clip"] = publish(s.device.video) if s.device and s.device.video else None
         elif s.type == "product":
             # a cinemagraph's video is the photograph as shot: whitening the still's studio background would put a box around it
             moving = isinstance(s.image, ImageInput) and s.image.cinemagraph is not None
-            x["img"] = block_image(s.image, 1600, knockout=s.knockout and s.surface != "dark" and not moving)
+            # an illustration in a named medium is a whole print, shown as a plate: no knockout, no feathered edge
+            from ..inputs import art_direction
+            plate = isinstance(s.image, ImageInput) and art_direction(project, s.image)[0] is not None
+            x["img"] = block_image(s.image, 1600, knockout=s.knockout and s.surface != "dark" and not moving and not plate)
+            x["plate"] = plate
             x["screen"] = block_image(s.device.image, 800) if s.device and s.device.image else None
             x["clip"] = publish(s.device.video) if s.device and s.device.video else None
             x["behind"] = block_image(s.behind.image, 800) if s.behind and s.behind.image else None
