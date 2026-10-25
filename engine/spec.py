@@ -1824,6 +1824,47 @@ class Beat(Model):
         return _faces(v)
 
 
+class Finish(Model):
+    """The finishing pass over a finished film (engine/finish.py), after it is generated and joined and before it is
+    encoded for the page: a SeedVR2 restore (grain and compression mush out, fine detail redrawn), a deflicker and a
+    light temporal denoise, an optional sharpen, and frame interpolation where the motion is slow. Each step is its own
+    cached stage keyed by the film and its settings. `finish: true` takes every default."""
+    restore: Optional[int] = Field(1088, ge=480, le=2160, description="Run SeedVR2 at this height (1088 keeps a 1920x1088 "
+                                   "film's size and redraws its detail; 1440 or 2160 enlarge it). null skips it. Slow: "
+                                   "about a minute and a half per second of film at 1088")
+    batch: int = Field(21, ge=5, le=49, description="SeedVR2 frames restored together (4n+1). More frames: steadier "
+                       "detail from frame to frame (less shimmer), more VRAM")
+    deflicker: bool = Field(True, description="Even out frame-to-frame brightness flicker (FFmpeg deflicker, over 5 frames)")
+    denoise: float = Field(0.25, ge=0, le=1, description="Temporal denoise: pixels that only shimmer from frame to frame "
+                           "are averaged with their neighbours in time (FFmpeg atadenoise; edges and real motion are kept "
+                           "by its thresholds). 0 = off, 1 = strong (can smear fine moving texture)")
+    sharpen: float = Field(0.0, ge=0, le=1, description="A light unsharp mask after the restore (0 = off; 0.3 is a gentle "
+                           "crispening, higher shows halos)")
+    interpolate: Literal["off", "auto", "on"] = Field("off", description="Double the frame rate with a frame interpolator "
+                                                     "(smoother slow scrolling, twice the frames in the page's film). auto: "
+                                                     "only when the film's motion is slow (`slow`), where interpolation is "
+                                                     "clean; fast motion is where interpolators morph")
+    slow: float = Field(6.0, gt=0, le=60, description="interpolate auto: the most motion, in pixels a frame at 1920 wide "
+                        "(the film's median), that still counts as slow")
+    interpolator: Optional[str] = Field(None, description="A RIFE or FILM checkpoint in ComfyUI's models/frame_interpolation "
+                                        "folder (ComfyUI's own FrameInterpolate node). Default: the first one ComfyUI lists, "
+                                        "else FFmpeg's motion-compensated interpolation (minterpolate), which needs no model")
+
+    @model_validator(mode="after")
+    def _batch_shape(self):
+        if (self.batch - 1) % 4:
+            raise ValueError(f"finish.batch {self.batch}: SeedVR2 restores 4n+1 frames together (5, 9, 13, 17, 21, 25 ...)")
+        return self
+
+
+def _finish_in(v):
+    if v is True:
+        return {}
+    if v is False:
+        return None
+    return v
+
+
 class FilmScene(SceneBase):
     """AI film scrubbed by scroll. Blender blockout -> Z-Image keyframes -> LTX-2.3 -> encode. Or `beats`: a story told
     in separate shots, each a generated still animated by LTX-2.3, joined with short crossfades; steps can pin
@@ -1838,6 +1879,9 @@ class FilmScene(SceneBase):
     beat_fade: float = Field(0.4, ge=0, le=2, description="beats: crossfade between shots, in seconds")
     beat_restore: Optional[int] = Field(None, description="beats: run SeedVR2 over the finished film at this height "
                                                           "(e.g. 1088) to clean grain and redraw fine detail; slow")
+    finish: Optional[Finish] = Field(None, description="The finishing pass over the finished film (see Finish): SeedVR2 "
+                                     "restore, deflicker, temporal denoise, sharpen, frame interpolation where motion is "
+                                     "slow. `finish: true` for the defaults")
     gop: int = 6
     # ---- the one-take page (engine/journey.py)
     journey: Optional["Journey"] = Field(None, description="The page as one camera journey (see Journey): the world "
@@ -1861,6 +1905,11 @@ class FilmScene(SceneBase):
     @classmethod
     def _faces_in(cls, v):
         return _faces(v)
+
+    @field_validator("finish", mode="before")
+    @classmethod
+    def _finish_true(cls, v):
+        return _finish_in(v)
 
     @model_validator(mode="after")
     def _pointer_on_film(self):

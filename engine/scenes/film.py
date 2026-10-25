@@ -602,6 +602,10 @@ def build(sec: FilmScene, ctx: BuildContext, theme: dict) -> dict:
         from .. import faces
         faces.preflight(ctx)
         src = faces.restore_film(sec, ctx, src)
+    # ---- finish (engine/finish.py): SeedVR2 restore, deflicker, temporal denoise, interpolation, before the encode
+    if sec.finish is not None:
+        from .. import finish
+        src = finish.run(sec, ctx, src)
     cfg = encode(src, ctx, sec.gop)
     # ---- reveal (engine/reveal.py): tracked masks and the scroll-driven colour config, from the same film file
     if sec.reveal:

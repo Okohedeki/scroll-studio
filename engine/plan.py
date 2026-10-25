@@ -36,6 +36,9 @@ DEFAULTS = {
     "film:beat": 100.0,         # per second of a beat (still + edit + animation)
     "film:camera": 90.0,        # per second of a beat with a camera move (depth + people mask + guide, then the video model along it)
     "film:freeze": 1.5,         # per second of a frozen moment (depth + camera render, no upscale)
+    "film:finish_restore": 95.0,  # per second of film (finish: SeedVR2 at 1088 in larger batches, chunked)
+    "film:finish_clean": 1.5,   # per second of film (finish: FFmpeg deflicker + temporal denoise + sharpen)
+    "film:finish_interpolate": 6.0,  # per second of film (finish: frame interpolation, RIFE/FILM in ComfyUI or FFmpeg)
     "film:freeze_up": 10.0,     # per second of a frozen moment that upscales its frame (SeedVR2: ~2 min, then seconds)
     "film:freeze_zoom": 150.0,  # per tile of a deep zoom (SeedVR2 enlarge + Z-Image redraw + the agreement, model loads included)
     "film:freeze_layers": 150.0,  # per frozen moment with layered depth (Florence-2, SAM 2.1 per subject, Qwen background fill)
@@ -60,7 +63,7 @@ IMAGES = {"beat frame": 3.0, "image": 15.0, "edit": 60.0, "product still": 25.0,
           "download": 5.0, "art": 240.0, "stand-in": 5.0,
           "medium": 3.0}                # a named medium's post-process (engine/medium.py), on the CPU
 # what counts as heavy GPU work (a video model, SeedVR2, a Cycles pass over every frame): the build lists these first
-HEAVY = ("film:generate", "film:generate_wan", "film:restore", "film:product", "film:beat", "film:camera", "film:keyframes",
+HEAVY = ("film:generate", "film:generate_wan", "film:restore", "film:finish_restore", "film:product", "film:beat", "film:camera", "film:keyframes",
          "film:freeze_up", "film:freeze_zoom", "film:freeze_layers", "sequence:render", "inside:render", "film:reveal_track", "film:faces", "light:relight")
 
 
@@ -246,6 +249,9 @@ def units(sec, name: str) -> tuple[str, float]:
             return "film:faces", frames
         if name == "track":
             return "film:track", 1.0
+        if name in ("finish_restore", "finish_clean", "finish_interpolate"):   # engine/finish.py, over the whole film
+            scale = (sec.finish.restore / 1088) ** 2 if name == "finish_restore" and sec.finish and sec.finish.restore else 1.0
+            return f"film:{name}", dur * scale
     if t == "inside":
         w, h = sec.size
         stops = sec.stops or [None] * max(1, len([x for x in sec.steps if not x.intro]) or 5)
@@ -269,6 +275,15 @@ def units(sec, name: str) -> tuple[str, float]:
 
 def expected(sec, beats: Optional[set] = None) -> list[str]:
     """The stages a scene section runs, in order (films only; other builders report what they reach)."""
+    names = _expected(sec, beats)
+    if sec.type == "film" and getattr(sec, "finish", None) is not None and "encode" in names:   # finish: before the encode
+        from .finish import stage_names
+        i = names.index("encode")
+        names[i:i] = stage_names(sec.finish)
+    return names
+
+
+def _expected(sec, beats: Optional[set] = None) -> list[str]:
     if sec.type == "light":     # engine/scenes/light.py: the world, its depth and sky, one relight per time, the maps, the web files
         return (["world", "depth", "sky"] + [f"time_{t.id}" for t in sec.times if t.id != sec.world_time]
                 + (["time_" + sec.world_time] if sec.world_time else []) + ["maps", "web"])
