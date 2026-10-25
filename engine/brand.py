@@ -393,6 +393,19 @@ def _decl(body: str, prop: str) -> list[str]:
     return [v.strip() for v in re.findall(rf"(?<![\w-]){prop}\s*:\s*([^;]+)", body, re.I)]
 
 
+def _css_vars(value: str, css: str, depth: int = 3) -> str:
+    """`value` with each `var(--name, fallback)` replaced by what the stylesheet sets --name to (the last setting wins,
+    as it would in the cascade of one rule), so `background: var(--cream)` on the body reads as the page's colour."""
+    if "var(" not in value or depth <= 0:
+        return value
+    props = dict(re.findall(r"(--[\w-]+)\s*:\s*([^;}]+)", css))
+
+    def one(m):
+        name, fallback = m.group(1), (m.group(2) or "").strip()
+        return props.get(name, fallback).strip()
+    return _css_vars(re.sub(r"var\(\s*(--[\w-]+)\s*(?:,\s*([^()]*))?\)", one, value), css, depth - 1)
+
+
 def page_brand(project: Project, page: str, base: str, log=print) -> dict:
     """Colours, fonts, radius and logo of a web page, from its markup and styles. Fonts are kept only when they are
     Google Fonts families (the page links them, or the engine knows them); a brand's own face is added as a file."""
@@ -441,7 +454,7 @@ def page_brand(project: Project, page: str, base: str, log=print) -> dict:
     root = _css_blocks(css, r"html|body|:root")
     for prop, role in (("background-color", "bg"), ("background", "bg"), ("color", "ink")):
         for v in _decl(root, prop):
-            h = _hexes(v)
+            h = _hexes(_css_vars(v, css))
             if h and role not in colors:
                 colors[role] = _hex(h[0])
     named = [_hexes(v) for k, v in re.findall(r"--([\w-]*(?:brand|primary|accent)[\w-]*)\s*:\s*([^;]+)", css, re.I)]

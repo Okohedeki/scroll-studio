@@ -54,6 +54,17 @@ def test_a_saved_page_gives_colours_fonts_radius_and_logo(tmp_path, monkeypatch)
     assert list((tmp_path / ".build" / "brand").glob("*.json"))             # kept for the next load
 
 
+def test_colours_set_through_css_variables_are_read(tmp_path, monkeypatch):
+    no_network(monkeypatch)
+    p = project(tmp_path, {"from": "brand/vars.html"})
+    (tmp_path / "brand" / "vars.html").write_text(
+        "<html><head><style>:root { --cream: #f7f1e3; --soil: #2a2418; --tomato: #d4572a; }"
+        "body { background: var(--cream); color: var(--soil, #000); } .btn { background: var(--tomato); }</style></head>"
+        "<body><a class='btn'>Go</a></body></html>", encoding="utf-8")
+    colors = p.load().theme._brand["colors"]
+    assert colors["bg"] == "#f7f1e3" and colors["ink"] == "#2a2418"
+
+
 def test_the_brand_is_laid_over_the_preset_and_under_theme_overrides(tmp_path, monkeypatch):
     no_network(monkeypatch)
     p = project(tmp_path, {"preset": "night", "from": "brand/page.html", "fonts": {"body": "Figtree"}})
