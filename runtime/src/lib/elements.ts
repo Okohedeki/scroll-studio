@@ -29,9 +29,9 @@ export function readElements(section: HTMLElement, data: Pick<SectionData, "step
   });
 }
 
-/** Words as spans that can rise or appear one by one (each knows its place: `--i`, and the transition delay of a
- * caption's rise). */
-export function splitWords(el: HTMLElement) {
+/** Words as spans that can rise or appear one by one, each delayed `pace` seconds after the one before (a caption's
+ * rise, or its words typed on). Returns how many there are. */
+export function splitWords(el: HTMLElement, pace = 0.045) {
   let i = 0;
   const walk = (node: Node) => {
     if (node.nodeType === 3) {
@@ -41,7 +41,7 @@ export function splitWords(el: HTMLElement) {
         if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(" ")); return; }
         const w = document.createElement("span"); w.className = "ss-w";
         const s = document.createElement("span"); s.textContent = part;
-        s.style.transitionDelay = (0.06 + i++ * 0.045).toFixed(3) + "s";
+        s.style.transitionDelay = (0.06 + i++ * pace).toFixed(3) + "s";
         w.appendChild(s); frag.appendChild(w);
       });
       node.parentNode!.replaceChild(frag, node);
@@ -65,7 +65,8 @@ export class Elements {
   constructor(section: HTMLElement, data: Pick<SectionData, "steps">) {
     this.list = readElements(section, data);
     section.querySelectorAll<HTMLElement>(".ss-caption").forEach((el, k) => {
-      el.querySelectorAll<HTMLElement>(".ss-split-words").forEach(splitWords);
+      const pace = el.dataset.enter === "type-on" ? 0.11 : 0.045;      // typed on: about nine words a second
+      el.querySelectorAll<HTMLElement>(".ss-split-words").forEach((t) => splitWords(t, pace));
       const e = this.list[k];
       this.captions.push({ el, step: e ? e.step : k, from: e ? e.show[0] : +el.dataset.from!, to: e ? e.show[1] : +el.dataset.to!, state: "idle" });
     });

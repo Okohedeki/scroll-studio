@@ -56,6 +56,9 @@ describe("captions over a stage", () => {
     const words = [...sec.querySelectorAll<HTMLElement>(".ss-w > span")];
     expect(words.map((w) => w.textContent)).toEqual(["Cold", "from", "the", "source"]);
     expect(words[3].style.transitionDelay).toBe("0.195s");
+    const typed = section(`<div class="ss-caption" data-enter="type-on"><h2 class="ss-split-words">One two three</h2></div>`);
+    new Elements(typed, { steps: steps(1) });
+    expect([...typed.querySelectorAll<HTMLElement>(".ss-w > span")].map((w) => w.style.transitionDelay)).toEqual(["0.060s", "0.170s", "0.280s"]);
     expect(splitWords(document.createElement("p"))).toBe(0);
   });
 });

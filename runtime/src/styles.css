@@ -158,6 +158,69 @@ blockquote { hanging-punctuation: first last; }
 .ss-cards.ss-side-left .ss-step { width: min(520px, 100%); }
 .ss-steps--over .ss-card { pointer-events: auto; }
 
+/* ---------------------------------------------------------------- the layout model: a step's own `at`, `enter`, `exit`
+   (engine/layout.py). Nothing here applies to a step left to its layout. */
+/* over a stage: more named spots, a box (--x --y --w, 0-1 of the stage; --hh its height) and a slot on the 12-column grid */
+.ss-captions--top, .ss-captions--bottom { left: 50%; transform: translateX(-50%); text-align: center; height: auto; }
+.ss-captions--top { top: 15%; }
+.ss-captions--bottom { top: auto; bottom: 12%; }
+.ss-captions--box { left: calc(var(--x) * 100%); top: calc(var(--y) * 100%); width: calc(var(--w) * 100%); height: auto;
+  min-height: calc(var(--hh, 0) * 100%); transform: none; }
+.ss-captions--grid { left: 50%; transform: translateX(-50%); width: min(100%, var(--max)); height: auto; padding: 0 var(--gutter);
+  display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: clamp(12px, 1.6vw, 28px); }
+.ss-captions--grid.ss-captions--row-middle { top: 50%; transform: translate(-50%, -50%); }
+.ss-captions--grid.ss-captions--row-top { top: 15%; }
+.ss-captions--grid.ss-captions--row-bottom { top: auto; bottom: 12%; }
+.ss-captions--grid .ss-caption { grid-column: var(--col); }
+:is(.ss-captions--top, .ss-captions--bottom, .ss-captions--box, .ss-captions--grid) .ss-caption { position: relative; top: auto; transform: none; }
+.ss-captions--align-right, .ss-at--align-right .ss-card { text-align: right; }
+.ss-captions--align-center, .ss-at--align-center .ss-card { text-align: center; }
+:is(.ss-captions--top, .ss-captions--bottom, .ss-captions--align-center) .ss-eyebrow { justify-content: center; }
+.ss-captions--align-right .ss-eyebrow { justify-content: flex-end; }
+/* split and cards: the card's side and height on the screen; in cards also a box or a grid slot */
+.ss-step:is(.ss-at--top, .ss-at--top-left, .ss-at--top-right, .ss-at--row-top) .ss-card { top: max(96px, 13svh); }
+.ss-step:is(.ss-at--bottom, .ss-at--bottom-left, .ss-at--bottom-right, .ss-at--row-bottom) .ss-card { top: max(110px, calc(86svh - 380px)); }
+.ss-step:is(.ss-at--right, .ss-at--top-right, .ss-at--bottom-right) .ss-card { margin-left: auto; text-align: right; }
+.ss-step:is(.ss-at--center, .ss-at--top, .ss-at--bottom) .ss-card { margin-inline: auto; text-align: center; }
+.ss-step:is(.ss-at--right, .ss-at--top-right, .ss-at--bottom-right, .ss-at--align-right) .ss-num { justify-content: flex-end; }
+.ss-step:is(.ss-at--center, .ss-at--top, .ss-at--bottom, .ss-at--align-center) .ss-num { justify-content: center; }
+.ss-cards.ss-side-left .ss-step.ss-at { width: auto; align-self: stretch; }
+.ss-steps--over .ss-step.ss-at--box .ss-card { max-width: none; width: calc(var(--w) * 100vw); top: calc(var(--y) * 100svh);
+  margin-left: calc(var(--x) * 100vw - (100vw - 100%) / 2); }
+.ss-steps--over .ss-step.ss-at--grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: clamp(12px, 1.6vw, 28px); align-items: start; }
+.ss-steps--over .ss-step.ss-at--grid .ss-card { grid-column: var(--col); max-width: none; }
+
+/* motions over a stage: as the step's window opens (enter) and closes (exit). The words rise only for rise (the default). */
+.ss-caption[data-enter], .ss-caption[data-exit] { transition: opacity .7s var(--ease), clip-path .9s var(--ease), scale .7s var(--ease); }
+.ss-caption:is([data-enter=wipe], [data-exit=wipe]) { clip-path: inset(-40% -20%); }
+.ss-caption[data-enter]:not([data-enter=rise]):not(.ss-off) .ss-w > span, .ss-caption.ss-off[data-exit]:not([data-exit=rise]) .ss-w > span { transform: none; }
+.js .ss-caption:is([data-enter=fade], [data-enter=scale]):not(.ss-on):not(.ss-off) { opacity: 0; }
+.js .ss-caption[data-enter=scale]:not(.ss-on):not(.ss-off) { scale: .92; }
+.js .ss-caption[data-enter=wipe]:not(.ss-on):not(.ss-off) { clip-path: inset(-40% 120% -40% -20%); }
+.js .ss-caption[data-enter=type-on] .ss-w > span { opacity: 0; transition: opacity .01s linear, transform .5s var(--ease); }
+.js .ss-caption[data-enter=type-on]:is(.ss-on, .ss-off) .ss-w > span { opacity: 1; }
+.ss-caption[data-enter=none].ss-on, .ss-caption[data-enter=none].ss-on * { transition: none !important; }
+.js .ss-caption.ss-off:is([data-exit=fade], [data-exit=scale], [data-exit=type-on]) { opacity: 0; }
+.js .ss-caption.ss-off[data-exit=type-on] { transition-duration: .15s; }
+.js .ss-caption.ss-off[data-exit=scale] { scale: 1.04; }
+.js .ss-caption.ss-off[data-exit=wipe] { clip-path: inset(-40% -20% -40% 120%); }
+.js .ss-caption.ss-off[data-exit=none] { visibility: hidden; }
+/* motions on a card follow its place on the screen: --in goes 0 -> 1 as it reaches the middle, --out 1 -> 0 as it passes */
+.js .ss-step:is([data-enter], [data-exit]) { --ki: var(--in, 1); --ko: var(--out, 1); }
+.js .ss-step:is([data-enter=wipe], [data-enter=type-on], [data-enter=none]) { --ki: 1; }
+.js .ss-step:is([data-exit=wipe], [data-exit=none]) { --ko: 1; }
+.js .ss-step[data-enter=rise] { --ri: calc((1 - var(--in, 1)) * 48px); }
+.js .ss-step[data-exit=rise] { --ro: calc((var(--out, 1) - 1) * 48px); }
+.js .ss-step[data-enter=scale] { --si: calc((1 - var(--in, 1)) * .08); }
+.js .ss-step[data-exit=scale] { --so: calc((1 - var(--out, 1)) * .05); }
+.js .ss-step[data-enter=wipe] { --wi: calc((1 - var(--in, 1)) * 140% - 20%); }
+.js .ss-step[data-exit=wipe] { --wo: calc((1 - var(--out, 1)) * 140% - 20%); }
+.js .ss-step:is([data-enter], [data-exit]) .ss-card { opacity: calc(.26 + .74 * var(--ki) * var(--ko));
+  translate: 0 calc(var(--ri, 0px) + var(--ro, 0px)); scale: calc(1 - var(--si, 0) + var(--so, 0)); }
+.js .ss-step:is([data-enter=wipe], [data-exit=wipe]) .ss-card { clip-path: inset(-20% var(--wi, -20%) -20% var(--wo, -20%)); }
+.js .ss-step .ss-w > span { transform: none; transition: none; }
+.js .ss-step[data-enter=type-on] .ss-w > span { opacity: clamp(0, calc(var(--in, 1) * var(--n, 1) - var(--i, 0)), 1); }
+
 /* ---------------------------------------------------------------- blocks */
 .ss-block { position: relative; padding: clamp(90px, 14vh, 160px) var(--gutter); }
 .ss-band { background: var(--bg-2); border-block: 1px solid var(--line); }
@@ -349,6 +412,12 @@ html:not(.js) .ss-strip { overflow-x: auto; }
     background: rgba(var(--bg-rgb), .82); border-radius: 14px; }
   .ss-steps--over .ss-step.ss-intro .ss-card { background: none; margin-inline: 0; padding-inline: 0; }
   .ss-cards.ss-side-left .ss-steps--over { align-items: stretch; }
+  /* a step's own place (`at`) is for wide screens: on a phone it reads where its layout puts every step */
+  .ss-captions--box, .ss-captions--grid { left: var(--gutter); top: 26%; bottom: auto; width: var(--caption-w); min-height: 0;
+    padding: 0; transform: none; display: block; }
+  .ss-steps--over .ss-step.ss-at--grid { display: block; }
+  .ss-split .ss-step.ss-at .ss-card { top: 62svh; }
+  .ss-steps--over .ss-step.ss-at .ss-card { top: auto; width: auto; max-width: none; margin-left: -16px; margin-right: -16px; }
   .ss-product__in, .ss-orbit__in, .ss-faq__in { grid-template-columns: 1fr; }
   .ss-product--right .ss-product__media { order: 0; }
   .ss-product__media { min-height: 52vh; }
@@ -368,6 +437,9 @@ html:not(.js) .ss-strip { overflow-x: auto; }
 @media (prefers-reduced-motion: reduce) {
   .js .ss-reveal { opacity: 1; transform: none; }
   .js .ss-w > span { transition: none; }
+  /* a step's own motion keeps only its fade */
+  .js .ss-caption[data-enter] .ss-w > span { transition: none !important; }
+  .ss-caption:is([data-enter], [data-exit]), .js .ss-step:is([data-enter], [data-exit]) .ss-card { clip-path: none !important; scale: none !important; translate: none !important; }
 }
 
 /* ---- diorama (miniature worlds): the flat map shown until the live scene is up, and the pins over the orbit view */

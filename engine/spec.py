@@ -593,7 +593,7 @@ SHOW_DOC = ("When the step is on screen: from and to, 0-1 of the scene's progres
             "diorama) fill it in for steps that leave it out")
 ENTER_DOC = ("How the step arrives: fade, rise (the words rise into place), wipe (revealed from the left), type-on (word by "
              "word), scale (grows in) or none. Default: the layout's own, words rising over a stage and cards brightening "
-             "as they reach the middle of the screen. With reduced motion every motion is a plain fade")
+             "as they reach the middle of the screen. With reduced motion only the fade is kept")
 EXIT_DOC = ("How the step leaves: fade, rise (the words rise away), wipe (cleared to the right), type-on (gone at once), "
             "scale or none. Default: the layout's own")
 

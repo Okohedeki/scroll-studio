@@ -64,6 +64,52 @@ model: colour stops, glows, stars and grain, enough for colour cards, dusk skies
     title: Your words stay <em>on your phone.</em>
 ```
 
+## Placing words
+
+Every scene's copy is placed and timed the same way, in every layout. A step says where it sits with `at`, when it is on
+screen with `show`, and how it arrives and leaves with `enter` and `exit`. Leave them out and the layout decides, as it
+always has ([Margin](../examples/margin-notes/site.yaml) uses all of them):
+
+```yaml
+  - id: desk
+    type: diorama
+    layout: overlay
+    places: [{ name: Notebook, kind: notebook }, { name: Laptop, kind: laptop }, { name: Coffee, kind: mug }]
+    steps:
+      - { title: "Your best ideas are <em>in the margins.</em>", intro: true }        # the layout's own place
+      - title: Write <em>anywhere</em> on the page.
+        at: { grid: "8 / span 5", row: top }        # a slot on the 12-column grid: columns 8 to 12, near the top
+        enter: wipe
+      - title: Pick up <em>where the pen stopped.</em>
+        at: bottom-left                               # a named spot
+        enter: type-on
+        exit: fade
+      - title: Nothing pings. <em>Nothing nags.</em>
+        at: { x: 0.56, y: 0.58, w: 0.36, align: right }   # a box on the stage, 0-1 of its width and height
+        show: [0.62, 0.9]                             # on screen from 62% to 90% of the way through the scene
+        enter: scale
+```
+
+- **`at`** is a named spot (`left`, `right`, `center`, `top`, `bottom`, `top-left`, `top-right`, `bottom-left`,
+  `bottom-right`; `auto` lets the layout decide), a box (`{x, y, w, h, align}`: its top-left corner, width and
+  optional height, in 0-1 of the stage), or a grid slot (`{grid, row, align}`: columns as CSS writes them, `"9 / span 4"`
+  or `"1 / 7"`, on the theme's 12 columns between the gutters; `row: top | middle | bottom`). Overlay scenes take all
+  three; in `cards` the card goes there; in `split` the copy keeps its column, so `at` takes a spot (its side and height).
+  On a phone a box or a grid slot reads where the layout puts every caption.
+- **`show: [from, to]`** is the window of the scene's progress the step is on screen for (overlay scenes). Scenes
+  that time their own copy (`inside`, `light`, `diorama`, `code` steps with `state.file`, `film` steps with
+  `state.beat`) fill it in for steps that leave it out. In `split` and `cards` a step shows while it scrolls past, for
+  its `length`.
+- **`enter`** and **`exit`**: `fade`, `rise`, `wipe`, `type-on`, `scale` or `none`. Over a stage they play as the
+  window opens and closes; on a card they follow its place on the screen as it scrolls in and out. With reduced motion
+  only the fade is kept.
+
+Specs from before 1.5 keep building the same page: `place: top-right` is `at: top-right`, `at: [0.3, 0.46]` is
+`show: [0.3, 0.46]`, `layout` and `side` are named arrangements of the stage and the copy column, and split and cards
+lengths are each step's share of the scroll. Where a scene frames its subject beside the copy (an `inside` stop's part,
+a `diorama` place), the subject takes the side the copy's `at` leaves free, unless the scene's `side` (or the place's)
+says otherwise.
+
 ## Themes and brands
 
 Everything visual is a token, and a theme is a stack of token sets, each laid over the one before:

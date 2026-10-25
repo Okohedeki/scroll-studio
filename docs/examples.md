@@ -21,6 +21,7 @@ Every example is a `site.yaml` in [`examples/`](../examples/) and rebuilds with 
 | **Light as the scroll** | `light` | [Quay House](../examples/harbour-light/site.yaml) | One harbour from dawn to night; windows and lamps come on |
 | **Inside the product** | `inside` | [Inside the mainboard](../examples/inside-board/site.yaml) | A macro flight into the Framework Laptop 12 mainboard's 3D model |
 | **Miniature world** | `diorama` | [Harbourlight](../examples/little-harbour/site.yaml) | A tilt-shift harbour you orbit; it dives to each place |
+| **Placing words** | `at`, `enter`, `exit` | [Margin](../examples/margin-notes/site.yaml) | A miniature desk; each caption sits in its own place (a grid slot, a corner, a box) and arrives its own way (wipe, type-on, scale) |
 | **Film cuts** | `transition:` | [Halo Coffee](../examples/film-cuts/site.yaml) | A logo becomes the sun becomes a cup; iris, wipe, whip, carry |
 | **Type in the world (film)** | `place:` | [Stillwater](../examples/type-in-the-world/site.yaml) | Headlines behind a spruce, painted on the deck, in the haze |
 | **Type in the world (photos)** | `place:` + `parallax` | [Casa Alta](../examples/type-in-the-world-stills/site.yaml) | Headlines behind the house and the olive tree |

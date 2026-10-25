@@ -87,10 +87,16 @@ def stage_key(sec: DioramaScene, table: str, draft: bool) -> dict:
     """What the layout depends on: the world, the places, the camera and the steps' timing and targets. The look
     (tilt-shift, sun, grade) is drawn live and is not here, so changing it rebuilds nothing."""
     from .. import diorama
-    return {"v": VERSION + diorama.plan.VERSION, "draft": draft, "table": table, "layout": sec.layout, "side": sec.side,
-            "scene": sec.model_dump(mode="json", include={"world", "places", "camera"}),
-            "steps": [{"intro": s.intro, "length": s.length, "place": (s.state or {}).get("place"), "wide": (s.state or {}).get("wide")}
-                      for s in sec.steps]}
+    from ..layout import scene_layout
+    key = {"v": VERSION + diorama.plan.VERSION, "draft": draft, "table": table, "layout": sec.layout, "side": sec.side,
+           "scene": sec.model_dump(mode="json", include={"world", "places", "camera"}),
+           "steps": [{"intro": s.intro, "length": s.length, "place": (s.state or {}).get("place"), "wide": (s.state or {}).get("wide")}
+                     for s in sec.steps]}
+    # overlay: the side each placed caption takes decides the side its place is framed on (diorama.plan.camera_plan)
+    copy = [e.side if e.by else None for e in scene_layout(sec).elements] if sec.layout == "overlay" else []
+    if any(copy):
+        key["copy"] = copy
+    return key
 
 
 def build(sec: DioramaScene, ctx: BuildContext, theme: dict) -> dict:

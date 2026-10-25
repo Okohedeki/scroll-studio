@@ -225,3 +225,29 @@ def test_a_cards_page_places_a_card_and_names_its_motion():
     assert arts[0].attrs["style"] == "--h: 120vh; --x: 0.55; --y: 0.2; --w: 0.35"
     assert arts[1].classes == ["ss-step", "ss-at", "ss-at--bottom-right"] and arts[1].attrs["data-exit"] == "wipe"
     assert arts[2].classes == ["ss-step"] and arts[2].attrs["style"] == "--h: 120vh"
+
+
+def test_a_diorama_place_sits_on_the_side_its_caption_leaves_free():
+    from engine import diorama
+    from engine.spec import DioramaScene
+
+    def sides(*steps):
+        places = [{"name": "Laptop", "kind": "laptop"}, {"name": "Mug", "kind": "mug"}, {"name": "Lamp", "kind": "deskLamp"}]
+        s = DioramaScene.model_validate({"id": "d", "type": "diorama", "layout": "overlay", "world": {"kind": "desk", "seed": 5},
+                                         "places": places, "steps": [{"title": t, **x} for t, x in zip("abc", steps)]})
+        return [b["side"] for b in diorama.build(s, "#fff", True)[0]["camera"]["beats"]]
+    assert sides({}, {}, {}) == [1, 1, 1]                                        # captions on the left: places on the right
+    assert sides({"place": "top-right"}, {"place": "left"}, {"place": "center"}) == [-1, 1, 1]          # as 1.4
+    assert sides({"at": "bottom-right"}, {"at": {"grid": "8 / span 5"}}, {"at": {"x": 0.05, "y": 0.1}}) == [-1, -1, 1]
+
+
+def test_moving_a_diorama_caption_replans_its_camera_and_nothing_else_does():
+    from engine.scenes.diorama import stage_key
+    from engine.spec import DioramaScene
+
+    def key(**step):
+        return stage_key(DioramaScene.model_validate({"id": "d", "type": "diorama", "layout": "overlay",
+                                                       "places": [{"name": "A", "kind": "laptop"}],
+                                                       "steps": [{"title": "a", **step}]}), "#fff", False)
+    assert "copy" not in key() and key() == key(enter="wipe")                  # an old spec keeps its cache key
+    assert key(at="right")["copy"] == ["right"] and key(at="right") != key(at="left")

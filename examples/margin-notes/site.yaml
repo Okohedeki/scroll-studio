@@ -1,0 +1,76 @@
+# Margin: a notes app pitched on a miniature desk, and the example for placing words (docs/guide.md, "Placing words").
+# Every step says where it sits and how it arrives with the layout model: `at` (a named spot, a box on the stage or a slot
+# on the 12-column grid), `enter` and `exit`. The diorama times the steps itself (each one is on screen while the camera
+# rests at its place), so no step needs a `show`; give one to time a caption by hand.
+# Scene type `diorama`: laid out on the CPU in seconds, drawn live in the page. No GPU, no models, nothing to render.
+#
+#   studio build examples/margin-notes
+#   studio record examples/margin-notes --section desk
+name: Margin
+description: "A notes app that keeps the thinking you do in the margins."
+theme: { preset: paper, colors: { accent: "#c2492f", accent2: "#3f6f8f" } }
+nav:
+  cta: { label: Try Margin, href: "#start" }
+sections:
+  - id: desk
+    type: diorama
+    layout: overlay
+    shade: none
+    cue: Scroll to sit down
+    world: { kind: desk, seed: 4 }
+    camera: { orbit: cw, hold: 0.55 }
+    look: { sun: morning, tilt_shift: 1.1 }
+    places:
+      - { name: Notebook, kind: notebook }
+      - { name: Laptop, kind: laptop }
+      - { name: Coffee, kind: mug }
+      - { name: Shelf, kind: books }
+      - { name: Lamp, kind: deskLamp }
+    steps:
+      - kicker: Margin
+        title: "Your best ideas are <em>in the margins.</em>"
+        body: A notes app that keeps the asides, the arrows and the questions you scribble beside the work.
+        intro: true
+        hint: Scroll to sit down
+        length: 1.5
+      - kicker: "01 · Capture"
+        title: "Write <em>anywhere</em> on the page."
+        body: Beside a paragraph, under a sketch, across a photo. Notes stay pinned to what they are about.
+        at: { grid: "8 / span 5", row: top }          # a slot on the grid: columns 8 to 12, near the top
+        enter: wipe
+        surface: light                                   # a soft glow of the page behind the words
+        length: 1.4
+      - kicker: "02 · Sync"
+        title: "Pick up <em>where the pen stopped.</em>"
+        body: The laptop has the note you started on the train, with the arrow still pointing where you meant.
+        at: bottom-left                                  # a named spot
+        enter: type-on
+        surface: light
+        exit: fade
+        length: 1.4
+      - kicker: "03 · Calm"
+        title: "Nothing pings. <em>Nothing nags.</em>"
+        body: No streaks, no badges. Margin waits on the desk until you come back to it.
+        at: { x: 0.56, y: 0.58, w: 0.36, align: right }  # a box on the stage, 0-1 of its width and height
+        enter: scale
+        surface: light
+        length: 1.4
+      - kicker: "04 · Shelf"
+        title: "Every note, <em>on its own shelf.</em>"
+        body: Notebooks file themselves by what they are about, not by the day you happened to write them.
+        at: top-left
+        enter: fade
+        surface: light
+        exit: wipe
+        length: 1.4
+      - kicker: Margin
+        title: "Bring your <em>own margins.</em>"
+        at: center
+        enter: rise
+        length: 1.2
+
+  - type: cta
+    id: start
+    kicker: Free on every device
+    title: "Start a page. <em>Leave room at the edge.</em>"
+    button: { label: Get Margin, href: "https://example.com" }

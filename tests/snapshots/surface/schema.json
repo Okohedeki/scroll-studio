@@ -10984,7 +10984,7 @@
       }
      ],
      "default": null,
-     "description": "How the step arrives: fade, rise (the words rise into place), wipe (revealed from the left), type-on (word by word), scale (grows in) or none. Default: the layout's own, words rising over a stage and cards brightening as they reach the middle of the screen. With reduced motion every motion is a plain fade",
+     "description": "How the step arrives: fade, rise (the words rise into place), wipe (revealed from the left), type-on (word by word), scale (grows in) or none. Default: the layout's own, words rising over a stage and cards brightening as they reach the middle of the screen. With reduced motion only the fade is kept",
      "title": "Enter"
     },
     "exit": {

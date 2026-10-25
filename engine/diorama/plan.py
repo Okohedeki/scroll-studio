@@ -7,6 +7,7 @@ from typing import Optional
 
 import numpy as np
 
+from ..layout import scene_layout
 from . import recipes, recipes2
 from .recipes import HERO, WATER_KINDS, dress, pal_of, resolve_where, snap_free, face_default
 from .world import GRID, World
@@ -227,15 +228,16 @@ def camera_plan(w: World, sec, placed: list[dict], stepmap: list[Optional[int]])
         framing[pi] = (gy, dist, tgt)
         options.append(yaw_options(w, pl, tgt, dist, cam.dive_pitch, math.degrees(pl["yaw"]), PREFER.get(pl["kind"], 24.0)))
     chosen = dict(zip(order, choose_yaws(options, cam.orbit)))
+    copy = scene_layout(sec).elements if sec.layout == "overlay" else None     # where each caption sits (engine/layout.py)
     for si, pi in enumerate(stepmap):
         if pi is not None:
             pl = placed[pi]
             gy, dist, tgt = framing[pi]
             yaw = chosen[pi]
             side = {"left": -1, "right": 1}.get(pl["side"] or "", view_side)
-            cap = sec.steps[si].place if sec.layout == "overlay" else None
-            if cap and not pl["side"]:        # a caption set on the left leaves the world the right of the picture
-                side = -1 if cap.endswith("right") else 1 if cap.endswith("left") else side
+            cap = copy[si] if copy and si < len(copy) else None
+            if cap and cap.by and not pl["side"]:   # a caption placed on the left leaves the world the right of the picture
+                side = -1 if cap.side == "right" else 1 if cap.side == "left" else side
             beats.append({"kind": "place", "place": pi, "yaw": yaw, "pitch": cam.dive_pitch, "dist": round(dist, 2),
                           "target": [round(pl["x"], 3), round(gy + min(pl["h"], 9.0) * 0.44, 3), round(pl["z"], 3)],
                           "side": side})

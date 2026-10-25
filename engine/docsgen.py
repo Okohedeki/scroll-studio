@@ -157,7 +157,7 @@ def enums_in(s: dict) -> list[list[Any]]:
     out = []
     if "enum" in s:
         out.append(s["enum"])
-    for b in s.get("anyOf", []):
+    for b in s.get("anyOf", []) + s.get("oneOf", []):
         out += enums_in(b)
     if isinstance(s.get("items"), dict):
         out += enums_in(s["items"])
