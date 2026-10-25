@@ -327,6 +327,8 @@ def css_vars(t: dict, log=lambda m: None) -> str:
     for role, fam in f.items():   # extra roles a style declares (masthead, script, marquee...): --font-<role>
         if role not in ("display", "body", "mono"):
             tokens[f"--font-{role}"] = f'"{fam}", {"Georgia, serif" if fam in SERIFS else FALLBACK["body"]}'
+    for role, colour in ((t.get("skin") or {}).get("roles") or {}).items():   # what the style's runtime and templates read (skin)
+        tokens[f"--skin-{role.replace('_', '-')}"] = colour
     out = ":root {\n" + "\n".join(f"  {k}: {v};" for k, v in tokens.items()) + "\n}"
     return out + "\n" + surface_css(c, t["mode"])
 
@@ -489,7 +491,7 @@ def _hex6(h: str) -> str:
 
 
 def skin(style: str, colors: dict, fonts: dict) -> dict:
-    """What a brand changes in a style's own stylesheet: each colour of the style's palette (style.yaml) and each of its
+    """What a brand changes in a style's own stylesheet and templates: each colour of the style's palette (style.yaml) and each of its
     display/body/mono families, mapped to the theme's. Most styles write their palette into style.css directly, so this
     is how a brand reaches them; everything else in the stylesheet (the style's mechanics) stays as it is."""
     st = styles()[style]
@@ -506,7 +508,13 @@ def skin(style: str, colors: dict, fonts: dict) -> dict:
         old, new = st.get("fonts", {}).get(role), fonts.get(role)
         if old and new:
             fmap.setdefault(old, new)
-    return {"colors": {k: v for k, v in cmap.items() if k != v}, "fonts": {k: v for k, v in fmap.items() if k != v}}
+    # each role of the style's palette as the brand re-draws it, for the parts the stylesheet does not draw: the style's
+    # runtime (canvas, SVG) reads them as --skin-<role> (runtime/src/styles/_kit.ts `skin`). A role the brand leaves as it
+    # was, or whose colour no stylesheet swaps (pure black and white), has none: the style's own value stays.
+    roles = {role: cmap[_hex6(old)] for role, old in st.get("colors", {}).items()
+             if HEX.fullmatch(str(old)) and cmap.get(_hex6(old), _hex6(old)) != _hex6(old)}
+    return {"colors": {k: v for k, v in cmap.items() if k != v}, "fonts": {k: v for k, v in fmap.items() if k != v},
+            "roles": roles}
 
 
 def reskin(css: str, sk: Optional[dict]) -> str:

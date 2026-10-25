@@ -220,7 +220,7 @@ def _page(site: Site, entries: list[dict], theme: dict, cuts_cfg: list[dict]) ->
     from . import themes
     from .compiler import _env
     sdir = themes.style_dir(theme["style"]) if theme["style"] else None
-    env = _env(sdir)
+    env = _env(sdir, theme.get("skin"))
     env.globals["art"] = None
     return env.get_template("site.html.j2").render(
         site=site, sections=entries, theme=theme, css_vars="", logo=None, font_css="", font_links=[], nav_links=[],
