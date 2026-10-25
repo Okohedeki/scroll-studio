@@ -19,6 +19,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Optional
 
+from ..layout import window
 from ..project import Project
 from ..spec import Site, is_scene
 
@@ -244,7 +245,7 @@ def _notes(sec) -> list[str]:
     """What a builder decides at render time for this section, so the snapshot cannot show it (never skipped silently)."""
     notes = []
     steps = getattr(sec, "steps", None) or []
-    unset = [st for st in steps if st.at is None]
+    unset = [st for st in steps if window(st) is None]
     if sec.type == "inside" and steps:
         notes.append("the scene builder schedules the steps' windows (`at`) along the route and sets the scroll length "
                      "(engine/inside.py schedule_steps): shown as the spec leaves them")

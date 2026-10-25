@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Optional
 
+from ..layout import window
 from ..project import BuildError, Project, probe
 from ..spec import FilmScene, Site, Trailer, is_scene
 
@@ -84,8 +85,9 @@ class Film:
     def step_range(self, i: int) -> tuple[float, float]:
         """Seconds of the film under step i, as the site shows it."""
         st = self.sec.steps[i]
-        if st.at is not None:
-            return st.at[0] * self.dur, st.at[1] * self.dur
+        w = window(st)
+        if w is not None:
+            return w[0] * self.dur, w[1] * self.dur
         pin = (st.state or {}).get("beat")
         if pin is not None:
             if pin not in self.spans:

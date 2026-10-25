@@ -23,6 +23,7 @@ from PIL import Image
 
 from .. import light, light_presets
 from ..inputs import credit, image_key, resolve_image
+from ..layout import set_window, window, windows_by_length
 from ..project import BuildContext, BuildError, file_key
 from ..spec import LightScene, LightSun
 
@@ -117,13 +118,9 @@ def schedule(sec: LightScene) -> tuple[list[int], list[dict]]:
     if sec.layout == "overlay":
         if sec.length <= 0:
             sec.length = round(2.6 * max(n, 2), 2)
-        spans = [(st.at[0], st.at[1]) if st.at is not None else (i / n, (i + 1) / n) for i, st in enumerate(sec.steps)]
+        spans = [window(st) or (i / n, (i + 1) / n) for i, st in enumerate(sec.steps)]
     else:
-        tot = sum(st.length for st in sec.steps)
-        acc, spans = 0.0, []
-        for st in sec.steps:
-            spans.append((acc / tot, (acc + st.length) / tot))
-            acc += st.length
+        spans = windows_by_length(sec.steps)
     holds = []
     for (a, b), t in zip(spans, out):
         c, hw = (a + b) / 2, max(HOLD_FLOOR, sec.hold * (b - a) / 2)
@@ -132,9 +129,9 @@ def schedule(sec: LightScene) -> tuple[list[int], list[dict]]:
         # a headline is on screen while the light holds (and a little either side): the change itself passes between
         # headlines, with nothing over it, and a caption never sits on a picture that has become another time
         for i, (st, h, (a, b)) in enumerate(zip(sec.steps, holds, spans)):
-            if st.at is None:
+            if window(st) is None:
                 m = 0.1 * (b - a)
-                st.at = (0.0 if i == 0 else round(h["a"] - m, 4), 1.0 if i == n - 1 else round(h["b"] + m, 4))
+                set_window(st, 0.0 if i == 0 else round(h["a"] - m, 4), 1.0 if i == n - 1 else round(h["b"] + m, 4))
     return out, holds
 
 

@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Optional
 
 from ..config import settings
+from ..layout import subject_side, window
 from ..project import BuildContext, BuildError, Project
 from ..spec import InsideScene, Product
 
@@ -63,7 +64,7 @@ def route(sec: InsideScene, project: Project, log=print):
 def look(sec: InsideScene, theme: dict) -> dict:
     return {"hdri": sec.hdri, "ambient": sec.ambient, "lamp": sec.lamp, "lamp_color": sec.lamp_color, "rim": sec.rim,
             "exposure": sec.exposure, "background": sec.background or theme["colors"]["bg"], "cutaway": sec.cutaway,
-            "offset": sec.offset * (1 if sec.side == "right" else -1)}
+            "offset": sec.offset * (1 if subject_side(sec) == "right" else -1)}
 
 
 def job_stops(res) -> list[dict]:
@@ -267,7 +268,7 @@ def build(sec: InsideScene, ctx: BuildContext, theme: dict) -> dict:
         "wideFill": round(min(0.86, 0.95 * (1 - inside.WIDE_OFFSET * sec.offset)), 3),
         "stops": [{"label": s.label, "frame": w["frame"], "at": w["copy"], "still": still(f"stop{s.index + 1}.jpg")}
                   for s, w in zip(res.stops, plan.windows)],
-        "stepsAt": [list(st.at) if st.at else None for st in sec.steps], "scrollLength": sec.length,
+        "stepsAt": [list(window(st)) if window(st) else None for st in sec.steps], "scrollLength": sec.length,
         "credits": [sec.credit] if sec.credit and sec.model not in (None, "product") else [],
     }
 

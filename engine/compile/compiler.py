@@ -13,7 +13,7 @@ from markupsafe import Markup
 
 from ..config import STATIC
 from ..inputs import credit as image_credit, resolve_image
-from .. import safety
+from .. import layout, safety
 from ..project import BuildContext, BuildError, Project
 from ..spec import ImageInput, Site, is_scene
 from . import fonts, themes
@@ -46,6 +46,8 @@ def _env(style_dir: Optional[Path] = None, skin: Optional[dict] = None) -> Envir
     env.filters["rich"] = rich
     env.filters["vh"] = lambda v: f"{float(v) * 100:.0f}vh"
     env.filters["countable"] = lambda v: bool(re.fullmatch(r"\d+(\.\d+)?", str(v).replace(",", "")))
+    # the layout model: every placement field compiled into one form (engine/layout.py)
+    env.globals.update(placed=layout.scene_layout, stop_spot=layout.stop_spot)
     return env
 
 
@@ -194,8 +196,8 @@ def build_site(project: Project, log: Callable[[str], None] = print,
                 entry["config"] = json.loads(prev.read_text())
                 if entry["config"].get("stepsAt"):      # a builder that placed the copy itself (inside): keep its placement
                     for st, at in zip(sec.steps, entry["config"]["stepsAt"]):
-                        if st.at is None and at:
-                            st.at = tuple(at)
+                        if layout.window(st) is None and at:
+                            layout.set_window(st, *at)
                     if entry["config"].get("scrollLength") and not sec.length:
                         sec.length = entry["config"]["scrollLength"]
                     entry["sdata"] = sec.model_dump(mode="json", include={"hud", "steps", "layout", "length"})

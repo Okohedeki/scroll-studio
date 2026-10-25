@@ -23,6 +23,7 @@ from typing import Callable, Optional
 from ..config import settings
 from ..fidelity import PRESETS, WouldRender, planning, previewing
 from ..inputs import image_key, resolve_image
+from ..layout import window
 from ..plan import IMAGES, Plan, image_refs, section_locked
 from ..project import BuildContext, BuildError, Project, file_key
 from ..spec import FilmScene, ImageInput, Site, is_scene
@@ -99,7 +100,7 @@ def step_captions(steps, beat: Optional[str] = None) -> list:
     steps = [st for st in steps if st.title]
     out = []
     for i, st in enumerate(steps):
-        part = (st.state or {}).get("part") if beat is not None else st.at
+        part = (st.state or {}).get("part") if beat is not None else window(st)
         a, b = (float(part[0]), float(part[1])) if part else (i / len(steps), (i + 1) / len(steps))
         out.append((a, b, st.title, st.kicker or ""))
     return out
@@ -112,7 +113,8 @@ def span_captions(steps, s0: float, s1: float) -> list:
     free = [st for st in steps if st.title and not (st.state or {}).get("beat")]
     out, n = [], len(free)
     for i, st in enumerate(free):
-        a, b = (float(st.at[0]), float(st.at[1])) if st.at else (i / n, (i + 1) / n)
+        w = window(st)
+        a, b = (float(w[0]), float(w[1])) if w else (i / n, (i + 1) / n)
         lo, hi = max(a, s0), min(b, s1)
         if hi - lo > 1e-6 and s1 > s0:
             out.append(((lo - s0) / (s1 - s0), (hi - s0) / (s1 - s0), st.title, st.kicker or ""))

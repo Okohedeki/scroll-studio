@@ -4,9 +4,14 @@ validating and compile into the same model; the layout snapshots (tests/test_lay
 unchanged."""
 from __future__ import annotations
 
+import json
+import re
+
 import pytest
 from pydantic import ValidationError
 
+from engine import layout
+from engine.compile.layout_snapshot import page_html, parse
 from engine.spec import AtBox, AtGrid, Site, Step
 
 
@@ -100,3 +105,123 @@ def test_the_schema_explains_every_new_field():
     for model in (AtBox, AtGrid):
         for name, f in model.model_fields.items():
             assert f.description, f"{model.__name__}.{name}"
+
+
+# ---------------------------------------------------------------- the old fields compile into the model (engine/layout.py)
+
+def sec(layout_: str = "overlay", steps=(), **extra):
+    raw = {"name": "t", "sections": [{"id": "s", "type": "type", "text": "x", "layout": layout_, "steps": list(steps), **extra}]}
+    return Site.model_validate(raw).sections[0]
+
+
+def test_a_window_is_show_or_the_older_at():
+    assert layout.window(Step(title="t")) is None
+    assert layout.window(Step(title="t", at=[0.1, 0.3])) == (0.1, 0.3)
+    assert layout.window(Step(title="t", show=[0.2, 0.4], at="right")) == (0.2, 0.4)
+    assert layout.window(Step(title="t", at="right")) is None
+
+
+def test_builders_time_a_step_through_one_function_that_keeps_the_spec_s_spelling():
+    old = Step(title="t")
+    layout.set_window(old, 0.1, 0.3)
+    assert old.at == (0.1, 0.3) and old.show is None                     # a 1.4 step: embedded exactly as 1.4 did
+    placed = Step(title="t", at={"grid": "9 / span 4"})
+    layout.set_window(placed, 0.1, 0.3)
+    assert placed.show == (0.1, 0.3) and isinstance(placed.at, AtGrid)    # its place is kept
+    layout.set_window(placed, 0.2, 0.5)
+    assert placed.show == (0.2, 0.5)
+
+
+def test_split_and_cards_lengths_compile_into_windows():
+    steps = [Step(title="a", length=1), Step(title="b", length=3)]
+    assert layout.windows_by_length(steps) == [(0.0, 0.25), (0.25, 1.0)]
+    els = layout.scene_layout(sec("cards", [{"title": "a", "length": 1}, {"title": "b", "length": 3}])).elements
+    assert [e.show for e in els] == [(0.0, 0.25), (0.25, 1.0)]
+
+
+def test_layout_side_place_and_at_become_one_element_per_step():
+    s = sec("overlay", [{"title": "a"}, {"title": "b", "place": "top-right", "at": [0.2, 0.4]}, {"title": "c", "at": "left"},
+                        {"title": "d", "at": {"x": 0.1, "y": 0.6, "w": 0.3, "h": 0.2, "align": "center"}},
+                        {"title": "e", "at": {"grid": "9 / span 4", "row": "top"}, "show": [0.5, 0.7], "enter": "wipe"},
+                        {"title": "f", "at": "auto", "place": "sky"}], side="left")
+    lay = layout.scene_layout(s)
+    assert (lay.kind, lay.side) == ("overlay", "left")
+    a, b, c, d, e, f = lay.elements
+    assert (a.spot, a.show, a.by) == ("auto", (0, 1), None)               # 1.4: the layout's own place, the whole scene
+    assert (b.spot, b.show, b.by, b.side) == ("top-right", (0.2, 0.4), "place", "right")
+    assert (c.spot, c.by, c.auto) == ("left", "at", False)                 # a named left is its own spot, as `place: left` was
+    assert (d.spot, d.style, d.align, d.side) == ("box", "--x: 0.1; --y: 0.6; --w: 0.3; --hh: 0.2", "center", "left")
+    assert (e.spot, e.style, e.row, e.align, e.side, e.enter) == ("grid", "--col: 9 / span 4", "top", None, "right", "wipe")
+    assert f.auto and f.step.world.kind == "sky"
+    # the page carries the captions the layout places first, then every other in its own container (1.4's corners)
+    assert [x.index for x in lay.in_order] == [0, 5, 1, 2, 3, 4]
+    assert lay.runtime()["elements"][0] == {"step": 0, "show": [0, 1]}
+    assert lay.runtime()["elements"][-1] == {"step": 4, "show": [0.5, 0.7], "enter": "wipe"}
+
+
+def test_the_subject_takes_the_side_the_copy_leaves_free():
+    inside = {"name": "t", "product": {"name": "p", "model": "m.glb"},
+              "sections": [{"id": "i", "type": "inside", "steps": [{"title": "a"}, {"title": "b"}]}]}
+
+    def side_of(**over):
+        raw = {**inside, "sections": [{**inside["sections"][0], **over}]}
+        return layout.subject_side(Site.model_validate(raw).sections[0])
+    assert side_of() == "right"                                                       # 1.4: copy left, part right
+    assert side_of(side="left") == "left"                                             # the scene's side still decides
+    assert side_of(steps=[{"title": "a", "at": "right"}, {"title": "b", "at": {"grid": "8 / span 5"}}]) == "left"
+    assert side_of(steps=[{"title": "a", "at": "right"}, {"title": "b", "at": "left"}]) == "right"
+    assert side_of(steps=[{"title": "a", "place": "right"}]) == "right"               # a 1.4 corner keeps the 1.4 page
+    assert side_of(side="right", steps=[{"title": "a", "at": "right"}]) == "right"
+
+
+def test_a_journey_stop_s_side_is_its_spot():
+    class Stop:
+        side = "auto"
+    assert layout.stop_spot(Stop()) == "left"
+    assert layout.stop_spot(Stop(), {"side": "bottom"}) == "bottom"
+    Stop.side = "right"
+    assert layout.stop_spot(Stop()) == "right"
+
+
+# ---------------------------------------------------------------- the page renders the model
+
+def _scene_markup(spec: dict):
+    html = page_html(Site.model_validate(spec))
+    return html, parse(html)
+
+
+def _all(node, pred):
+    out = [node] if pred(node) else []
+    for c in node.children:
+        out += _all(c, pred)
+    return out
+
+
+def test_an_overlay_page_places_and_times_captions_from_the_model():
+    spec = scene("overlay", at={"grid": "9 / span 4", "row": "bottom", "align": "right"}, show=[0.2, 0.6], enter="wipe",
+                 exit="fade")
+    spec["sections"][0]["steps"] += [{"title": "Two", "at": {"x": 0.07, "y": 0.58}}, {"title": "Three"}]
+    html, tree = _scene_markup(spec)
+    conts = _all(tree, lambda n: "ss-captions" in n.classes)
+    assert [c.classes for c in conts] == [["ss-captions"],
+                                          ["ss-captions", "ss-captions--grid", "ss-captions--row-bottom", "ss-captions--align-right"],
+                                          ["ss-captions", "ss-captions--box"]]
+    assert conts[1].attrs["style"] == "--col: 9 / span 4" and conts[2].attrs["style"] == "--x: 0.07; --y: 0.58; --w: 0.34"
+    cap = conts[1].children[0]
+    assert (cap.attrs["data-from"], cap.attrs["data-to"], cap.attrs["data-enter"], cap.attrs["data-exit"]) == ("0.2", "0.6", "wipe", "fade")
+    assert "data-enter" not in conts[0].children[0].attrs                              # left to the layout: no attribute
+    script = re.search(r'class="ss-layout">(.*?)</script>', html)[1]
+    assert json.loads(script) == {"elements": [{"step": 2, "show": [0, 1]},
+                                                       {"step": 0, "show": [0.2, 0.6], "enter": "wipe", "exit": "fade"},
+                                                       {"step": 1, "show": [0, 1]}]}
+
+
+def test_a_cards_page_places_a_card_and_names_its_motion():
+    spec = scene("cards", at={"x": 0.55, "y": 0.2, "w": 0.35}, enter="rise")
+    spec["sections"][0]["steps"] += [{"title": "Two", "at": "bottom-right", "exit": "wipe"}, {"title": "Three"}]
+    _, tree = _scene_markup(spec)
+    arts = _all(tree, lambda n: n.tag == "article")
+    assert arts[0].classes == ["ss-step", "ss-at", "ss-at--box"] and arts[0].attrs["data-enter"] == "rise"
+    assert arts[0].attrs["style"] == "--h: 120vh; --x: 0.55; --y: 0.2; --w: 0.35"
+    assert arts[1].classes == ["ss-step", "ss-at", "ss-at--bottom-right"] and arts[1].attrs["data-exit"] == "wipe"
+    assert arts[2].classes == ["ss-step"] and arts[2].attrs["style"] == "--h: 120vh"

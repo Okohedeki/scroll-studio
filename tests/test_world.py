@@ -101,7 +101,7 @@ def _film(steps, **kw):
 
 @pytest.mark.parametrize("steps, kw, why", [
     ([{"title": "a", "at": [0, 1], "place": {"kind": "sky"}}], {"layout": "cards"}, "layout: overlay"),
-    ([{"title": "a", "place": {"kind": "sky"}}], {}, "needs `at"),
+    ([{"title": "a", "place": {"kind": "sky"}}], {}, "needs a window"),
     ([{"title": "a", "at": [0, 1], "place": {"kind": "surface"}}], {}, "a surface needs"),
     ([{"title": "a", "at": [0, 1], "place": {"kind": "surface", "at": 0.4}}], {}, "not a number"),
     ([{"title": "a", "at": [0, 1], "place": {"kind": "sky", "at": "the sky"}}], {}, "not a prompt"),

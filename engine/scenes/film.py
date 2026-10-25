@@ -18,6 +18,7 @@ from types import SimpleNamespace
 from typing import Optional
 
 from .. import world as typeworld
+from ..layout import set_window, window
 from ..project import BuildContext, BuildError, ffmpeg, file_key, probe
 from ..spec import FilmScene
 
@@ -563,11 +564,11 @@ def beat_spans(sec: FilmScene, durs: list[float], fade) -> dict[str, tuple[float
 
 
 def pin_steps(sec: FilmScene, durs: list[float], fade) -> None:
-    """Time steps pinned with state: {beat: id} to their beat's span over the joined film (sets step.at)."""
+    """Time steps pinned with state: {beat: id} to their beat's span over the joined film (sets the step's window)."""
     spans = beat_spans(sec, durs, fade)
     for st in sec.steps:
         pin = (st.state or {}).get("beat")
-        if pin is None or st.at is not None:
+        if pin is None or window(st) is not None:
             continue
         if pin not in spans:
             raise BuildError(f"film section '{sec.id}': step '{st.title}' is pinned to beat {pin}, which is not in beats")
@@ -577,7 +578,7 @@ def pin_steps(sec: FilmScene, durs: list[float], fade) -> None:
             a, b2 = a + (b2 - a) * float(part[0]), a + (b2 - a) * float(part[1])
         pad = (b2 - a) * 0.1
         # a caption on the film's last moment stays up until the scene lets go (a closing line, a button)
-        st.at = (round(a + pad, 4), 1.0 if b2 >= 0.999 else round(b2 - pad * 0.6, 4))
+        set_window(st, round(a + pad, 4), 1.0 if b2 >= 0.999 else round(b2 - pad * 0.6, 4))
 
 
 def build(sec: FilmScene, ctx: BuildContext, theme: dict) -> dict:

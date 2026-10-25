@@ -33,6 +33,7 @@ from typing import Optional
 import numpy as np
 
 from .project import BuildError
+from .layout import set_window, window
 from .spec import InsideScene, InsideStop
 
 SENSOR = 36.0                       # mm, full frame width
@@ -576,9 +577,9 @@ def schedule_steps(steps, plan: Plan, outro: str = "wide") -> list[dict]:
         gap = 0.012 if len(items) > 1 else 0.0
         w = (hi - lo) / len(items)
         for j, s in enumerate(items):
-            if s.at is None:
-                s.at = (round(lo + j * w + (gap if j else 0), 4), round(lo + (j + 1) * w - gap, 4))
-                done.append({"title": s.title, "at": list(s.at)})
+            if window(s) is None:
+                set_window(s, round(lo + j * w + (gap if j else 0), 4), round(lo + (j + 1) * w - gap, 4))
+                done.append({"title": s.title, "at": list(window(s))})
 
     if intro:
         a, b = plan.intro_window or (0.0, plan.windows[0]["copy"][0])
@@ -590,9 +591,9 @@ def schedule_steps(steps, plan: Plan, outro: str = "wide") -> list[dict]:
         # neighbours never overlap: end a little before the next stop's copy begins
         if i + 1 < n:
             hi = min(hi, plan.windows[i + 1]["copy"][0] - 0.004)
-        if s.at is None:
-            s.at = (round(lo, 4), round(max(hi, lo + 0.01), 4))
-            done.append({"title": s.title, "at": list(s.at)})
+        if window(s) is None:
+            set_window(s, round(lo, 4), round(max(hi, lo + 0.01), 4))
+            done.append({"title": s.title, "at": list(window(s))})
     extra = rest[n:]
     if extra:
         if outro == "wide" and plan.outro_window:

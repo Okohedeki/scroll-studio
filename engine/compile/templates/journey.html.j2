@@ -107,7 +107,7 @@
       <div class="jy-stops">
         {% for stop in j.stops %}
         {% set si = jc.stops[loop.index0] if jc else none %}
-        {% set side = si.side if si else (stop.side if stop.side != "auto" else "left") %}
+        {% set side = stop_spot(stop, si) %}
         {% set surface = si.surface if si else (stop.surface if stop.surface != "auto" else "dark") %}
         <article class="jy-stop jy-side-{{ side }} jy-surface-{{ surface }}" id="{{ stop.id }}" data-stop="{{ stop.id }}"{% if si %} style="--jy-scrim: {{ si.scrim }}"{% endif %} aria-label="{{ stop.label or stop.id }}">
           {% if si and si.still %}<figure class="jy-still"><img src="{{ si.still }}" alt="{{ stop.place }}" loading="{{ 'eager' if loop.first else 'lazy' }}"></figure>{% endif %}

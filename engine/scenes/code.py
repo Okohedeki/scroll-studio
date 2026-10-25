@@ -3,6 +3,7 @@ the files, splits edits into diff lines, lays the route out over the scroll, and
 """
 from pathlib import Path
 
+from ..layout import set_window, window
 from ..project import BuildContext, BuildError
 from ..spec import CodeScene
 
@@ -59,7 +60,7 @@ def build(sec: CodeScene, ctx: BuildContext, theme: dict) -> dict:
     cursor = 0
     for st in sec.steps:
         pin = (st.state or {}).get("file")
-        if pin is None or st.at is not None:
+        if pin is None or window(st) is not None:
             continue
         keys = pin if isinstance(pin, list) else [pin]
         ranges = []
@@ -75,7 +76,7 @@ def build(sec: CodeScene, ctx: BuildContext, theme: dict) -> dict:
                 raise BuildError(f"[{sec.id}] step '{st.title}' is pinned to {k}, which is not in files")
         a, b = min(r[0] for r in ranges), max(r[1] for r in ranges)
         pad = (b - a) * 0.06
-        st.at = (round(a + pad, 4), round(b - pad * 0.5, 4))
+        set_window(st, round(a + pad, 4), round(b - pad * 0.5, 4))
 
     return {
         "terminal": sec.terminal.model_dump() if sec.terminal else None,

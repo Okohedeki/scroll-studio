@@ -31,6 +31,7 @@ import cv2
 import numpy as np
 
 from . import reveal, world_depth as wd, world_math as wm
+from .layout import window
 from .project import BuildContext, BuildError, file_key, probe
 from .spec import FilmScene, RevealAt, RevealRegion, Step, WorldPlace
 
@@ -76,8 +77,9 @@ def validate(sec) -> None:
                          f"(the title is set in the picture; the other layouts put the copy in cards beside it)")
     for i, st, w in world_steps(sec):
         what = f"section '{sec.id}', step '{plain(st.title)[:40]}'"
-        if sec.type in ("film", "sequence") and st.at is None:
-            raise BuildError(f"{what}: in-world type needs `at: [from, to]` (scroll progress, 0-1) or `state: {{beat: <id>}}`")
+        if sec.type in ("film", "sequence") and window(st) is None:
+            raise BuildError(f"{what}: in-world type needs a window, `show: [from, to]` (scroll progress, 0-1), or "
+                             f"`state: {{beat: <id>}}`")
         if w.kind == "surface" and not w.at and not w.quad:
             raise BuildError(f"{what}: a surface needs `at` (a prompt naming it, e.g. \"the wooden deck\") or a `quad`")
         if w.kind == "surface" and w.at is not None and not isinstance(w.at, str):
@@ -150,7 +152,7 @@ def frame_of(progress: float, nframes: int) -> int:
 
 
 def window_frames(st: Step, nframes: int) -> tuple[int, int]:
-    a, b = st.at
+    a, b = window(st)
     return frame_of(a, nframes), frame_of(b, nframes)
 
 

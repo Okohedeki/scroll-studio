@@ -1976,15 +1976,12 @@ class DioramaScene(SceneBase):
     @model_validator(mode="after")
     def _windows(self):
         # overlay layout: a step's caption is on screen while the camera rests at its place (and a little around it)
-        if self.layout == "overlay" and self.steps and any(s.at is None for s in self.steps):
-            total = sum(s.length for s in self.steps) or 1.0
-            acc = 0.0
-            for s in self.steps:
-                a, b = acc / total, (acc + s.length) / total
-                acc += s.length
-                if s.at is None:
+        from .layout import set_window, window, windows_by_length
+        if self.layout == "overlay" and self.steps and any(window(s) is None for s in self.steps):
+            for s, (a, b) in zip(self.steps, windows_by_length(self.steps)):
+                if window(s) is None:
                     w = b - a
-                    s.at = (round(a + w * 0.12, 4), round(b - w * 0.12, 4))
+                    set_window(s, round(a + w * 0.12, 4), round(b - w * 0.12, 4))
         return self
 
 
