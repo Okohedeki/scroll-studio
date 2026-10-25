@@ -13,7 +13,7 @@
  * Reduced motion: no belt, no sampling, no smears; each sheet is a still print with its plates at rest.
  * Research: docs/styles/styles-32-33.md, section 2.
  */
-import { $, $$, onFrame, reduced } from "./_kit";
+import { $, $$, onFrame, reduced, skinRgba } from "./_kit";
 import { makeBelts, measure, watch, trueOffset, yInBelt, wireLinks, beltOf, type Belt } from "./_belt";
 import { loadArt, type ArtFrames } from "./_art";
 
@@ -66,8 +66,8 @@ export default function start() {
       }
       ctx.globalCompositeOperation = "source-over";
     };
-    plate(0.26, "rgba(23,212,255,.9)", -2, 0);
-    plate(1.31, "rgba(255,61,154,.9)", 2, 1.5);
+    plate(0.26, skinRgba("accent2", "#17d4ff", 0.9), -2, 0);       // the cyan and magenta plates are the style's two accents
+    plate(1.31, skinRgba("accent", "#ff3d9a", 0.9), 2, 1.5);
   }
   loadArt().then((a) => { art = a; arts.forEach((x) => { halftone(x.c, 6); x.host.classList.add("sa-drawn"); }); });
 

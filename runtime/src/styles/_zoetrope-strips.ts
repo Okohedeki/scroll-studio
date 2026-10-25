@@ -5,6 +5,7 @@
  * into frame 0. Used by zoetrope.ts both as the drum's texture and, laid flat, as the reduced-motion still.
  */
 import type { ArtFrames } from "./_art";
+import { skin, skinRgba } from "./_kit";
 
 export type Motif = "ball" | "word" | "bird" | "walker" | "turn" | "parade" | "question" | "quote" | "cta" | "art" | "picture" | "coin" | "bars" | "sun" | "pan";
 export interface Device { app?: string; title?: string; label?: string; note?: string; button?: string; options?: string[]; selected?: string }
@@ -23,7 +24,8 @@ export interface StripSpec {
 }
 
 export const FRAMES = 12;
-const PAPER = "#efe2c4", PAPER2 = "#e2cfa6", INK = "#1b1611", RED = "#c8402a", BLUE = "#2b5079", OCHRE = "#c78f2a", SKY = "#dfe0cf";
+// the print: its ink, red and blue are the style's ink and two accents (a brand's colours when it wears one); the paper and the rest are the card stock's
+const PAPER = "#efe2c4", PAPER2 = "#e2cfa6", INK = skin("ink", "#1b1611"), RED = skin("accent", "#c8402a"), BLUE = skin("accent2", "#2b5079"), OCHRE = "#c78f2a", SKY = "#dfe0cf";
 const DISPLAY = '"Bodoni Moda", Georgia, serif', SLAB = '"Alfa Slab One", Georgia, serif';
 const TAU = Math.PI * 2;
 
@@ -527,7 +529,7 @@ export function drawCard(ctx: CanvasRenderingContext2D, L: CardLayout, spec: Str
   ctx.restore();
   ctx.strokeStyle = INK; ctx.lineWidth = Math.max(2, 3 * u); ctx.strokeRect(f.x, f.y, f.w, f.h);
   const low = Math.max(f.y + f.h, L.text.y + L.text.h);
-  ctx.font = `${Math.round(Math.max(10, 13 * u))}px ${SLAB}`; ctx.fillStyle = "rgba(29, 22, 17, .6)"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.font = `${Math.round(Math.max(10, 13 * u))}px ${SLAB}`; ctx.fillStyle = skinRgba("ink", "#1d1611", 0.6); ctx.textAlign = "center"; ctx.textBaseline = "middle";
   ctx.fillText(`${spec.maker.toUpperCase()}  ·  THE WHEEL OF LIFE`, W / 2, (low + H - m) / 2);
   ctx.textAlign = "left";
 }

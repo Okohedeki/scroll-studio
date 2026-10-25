@@ -15,7 +15,7 @@
  */
 import { $, $$, chars, onFrame, reduced } from "./_kit";
 import { makeBelts, measure, watch, trueOffset, setOffset, yInBelt, wireLinks, beltOf, scrollTargetFor, type Belt } from "./_belt";
-import { drawFrame, drawFlash, drawRunOn, hash, FPB, LAMP, meanLuma, type Tone } from "./_film-draw";
+import { drawFrame, drawFlash, drawRunOn, hash, FPB, LAMP, lamp, meanLuma, type Tone } from "./_film-draw";
 import { loadArt, type ArtFrames } from "./_art";
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -141,7 +141,7 @@ export default function start() {
     const phone = W < 50, lane = phone ? 7 : 9, x1 = phone ? 4 : 7, tr = phone ? 3 : 7;
     const x0 = x1 + lane + 3, pw = W - 2 * (x1 + lane + 3) - tr;
     // sprocket holes, four to the frame, riding with the page
-    ctx.fillStyle = "rgba(255,246,223,.6)";
+    ctx.fillStyle = lamp(0.6);
     const off = -(((ry % p4) + p4) % p4), hh = p4 * 0.5;
     for (let yy = off - p4; yy < H + p4; yy += p4) { ctx.fillRect(x1, yy, lane, hh); ctx.fillRect(W - x1 - lane, yy, lane, hh); }
     // the frames
@@ -152,9 +152,9 @@ export default function start() {
       ctx.drawImage(thumb(toneAt(j * P + P / 2), j, pw, P - 3), x0, top + 1, pw, P - 3);
       for (let s = 0; s < 4; s++) { // the optical track: a variable-area track, one bar per perforation
         const wq = 0.2 + 0.8 * hash(j * 4 + s, 5), bw = tr * wq;
-        ctx.fillStyle = "rgba(255,246,223,.85)"; ctx.fillRect(W - x1 - lane - 2 - tr + (tr - bw) / 2, top + s * p4 + 1.5, bw, p4 - 2.5);
+        ctx.fillStyle = lamp(0.85); ctx.fillRect(W - x1 - lane - 2 - tr + (tr - bw) / 2, top + s * p4 + 1.5, bw, p4 - 2.5);
       }
-      if (!phone && j % 16 === 0) { ctx.fillStyle = "rgba(255,246,223,.8)"; ctx.font = "8px 'Share Tech Mono', monospace"; ctx.fillText(`FT ${String(j / 16).padStart(3, "0")}`, x0 + 2, top + 10); }
+      if (!phone && j % 16 === 0) { ctx.fillStyle = lamp(0.8); ctx.font = "8px 'Share Tech Mono', monospace"; ctx.fillText(`FT ${String(j / 16).padStart(3, "0")}`, x0 + 2, top + 10); }
     }
     // splices
     for (let i = 1; i < reels.length; i++) {
@@ -250,7 +250,7 @@ export default function start() {
   function drawScratches(frame: number) {
     sctx.clearRect(0, 0, vw, vh);
     if (!strokes.length) return;
-    sctx.strokeStyle = "rgba(255,246,223,.92)"; sctx.lineCap = "round"; sctx.lineJoin = "round"; sctx.lineWidth = 1.7;
+    sctx.strokeStyle = lamp(0.92); sctx.lineCap = "round"; sctx.lineJoin = "round"; sctx.lineWidth = 1.7;
     for (const s of strokes) {
       const p = s.pts;
       const y0 = p[1] - scrollY;
@@ -313,7 +313,7 @@ export default function start() {
     drawFrame(gctx, gw, gh, frame, tone, lw);
     drawRunOn(gctx, gw, gh, y / 2.3, tone, lw, speed);
     if (speed > 1500) {                                           // too fast to see frames: the picture streaks along the strip
-      gctx.fillStyle = "rgba(255,246,223,.22)";
+      gctx.fillStyle = lamp(0.22);
       for (let k = 0; k < 16; k++) gctx.fillRect(Math.floor(hash(frame, k, 3) * gw), 0, 1, gh);
     }
     gate.style.translate = `${((hash(frame, 1, 9) - 0.5) * 3).toFixed(1)}px ${((hash(frame, 2, 9) - 0.5) * 3).toFixed(1)}px`;   // gate weave

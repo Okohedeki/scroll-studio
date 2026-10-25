@@ -10,10 +10,11 @@
  * nudged with the arrow keys; buttons sink into the page; the CTA throws flat confetti.
  * Reduced motion: everything is already on the desk, bands stand still, dragging still works.
  */
-import { $, $$, onFrame, pinSequence, reduced } from "./_kit";
+import { $, $$, onFrame, pinSequence, reduced, skin } from "./_kit";
 import { clamp } from "../lib/util";
 
-const MARKS = ["#ffc900", "#b8ff5c", "#ff90e8", "#7fd3ff", "#ff7a5c", "#a388ee"];
+// the highlighter marks, as in style.css (--nb-*): yellow, pink and violet are the style's palette, lime, sky and coral its own
+const MARKS = [skin("bg2", "#ffc900"), "#b8ff5c", skin("accent", "#ff90e8"), "#7fd3ff", "#ff7a5c", skin("accent2", "#a388ee")];
 const seeded = (i: number) => { const x = Math.sin(i * 12.9898 + 4.1) * 43758.5453; return x - Math.floor(x); };
 
 export default function start(): void {

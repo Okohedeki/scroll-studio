@@ -11,16 +11,18 @@
  *   arrivals  the headline rises line by line; copy rises 14px once; figures count up once, slowly
  *   timeline  the rail fills with the field's colours as you read down it
  */
-import { $, $$, onFrame, onSeen, reduced } from "./_kit";
+import { $, $$, onFrame, onSeen, reduced, skin } from "./_kit";
 import { clamp, lerp, smooth } from "../lib/util";
 
 type RGB = [number, number, number];
 const hex = (h: string): RGB => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16) / 255) as RGB;
+// the mesh colours are the style's own (Stripe's magenta, sky, violet, gold); the one that is its accent wears a brand's
+const ACCENT = skin("accent", "#635bff");
 const PALS: RGB[][] = [
   ["#ef008f", "#6ec3f4", "#7038ff", "#ffba27"],   // hero: magenta, sky, violet, gold
-  ["#00d4ff", "#3ee1a8", "#80e9ff", "#635bff"],   // cool developer teal
-  ["#635bff", "#a960ee", "#90e0ff", "#ff6ec7"],   // lilac
-  ["#1a1f71", "#635bff", "#00d4ff", "#80e9ff"],   // deep enterprise navy
+  ["#00d4ff", "#3ee1a8", "#80e9ff", ACCENT],   // cool developer teal
+  [ACCENT, "#a960ee", "#90e0ff", "#ff6ec7"],   // lilac
+  ["#1a1f71", ACCENT, "#00d4ff", "#80e9ff"],   // deep enterprise navy
   ["#ff7a59", "#ffba27", "#ef008f", "#a960ee"],   // warm
 ].map((p) => p.map(hex));
 const mobile = () => matchMedia("(max-width: 900px)").matches;
@@ -231,7 +233,7 @@ function field() {
   const loc = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const U = (n: string) => gl.getUniformLocation(prog, n);
   const u = { res: U("uRes"), scale: U("uScale"), c: [0, 1, 2, 3].map((i) => U(`uC${i}`)), ground: U("uGround"), amp: U("uAmp"), ptr: U("uPtr"), n: U("uN"), r: U("uR"), e: U("uE"), k: U("uK"), w: U("uW") };
-  gl.uniform3fv(u.ground, hex("#f6f9fc"));
+  gl.uniform3fv(u.ground, hex(skin("bg", "#f6f9fc")));      // the page the mesh is cut out of
   document.documentElement.classList.add("gm-gl");
 
   type Zone = { el: HTMLElement; kind: number; cutT: number; cutB: number; rest: number; s: number; target: number; t: number; wash: number[]; mwash: number[]; radius: number };

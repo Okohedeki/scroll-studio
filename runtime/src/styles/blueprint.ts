@@ -9,7 +9,7 @@
  * the whole completed sheet. Reduced motion (or a page with scenes): the views stay stacked, drawn complete, and
  * their annotation layer fades in as each view is reached.
  */
-import { $, $$, onFrame, reduced } from "./_kit";
+import { $, $$, onFrame, reduced, skin } from "./_kit";
 
 type Kind = "path" | "letter" | "count" | "show" | "wipe" | "stamp";
 interface Item {
@@ -451,21 +451,22 @@ export default function start() {
   }
   function drawPaper(M: number) {
     if (!paper) return;
+    const LINE = skin("ink", "#e8f1ff");      // the sheet's frame, ticks and labels are the drawing ink
     paper.setAttribute("viewBox", `0 0 ${sheetW} ${sheetH}`);
     paper.setAttribute("width", String(sheetW)); paper.setAttribute("height", String(sheetH));
-    let s = `<rect x="${M / 2}" y="${M / 2}" width="${sheetW - M}" height="${sheetH - M}" fill="none" stroke="#e8f1ff" stroke-width="3"/>`;
-    s += `<rect x="${M / 2 + 14}" y="${M / 2 + 14}" width="${sheetW - M - 28}" height="${sheetH - M - 28}" fill="none" stroke="#e8f1ff" stroke-width="1"/>`;
+    let s = `<rect x="${M / 2}" y="${M / 2}" width="${sheetW - M}" height="${sheetH - M}" fill="none" stroke="${LINE}" stroke-width="3"/>`;
+    s += `<rect x="${M / 2 + 14}" y="${M / 2 + 14}" width="${sheetW - M - 28}" height="${sheetH - M - 28}" fill="none" stroke="${LINE}" stroke-width="1"/>`;
     for (let i = 0; i < 8; i++) {
       const x = M / 2 + ((sheetW - M) * (i + 0.5)) / 8, xe = M / 2 + ((sheetW - M) * (i + 1)) / 8;
-      if (i < 7) s += `<path d="M${xe} ${M / 2} v14 M${xe} ${sheetH - M / 2} v-14" stroke="#e8f1ff"/>`;
-      s += `<text x="${x}" y="${M / 2 + 11}" fill="#e8f1ff" font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle">${i + 1}</text>`;
-      s += `<text x="${x}" y="${sheetH - M / 2 - 3}" fill="#e8f1ff" font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle">${i + 1}</text>`;
+      if (i < 7) s += `<path d="M${xe} ${M / 2} v14 M${xe} ${sheetH - M / 2} v-14" stroke="${LINE}"/>`;
+      s += `<text x="${x}" y="${M / 2 + 11}" fill="${LINE}" font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle">${i + 1}</text>`;
+      s += `<text x="${x}" y="${sheetH - M / 2 - 3}" fill="${LINE}" font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle">${i + 1}</text>`;
     }
     for (let i = 0; i < 6; i++) {
       const y = M / 2 + ((sheetH - M) * (i + 0.5)) / 6, ye = M / 2 + ((sheetH - M) * (i + 1)) / 6;
-      if (i < 5) s += `<path d="M${M / 2} ${ye} h14 M${sheetW - M / 2} ${ye} h-14" stroke="#e8f1ff"/>`;
-      s += `<text x="${M / 2 + 7}" y="${y + 4}" fill="#e8f1ff" font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle">${"ABCDEF"[i]}</text>`;
-      s += `<text x="${sheetW - M / 2 - 7}" y="${y + 4}" fill="#e8f1ff" font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle">${"ABCDEF"[i]}</text>`;
+      if (i < 5) s += `<path d="M${M / 2} ${ye} h14 M${sheetW - M / 2} ${ye} h-14" stroke="${LINE}"/>`;
+      s += `<text x="${M / 2 + 7}" y="${y + 4}" fill="${LINE}" font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle">${"ABCDEF"[i]}</text>`;
+      s += `<text x="${sheetW - M / 2 - 7}" y="${y + 4}" fill="${LINE}" font-family="IBM Plex Mono, monospace" font-size="11" text-anchor="middle">${"ABCDEF"[i]}</text>`;
     }
     paper.innerHTML = s;
   }

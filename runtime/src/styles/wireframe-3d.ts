@@ -14,9 +14,11 @@ import * as THREE from "three";
 import { LineSegments2 } from "three/examples/jsm/lines/LineSegments2.js";
 import { LineSegmentsGeometry } from "three/examples/jsm/lines/LineSegmentsGeometry.js";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
-import { $, $$, onFrame, reduced, chars } from "./_kit";
+import { $, $$, onFrame, reduced, chars, skin, skinNum, skinRgba } from "./_kit";
 
-const BG = 0x0a0a0b, INK = 0xd9dde3, CONS = 0x2b3038, CONS2 = 0x3a3f47, HI = 0x4da3ff;
+// the drawing: background, ink and highlight are the style's palette (a brand's colours when it wears one), the construction greys its own
+const BG = skinNum("bg", 0x0a0a0b), INK = skinNum("ink", 0xd9dde3), CONS = 0x2b3038, CONS2 = 0x3a3f47, HI = skinNum("accent", 0x4da3ff);
+const ACCENT = skin("accent", "#4da3ff");
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 const smooth = (t: number) => t * t * (3 - 2 * t);
@@ -499,7 +501,7 @@ export default function start() {
         wps.forEach((w, j) => {
           const [wx, wy, vis] = toScreen(w);
           if (!vis) return;
-          svg += `<text x="${wx + 10}" y="${wy - 8}" ${j === c.stop ? 'style="fill:#4da3ff"' : ""}>WP${String(j + 1).padStart(2, "0")}</text>`;
+          svg += `<text x="${wx + 10}" y="${wy - 8}" ${j === c.stop ? `style="fill:${ACCENT}"` : ""}>WP${String(j + 1).padStart(2, "0")}</text>`;
         });
       }
       if (sc.kind === "stats") {
@@ -516,7 +518,7 @@ export default function start() {
     });
     if (hoverPart) {
       const [hx, hy, vis] = toScreen(hoverPart.group.localToWorld(V(-PH.w / 2, PH.h / 2, hoverPart.t)));
-      if (vis) svg += `<path class="acc" d="M${hx} ${hy} L${hx - 30} ${hy - 30} H${hx - 60}"/><text x="${hx - 64}" y="${hy - 36}" text-anchor="end" style="fill:#4da3ff">${hoverPart.name} · ${hoverPart.dims}</text>`;
+      if (vis) svg += `<path class="acc" d="M${hx} ${hy} L${hx - 30} ${hy - 30} H${hx - 60}"/><text x="${hx - 64}" y="${hy - 36}" text-anchor="end" style="fill:${ACCENT}">${hoverPart.name} · ${hoverPart.dims}</text>`;
     }
     hud.innerHTML = svg;
     // toolbar, title block, gizmo
@@ -565,9 +567,9 @@ function drawScreen(): HTMLCanvasElement {
   const app = document.querySelector<HTMLElement>("[data-device] .ss-app");
   const txt = (sel: string) => app?.querySelector(sel)?.textContent?.trim() || "";
   const font = (w: number, s: number, fam = "Archivo, sans-serif") => `${w} ${s}px ${fam}`;
-  g.fillStyle = "#d9dde3"; g.font = font(500, 26, "JetBrains Mono, monospace"); g.fillText("9:41", 40, 64);
+  g.fillStyle = skin("ink", "#d9dde3"); g.font = font(500, 26, "JetBrains Mono, monospace"); g.fillText("9:41", 40, 64);
   let y = 150;
-  g.fillStyle = "#4da3ff"; g.font = font(500, 26, "JetBrains Mono, monospace"); g.fillText((txt(".ss-app__name") || "APP").toUpperCase(), 40, y); y += 76;
+  g.fillStyle = ACCENT; g.font = font(500, 26, "JetBrains Mono, monospace"); g.fillText((txt(".ss-app__name") || "APP").toUpperCase(), 40, y); y += 76;
   g.fillStyle = "#ffffff"; g.font = font(700, 60);
   y = wrap(g, txt(".ss-app__title") || "Your screen", 40, y, 540, 66) + 30;
   g.fillStyle = "#9aa3ad"; g.font = font(500, 24, "JetBrains Mono, monospace"); g.fillText((txt(".ss-app__label") || "").toUpperCase(), 40, y); y += 44;
@@ -575,15 +577,15 @@ function drawScreen(): HTMLCanvasElement {
   const opts = app ? [...app.querySelectorAll<HTMLElement>(".ss-app__opt")] : [];
   (opts.length ? opts : [null, null, null]).forEach((o) => {
     const on = !!o?.classList.contains("is-on");
-    g.strokeStyle = on ? "#4da3ff" : "#3a3f47"; g.lineWidth = on ? 4 : 2;
-    g.fillStyle = on ? "rgba(77,163,255,.12)" : "rgba(255,255,255,.03)";
+    g.strokeStyle = on ? ACCENT : "#3a3f47"; g.lineWidth = on ? 4 : 2;
+    g.fillStyle = on ? skinRgba("accent", "#4da3ff", 0.12) : "rgba(255,255,255,.03)";
     roundRect(g, 40, y, 540, 130, 22); g.fill(); g.stroke();
-    g.fillStyle = on ? "#9cc9ff" : "#e6e9ee"; g.font = font(600, 36); g.fillText(o?.querySelector("b")?.textContent || "—", 70, y + 58);
+    g.fillStyle = on ? skin("accent2", "#9cc9ff") : "#e6e9ee"; g.font = font(600, 36); g.fillText(o?.querySelector("b")?.textContent || "—", 70, y + 58);
     g.fillStyle = "#8f98a3"; g.font = font(400, 26); g.fillText(o?.querySelector("small")?.textContent || "", 70, y + 100);
     y += 152;
   });
   const btn = txt(".ss-app__btn");
-  if (btn) { g.fillStyle = "#4da3ff"; roundRect(g, 40, cv.height - 190, 540, 110, 55); g.fill(); g.fillStyle = "#04101f"; g.font = font(700, 34); g.textAlign = "center"; g.fillText(btn, 310, cv.height - 122); g.textAlign = "left"; }
+  if (btn) { g.fillStyle = ACCENT; roundRect(g, 40, cv.height - 190, 540, 110, 55); g.fill(); g.fillStyle = "#04101f"; g.font = font(700, 34); g.textAlign = "center"; g.fillText(btn, 310, cv.height - 122); g.textAlign = "left"; }
   return cv;
 }
 function wrap(g: CanvasRenderingContext2D, text: string, x: number, y: number, w: number, lh: number) {

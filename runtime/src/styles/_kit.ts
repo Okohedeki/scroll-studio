@@ -2,7 +2,7 @@
  * Toolkit for style experiences (runtime/src/styles/<style>.ts). An experience restructures nothing the page needs
  * to work without JavaScript: the static page is complete, and these helpers add the style's own scroll mechanics.
  */
-import { clamp, reducedMotion } from "../lib/util";
+import { clamp, cssVar, hexToRgb, reducedMotion } from "../lib/util";
 
 export const reduced = reducedMotion;
 export const $ = <T extends Element = HTMLElement>(sel: string, root: ParentNode = document) => root.querySelector<T>(sel as any) as T | null;
@@ -99,6 +99,33 @@ export function typeTo(spans: HTMLElement[], k: number) {
 export function onSeen(el: Element, fn: () => void, threshold = 0.3) {
   const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { io.disconnect(); fn(); } }), { threshold });
   io.observe(el);
+}
+
+const worn = new Map<string, string>();
+/**
+ * A colour of the style's own palette as this page wears it. `role` is the key in the style's style.yaml (bg, ink, accent,
+ * accent2...) and `own` is that colour as the style draws it. With no brand the page sets nothing and the style's own colour
+ * comes back; with a brand (theme.from) the compiler sets --skin-<role> to the brand's colour, the same swap it makes in the
+ * style's stylesheet and templates (engine/compile/themes.py `skin`). `own` must be the style.yaml colour of `role`
+ * (tests/test_brand_everywhere.py checks it). Colours that are not in the palette, black and white and effects stay literal.
+ */
+export function skin(role: string, own: string): string {
+  let v = worn.get(role);
+  if (v === undefined) worn.set(role, v = cssVar(`--skin-${role.replace(/_/g, "-")}`));
+  return v || own;
+}
+/** `skin` as 0..255 channels. */
+export function skinRgb(role: string, own: string): [number, number, number] {
+  return hexToRgb(skin(role, own)).map((c) => Math.round(c * 255)) as [number, number, number];
+}
+/** `skin` as a number, for three.js colours (0xrrggbb). */
+export function skinNum(role: string, own: number): number {
+  return parseInt(skin(role, "#" + own.toString(16).padStart(6, "0")).slice(1), 16);
+}
+/** `skin` as an rgba() string with the given alpha. */
+export function skinRgba(role: string, own: string, a: number | string): string {
+  const [r, g, b] = skinRgb(role, own);
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
 /** Inject a stylesheet once (for rules that only make sense once the experience has restructured the page). */

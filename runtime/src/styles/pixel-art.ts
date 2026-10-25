@@ -7,12 +7,13 @@
  * The document keeps a real height (scrollbar, keyboard, anchors all work); READ AS PAGE shows the plain manual.
  * Everything is drawn here on one canvas from tiny pixel maps; there are no images.
  */
-import { $, $$, onFrame, reduced } from "./_kit";
+import { $, $$, onFrame, reduced, skin } from "./_kit";
 
 // ---------------------------------------------------------------- palette (PICO-8) and pixel maps
+// the sixteen colours are the console's; the four that are the style's palette (navy, cream, yellow, green) wear a brand's
 const PAL: Record<string, string> = {
-  k: "#000000", n: "#1d2b53", p: "#7e2553", g: "#008751", b: "#ab5236", d: "#5f574f", l: "#c2c3c7", w: "#fff1e8",
-  r: "#ff004d", o: "#ffa300", y: "#ffec27", G: "#00e436", B: "#29adff", v: "#83769c", P: "#ff77a8", s: "#ffccaa",
+  k: "#000000", n: skin("bg", "#1d2b53"), p: "#7e2553", g: "#008751", b: "#ab5236", d: "#5f574f", l: "#c2c3c7", w: skin("ink", "#fff1e8"),
+  r: "#ff004d", o: "#ffa300", y: skin("accent", "#ffec27"), G: skin("accent2", "#00e436"), B: "#29adff", v: "#83769c", P: "#ff77a8", s: "#ffccaa",
 };
 const BODY = [
   "...BBBB...",

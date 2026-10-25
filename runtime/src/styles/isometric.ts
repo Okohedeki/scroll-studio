@@ -10,15 +10,22 @@
  * world by leader lines; a minimap shows where you are. Reduced motion: no flights, the world is built, the camera
  * cuts to each district.
  */
-import { $, $$, onFrame, reduced } from "./_kit";
+import { $, $$, onFrame, reduced, skin, skinRgb, skinRgba } from "./_kit";
 
 const NS = "http://www.w3.org/2000/svg";
 const TW = 32, TH = 16, ZH = 36;
-type Pal = [string, string, string];
+type Pal = [string, string, string];   // top, left and right faces
+/** A box's three faces in a palette colour of the style (its right face): as drawn, or, when a brand re-colours it, that colour with the lighter faces drawn from it. */
+function wear(role: string, own: Pal): Pal {
+  const c = skin(role, own[2]);
+  if (c === own[2]) return own;
+  const [r, g, b] = skinRgb(role, own[2]), toward = (k: number) => "#" + [r, g, b].map((v) => Math.round(v + (255 - v) * k).toString(16).padStart(2, "0")).join("");
+  return [toward(0.4), toward(0.18), c];
+}
 const PAL: Record<string, Pal> = {
-  white: ["#ffffff", "#dce3ec", "#b3c3d6"], accent: ["#ff8a65", "#f4643f", "#d24a28"], teal: ["#7fe0d6", "#2ec4b6", "#21998e"],
+  white: ["#ffffff", "#dce3ec", "#b3c3d6"], accent: wear("accent", ["#ff8a65", "#f4643f", "#d24a28"]), teal: wear("accent2", ["#7fe0d6", "#2ec4b6", "#21998e"]),
   ground: ["#f3ebdd", "#dcc9a8", "#c4ad86"], road: ["#aab7c7", "#8e9caf", "#77869b"], tree: ["#9fd69e", "#78bb77", "#5b9c5e"],
-  ink: ["#4a5a70", "#34445a", "#1d2b3a"], yellow: ["#ffd98a", "#f5bd52", "#d99d2c"], glass: ["#e3f4fb", "#bfe0ef", "#9cc8de"], trunk: ["#c9a27a", "#a8835e", "#8a6a4b"],
+  ink: wear("ink", ["#4a5a70", "#34445a", "#1d2b3a"]), yellow: ["#ffd98a", "#f5bd52", "#d99d2c"], glass: ["#e3f4fb", "#bfe0ef", "#9cc8de"], trunk: ["#c9a27a", "#a8835e", "#8a6a4b"],
 };
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -127,7 +134,7 @@ export default function start() {
         const [x3, y3] = proj(ch.x, ch.y + t, 0), [x4, y4] = proj(ch.x + ch.w, ch.y + t, 0);
         p += `M${x1} ${y1}L${x2} ${y2}M${x3} ${y3}L${x4} ${y4}`;
       }
-      gl.setAttribute("d", p); gl.setAttribute("stroke", "rgba(29,43,58,.09)"); gl.setAttribute("fill", "none");
+      gl.setAttribute("d", p); gl.setAttribute("stroke", skinRgba("ink", "#1d2b3a", ".09")); gl.setAttribute("fill", "none");
       ch.g.appendChild(gl);
       d.chunks.push(ch);
     }
@@ -251,7 +258,7 @@ export default function start() {
         const qm = document.createElementNS(NS, "text");
         const [qx, qy] = proj(k1.x + 1.5, k1.y + 3, 1.3);
         qm.setAttribute("transform", `matrix(.894 .447 0 1 ${qx - 8} ${qy})`);
-        qm.setAttribute("font-size", "34"); qm.setAttribute("fill", "#d24a28"); qm.textContent = "?";
+        qm.setAttribute("font-size", "34"); qm.setAttribute("fill", PAL.accent[2]); qm.textContent = "?";
         k1.g.appendChild(qm);
         person(3.5, 2.5); person(4.5, 1.8, PAL.accent); tree(-5, 4, 0.9);
         break;
@@ -366,7 +373,7 @@ export default function start() {
       const c = [m(sc.d.cx - 7, sc.d.cy - 7), m(sc.d.cx + 7, sc.d.cy - 7), m(sc.d.cx + 7, sc.d.cy + 7), m(sc.d.cx - 7, sc.d.cy + 7)];
       out += `<g class="d" data-i="${i}"><polygon points="${c.map((p) => p.join(",")).join(" ")}" fill="#f3ebdd" stroke="#9fb3c8"/></g>`;
     });
-    out += `<circle class="here" r="4.5" fill="#d24a28" stroke="#fff" stroke-width="2"/>`;
+    out += `<circle class="here" r="4.5" fill="${PAL.accent[2]}" stroke="#fff" stroke-width="2"/>`;
     mini.innerHTML = out;
     miniMarker = mini.querySelector("circle.here");
     $$<SVGGElement>(".d", mini).forEach((g) => g.addEventListener("click", () => flyTo(+(g.dataset.i || 0), -1)));

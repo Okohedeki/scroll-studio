@@ -11,10 +11,13 @@
  *
  * Reduced motion and no WebGL: the page is the plain list of cards, each with its figure drawn still.
  */
-import { $, $$, onFrame, reduced } from "./_kit";
+import { $, $$, onFrame, reduced, skin, skinNum, skinRgba } from "./_kit";
 import { artConfig, loadArt, type ArtFrames } from "./_art";
 import { drawFigure, FIGURES, type FigData, type Figure } from "./_zoetrope-figures";
 import { drawBack, stripFonts, type Device } from "./_zoetrope-strips";
+
+// the printed cards and the wheel: ink, red and blue are the style's ink and accents (a brand's when it wears one), paper and brass its own
+const INK = skin("ink", "#1d1611"), RED = skin("accent", "#c8371e");
 
 const TAU = Math.PI * 2;
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -234,16 +237,16 @@ export default function start() {
     const x = cv.getContext("2d")!; x.scale(s, s);
     const { W, H } = FACE;
     x.fillStyle = "#f8f1df"; x.fillRect(0, 0, W, H);
-    x.strokeStyle = "#1d1611"; x.lineWidth = 4; x.strokeRect(16, 16, W - 32, H - 32); x.lineWidth = 1.5; x.strokeRect(25, 25, W - 50, H - 50);
-    x.fillStyle = "#c8371e"; for (const [a, b] of [[16, 16], [W - 16, 16], [16, H - 16], [W - 16, H - 16]]) { x.beginPath(); x.arc(a, b, 9, 0, TAU); x.fill(); }
-    x.fillStyle = "#1d1611"; x.font = `26px "Alfa Slab One", Georgia, serif`; x.textBaseline = "middle"; x.fillText(`No. ${c.i + 1}`, 44, 60);
-    x.textAlign = "right"; x.fillStyle = "#a12a14"; x.font = `16px "Alfa Slab One", Georgia, serif`;
+    x.strokeStyle = INK; x.lineWidth = 4; x.strokeRect(16, 16, W - 32, H - 32); x.lineWidth = 1.5; x.strokeRect(25, 25, W - 50, H - 50);
+    x.fillStyle = RED; for (const [a, b] of [[16, 16], [W - 16, 16], [16, H - 16], [W - 16, H - 16]]) { x.beginPath(); x.arc(a, b, 9, 0, TAU); x.fill(); }
+    x.fillStyle = INK; x.font = `26px "Alfa Slab One", Georgia, serif`; x.textBaseline = "middle"; x.fillText(`No. ${c.i + 1}`, 44, 60);
+    x.textAlign = "right"; x.fillStyle = skin("accent_text", "#a12a14"); x.font = `16px "Alfa Slab One", Georgia, serif`;
     let lab = c.label.toUpperCase(); while (x.measureText(lab).width > 360 && lab.length > 4) lab = lab.slice(0, -2);
     if (lab !== c.label.toUpperCase()) lab = lab.trim() + "…";
     x.fillText(lab, W - 44, 61); x.textAlign = "left";
     const f = FACE.fig;
     drawFigure(x, c.fig, 0, f.x, f.y, f.w, f.h, c.data);
-    x.strokeStyle = "#1d1611"; x.lineWidth = 4; x.strokeRect(f.x, f.y, f.w, f.h);
+    x.strokeStyle = INK; x.lineWidth = 4; x.strokeRect(f.x, f.y, f.w, f.h);
     // the title, fitted to three lines
     const t = FACE.title;
     let size = 54, lines: string[] = [];
@@ -253,10 +256,10 @@ export default function start() {
       if (lines.length <= 3 && lines.length * size * 1.08 <= t.h) break;
     }
     if (lines.length > 3) { lines = lines.slice(0, 3); lines[2] = lines[2].replace(/\s*\S*$/, "…"); }
-    x.fillStyle = "#1d1611"; x.textAlign = "center"; x.textBaseline = "alphabetic";
+    x.fillStyle = INK; x.textAlign = "center"; x.textBaseline = "alphabetic";
     const lh = size * 1.06, y0 = t.y + (t.h - lines.length * lh) / 2 + size * 0.8;
     lines.forEach((ln, k) => x.fillText(ln, W / 2, y0 + k * lh));
-    x.font = `14px "Alfa Slab One", Georgia, serif`; x.fillStyle = "rgba(29,22,17,.55)";
+    x.font = `14px "Alfa Slab One", Georgia, serif`; x.fillStyle = skinRgba("ink", "#1d1611", 0.55);
     x.fillText(`${maker.toUpperCase()}  ·  OPEN THE CARD`, W / 2, H - 46);
     x.textAlign = "left";
     return cv;
@@ -282,7 +285,7 @@ export default function start() {
     renderer.setClearColor(0x000000, 0);
     stage.appendChild(renderer.domElement);
     scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0xf3ead6, 10, 34);
+    scene.fog = new THREE.Fog(skinNum("bg", 0xf3ead6), 10, 34);
     camera = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.05, 120);
     scene.add(new THREE.HemisphereLight(0xfff8ec, 0xb9a98c, 1.6));
     const key = new THREE.DirectionalLight(0xffffff, 1.5); key.position.set(-4, 9, 7); scene.add(key);
@@ -299,12 +302,12 @@ export default function start() {
   function discTex() {
     const S = 1024, cv = document.createElement("canvas"); cv.width = cv.height = S;
     const x = cv.getContext("2d")!, m = S / 2;
-    const bands = ["#c8371e", "#f8f1df", "#1f4f8a", "#f8f1df", "#e2b54a"];
+    const bands = [RED, "#f8f1df", skin("accent2", "#1f4f8a"), "#f8f1df", "#e2b54a"];
     for (let i = 0; i < 5; i++) { x.fillStyle = bands[i]; x.beginPath(); x.arc(m, m, m * (1 - i * 0.035), 0, TAU); x.fill(); }
     const seg = Math.max(24, N * 2);
     for (let i = 0; i < seg; i++) { x.fillStyle = i % 2 ? "#f3e6c8" : "#ead8af"; x.beginPath(); x.moveTo(m, m); x.arc(m, m, m * 0.83, (i / seg) * TAU, ((i + 1) / seg) * TAU); x.fill(); }
-    x.strokeStyle = "#1d1611"; x.lineWidth = 3; for (const rr of [0.83, 0.5, 0.26]) { x.beginPath(); x.arc(m, m, m * rr, 0, TAU); x.stroke(); }
-    x.fillStyle = "#1d1611"; x.font = `${Math.round(S * 0.05)}px "Alfa Slab One", Georgia, serif`; x.textAlign = "center"; x.textBaseline = "middle";
+    x.strokeStyle = INK; x.lineWidth = 3; for (const rr of [0.83, 0.5, 0.26]) { x.beginPath(); x.arc(m, m, m * rr, 0, TAU); x.stroke(); }
+    x.fillStyle = INK; x.font = `${Math.round(S * 0.05)}px "Alfa Slab One", Georgia, serif`; x.textAlign = "center"; x.textBaseline = "middle";
     x.fillText(maker.toUpperCase().slice(0, 14), m, m - S * 0.025);
     x.font = `italic ${Math.round(S * 0.03)}px "Bodoni Moda", Georgia, serif`; x.fillText("The Wheel of Life", m, m + S * 0.04);
     return cv;
