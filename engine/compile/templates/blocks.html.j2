@@ -89,7 +89,7 @@
 
 {% elif b.type == "hero" %}
 {% set media = e.img or e.video %}
-<section class="ss-block ss-hero ss-hero--{{ b.align }}{{ band }}{% if media and not b.surface %} ss-surface-dark ss-hero--media{% endif %}{% if b.device %} ss-hero--device{% endif %}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+<section class="ss-block ss-hero ss-hero--{{ b.align }}{{ band }}{% if media and not b.surface %} ss-surface-{{ 'light' if e.calm and e.calm.tone == 'light' else 'dark' }} ss-hero--media{% endif %}{% if e.calm %} ss-hero--calm ss-hero--calm-{{ e.calm.side }}{% endif %}{% if b.device %} ss-hero--device{% endif %}"{% if b.id %} id="{{ b.id }}"{% endif %}>
   {% if media %}<div class="ss-hero__media">{% if e.video %}<video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video>{% else %}<img src="{{ e.img }}" alt="" fetchpriority="high">{% endif %}</div><div class="ss-hero__shade"></div>{% endif %}
   <div class="ss-hero__in">
     {% if b.badge %}<span class="ss-badge">{{ b.badge }}</span>{% endif %}
@@ -103,7 +103,7 @@
 {% elif b.type == "product" %}
 <section class="ss-block ss-product ss-product--{{ b.side }} ss-pose--{{ b.pose }}{{ band }}"{% if b.id %} id="{{ b.id }}"{% endif %}><div class="ss-wrap ss-product__in">
   <div class="ss-product__media{% if e.img and b.device %} ss-product__media--both{% endif %}" data-float>
-    {% if e.img %}<img class="ss-product__img" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
+    {% if e.img %}<img class="ss-product__img{% if e.plate %} ss-product__img--plate{% endif %}" src="{{ e.img }}" alt="" loading="lazy">{% endif %}
     {% if b.behind %}<div class="ss-phone-behind">{{ phone(b.behind, e.behind, e.behind_clip) }}</div>{% endif %}
     {% if b.device %}{{ phone(b.device, e.screen, e.clip) }}{% endif %}
   </div>

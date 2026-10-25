@@ -4799,6 +4799,26 @@
      "default": null,
      "description": "A frame of a beat of a film (its first or last frame, or the frame at a time): chain one beat onto the end of another"
     },
+    "calm": {
+     "anyOf": [
+      {
+       "enum": [
+        "left",
+        "right",
+        "center",
+        "top",
+        "bottom"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Keep this side of the picture calm for a headline: asked of the model, then measured; a busy result is mirrored or regenerated with the next seeds (a file is only checked). Set by itself on a hero in a named medium (its `align` side)",
+     "title": "Calm"
+    },
     "cinemagraph": {
      "anyOf": [
       {
@@ -4915,6 +4935,19 @@
      "default": null,
      "description": "Design this image to match another section's last frame, for a match cut (see FrameMatch)"
     },
+    "medium": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Draw this image in a named medium: risograph, toile, engraving, gouache, watercolour, halftone, ink (a tested recipe: the model's prompt plus a post-process in the theme's inks; see `imagery.medium`), over the site's own. Works on a file too (the post-process only). `none` leaves this image out of the site's named medium",
+     "title": "Medium"
+    },
     "product": {
      "anyOf": [
       {
@@ -4986,6 +5019,29 @@
    "additionalProperties": false,
    "description": "How every image and film this site generates is phrased, so the whole page looks like one shoot. Each part is\nadded to every prompt the engine sends to the image and video models (a `generate:` image, a beat's frame and clip,\na take's keyframes and segments); the prompt itself stays about the subject. Unset, nothing is added. A direction\nfrom `studio directions` writes this block when you pick it.",
    "properties": {
+    "grain": {
+     "anyOf": [
+      {
+       "maximum": 1,
+       "minimum": 0,
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Named medium: how much paper and ink texture, 0 none to 1 (default: the medium's own)",
+     "title": "Grain"
+    },
+    "inks": {
+     "description": "Named medium: the inks it prints with, #hex or theme roles (accent, accent2, ink, bg, bg2, dark). Default: the medium's own pick from the theme (risograph accent and accent2, toile accent, engraving the dark)",
+     "items": {
+      "type": "string"
+     },
+     "title": "Inks",
+     "type": "array"
+    },
     "lens": {
      "anyOf": [
       {
@@ -5013,7 +5069,7 @@
      "title": "Light"
     },
     "medium": {
-     "description": "What the picture is made of, said first: '35mm film photograph, Kodak Portra 400, fine grain', 'gouache illustration on textured paper, flat shapes'",
+     "description": "What the picture is made of, said first: '35mm film photograph, Kodak Portra 400, fine grain', 'gouache illustration on textured paper, flat shapes'. Or a named medium, a tested recipe that also post-processes every generated still in the theme's inks so the page reads as one hand: risograph, toile, engraving, gouache, watercolour, halftone, ink",
      "title": "Medium",
      "type": "string"
     },
@@ -5042,6 +5098,19 @@
      "default": null,
      "description": "Colour in words: 'muted terracotta, bone and sage'",
      "title": "Palette"
+    },
+    "paper": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Named medium: the paper, #hex or a theme role. Default: the theme's background when it is pale, else a warm off-white",
+     "title": "Paper"
     },
     "restyle": {
      "default": true,

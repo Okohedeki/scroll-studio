@@ -63,7 +63,7 @@ def _lfs_check(url: str, out: Path, log=print) -> None:
 
 # Image-input fields added after earlier builds were keyed: left out of keys while unset, so adding a field never
 # re-renders finished work.
-LATE_FIELDS = ("product", "scene", "beat_frame", "region", "match", "cinemagraph")
+LATE_FIELDS = ("product", "scene", "beat_frame", "region", "match", "cinemagraph", "medium", "calm")
 
 
 def stable_dump(model) -> dict:
@@ -96,7 +96,7 @@ def treated_prompt(project: Project, ref: ImageInput) -> str:
     """The prompt as sent to the image model: the spec's prompt with the site's `imagery:` treatment (engine/imagery.py),
     unchanged when the site sets none (so its cache keys and files stay as they were)."""
     from . import imagery
-    return imagery.treat(project, ref.generate)
+    return imagery.treat(project, ref.generate, medium=ref.medium, calm=ref.calm)
 
 
 def generated_digest(prompt: str, w: int, h: int, seed: int) -> str:
@@ -140,7 +140,10 @@ def resolve_image(project: Project, ref: ImageRef, log=print, alpha: bool = Fals
         from .product import image_still
         return image_still(project, ref, log, alpha)
     if ref.file:
-        return resolve_path(project, ref.file, log)
+        src = resolve_path(project, ref.file, log)
+        if (ref.medium and ref.medium != "none") or ref.calm:     # an image's own medium works on a file too
+            return _art_directed(project, ref, src, log)
+        return src
     if ref.edit:
         return _edit(project, ref, log)
     if ref.gradient:
@@ -154,7 +157,45 @@ def resolve_image(project: Project, ref: ImageRef, log=print, alpha: bool = Fals
     if not ref.generate:
         raise BuildError("an image input needs `file`, `generate`, `gradient` or `product`")
     w, h = (int(v) // 16 * 16 for v in ref.size)
-    return generate_image(project, treated_prompt(project, ref), w, h, ref.seed, log)
+    prompt = treated_prompt(project, ref)
+    raw = generate_image(project, prompt, w, h, ref.seed, log)
+    if raw.parent != project.build / "_generated":       # a storyboard's stand-in card: nothing to treat
+        return raw
+    return _art_directed(project, ref, raw, log, lambda k: generate_image(project, prompt, w, h, ref.seed + 1000 * k,
+                                                                          log, free=False))
+
+
+def art_direction(project: Project, ref: ImageInput) -> tuple[Optional[str], Optional[dict], Optional[float]]:
+    """(named medium, its palette, grain) this image is drawn in (engine/medium.py), or Nones: its own `medium:`, else
+    the site's `imagery.medium` when it is a named one (generated images only: a photo or logo you supply is left as
+    it is unless it asks)."""
+    from . import imagery, medium
+    if ref.medium == "none" or (not ref.medium and not ref.generate):
+        return None, None, None
+    im, named = imagery.look(project, ref.medium)
+    if not named:
+        return None, None, None
+    return named, medium.site_palette(project, named, im), im.grain
+
+
+def hero_image(project: Project, block) -> tuple[Optional[ImageRef], Optional[str]]:
+    """A hero block's picture with the composition rule (engine/medium.py): in a named medium, the side its headline is
+    set on (`align`) is kept calm unless the image says `calm:` itself. (image, calm side or None)."""
+    img = block.image
+    if not isinstance(img, ImageInput):
+        return img, None
+    if img.calm is None and (img.generate or img.file) and art_direction(project, img)[0]:
+        img = img.model_copy(update={"calm": "left" if block.align == "left" else "center"})
+    return img, img.calm
+
+
+def _art_directed(project: Project, ref: ImageInput, raw: Path, log=print, regenerate=None) -> Path:
+    """The image in its named medium and with its calm side checked (engine/medium.py); `raw` when neither applies."""
+    name, pal, grain = art_direction(project, ref)
+    if not name and not ref.calm:
+        return raw
+    from . import medium
+    return medium.finish(project, raw, name, pal, ref.seed, grain, ref.calm, regenerate, log=log)
 
 
 def generate_image(project: Project, prompt: str, w: int, h: int, seed: int, log=print, free: bool = True) -> Path:

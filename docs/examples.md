@@ -25,6 +25,7 @@ Every example is a `site.yaml` in [`examples/`](../examples/) and rebuilds with 
 | **Film cuts** | `transition:` | [Halo Coffee](../examples/film-cuts/site.yaml) | A logo becomes the sun becomes a cup; iris, wipe, whip, carry |
 | **Type in the world (film)** | `place:` | [Stillwater](../examples/type-in-the-world/site.yaml) | Headlines behind a spruce, painted on the deck, in the haze |
 | **Type in the world (photos)** | `place:` + `parallax` | [Casa Alta](../examples/type-in-the-world-stills/site.yaml) | Headlines behind the house and the olive tree |
+| **One medium, art-directed** | `imagery.medium` | [Kitewell](../examples/kitewell/site.yaml) | A risograph hero in the brand's two inks, calm where the headline sits; a toile band to close |
 | **Direction boards** | `studio directions` | [Kiln & Kettle](../examples/kiln-and-kettle/site.yaml) | Six art directions for one brief, side by side |
 | **One take with a real product** | `film` + `take` | [Stillwater](../examples/one-take/site.yaml) | A mountain ridge down to a bottle on a lakeside table; the bottle is its real 3D model |
 | **Story film** | `film` | [Lodestar Orbital](../examples/lodestar-orbital/site.yaml) | A rocket launch to orbit, generated locally |

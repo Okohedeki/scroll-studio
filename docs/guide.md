@@ -296,6 +296,66 @@ take's keyframes and segments), and with `restyle` on (the default) the phrases 
 key changes. Example: [Kiln & Kettle](../examples/kiln-and-kettle/site.yaml). MCP tools: `directions`, `direction_reroll`,
 `direction_pick`, `direction_undo`.
 
+## Art direction: a medium
+
+The strongest landing pages open on one illustrated picture in one clear medium, with a clean layout over it and calm
+space where the headline sits. `imagery.medium` can name a medium instead of describing one, and then the engine draws
+every generated picture on the page in it, in the brand's colours:
+
+```yaml
+theme:
+  from: { colors: { bg: "#f6f1e7", ink: "#16203a", accent: "#2f4fd8", accent2: "#ff6c8f" } }
+imagery:
+  medium: risograph          # risograph, toile, engraving, gouache, watercolour, halftone, ink
+sections:
+  - type: hero
+    align: left              # the headline's side is kept calm
+    title: Cash flow, <em>with the wind behind it.</em>
+    image: { generate: "Paper planes and a big kite above a small city of rooftops", seed: 7 }
+```
+
+Each medium is a tested local recipe in two halves (`engine/medium.py`). The prompt sent to Z-Image Turbo opens with
+the medium's words, its inks named in colour words ("two-colour riso print in cobalt blue and fluorescent pink"). Then
+a deterministic post-process runs over the still on the CPU (a few seconds, cached), and that is what makes the page
+read as one hand:
+
+| Medium | Inks from the theme | What the post-process does |
+|---|---|---|
+| `risograph` | accent and accent2 | Separates the picture into the two inks (a flat tint stays one ink; inks meet only in a blend or a dark overprint), screens every tint with the drum's clumped grain, moves the second drum a few pixels off register, prints on the paper |
+| `toile` | accent, darkened until line work shows | One ink on cream: the picture's tone becomes how much ink, unevenly inked in the plate's grain |
+| `engraving` | the dark (text on a light page) | One ink, sharpened line work, higher contrast, on paper |
+| `halftone` | the dark and the accent | A real AM dot screen: the tone in dark dots at 45 degrees, the colour in accent dots at 15, a period of about 1/210 of the width |
+| `gouache` | dark, accent, accent2 and the paper | Mean-shift flattening into matte shapes, colours pulled toward the brand's, brush streaks and paper tooth |
+| `watercolour` | dark, accent, accent2 | The picture's white becomes the paper, pigment pools at the edge of each wash and granulates, colours lean toward the brand's |
+| `ink` | the dark and the accent | Black brush work where the ink is loaded, the washes in the accent |
+
+The paper is the theme's background when it is pale, else a warm off-white. A model asked for a print often draws the
+sheet's margin too; it is cut away so the picture runs to the edges. Set the inks yourself with `imagery.inks` (#hex or
+theme roles: accent, accent2, ink, bg, bg2, dark) and `imagery.paper`; `imagery.grain` (0-1) sets how much paper and
+ink texture. The other `imagery:` parts (light, mood, palette in words) still apply.
+
+**Which pictures.** The site's medium reaches every `generate:` image (heroes, backdrops, product shots, strips,
+galleries, parallax photos, a film beat's first frame; a film's clip is phrased in the medium's words but its frames
+are not re-processed). A file you supply is left as it is, unless it asks: any image takes its own `medium:`, which
+also works on a file (the post-process only), and `medium: none` leaves one image out.
+
+```yaml
+backdrop: { generate: "A strip of riverside landscape along the bottom edge", medium: toile, calm: center }
+```
+
+**Calm space for the headline.** `calm: left | right | center | top | bottom` on an image keeps that side quiet. The
+model is asked for it (the subject on the other side, one flat colour where the words go, the horizon low), and the
+result is measured: the share of that side covered by edges at the size of a headline's letters, plus its tonal
+spread, at 320 px wide so paper grain and dot screens count as tone. Above 0.06 the side is busy: a generated picture
+is mirrored, then regenerated with the next seeds (seed + 1000, + 2000), and the calmest is kept; the build says what
+it did, and when nothing passed. A file is only checked. A hero in a named medium gets `calm:` from its `align` (left,
+or center), sets its words light or dark from what that side turned out to be, and trades the heavy shade for a light
+scrim on the headline side only. Product shots in a medium are shown as whole prints (no knockout, no feathered edge).
+
+Pages and caches built before this are untouched: a site without a named medium sends the same prompts and builds the
+same pictures. Example: [Kitewell](../examples/kitewell/site.yaml), a risograph fintech hero with a toile closing band,
+built from the raw stills in its `inputs/` so it needs no GPU.
+
 ## Storyboard first
 
 A film costs an hour or more to render (LTX-2.3 or Wan 2.2, SeedVR2, a Cycles product pass over every frame), so

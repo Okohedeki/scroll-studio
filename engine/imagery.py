@@ -7,7 +7,8 @@ of the shoot. The prompts in the spec stay about the subject; the treatment is a
   * a beat's clip prompt (the video model sees the same shoot)
   * a take's / shot's keyframes and segment prompts (`treat_shot`)
 
-With `restyle` on (the default) the phrases in the original prompt that the treatment replaces are dropped first
+A named medium (`medium: risograph`, engine/medium.py) says its recipe's words with its inks named from the theme, and
+its post-process runs over every generated still (engine/inputs.py). With `restyle` on (the default) the phrases in the original prompt that the treatment replaces are dropped first
 ('photorealistic', 'shot on a medium format camera', '35mm lens', 'golden hour'), so a prompt written for one look does
 not argue with another. Nothing is added when the site has no `imagery:`, and cache keys only change when it is set.
 """
@@ -89,45 +90,81 @@ def restyle(prompt: str, im: Imagery) -> str:
     return ", ".join(out) if out else prompt.strip()
 
 
-def phrase(im: Imagery, prompt: str, video: bool = False) -> str:
-    """`prompt` shot the way `im` says. video: the clip prompt (no lens: the camera moves)."""
+def phrase(im: Optional[Imagery], prompt: str, video: bool = False, pal: Optional[dict] = None,
+           calm: Optional[str] = None, plain: bool = False) -> str:
+    """`prompt` shot the way `im` says. video: the clip prompt (no lens: the camera moves). A named medium
+    (engine/medium.py) says its recipe's words, its inks named from `pal`. calm: the side kept quiet for a headline.
+    plain: leave the named medium out (an image with `medium: none`)."""
+    from . import medium as med
     prompt = (prompt or "").strip()
-    head = im.medium.strip().rstrip(".")
+    named = med.recipe(im.medium) if im is not None else None
+    if im is None or (plain and named):
+        head = ""
+    else:
+        head = med.prompt_head(named.name, pal) if named else im.medium.strip().rstrip(".")
+    calm_words = med.CALM_WORDS[calm] if calm and not video else ""
     if not prompt:
         return head
-    if prompt.lower().startswith(head.lower()):      # already treated
+    if head and prompt.lower().startswith(head.lower()):      # already treated
         return prompt
-    core = restyle(prompt, im) if im.restyle else prompt
+    core = restyle(prompt, im) if im is not None and im.restyle else prompt
     core = core.rstrip(". ")
-    parts = [im.light, None if video else im.lens, im.palette, im.mood]
+    parts = [calm_words] + ([im.light, None if video else im.lens, im.palette, im.mood] if im is not None else [])
     tail = ". ".join(p.strip().rstrip(".") for p in parts if p)
-    return f"{head}. {core}." + (f" {tail}." if tail else "")
+    return (f"{head}. " if head else "") + f"{core}." + (f" {tail}." if tail else "")
 
 
-def treat(project, prompt: str, video: bool = False) -> str:
-    """The prompt as it is sent to the model for this project: unchanged unless the site sets `imagery:`."""
+def look(project, medium: Optional[str] = None) -> tuple[Optional[Imagery], Optional[str]]:
+    """(the imagery an image is phrased with, the named medium it is drawn in or None): the site's `imagery:`, with an
+    image's own `medium:` over it ('none' leaves the site's named medium out)."""
+    from . import medium as med
     im = of(project)
-    return phrase(im, prompt, video) if im and prompt else prompt
+    if medium and medium != "none":
+        im = im.model_copy(update={"medium": medium}) if im is not None else Imagery(medium=medium)
+    named = med.recipe(im.medium) if im is not None and medium != "none" else None
+    return im, named.name if named else None
+
+
+def treat(project, prompt: str, video: bool = False, medium: Optional[str] = None, calm: Optional[str] = None) -> str:
+    """The prompt as it is sent to the model for this project: unchanged unless the site sets `imagery:` (or the image
+    its own `medium:` or `calm:`)."""
+    if not prompt:
+        return prompt
+    im, named = look(project, medium)
+    if im is None and not calm:
+        return prompt
+    pal = None
+    if named:
+        from . import medium as med
+        pal = med.site_palette(project, named, im)
+    return phrase(im, prompt, video, pal, calm, plain=medium == "none")
 
 
 def treat_shot(project, shot: dict) -> dict:
     """A take's / shot's keyframe and segment prompts treated (a copy; the spec's dicts are left alone)."""
-    im = of(project)
+    im, named = look(project)
     if im is None:
         return shot
+    pal = None
+    if named:
+        from . import medium as med
+        pal = med.site_palette(project, named, im)
+
+    def ph(prompt: str, video: bool = False) -> str:
+        return phrase(im, prompt, video, pal)
     shot = dict(shot)
     kf = shot.get("keyframes")
     if kf and kf.get("frames"):
         kf = dict(kf)
-        kf["frames"] = [dict(f, prompt=phrase(im, f["prompt"])) if f.get("prompt") else f for f in kf["frames"]]
+        kf["frames"] = [dict(f, prompt=ph(f["prompt"])) if f.get("prompt") else f for f in kf["frames"]]
         shot["keyframes"] = kf
     ltx = shot.get("ltx")
     if ltx and (ltx.get("segments") or ltx.get("prompt")):
         ltx = dict(ltx)
         if ltx.get("segments"):
-            ltx["segments"] = [dict(s, prompt=phrase(im, s["prompt"], video=True)) if s.get("prompt") else s
+            ltx["segments"] = [dict(s, prompt=ph(s["prompt"], video=True)) if s.get("prompt") else s
                                for s in ltx["segments"]]
         if ltx.get("prompt"):
-            ltx["prompt"] = phrase(im, ltx["prompt"], video=True)
+            ltx["prompt"] = ph(ltx["prompt"], video=True)
         shot["ltx"] = ltx
     return shot
