@@ -357,8 +357,8 @@ html.mode-dark.hero-light .ss-nav:not(.ss-solid) { --ink: var(--bg); --ink-rgb: 
 .ss-hero--calm-left .ss-hero__in { max-width: min(var(--max), 54vw); }
 .ss-hero .ss-h1 { margin: 0; }
 .ss-hero .ss-lede { max-width: 46ch; }
-/* over a picture the lede is nearly the full ink: the dimmer running-text grey loses its contrast on a saturated colour */
-.ss-hero--media :is(.ss-lede, .ss-rating) { color: color-mix(in srgb, var(--ink) 92%, transparent); }
+/* over a calm picture (a light scrim, no shade) the lede is nearly the full ink: the running-text grey loses contrast on colour */
+.ss-hero--calm.ss-hero--media :is(.ss-lede, .ss-rating) { color: color-mix(in srgb, var(--ink) 92%, transparent); }
 .ss-hero--media .ss-h1 { text-shadow: 0 2px 40px rgba(0, 0, 0, .25); }
 .ss-badge { display: inline-flex; align-items: center; padding: 8px 16px; border-radius: 999px; font-size: 14px; font-weight: 500;
   background: rgba(var(--ink-rgb), .1); border: 1px solid rgba(var(--ink-rgb), .22); }
