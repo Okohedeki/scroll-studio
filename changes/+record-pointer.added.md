@@ -1,0 +1,1 @@
+`studio record --pointer wander` (or `--pointer "x,y x,y ..."`, waypoints in 0-1 of the viewport) moves the mouse on a smooth path while it records, so a `pointer:` lens or light is seen following it, and draws a small ring where the pointer is (`--no-cursor` to leave it out).

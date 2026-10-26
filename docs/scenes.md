@@ -615,6 +615,10 @@ goes dark and a pool of warm light follows the pointer. Add it to a `parallax` o
 - **Cost.** It redraws only when the pointer (or the scroll) moves: a still pointer costs nothing, and a section off
   screen is not drawn at all. Moving, it adds one texture read per pixel (lens) or five (light) to the scene's pass;
   the example draws at a steady 60 fps while the pointer moves.
+- **Recording it.** A plain scroll-through never moves the mouse, so the lens sits at `rest`. `studio record my-site
+  --pointer wander` moves it on a slow tour of the frame while it scrolls (or `--pointer "0.3,0.5 0.7,0.4 ..."`: waypoints
+  in 0-1 of the viewport, passed on a smooth curve over the recording), with real mouse events the page follows, and draws
+  a small ring where the pointer is (`--no-cursor` leaves it out).
 
 Example: [Atelier Sfumato](../examples/atelier-sfumato/site.yaml) (both modes on the Mona Lisa, buildable on a laptop:
 the painting is in the project and the depth model runs on the CPU).

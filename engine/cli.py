@@ -558,12 +558,23 @@ def preview(name: str, port: int = 5173):
 @app.command()
 def record(name: str, section: Optional[str] = None, seconds: float = 12.0, out: Optional[Path] = None,
            gif: bool = False, width: int = 1920, height: int = 1080, out_width: Optional[int] = None,
-           poster_at: float = typer.Option(0.5, help="Where in the recording (0-1) to take the poster JPG")):
+           poster_at: float = typer.Option(0.5, help="Where in the recording (0-1) to take the poster JPG"),
+           pointer: Optional[str] = typer.Option(None, "--pointer", help="Move the mouse while recording, for pictures "
+                                                 "that follow it (`pointer:` lenses and lights): 'wander' for a slow tour "
+                                                 "of the frame, or waypoints 'x,y x,y ...' in 0-1 of the viewport"),
+           cursor: bool = typer.Option(True, "--cursor/--no-cursor", help="With --pointer: draw a small ring where the "
+                                                                         "pointer is (headless frames have no cursor)")):
     """Record a scroll-through to MP4 (for README, social posts, Reddit)."""
-    from .record import record as rec
+    from .project import BuildError
+    from .record import parse_pointer, record as rec
     root = resolve(name)
     out = out or root / "recordings" / f"{section or 'page'}.mp4"
-    rec(root / "dist", out, section=section, size=(width, height), seconds=seconds, gif=gif, out_width=out_width, poster_at=poster_at)
+    try:
+        path = parse_pointer(pointer)
+    except BuildError as e:
+        raise typer.BadParameter(str(e))
+    rec(root / "dist", out, section=section, size=(width, height), seconds=seconds, gif=gif, out_width=out_width,
+        poster_at=poster_at, pointer=path, cursor=cursor)
 
 
 @app.command()
