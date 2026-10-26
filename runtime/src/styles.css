@@ -601,6 +601,7 @@ html:not(.js) .ss-strip { overflow-x: auto; }
 @media (max-width: 900px) {
   .ss-nav__links { display: none; }
   .ss-intro2, .ss-features, .ss-features--2, .ss-features--4, .ss-timeline, .ss-timeline--3, .ss-timeline--4 { grid-template-columns: 1fr; }
+  .ss-feature { padding: 28px 22px 32px; }   /* one card per row: the full-width card keeps a reading measure inside it */
   .ss-timeline { gap: 32px; border-top: 0; }
   .ss-stats, .ss-stats--3 { grid-template-columns: 1fr 1fr; row-gap: 44px; }
   .ss-telemetry { top: auto; bottom: 14vh; transform: none; width: 170px; }
