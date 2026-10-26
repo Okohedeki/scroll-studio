@@ -966,7 +966,10 @@ and before the encode, each step its own cached stage keyed by the film and its 
    never falls back to it.
 
 `studio build --plan` prices each stage (SeedVR2 about 95 s per second of film at 1088, scaled by the square of the
-height; the clean-up seconds). Measured with `studio inspect` on the same clip before and after:
+height; the clean-up seconds). The restore works in overlapping chunks, and each chunk is kept by the frames it is made
+of: change one shot and rebuild, and only the chunks whose frames changed are restored again (the log says how many
+were kept); a shot whose length changes moves every chunk after it. Measured with `studio inspect` on the same clip
+before and after:
 
 | clip (LTX-2.3 camera beat, 1024x576 scaled to 1920x1088, 4 s) | fine detail | edge width | luma zigzag | inspect: softness / morphs / halos | verdict |
 |---|---|---|---|---|---|

@@ -1,0 +1,1 @@
+The chunked SeedVR2 restore (`finish:`, `beat_restore`, `take.upscale`) keeps each chunk by the frames it is made of, so rebuilding a film after one shot changed restores only the chunks whose frames changed instead of the whole film.

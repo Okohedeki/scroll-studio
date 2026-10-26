@@ -549,6 +549,18 @@ def stage_composite(film, pdir, dst, fps, res, grade=True, grain=None, track=Non
           + (f", graded to the plate (grain {match.sigma or 0:.1f}, soften {match.soften:.2f}px)" if grade else ""), flush=True)
 
 
+def chunk_key(src, start: int, chunk: int, fps, ucfg: dict, method: str, prompt: str = "") -> str:
+    """What one chunk of an upscale pass is made of: an MD5 of its decoded frames (as the pass reads them: trimmed and
+    padded to `chunk`) and the settings that change its result. Two films that share those frames share the chunk."""
+    raw = subprocess.run(
+        ["ffmpeg", "-v", "error", "-i", str(src), "-vf", f"trim=start_frame={start}:end_frame={start + chunk},"
+         f"setpts=PTS-STARTPTS,tpad=stop_mode=clone:stop={chunk},fps={fps}", "-frames:v", str(chunk), "-pix_fmt", "rgb24",
+         "-f", "md5", "-"], capture_output=True, text=True, check=True).stdout.strip()
+    settings_ = {k: v for k, v in ucfg.items() if isinstance(v, (str, int, float, bool, type(None), list))}
+    return hashlib.md5(json.dumps([raw, method, chunk, settings_, prompt], sort_keys=True,
+                                  default=str).encode()).hexdigest()[:12]
+
+
 def stage_upscale(shot, out, args):
     """Upscale the finished film in overlapping, cross-faded chunks.
 
@@ -602,6 +614,7 @@ def stage_upscale(shot, out, args):
               if method == "seedvr2" else f"LTX 2x, sigmas {ucfg.get('sigmas', '0.725, 0.421875, 0.0')}")
     print(f"  {total} frames -> {len(starts)} chunk(s) of {chunk} (overlap {overlap}) | {detail}")
     chunk_dirs = []
+    reused = 0
     for ci, s in enumerate(starts):
         cdir = os.path.join(udir, f"c{ci:02d}")
         n = min(chunk, total - s)
@@ -609,6 +622,16 @@ def stage_upscale(shot, out, args):
             print(f"  chunk {ci} (frames {s}-{s + n - 1}) already done")
             chunk_dirs.append((s, cdir))
             continue
+        # a chunk is also kept by what it is made of (its frames and the settings), so a film re-joined after one beat
+        # changed restores only the chunks whose frames changed
+        shared = os.path.join(gdir, "up", "chunks", chunk_key(src, s, chunk, fps, ucfg, method,
+                                                               prompt_at(s + chunk // 2) if method != "seedvr2" else ""))
+        if os.path.isdir(shared) and len(glob.glob(os.path.join(shared, "*.png"))) >= n and not args.force:
+            print(f"  chunk {ci + 1}/{len(starts)}: frames {s}-{s + n - 1} unchanged, kept")
+            chunk_dirs.append((s, shared))
+            reused += 1
+            continue
+        cdir = shared
         clip = os.path.join(udir, f"in{ci:02d}.mp4")
         ff("-i", src, "-vf", f"trim=start_frame={s}:end_frame={s + chunk},setpts=PTS-STARTPTS,"
            f"tpad=stop_mode=clone:stop={chunk},fps={fps}", "-frames:v", str(chunk),
@@ -623,8 +646,14 @@ def stage_upscale(shot, out, args):
             return
         print(f"  chunk {ci + 1}/{len(starts)}: frames {s}-{s + n - 1}", flush=True)
         images = ltx_comfy.run(graph)
-        ltx_comfy.fetch(images[:n], cdir)
+        tmp = cdir + ".part"                     # complete or absent: an interrupted chunk is never taken as done
+        shutil.rmtree(tmp, ignore_errors=True)
+        ltx_comfy.fetch(images[:n], tmp)
+        shutil.rmtree(cdir, ignore_errors=True)
+        os.replace(tmp, cdir)
         chunk_dirs.append((s, cdir))
+    if reused:
+        print(f"  {reused} of {len(starts)} chunk(s) had the same frames as an earlier pass and were kept")
 
     # Stitch: linear cross-fade across each overlap.
     final = os.path.join(udir, "frames")
