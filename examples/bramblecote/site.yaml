@@ -1,0 +1,193 @@
+# Bramblecote: `studio remake` end to end. A fictional seed company's ordinary landing page (inputs/source/: its HTML,
+# written for this example, and its stock-style photos) is read by `studio remake` and told again as a scroll page,
+# then art-directed in one medium.
+#
+#   python -m http.server 8000 --bind 127.0.0.1 --directory examples/bramblecote/inputs/source
+#   studio remake http://127.0.0.1:8000/ --name bramblecote --no-gpu     # step 1: the page as read (in another shell)
+#   studio build examples/bramblecote                                      # this file: step 2, art-directed
+#   studio inspect examples/bramblecote --page
+#
+# What `studio remake` wrote, and is kept here word for word: the brand (`theme.from`: the page's cream, soil ink,
+# tomato and leaf green, Fraunces and Work Sans, its pill buttons), every headline and line of copy, the sections in
+# page order and the block each became (cards -> features, a heading with one photo -> product, figures -> stats,
+# numbered steps -> timeline, four photos -> strip, the testimonial with its author -> quote, <details> -> faq, a
+# short heading with a button -> cta), every button and its link, and the logo row left out.
+#
+# What the art direction changed: `imagery.medium: gouache` paints every picture in matte, flat shapes pulled toward
+# the brand's colours; the page's photos were replaced by gouache stills of the same subjects (inputs/, generated
+# with Z-Image Turbo; the prompt and seed of each are in the comment above it); the opening photo parallax became a
+# left-aligned hero with calm space for the words, a badge and a rating; the feature cards got pictures; the stats
+# sit on a divided row; and the logo row the remake left out came back as wordmarks.
+name: Bramblecote Seeds
+description: Bramblecote sends the right heirloom seeds for your plot at the right moment to sow them, with a calendar
+  that knows your frost dates. A concept site.
+lang: en
+theme:
+  preset: studio
+  from:
+    mode: light
+    colors:
+      bg: '#f7f1e3'
+      bg2: '#ede7d9'
+      ink: '#2a2418'
+      accent: '#d4572a'
+      accent2: '#5b8c3a'
+      accent_ink: '#000000'
+    fonts:
+      display: Fraunces
+      body: Work Sans
+    radius: 999px
+  type: { scale: 0.9 }
+imagery:
+  medium: gouache
+nav:
+  cta:
+    label: Start a box
+    href: '#start'
+sections:
+- id: open
+  type: hero
+  align: left
+  badge: { text: Heirloom seeds by post, icon: dot }
+  title: Grow the tomatoes <em>people still talk about.</em>
+  body: Bramblecote sends the right seeds for your plot at the moment to sow them, with a calendar that knows
+    your frost dates.
+  buttons:
+  - { label: Start a box, href: '#start', icon: arrow }
+  - { label: How it works, href: '#how', look: ghost }
+  rating: { score: 4.8, text: 'from 2,300 member gardens' }
+  image:
+    # generate: A sunny walled kitchen garden in early summer seen from the side, an old brick wall with a green door and raised wooden beds of tomatoes, beans on bamboo canes and lettuces, all standing in the right third of the picture, a watering can beside them; the left two thirds are open sandy gravel under a wide pale sky, with nothing in it
+    # (2048x1152, seed 711, the second of a batch of four; calm: left)
+    file: inputs/hero.jpg
+    live: [{ kind: glint, box: [0.46, 0.6, 0.58, 0.74], count: 3 }]   # sun catching the tomatoes and the can
+    medium: gouache
+- type: logos
+  title: As featured in
+  items:                                       # the page's own row of names (invented publications), as wordmarks
+  - { name: The Allotment Quarterly }
+  - { name: Potting Shed Radio }
+  - { name: Grow North }
+  - { name: Plot & Pantry }
+- id: why
+  type: intro
+  title: Why growers switch to Bramblecote
+  body: Garden centre racks are planned for shoppers. Our seed list is planned for your soil, your shade and the
+    weeks you actually have.
+- id: features
+  type: features
+  items:
+  - title: Chosen for your plot
+    body: Tell us your postcode, your light and your space. We pick varieties that crop there, not just ones that
+      photograph well.
+    image:
+      # generate: A small allotment plot seen from above with a wooden marker stake and a little flag, simple and centred on plain paper
+      # (1280x960, seed 707, the first of a batch of two)
+      file: inputs/card-plot.jpg
+      medium: gouache
+  - title: Sent when it is time
+    body: Seeds arrive a fortnight before their sowing window opens, so nothing sits in a drawer until it is too
+      late.
+    image:
+      # generate: A paper envelope of seeds with a red wax seal next to a tear-off calendar page, simple and centred on plain paper
+      # (1280x960, seed 708, the first of a batch of two)
+      file: inputs/card-post.jpg
+      medium: gouache
+  - title: Saved by growers
+    body: Every variety is open-pollinated and grown out by small farms, so you can save your own seed next autumn.
+    image:
+      # generate: Dried bean pods and seed heads in a small cloth bag tied with string, simple and centred on plain paper
+      # (1280x960, seed 709, the first of a batch of two)
+      file: inputs/card-save.jpg
+      medium: gouache
+- id: box
+  type: product
+  title: A season in a box
+  side: left
+  image:
+    # generate: An open kraft paper seed box on a wooden potting bench, rows of paper seed packets inside, a trowel, a ball of twine and seedlings in small pots beside it, morning light through a window
+    # (1600x1280, seed 702, the first of a batch of three)
+    file: inputs/box.jpg
+    medium: gouache
+  knockout: false
+  body: Each box holds six to eight packets for the coming month, a sowing card for every one and a little twine
+    for the bean poles.
+  tags:
+  - Six to eight varieties
+  - Sowing cards
+  - Frost-date calendar
+  - Free swaps
+  nav_label: The box
+- id: stats
+  type: stats
+  look: divided
+  items:
+  - value: 1,400
+    label: varieties trialled on our own beds
+  - value: '96'
+    unit: '%'
+    label: average germination in last year's tests
+  - value: '11'
+    label: seasons of growing notes from members
+- id: how
+  type: timeline
+  title: How it works
+  items:
+  - when: '01'
+    title: Describe your plot
+    body: Sun, soil and size, in two minutes. A balcony counts.
+  - when: '02'
+    title: We plan the season
+    body: A sowing calendar built around your last frost and your first.
+  - when: '03'
+    title: Sow as it arrives
+    body: Each month's packets land just before their window opens.
+  nav_label: How it works
+- id: harvest
+  type: strip
+  title: From last summer's members
+  body: A few of the harvests our growers sent in at the end of the season.
+  items:
+  # generate: A wicker basket of heirloom tomatoes in red, yellow and striped green on a garden table (1280x1280, seed 703, the second of two)
+  - image: { file: inputs/harvest-tomatoes.jpg, medium: gouache }
+    caption: A basket of striped heirloom tomatoes
+  # generate: Purple and green runner beans hanging from a bamboo cane wigwam in a vegetable garden (1280x1280, seed 704, the second of two)
+  - image: { file: inputs/harvest-beans.jpg, medium: gouache }
+    caption: Purple runner beans on a cane wigwam
+  # generate: Orange and pale green winter squashes lined up on a wooden shelf in a garden shed (1280x1280, seed 705, the second of two)
+  - image: { file: inputs/harvest-squash.jpg, medium: gouache }
+    caption: Winter squashes on a shed shelf
+  # generate: Terracotta pots of basil, thyme and parsley on a sunny kitchen windowsill (1280x1280, seed 706, the second of two)
+  - image: { file: inputs/harvest-herbs.jpg, medium: gouache }
+    caption: Pots of herbs on a windowsill
+- id: quote
+  type: quote
+  text: My clay soil finally grew carrots worth pulling. The box knew what my plot could do before I did.
+  who: Priya Lund, member since the second season
+- id: faq
+  type: faq
+  title: Questions
+  items:
+  - q: Can I pause over winter?
+    a: Yes. Pause from your account page any month and pick up again in spring.
+  - q: What if a packet does not suit me?
+    a: Send it back in the envelope provided and we will swap it for another variety.
+  - q: Do you post outside the UK?
+    a: Not yet. Seed import rules differ in every country, and we would rather get them right.
+  nav_label: Questions
+- id: start
+  type: cta
+  title: Your first box ships in March
+  button:
+    label: Start a box
+    href: '#start'
+    icon: arrow
+  nav_label: Start a box
+  backdrop:
+    # generate: A long low strip of a vegetable garden along the very bottom edge of the picture, rows of lettuces, bean canes, a few sunflowers and a wheelbarrow; the upper three quarters of the picture are plain empty cream paper with nothing painted on it
+    # (2048x1152, seed 721, the first of a batch of three; calm: center)
+    file: inputs/band.jpg
+    medium: gouache
+footer:
+  left: Bramblecote Seeds is a fictional company. Remade from its invented landing page (inputs/source/) with Scroll
+    Studio, a Scroll Studio example.

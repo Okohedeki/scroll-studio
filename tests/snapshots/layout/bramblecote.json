@@ -1,0 +1,477 @@
+{
+ "example": "bramblecote",
+ "root": {
+  "class": [
+   "mode-light",
+   "layout-flow",
+   "hero-media"
+  ]
+ },
+ "cuts": [],
+ "sections": [
+  {
+   "id": "open",
+   "type": "hero",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-hero",
+      "ss-hero--left",
+      "ss-surface-dark",
+      "ss-hero--media",
+      "ss-hero--kit"
+     ],
+     "id": "open",
+     "text": {
+      "title": "Grow the tomatoes people still talk abou",
+      "title_tag": "h1"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-hero__media"
+       ]
+      },
+      {
+       "tag": "div",
+       "class": [
+        "ss-hero__shade"
+       ]
+      },
+      {
+       "tag": "div",
+       "class": [
+        "ss-hero__in"
+       ],
+       "children": [
+        {
+         "tag": "span",
+         "class": [
+          "ss-badge",
+          "ss-badge--kit"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "logos",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-logos-block"
+     ],
+     "children": [
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      },
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      },
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      },
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "why",
+   "type": "intro",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ],
+     "id": "why",
+     "text": {
+      "title": "Why growers switch to Bramblecote",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-intro2"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "features",
+   "type": "features",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ],
+     "id": "features",
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-features",
+        "ss-features--3"
+       ],
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-feature",
+          "ss-reveal",
+          "ss-feature--art"
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-feature",
+          "ss-reveal",
+          "ss-feature--art"
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-feature",
+          "ss-reveal",
+          "ss-feature--art"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "box",
+   "type": "product",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-product",
+      "ss-product--left",
+      "ss-pose--beside"
+     ],
+     "id": "box",
+     "text": {
+      "title": "A season in a box",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-product__in"
+       ],
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-product__media"
+         ],
+         "data": {
+          "data-float": ""
+         },
+         "children": [
+          {
+           "tag": "img",
+           "class": [
+            "ss-product__img"
+           ]
+          }
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-product__copy",
+          "ss-reveal"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "stats",
+   "type": "stats",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-band"
+     ],
+     "id": "stats",
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-stats",
+        "ss-stats--3",
+        "ss-stats--divided"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "how",
+   "type": "timeline",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ],
+     "id": "how",
+     "text": {
+      "title": "How it works",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-timeline",
+        "ss-timeline--3"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "harvest",
+   "type": "strip",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-strip"
+     ],
+     "id": "harvest",
+     "text": {
+      "title": "From last summer's members",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-head",
+        "ss-strip__head",
+        "ss-reveal"
+       ]
+      },
+      {
+       "tag": "div",
+       "class": [
+        "ss-strip__track"
+       ],
+       "data": {
+        "data-strip": ""
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "quote",
+   "type": "quote",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ],
+     "id": "quote"
+    }
+   ]
+  },
+  {
+   "id": "faq",
+   "type": "faq",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-faq"
+     ],
+     "id": "faq",
+     "text": {
+      "title": "Questions",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-faq__in"
+       ],
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-faq__list"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "start",
+   "type": "cta",
+   "markup": [
+    {
+     "tag": "div",
+     "class": [
+      "ss-backdrop"
+     ],
+     "children": [
+      {
+       "tag": "section",
+       "class": [
+        "ss-block",
+        "ss-cta"
+       ],
+       "id": "start",
+       "text": {
+        "title": "Your first box ships in March",
+        "title_tag": "h2"
+       },
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-cta__in"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}
