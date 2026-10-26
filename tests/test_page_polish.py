@@ -678,3 +678,37 @@ def test_a_headline_in_a_narrow_grid_slot_fits_the_slot(chromium, tmp_path):
     for x in boxes:
         assert x["size"] <= x["slot"] * 0.12 + 0.5, x            # the type follows the slot
         assert x["right"] <= x["edge"] + 1, x                     # and the headline stays inside it
+
+
+def test_a_split_scene_with_its_picture_on_the_left_stacks_on_a_phone(chromium, tmp_path):
+    """`side: left` set two columns with a stronger rule than the phone's one column, so the picture and the copy were
+    squeezed side by side on a phone."""
+    from playwright.sync_api import sync_playwright
+
+    from engine.compile import compiler, fonts
+    from engine.serve import serve
+    root = tmp_path / "site"
+    (root / "inputs").mkdir(parents=True)
+    (root / "inputs" / "d.csv").write_text("year,value\n2020,1\n2021,3\n2022,2\n", encoding="utf-8")
+    spec = {"name": "Split", "theme": {"preset": "paper"}, "sections": [
+        {"id": "data", "type": "chart", "layout": "split", "side": "left", "data": "inputs/d.csv", "x": "year", "y": "value",
+         "steps": [{"title": "A line", "body": "It goes up and down."}]}, {"type": "cta", "title": "End"}]}
+    (root / "site.yaml").write_text(yaml.safe_dump(spec, sort_keys=False), encoding="utf-8")
+    saved = fonts.vendor
+    fonts.vendor = lambda links, dist, log=print: None
+    try:
+        compiler.build_site(Project(root), log=lambda m: None)
+    finally:
+        fonts.vendor = saved
+    httpd = serve(root / "dist", 0, background=True)
+    try:
+        with sync_playwright() as p:
+            b = p.chromium.launch()
+            page = b.new_page(viewport={"width": 390, "height": 844})
+            page.goto(f"http://127.0.0.1:{httpd.server_address[1]}/", wait_until="load")
+            tracks = page.eval_on_selector("#data .ss-split-grid", "e => getComputedStyle(e).gridTemplateColumns")
+            b.close()
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+    assert len(tracks.split()) == 1, tracks
