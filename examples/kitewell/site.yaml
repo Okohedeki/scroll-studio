@@ -30,12 +30,13 @@ nav:
 sections:
   - type: hero
     align: left
-    badge: Now open to teams in the UK
+    badge: { tag: New, text: Now open to teams in the UK, href: "#open" }
     title: Cash flow, <em>with the wind behind it.</em>
     body: Kitewell is the business account that sees the month ahead. Invoices, payroll and tax, laid out before they land.
     buttons:
-      - { label: Open an account, href: "#open" }
-      - { label: See how it works, href: "#how" }
+      - { label: Open an account, href: "#open", icon: arrow }
+      - { label: See how it works, href: "#how", look: ghost }
+    rating: { score: 4.8, text: "from 1,900 small teams" }
     image:
       # generate: Paper planes and a big kite rising into the sky above a small city of rooftops at the bottom right, a few soft round clouds
       # (1920x1088, seed 7; the composition rule kept the third try, seed 2007: the first two were busy on the left)
@@ -108,6 +109,15 @@ sections:
           file: inputs/card-cards.jpg
           medium: risograph
           crop: [0, 0, 1, 0.97]
+
+  - type: logos
+    title: Keeping the books for teams at
+    items:                                       # invented companies, set as wordmarks
+      - { name: Pellmoor Bakes }
+      - { name: Fernhill & Co }
+      - { name: Oxbow Studio }
+      - { name: Tallis Joinery }
+      - { name: Brightwater Cycles }
 
   - type: stats
     surface: dark

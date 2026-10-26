@@ -42,10 +42,10 @@ sections:
     steps:
       - intro: true
         at: { grid: "1 / span 7", row: top }
-        kicker: Guided hut-to-hut walking
+        badge: { text: Booking now for May to September, icon: dot }
         title: Walk the high fells, <em>hut to hut.</em>
         body: Seven days, five stone huts and one light pack. We carry the rest, cook the supper and have the fire lit before you arrive.
-        button: { label: Book a week, href: "#book" }
+        button: { label: Book a week, href: "#book", icon: arrow }
         image:
           # generate: A long low strip of fells, stone walls, a tarn and a tiny hut painted only along the very bottom edge of the picture; the upper three quarters of the picture are blank white paper with nothing painted on it
           # (2048x1152, seed 204, the second of a batch of three)
@@ -118,6 +118,7 @@ sections:
           medium: watercolour
 
   - type: stats
+    look: divided
     items:
       - { value: "62", unit: km, label: of path over five days }
       - { value: "5", label: stone huts a day's walk apart }

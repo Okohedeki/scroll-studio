@@ -27,18 +27,27 @@ nav:
 sections:
   - type: hero
     align: left
-    badge: Millrace 3 is out, with exactly-once delivery
+    badge: { tag: New, text: Millrace 3 delivers exactly once, href: "#wire" }
     title: Every job lands. <em>Even when the server doesn't.</em>
-    body: A durable queue and scheduler for backend teams. Retries, ordering and back-pressure are built in, so 3 a.m. stays quiet.
+    body: A durable queue for backend teams, with retries, ordering and back-pressure built in. 3 a.m. stays quiet.
     buttons:
-      - { label: Start free, href: "#start" }
-      - { label: Read the docs, href: "#flow" }
+      - { label: Start free, href: "#start", icon: arrow }
+      - { label: Read the docs, href: "#flow", look: ghost }
     image:
       # generate: An old water mill standing at the far right edge of the picture, partly cut off by the frame, its big wooden waterwheel turned by a fast stone channel of water that runs in from the right, a sluice gate, drawn as a clean technical line drawing with crisp outlines, the left two thirds of the picture are empty paper
       # (2048x1152, seed 601, the second of a batch of four; calm: left)
       file: inputs/mill.jpg
       medium: ink
       live: [{ kind: flow, box: [0.55, 0.62, 1.0, 0.98], speed: 0.9, strength: 0.5, angle: 200 }]   # the race runs
+
+  - type: logos
+    title: Moving jobs for teams at
+    items:                                       # invented companies, set as wordmarks
+      - { name: Quillmark }
+      - { name: Ferrous Pay }
+      - { name: Stonechat }
+      - { name: Lumenrail }
+      - { name: Orchard Health }
 
   - type: intro
     kicker: How it flows
@@ -166,6 +175,7 @@ sections:
 
   - type: stats
     surface: dark
+    look: divided
     items:
       - { value: "0", label: jobs lost in last year's chaos tests }
       - { value: "38", unit: ms, label: median enqueue to start }

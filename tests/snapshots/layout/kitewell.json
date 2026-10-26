@@ -20,7 +20,8 @@
       "ss-hero",
       "ss-hero--left",
       "ss-surface-dark",
-      "ss-hero--media"
+      "ss-hero--media",
+      "ss-hero--kit"
      ],
      "text": {
       "title": "Cash flow, with the wind behind it.",
@@ -43,6 +44,78 @@
        "tag": "div",
        "class": [
         "ss-hero__in"
+       ],
+       "children": [
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        }
        ]
       }
      ]
@@ -232,6 +305,56 @@
           "ss-feature--art"
          ]
         }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "logos",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-logos-block"
+     ],
+     "children": [
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      },
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      },
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      },
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      },
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
        ]
       }
      ]

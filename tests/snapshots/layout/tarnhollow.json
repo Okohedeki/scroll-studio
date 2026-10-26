@@ -26,7 +26,6 @@
       "data-scene": "parallax"
      },
      "text": {
-      "kicker": "Guided hut-to-hut walking",
       "title": "Walk the high fells, hut to hut.",
       "title_tag": "h1"
      },
@@ -79,10 +78,18 @@
               "data-to": "1"
              },
              "text": {
-              "kicker": "Guided hut-to-hut walking",
               "title": "Walk the high fells, hut to hut.",
               "title_tag": "h1"
-             }
+             },
+             "children": [
+              {
+               "tag": "span",
+               "class": [
+                "ss-badge",
+                "ss-badge--kit"
+               ]
+              }
+             ]
             }
            ]
           }
@@ -98,7 +105,7 @@
     "length": 1.6,
     "steps": [
      {
-      "kicker": "Guided hut-to-hut walking",
+      "kicker": null,
       "title": "Walk the high fells, <em>hut to hut.</em>",
       "body": "Seven days, five stone huts and one light pack. We carry the rest, cook the supper and have the fire lit before you arrive.",
       "fact": null,
@@ -114,7 +121,14 @@
       "surface": null,
       "button": {
        "label": "Book a week",
-       "href": "#book"
+       "href": "#book",
+       "icon": "arrow"
+      },
+      "badge": {
+       "text": "Booking now for May to September",
+       "href": null,
+       "tag": null,
+       "icon": "dot"
       },
       "image": {
        "file": "inputs/valley.jpg",
@@ -357,7 +371,8 @@
        "class": [
         "ss-wrap",
         "ss-stats",
-        "ss-stats--3"
+        "ss-stats--3",
+        "ss-stats--divided"
        ]
       }
      ]

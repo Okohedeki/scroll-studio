@@ -20,7 +20,8 @@
       "ss-hero",
       "ss-hero--left",
       "ss-surface-dark",
-      "ss-hero--media"
+      "ss-hero--media",
+      "ss-hero--kit"
      ],
      "text": {
       "title": "Fall asleep on the tide.",
@@ -43,6 +44,92 @@
        "tag": "div",
        "class": [
         "ss-hero__in"
+       ],
+       "children": [
+        {
+         "tag": "span",
+         "class": [
+          "ss-badge",
+          "ss-badge--kit"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--play"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        },
+        {
+         "tag": "svg",
+         "class": [
+          "ss-icon",
+          "ss-icon--star"
+         ]
+        }
        ]
       }
      ]
@@ -412,7 +499,8 @@
        "class": [
         "ss-wrap",
         "ss-stats",
-        "ss-stats--3"
+        "ss-stats--3",
+        "ss-stats--divided"
        ]
       }
      ]
@@ -427,6 +515,33 @@
      "tag": "section",
      "class": [
       "ss-block"
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "signup",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-signup-block"
+     ],
+     "text": {
+      "title": "Hear when it ships.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "button",
+       "class": [
+        "ss-btn",
+        "ss-btn--hot",
+        "ss-btn--kit"
+       ]
+      }
      ]
     }
    ]

@@ -20,7 +20,8 @@
       "ss-hero",
       "ss-hero--left",
       "ss-surface-dark",
-      "ss-hero--media"
+      "ss-hero--media",
+      "ss-hero--kit"
      ],
      "text": {
       "title": "Every job lands. Even when the server do",
@@ -43,6 +44,56 @@
        "tag": "div",
        "class": [
         "ss-hero__in"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "logos",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-logos-block"
+     ],
+     "children": [
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      },
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      },
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      },
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      },
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
        ]
       }
      ]
@@ -619,7 +670,8 @@
        "class": [
         "ss-wrap",
         "ss-stats",
-        "ss-stats--3"
+        "ss-stats--3",
+        "ss-stats--divided"
        ]
       }
      ]

@@ -26,7 +26,6 @@
       "data-scene": "parallax"
      },
      "text": {
-      "kicker": "Gloamery · open beta",
       "title": "Paint the scene. Then move the light.",
       "title_tag": "h1"
      },
@@ -75,10 +74,18 @@
               "data-to": "1"
              },
              "text": {
-              "kicker": "Gloamery · open beta",
               "title": "Paint the scene. Then move the light.",
               "title_tag": "h1"
-             }
+             },
+             "children": [
+              {
+               "tag": "span",
+               "class": [
+                "ss-badge",
+                "ss-badge--kit"
+               ]
+              }
+             ]
             }
            ]
           }
@@ -94,7 +101,7 @@
     "length": 1.6,
     "steps": [
      {
-      "kicker": "Gloamery · open beta",
+      "kicker": null,
       "title": "Paint the scene. <em>Then move the light.</em>",
       "body": "Rough in a room, a street or a shoreline. Gloamery paints it in gouache, and the lamp goes wherever you point.",
       "fact": null,
@@ -106,7 +113,14 @@
       "surface": null,
       "button": {
        "label": "Start painting",
-       "href": "#start"
+       "href": "#start",
+       "icon": "arrow"
+      },
+      "badge": {
+       "text": "Open to everyone this month",
+       "href": null,
+       "tag": "Beta",
+       "icon": "dot"
       },
       "image": {
        "file": "inputs/studio.jpg",
@@ -435,7 +449,8 @@
        "class": [
         "ss-wrap",
         "ss-stats",
-        "ss-stats--3"
+        "ss-stats--3",
+        "ss-stats--divided"
        ]
       }
      ]
@@ -450,6 +465,49 @@
      "tag": "section",
      "class": [
       "ss-block"
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "logos",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-logos-block"
+     ],
+     "children": [
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      },
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      },
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      },
+      {
+       "tag": "span",
+       "class": [
+        "ss-logo",
+        "ss-logo--word"
+       ]
+      }
      ]
     }
    ]

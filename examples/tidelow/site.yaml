@@ -29,12 +29,13 @@ nav:
 sections:
   - type: hero
     align: left
-    badge: Tidelow One, shipping in November
+    badge: { text: "Tidelow One, shipping in November", icon: dot }
     title: Fall asleep <em>on the tide.</em>
     body: A bedside speaker that plays a living sea and slows its waves to your breathing until you are under. No screen, and no app to open at midnight.
     buttons:
-      - { label: Reserve yours, href: "#reserve" }
-      - { label: How it works, href: "#how" }
+      - { label: Reserve yours, href: "#reserve", icon: arrow }
+      - { label: Hear the sea, href: "#sea", icon: play, look: ghost }
+    rating: { score: 4.9, text: from 640 early testers }
     image:
       # generate: A dark bedroom at night, mostly deep shadow, a tall open window on the right showing a full moon over a calm sea and a tiny distant lighthouse, a small round speaker glowing softly on a bedside table under the window, a sliver of moonlight on the floor
       # (2048x1152, seed 301, the fourth of a batch of four; calm: left)
@@ -123,6 +124,7 @@ sections:
           medium: halftone
 
   - type: stats
+    look: divided
     items:
       - { value: "11", label: nights of sea from four coasts }
       - { value: "0", label: screens or apps to open at night }
@@ -131,6 +133,13 @@ sections:
   - type: quote
     text: I used to count sheep. Now I count waves, <em>and I never get past forty.</em>
     who: Hanne, an early tester (a fictional quote)
+
+  - type: signup
+    title: Hear when it <em>ships.</em>
+    action: mailto:hello@example.com
+    placeholder: you@example.com
+    button: Tell me
+    note: One letter when Tidelow ships, and nothing else.
 
   - type: cta
     id: reserve

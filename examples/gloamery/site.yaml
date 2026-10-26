@@ -36,11 +36,11 @@ sections:
     steps:
       - intro: true
         at: left
-        kicker: Gloamery · open beta
+        badge: { tag: Beta, text: Open to everyone this month, icon: dot }
         title: Paint the scene. <em>Then move the light.</em>
         body: Rough in a room, a street or a shoreline. Gloamery paints it in gouache, and the lamp goes wherever you point.
         hint: Move your pointer. You are holding the lamp.
-        button: { label: Start painting, href: "#start" }
+        button: { label: Start painting, href: "#start", icon: arrow }
         image:
           # generate: A cluttered painter's attic studio at night under a sloping roof, canvases leaning against the walls, jars of brushes and rags, a big arched window looking out over moonlit rooftops, an easel on the right with a half-finished landscape, a single oil lamp on a stool casting a warm amber pool of light, deep ultramarine shadows everywhere else
           # (2048x1152, seed 401, the second of a batch of four; calm: left)
@@ -122,6 +122,7 @@ sections:
           live: [{ kind: glint, box: [0.22, 0.14, 0.38, 0.36], count: 3, color: accent }]
 
   - type: stats
+    look: divided
     items:
       - { value: "1", label: light you carry round any scene }
       - { value: "4", unit: s, label: to repaint the scene when the light moves }
@@ -131,11 +132,19 @@ sections:
     text: I used to light a scene by painting it again. <em>Now I pick up the lamp.</em>
     who: Noor Halvorsen, background painter (a fictional quote)
 
+  - type: logos
+    title: Painting with Gloamery at
+    items:                                       # invented studios, set as wordmarks
+      - { name: Lanternfish Animation }
+      - { name: Rookery Games }
+      - { name: Halberd Picture Co }
+      - { name: Mossgrove }
+
   - type: cta
     id: start
     kicker: Open beta, free while it lasts
     title: Pick up <em>the lamp.</em>
-    button: { label: Start painting, href: "#start" }
+    button: { label: Start painting, href: "#start", icon: arrow }
     surface: dark
     backdrop:               # drawn on the spot, no model: the page's dark with lamplight rising from below
       gradient:
