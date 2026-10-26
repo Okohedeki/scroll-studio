@@ -7,8 +7,8 @@
     "That only raises what is over or new and drops what is gone. To lower a budget after a change made something lighter, edit it here by hand."
   ],
   "runtime": {
-    "css": 141100,
     "entry": 44900,
+    "css": 141100,
     "total": 3617200,
     "chunks": {
       "GLTFLoader.js": 50900,
@@ -49,7 +49,7 @@
       "neon-glow.js": 10700,
       "paint-on-glass.js": 19100,
       "paper-cut-out.js": 24000,
-      "parallax.js": 13900,
+      "parallax.js": 15600,
       "particles.js": 28500,
       "pinscreen.js": 25700,
       "pixel-art.js": 22700,

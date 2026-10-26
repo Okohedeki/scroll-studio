@@ -440,7 +440,7 @@ spread, at 320 px wide so paper grain and dot screens count as tone. Above 0.06 
 is mirrored, then regenerated with the next seeds (seed + 1000, + 2000), and the calmest is kept; the build says what
 it did, and when nothing passed. A file is only checked. A hero in a named medium gets `calm:` from its `align` (left,
 or center), sets its words light or dark from what that side turned out to be, and trades the heavy shade for a light
-scrim on the headline side only. A full-bleed picture with a calm side is printed at 2560 px wide, the width the page serves it at, so a phone's narrow crop shows the medium's own grain and dots rather than a small print blown up. Product shots in a medium are shown as whole prints (no knockout, no feathered edge).
+scrim on the headline side only. A full-bleed picture with a calm side is printed at 2560 px wide, the width the page serves it at, so a phone's narrow crop shows the medium's own grain and dots rather than a small print blown up. On a phone, a hero's picture and a parallax photo with `calm: left` or `right` lean their narrow view toward the calm side, only as far as the words need to sit on calm space (measured at build); a parallax photo without a calm side is shown from its middle, as before. Product shots in a medium are shown as whole prints (no knockout, no feathered edge).
 
 Pages and caches built before this are untouched: a site without a named medium sends the same prompts and builds the
 same pictures. Example: [Kitewell](../examples/kitewell/site.yaml), a risograph fintech hero with a toile closing band,

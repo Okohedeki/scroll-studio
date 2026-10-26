@@ -49,6 +49,9 @@ def build(sec: ParallaxScene, ctx: BuildContext, theme: dict) -> dict:
         focus = float(np.percentile(d, 40))
         chapters.append({"step": idx[i], "image": ctx.url(img_out), "depth": ctx.url(dep_out), "focus": round(focus, 3),
                          "move": sec.moves[i] if i < len(sec.moves) else sec.move})
+        frame = phone_frame(st.image, img_out)
+        if frame is not None:
+            chapters[-1]["frame"] = frame
         if st.world is not None:      # type in the world (engine/world.py): this step's title set inside its photograph
             from .. import world
             chapters[-1]["world"] = world.build_photo(sec, ctx, i, idx[i], st, img_out, dep_out)
@@ -61,6 +64,18 @@ def build(sec: ParallaxScene, ctx: BuildContext, theme: dict) -> dict:
     if sec.pointer is not None and sec.pointer.pictures:       # the lens's second pictures, one per photo
         cfg["pointer"] = {"layers": pointer_layers(sec, ctx, credits)}
     return cfg
+
+
+def phone_frame(ref, shown) -> float | None:
+    """Where a phone's narrow view of a photo with a calm side (`calm: left | right`) sits across it, 0-1 as CSS
+    object-position takes it: leaning toward the calm side only as far as the words need (engine/medium.py phone_crop,
+    the rule a hero's picture follows). None for a photo without a calm side, which a phone shows from its middle."""
+    side = getattr(ref, "calm", None)
+    if side not in ("left", "right"):
+        return None
+    from ..medium import phone_crop
+    with Image.open(shown) as im:
+        return round(phone_crop(im.convert("RGB"), side)["x"], 3)
 
 
 def pointer_layers(sec: ParallaxScene, ctx: BuildContext, credits: list[str]) -> list:
