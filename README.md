@@ -15,6 +15,11 @@
     </tr>
   </table>
   <p>
+    <a href="https://okohedeki.github.io/scroll-studio-showcase/recordings/1.5.mp4"><img src="https://okohedeki.github.io/scroll-studio-showcase/recordings/1.5.jpg" alt="Scroll Studio 1.5 in 30 seconds: six example pages recorded from their built sites" width="720" /></a><br />
+    <strong>New in 1.5:</strong> your brand from a link, pictures in one medium, the pointer as a light or a lens, and <code>studio remake &lt;url&gt;</code>.
+    <a href="docs/whats-new.md">What's new &rarr;</a>
+  </p>
+  <p>
     <a href="https://okohedeki.github.io/scroll-studio-showcase/">Showcase</a> ·
     <a href="#get-started">Get started</a> ·
     <a href="https://okohedeki.github.io/scroll-studio/">Docs</a> ·

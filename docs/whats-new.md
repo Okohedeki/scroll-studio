@@ -2,10 +2,75 @@
 
 [← README](../README.md) · [Why Scroll Studio](why.md) · [What's new](whats-new.md) · [Examples](examples.md) · [Guide: make a site](guide.md) · [Styles](styles.md) · [Scenes](scenes.md) · [Licence](licence.md)
 
-### New in 1.4
+### New in 1.5
 
-Coming in 1.5: more customization (your own media everywhere, options for every style), better motion control and faster
-rendering. See the [1.5 milestone](https://github.com/Okohedeki/scroll-studio/milestone/1).
+1.5 is about making a page your own and making it look finished. Watch the
+[30-second film](https://okohedeki.github.io/scroll-studio-showcase/recordings/1.5.mp4), or scroll the six new example pages in the
+[showcase](https://okohedeki.github.io/scroll-studio-showcase/). Every spec from 1.4 builds the same page as before.
+
+**Make it yours**
+
+- **Your brand from a link, a logo or a file.** `theme: { from: ... }` reads the colours, fonts, button radius and
+  logo from a web page, a logo image or a `brand.yaml`, and `studio brand --from` writes them into site.yaml for you to
+  edit. ([Themes and brands](guide.md#themes-and-brands))
+- **Every look is a token.** Spacing, type scale, the shade over pictures, motion, film grain and the phone width are
+  theme settings now, each defaulting to how pages looked before. ([Themes and brands](guide.md#themes-and-brands))
+- **Your own fonts.** Any font role can be a font file in your project instead of a Google Fonts family, served with
+  the site. ([Themes and brands](guide.md#themes-and-brands))
+- **One way to place and time words.** In every scene a caption says where it sits (`at`: a named spot, a box or a
+  slot on a 12-column grid), when it shows (`show`) and how it arrives and leaves (`enter`, `exit`).
+  ([Placing words](guide.md#placing-words), [Millrace](https://okohedeki.github.io/scroll-studio-showcase/millrace/))
+- **Any block as a step.** A scene's step can be stats, a quote, features, a timeline, a call to action, a gallery, a
+  product card or an FAQ, placed and timed like a caption. ([Placing words](guide.md#placing-words))
+- **Styles are optional, and wear your brand.** A page needs no style; when you add one, it keeps its scroll mechanic
+  and layout but takes your brand's colours and fonts, down to the parts it draws in code.
+  ([Themes and brands](guide.md#themes-and-brands))
+
+**Quality**
+
+- **Pictures in one medium.** `imagery.medium` draws every picture on the page as risograph, toile, engraving,
+  gouache, watercolour, halftone or ink, in your brand's inks, and keeps calm space where the headline sits.
+  ([Art direction: a medium](guide.md#art-direction-a-medium), [Kitewell](https://okohedeki.github.io/scroll-studio-showcase/kitewell/),
+  [Tidelow](https://okohedeki.github.io/scroll-studio-showcase/tidelow/))
+- **Living details.** `live:` makes one small thing move in a still picture (drifting clouds, running water, rising
+  dust, a glint), drawn by the page with no GPU.
+  ([Living details](scenes.md#living-details-one-small-thing-alive-live), [Kitewell](https://okohedeki.github.io/scroll-studio-showcase/kitewell/))
+- **The landing page kit.** Badges, buttons with icons, a ghost button, a rating line, an email signup, a logo strip,
+  divided stats and a framed hero, all in your theme. ([Landing page pieces](guide.md#landing-page-pieces))
+- **The pointer as a light or a lens.** `pointer:` on a photo or film turns the visitor's pointer into a lamp on a
+  dark picture or a circle of colour on a black-and-white one; on a phone it follows the finger.
+  ([The pointer](scenes.md#the-visitors-pointer-reveals-the-picture-pointer), [Gloamery](https://okohedeki.github.io/scroll-studio-showcase/gloamery/),
+  [Tarnhollow](https://okohedeki.github.io/scroll-studio-showcase/tarnhollow/))
+- **A polish report for the page.** `studio inspect my-site --page` checks the built page at desktop and phone size
+  for text that is hard to read over its picture, type, blown-up pictures and layout, and names the fix in spec terms.
+  ([Check a page before you ship it](guide.md#check-a-page-before-you-ship-it))
+
+**Faster starts**
+
+- **Remake a page you already have.** `studio remake <url>` reads a live landing page and writes a scroll site from
+  its copy, pictures, sections and brand. ([Remake a landing page](guide.md#remake-a-landing-page),
+  [Bramblecote](https://okohedeki.github.io/scroll-studio-showcase/bramblecote/))
+- **Laptop mode.** `studio new my-site --laptop` writes a starter that builds with no GPU, ComfyUI or Blender.
+  ([Try it on a laptop](laptop.md))
+- **A doctor that tells you what you can build.** `studio doctor` opens with what this machine can build without a GPU,
+  and the one install that unlocks each thing it cannot yet. ([Try it on a laptop](laptop.md#1-install))
+
+**Safety and the project**
+
+- **Deprecation warnings and a compatibility promise.** Spec fields due to change warn when you build, and a written
+  policy says what stays the same between releases. ([Compatibility and deprecation](compatibility.md))
+- **Checked model files.** Downloaded model weights are checked against a recorded SHA-256 before use, and
+  `studio doctor --verify` checks the ones already on disk.
+  ([Threat model](security/threat-model.md#model-weights-run-code-when-loaded))
+- **A site.yaml is treated as untrusted.** Paths that leave the project, `javascript:` links and markup in text are
+  refused or shown as plain text. ([Threat model](security/threat-model.md#a-spec-reads-or-writes-files-outside-its-project))
+- **Local servers answer only this machine.** The Studio UI, preview, storyboard editor and direction boards refuse
+  requests for other hosts and from other websites.
+  ([Threat model](security/threat-model.md#local-servers-are-reached-by-other-web-pages))
+- **A docs site.** The documentation is at [okohedeki.github.io/scroll-studio](https://okohedeki.github.io/scroll-studio/),
+  with search, and its spec, command and MCP references are generated from the code.
+
+### New in 1.4
 
 - **The one-take page** (`journey:` on a film section): the whole landing page is one camera move through one generated world; every section is a place in it (the door, the rooms, the table, the window, the view), the page's blocks arrive at their stop set as part of the picture, and the camera rests while they are read. ([The one-take page](scenes.md#the-one-take-page-journey))
 - **Cinemagraphs** (`cinemagraph:` on any image): a still where only one thing moves (steam, a curtain, smoke, water);
