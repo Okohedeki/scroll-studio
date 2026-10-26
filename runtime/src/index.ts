@@ -157,7 +157,7 @@ class Scene {
       const real = st && !st.intro;
       const done = p >= 0.999;
       if (H.pnum) H.pnum.textContent = real ? st!.kicker?.match(/\d+/)?.[0] ?? String(active) : done ? "✓" : "—";
-      if (H.ptitle) H.ptitle.textContent = real ? (st!.title || "").replace(/<[^>]+>/g, "") : done ? "Complete" : (h.scales[0] || "");
+      if (H.ptitle) H.ptitle.textContent = real ? plainText(st!.title || "") : done ? "Complete" : (h.scales[0] || "");
       if (H.pbar) H.pbar.style.transform = `scaleX(${p})`;
       if (H.ppct) H.ppct.textContent = String(Math.round(p * 100));
     }
@@ -176,6 +176,12 @@ if (document.getElementById("ss-cuts")) import("./lib/cuts").then((m) => { cuts 
 const surfaced = [...document.querySelectorAll<HTMLElement>("main [class*='ss-surface-']")]
   .filter((el) => el.matches("section, .ss-panel, .ss-backdrop") && !el.closest(".ss-caption--block, .ss-card--block"));   // not a block shown as a step
 let navSurface = "";
+
+/** A title's words without its markup (`<em>` and the like), parsed rather than pattern-stripped. */
+function plainText(html: string): string {
+  return new DOMParser().parseFromString(html, "text/html").body.textContent || "";
+}
+
 function surfaceUnderNav() {
   if (!nav) return;
   const y = nav.offsetHeight / 2;

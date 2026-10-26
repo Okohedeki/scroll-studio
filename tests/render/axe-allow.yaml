@@ -87,8 +87,8 @@
   reason: "tape labels are white on pink (3.1:1) and the TV brand is 4.04:1"
 - rule: color-contrast
   look: style-sand
-  selector: 'ss-footer|sd-kicker|sd-count'
-  reason: "footer text is #28180c on #2e1d10 (1.05:1), the '3 of 3' kicker is 1.03:1 and the fixed scene counter is dark on the dark rim, 1.2:1 (reached by axe once the kitchen page grew, #138)"
+  selector: 'ss-footer|sd-kicker|sd-count|sd-tags'
+  reason: "footer text is #28180c on #2e1d10 (1.05:1), the '3 of 3' kicker is 1.03:1, the fixed scene counter is dark on the dark rim, 1.2:1, and on a phone the product's tags are ink on black, 1.18:1 (reached by axe once the kitchen page grew, #138, #107)"
 - rule: color-contrast
   look: style-smears
   selector: 'sa-head__cta|sa-cap--badge|sa-folio|sa-key__no|sa-btn--hot'
