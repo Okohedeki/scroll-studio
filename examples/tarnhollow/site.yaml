@@ -45,6 +45,7 @@ sections:
         badge: { text: Booking now for May to September, icon: dot }
         title: Walk the high fells, <em>hut to hut.</em>
         body: Seven days, five stone huts and one light pack. We carry the rest, cook the supper and have the fire lit before you arrive.
+        hint: Move over the valley to see it in colour
         button: { label: Book a week, href: "#book", icon: arrow }
         image:
           # generate: A long low strip of fells, stone walls, a tarn and a tiny hut painted only along the very bottom edge of the picture; the upper three quarters of the picture are blank white paper with nothing painted on it

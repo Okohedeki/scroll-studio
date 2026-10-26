@@ -312,6 +312,33 @@
              ]
             }
            ]
+          },
+          {
+           "tag": "article",
+           "class": [
+            "ss-step"
+           ],
+           "style": {
+            "--h": "110vh"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-card",
+              "ss-card--block",
+              "ss-card--quote"
+             ],
+             "children": [
+              {
+               "tag": "section",
+               "class": [
+                "ss-block"
+               ]
+              }
+             ]
+            }
+           ]
           }
          ]
         },
@@ -334,7 +361,7 @@
       "kicker": "Try it here",
       "title": "Carry the lantern <em>down to the shore.</em>",
       "body": "Light one thing and the rest goes quiet. Move across the lake and the pines, the mist and the boat come and go with you.",
-      "fact": null,
+      "fact": "On a phone, touch the picture and the lantern follows your finger.",
       "at": null,
       "length": 1.4,
       "intro": false,
@@ -382,6 +409,17 @@
        ]
       },
       "state": {}
+     },
+     {
+      "block": "quote",
+      "at": null,
+      "length": 1.1,
+      "state": {},
+      "id": null,
+      "band": false,
+      "surface": null,
+      "text": "I used to light a scene by painting it again. <em>Now I pick up the lamp.</em>",
+      "who": "Noor Halvorsen, background painter (a fictional quote)"
      }
     ],
     "hud": {
@@ -453,18 +491,6 @@
         "ss-stats--divided"
        ]
       }
-     ]
-    }
-   ]
-  },
-  {
-   "id": null,
-   "type": "quote",
-   "markup": [
-    {
-     "tag": "section",
-     "class": [
-      "ss-block"
      ]
     }
    ]

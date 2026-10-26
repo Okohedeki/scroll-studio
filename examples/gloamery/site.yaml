@@ -81,6 +81,7 @@ sections:
       - kicker: Try it here
         title: Carry the lantern <em>down to the shore.</em>
         body: Light one thing and the rest goes quiet. Move across the lake and the pines, the mist and the boat come and go with you.
+        fact: On a phone, touch the picture and the lantern follows your finger.
         length: 1.4
         image:
           # generate: A small rowing boat on a dark still lake at night with a lantern hanging at its bow, a pine forest on the far shore, low mist on the water, stars
@@ -88,6 +89,11 @@ sections:
           file: inputs/lake.jpg
           medium: gouache
           live: [{ kind: flow, box: [0.0, 0.48, 1.0, 0.74], speed: 0.6, strength: 0.4 }]   # the lake moves a little
+      # any block can be a step: the quote is a card over the same lake, so the lantern stays in your hand while it reads
+      - block: quote
+        text: I used to light a scene by painting it again. <em>Now I pick up the lamp.</em>
+        who: Noor Halvorsen, background painter (a fictional quote)
+        length: 1.1
 
   - type: strip
     id: gallery
@@ -127,10 +133,6 @@ sections:
       - { value: "1", label: light you carry round any scene }
       - { value: "4", unit: s, label: to repaint the scene when the light moves }
       - { value: "12", label: "palettes to paint in, or bring your own" }
-
-  - type: quote
-    text: I used to light a scene by painting it again. <em>Now I pick up the lamp.</em>
-    who: Noor Halvorsen, background painter (a fictional quote)
 
   - type: logos
     title: Painting with Gloamery at

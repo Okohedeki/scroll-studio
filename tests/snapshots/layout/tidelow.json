@@ -282,6 +282,44 @@
              ]
             }
            ]
+          },
+          {
+           "tag": "article",
+           "class": [
+            "ss-step"
+           ],
+           "style": {
+            "--h": "110vh"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-card",
+              "ss-card--block",
+              "ss-card--stats"
+             ],
+             "children": [
+              {
+               "tag": "section",
+               "class": [
+                "ss-block",
+                "ss-band"
+               ],
+               "children": [
+                {
+                 "tag": "div",
+                 "class": [
+                  "ss-wrap",
+                  "ss-stats",
+                  "ss-stats--3"
+                 ]
+                }
+               ]
+              }
+             ]
+            }
+           ]
           }
          ]
         },
@@ -352,6 +390,35 @@
        ]
       },
       "state": {}
+     },
+     {
+      "block": "stats",
+      "at": null,
+      "length": 1.1,
+      "state": {},
+      "id": null,
+      "band": false,
+      "surface": null,
+      "items": [
+       {
+        "value": "11",
+        "unit": null,
+        "label": "nights of sea from four coasts",
+        "data": null
+       },
+       {
+        "value": "0",
+        "unit": null,
+        "label": "screens or apps to open at night",
+        "data": null
+       },
+       {
+        "value": "1",
+        "unit": null,
+        "label": "ring of light that goes out before you do",
+        "data": null
+       }
+      ]
      }
     ],
     "hud": {
@@ -477,30 +544,6 @@
           "ss-feature--art"
          ]
         }
-       ]
-      }
-     ]
-    }
-   ]
-  },
-  {
-   "id": null,
-   "type": "stats",
-   "markup": [
-    {
-     "tag": "section",
-     "class": [
-      "ss-block",
-      "ss-band"
-     ],
-     "children": [
-      {
-       "tag": "div",
-       "class": [
-        "ss-wrap",
-        "ss-stats",
-        "ss-stats--3",
-        "ss-stats--divided"
        ]
       }
      ]

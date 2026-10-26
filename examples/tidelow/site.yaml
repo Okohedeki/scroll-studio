@@ -85,6 +85,13 @@ sections:
           file: inputs/shore.jpg
           medium: halftone
           live: [{ kind: flow, box: [0.0, 0.3, 1.0, 0.75], speed: 0.45, strength: 0.5 }]   # the sea breathes
+      # the figures are a card of their own beside the same sea (any block can be a step)
+      - block: stats
+        items:
+          - { value: "11", label: nights of sea from four coasts }
+          - { value: "0", label: screens or apps to open at night }
+          - { value: "1", label: ring of light that goes out before you do }
+        length: 1.1
 
   - id: breathe
     type: type
@@ -122,13 +129,6 @@ sections:
           # (1600x1280, seed 4)
           file: inputs/cat.jpg
           medium: halftone
-
-  - type: stats
-    look: divided
-    items:
-      - { value: "11", label: nights of sea from four coasts }
-      - { value: "0", label: screens or apps to open at night }
-      - { value: "1", label: ring of light that goes out before you do }
 
   - type: quote
     text: I used to count sheep. Now I count waves, <em>and I never get past forty.</em>
