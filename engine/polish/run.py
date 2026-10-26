@@ -194,7 +194,10 @@ def inspect_film(path: Path, spans: list[A.BeatSpan], fade: float, out_dir: Path
         emb = E.embed_samples(sc, spans, fade, log)
 
     rows = {m: [] for m in METRICS}
+    own = [(s.start - pad(s), s.start + _fade_in(s, fade) + pad(s)) for s in spans[1:] if s.fade_in is not None]
     for r in A.score_pops(st):
+        if any(a <= r["t"] <= b for a, b in own):        # a beat's own join (a cut) is judged by score_joins below
+            continue
         r["_beat"] = _owner(spans, fade, r["t"]).id
         r["metric"] = "pops"
         rows["pops"].append(r)
