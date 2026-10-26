@@ -541,7 +541,8 @@ def freeze_cmd(name: str, beat: str,
         if against:
             osec, ob = fb.find_beat(project, against)
             others[against] = fb.beat_clip_path(project, osec, ob)
-        zoom_report.report(clip, f.camera, f.ease, clip.parent / "report", name=beat, others=others, log=typer.echo)
+        zoom_report.report(clip, fb.camera_keys(f), "linear" if f.move is not None else f.ease, clip.parent / "report",
+                           name=beat, others=others, log=typer.echo)
         typer.echo(f"report: {clip.parent / 'report'}")
 
 
