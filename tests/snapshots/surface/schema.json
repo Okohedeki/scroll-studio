@@ -4355,6 +4355,18 @@
      "default": null,
      "description": "Experimental. Layered depth: background plate + a plane per subject, so depth jumps have no halos and the camera reveals real background behind people (see FreezeLayers). `layers: auto` or a list of subjects"
     },
+    "move": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/FreezeMove"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "A named camera move through the frozen frame instead of `camera` keys (see FreezeMove): `move: dolly-zoom`, or `{move: orbit-left, amount: 0.8, at: [0.5, 0.6]}`. The same rigs as a generated beat's named moves, rendered offline through the frame's depth: nothing in the picture moves but the camera"
+    },
     "parallax": {
      "default": 0.6,
      "description": "Strength of the 2.5D depth effect (0 = flat Ken Burns; the subject plane stays put while nearer and farther things shift)",
@@ -4686,6 +4698,67 @@
     }
    },
    "title": "FreezeLayers",
+   "type": "object"
+  },
+  "FreezeMove": {
+   "additionalProperties": false,
+   "description": "A named camera move through a frozen frame (`freeze.move`): the rig a generated beat's named move flies\n(engine/camera_moves.py), rendered offline through the frame's depth instead of guiding a video model. Nothing in\nthe picture moves but the camera, so a dolly zoom or an orbit holds every face and every pose of the frame. Moves\nthat open gaps behind near things show the frame's own pixels stretched there (2.5D: nothing behind a shape was\never drawn), so keep `amount` near 1 on a crowded picture.",
+   "properties": {
+    "amount": {
+     "default": 1.0,
+     "description": "How far the move goes: 1 is the tested recipe, 0.5 half as far, 1.5 further",
+     "maximum": 2.0,
+     "minimum": 0.25,
+     "title": "Amount",
+     "type": "number"
+    },
+    "at": {
+     "anyOf": [
+      {
+       "maxItems": 2,
+       "minItems": 2,
+       "prefixItems": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "number"
+        }
+       ],
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "The point the move is about, x y in 0-1 of the frame (the subject): where a dolly or a zoom goes, what an orbit or a crane keeps still, what a dolly zoom keeps the same size. Default: the centre",
+     "title": "At"
+    },
+    "move": {
+     "description": "A named camera move (engine/camera_moves.py), flown through the start image's depth and followed by the video model like keyed moves: static (locked-off tripod), dolly-in / dolly-out (the camera travels toward or away from `at`, near things grow faster than far ones), crash-zoom (a sudden lens zoom into `at`, then a hold), dolly-zoom (vertigo: the subject keeps its size while the background swells), orbit-left / orbit-right (an arc around the subject, which stays put while the foreground and background slide past each other), crane-up / crane-down (the camera rises or sinks, tilting to keep the subject), fpv (a drone flying forward with a banking roll), whip-pan (a fast pan with motion blur), push-through (a deep push past the foreground into the scene beyond). See docs/scenes.md for which read clearly on LTX-2.3",
+     "enum": [
+      "static",
+      "dolly-in",
+      "dolly-out",
+      "crash-zoom",
+      "dolly-zoom",
+      "orbit-left",
+      "orbit-right",
+      "crane-up",
+      "crane-down",
+      "fpv",
+      "whip-pan",
+      "push-through"
+     ],
+     "title": "Move",
+     "type": "string"
+    }
+   },
+   "required": [
+    "move"
+   ],
+   "title": "FreezeMove",
    "type": "object"
   },
   "GalleryBlock": {

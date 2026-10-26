@@ -290,6 +290,19 @@ cache, `trim`, crossfade, `beat_restore`, `locked`, `build --only`, storyboard c
   frame of any beat, so a generated beat can start exactly where a frozen moment (or another generated beat) ends. A
   beat that uses it re-renders when that beat's clip does. Under `build --only`, a beat that is not rendered stands in
   with its storyboard still instead of failing.
+- **A named move instead of keys.** `move:` takes the named moves of a generated beat (below: `dolly-zoom`,
+  `orbit-left`, `crane-up`, `dolly-in` ...) and flies the same rig through the frozen frame, so the vertigo of a dolly
+  zoom or the arc of an orbit happens around people who stay exactly as drawn. `at` is the subject (the focus plane an
+  orbit pivots on and a dolly zoom keeps the same size), `amount` scales the move. It replaces `camera` keys (`parallax`,
+  `dolly` and `ease` belong to keys and are not used), and does not combine with `detail` or `layers` yet. Moves that
+  start on a crop (orbit, crane, dolly zoom) do not begin on the whole frame, so a cut into them is a visible cut, not
+  a continuation. Like any 2.5D move, wide arcs stretch the pixels behind near edges: keep `amount` near 1 on a crowd.
+
+  ```yaml
+      - id: stare
+        seconds: 5
+        freeze: { image: inputs/market-square.png, upscale: 2, move: { move: dolly-zoom, at: [0.5, 0.55] } }
+  ```
 
 The render is an inverse parallax warp in torch (a ray marched through the depth map per pixel, so the nearest surface
 wins at an edge), on the GPU when there is one and the CPU otherwise; it needs no Blender session. The storyboard shows

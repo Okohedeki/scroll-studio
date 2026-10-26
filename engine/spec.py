@@ -1379,6 +1379,10 @@ class Freeze(Model):
     camera: list[FreezeKey] = Field(default_factory=list, description="Camera keys over the beat. The camera rests on "
                                                                       "the first box until its t and on the last after "
                                                                       "its t; none: the whole frame, with the parallax")
+    move: Optional["FreezeMove"] = Field(None, description="A named camera move through the frozen frame instead of "
+                                         "`camera` keys (see FreezeMove): `move: dolly-zoom`, or `{move: orbit-left, amount: "
+                                         "0.8, at: [0.5, 0.6]}`. The same rigs as a generated beat's named moves, rendered "
+                                         "offline through the frame's depth: nothing in the picture moves but the camera")
     parallax: float = Field(0.6, ge=0, le=2, description="Strength of the 2.5D depth effect (0 = flat Ken Burns; the "
                                                          "subject plane stays put while nearer and farther things shift)")
     dolly: Optional[float] = Field(None, ge=0, le=3, description="Extra push-in of near things as the camera closes in "
@@ -1711,6 +1715,34 @@ def _camera_in(v):
     return v
 
 
+class FreezeMove(Model):
+    """A named camera move through a frozen frame (`freeze.move`): the rig a generated beat's named move flies
+    (engine/camera_moves.py), rendered offline through the frame's depth instead of guiding a video model. Nothing in
+    the picture moves but the camera, so a dolly zoom or an orbit holds every face and every pose of the frame. Moves
+    that open gaps behind near things show the frame's own pixels stretched there (2.5D: nothing behind a shape was
+    ever drawn), so keep `amount` near 1 on a crowded picture."""
+    move: CameraMoveName = Field(..., description=CAMERA_MOVE_DOC)
+    amount: float = Field(1.0, ge=0.25, le=2.0, description="How far the move goes: 1 is the tested recipe, 0.5 half as "
+                          "far, 1.5 further")
+    at: Optional[tuple[float, float]] = Field(None, description="The point the move is about, x y in 0-1 of the frame (the "
+                                              "subject): where a dolly or a zoom goes, what an orbit or a crane keeps "
+                                              "still, what a dolly zoom keeps the same size. Default: the centre")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _bare_name(cls, v):
+        return {"move": v} if isinstance(v, str) else v
+
+    @model_validator(mode="after")
+    def _inside(self):
+        if self.at is not None and not all(0 <= v <= 1 for v in self.at):
+            raise ValueError(f"freeze move '{self.move}': `at` {list(self.at)} must be x y inside 0-1")
+        return self
+
+
+Freeze.model_rebuild()
+
+
 # ---------------------------------------------------------------------------------------------------------------
 
 
@@ -1804,6 +1836,13 @@ class Beat(Model):
                 raise ValueError(f"beat '{self.id}': `{name}` does not apply to a frozen moment (use freeze.image / freeze.from)")
         if self.strength != 1.0:
             raise ValueError(f"beat '{self.id}': `strength` does not apply to a frozen moment")
+        if f.move is not None:
+            if f.camera:
+                raise ValueError(f"beat '{self.id}': freeze has `move` or `camera` keys, not both (the move is the camera "
+                                 "path)")
+            if f.detail is not None or f.layers is not None:
+                raise ValueError(f"beat '{self.id}': freeze `move` does not combine with `detail` or `layers` yet; write "
+                                 "`camera` keys for a deep zoom or layered depth")
         ks = f.camera
         for i, k in enumerate(ks):
             x0, y0, x1, y1 = k.box
