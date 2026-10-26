@@ -428,6 +428,10 @@ def beats_film(sec: FilmScene, ctx: BuildContext) -> Path:
             key["camera"] = camera_key(sec, bi)
             if not b.image and b.camera.continues and bi > 0:
                 key["image"] = ref_key(start_ref(sec, bi, (W, H)))
+        if sec.subject is not None and not b.image and key["image"] is None:   # only then, so other beats keep their cache
+            key["image"] = ref_key(start_ref(sec, bi, (W, H)))
+            if isinstance(sec.subject.image, str) and not sec.subject.image.startswith("http"):
+                key["subject_file"] = ref_key(sec.subject.image)        # a new reference file re-makes the start pictures
         look = imagery.of(ctx.project)
         if look is not None:     # the site's `imagery:` treatment is part of the beat (only when set: other beats keep their cache)
             key["imagery"] = look.model_dump(mode="json")

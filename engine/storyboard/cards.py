@@ -295,7 +295,8 @@ class Maker:
                           "strength": b.strength, "res": [W, H], "image": image_key(b.image) if b.image else None,
                           "end": image_key(b.end_image) if b.end_image else None, "model": b.video_model,
                           "motion_seed": b.motion_seed,
-                          **({"camera": b.camera.model_dump(mode="json")} if b.camera is not None else {})})
+                          **({"camera": b.camera.model_dump(mode="json")} if b.camera is not None else {}),
+                          **({"subject": sec.subject.model_dump(mode="json")} if sec.subject is not None and not b.image else {})})
             c = Card(b.id, sec.id, "beat", f"{sec.id} / {b.id}", prompt=describe(ref) if b.image else b.prompt,
                      motion=b.motion, caption=caption, seconds=b.seconds - b.trim,
                      scroll=sec.length * (b.seconds - b.trim) / total, locked=b.locked or sec.locked, fingerprint=fp,

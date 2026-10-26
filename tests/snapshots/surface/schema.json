@@ -3729,6 +3729,18 @@
      "title": "Steps",
      "type": "array"
     },
+    "subject": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Subject"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "beats: the one subject the story is about, kept the same from shot to shot (see Subject): beats without an `image` start on a picture of it made from the reference by the image editor"
+    },
     "surface": {
      "anyOf": [
       {
@@ -3810,8 +3822,8 @@
      "type": "integer"
     },
     "deflicker": {
-     "default": true,
-     "description": "Even out frame-to-frame brightness flicker (FFmpeg deflicker, over 5 frames)",
+     "default": false,
+     "description": "Even out frame-to-frame brightness flicker (FFmpeg deflicker, over 5 frames). Off by default: on a moving camera it chases real changes of light and measured worse; turn it on for a clip that visibly pulses",
      "title": "Deflicker",
      "type": "boolean"
     },
@@ -3825,7 +3837,7 @@
     },
     "interpolate": {
      "default": "off",
-     "description": "Double the frame rate with a frame interpolator (smoother slow scrolling, twice the frames in the page's film). auto: only when the film's motion is slow (`slow`), where interpolation is clean; fast motion is where interpolators morph",
+     "description": "Double the frame rate with a frame interpolator (smoother slow scrolling, twice the frames in the page's film). auto: only with a RIFE/FILM checkpoint in ComfyUI and only when the film's motion is slow (`slow`), where interpolation is clean; on: always, with FFmpeg's minterpolate when there is no checkpoint (it leaves halos along moving edges)",
      "enum": [
       "off",
       "auto",
@@ -3844,7 +3856,7 @@
       }
      ],
      "default": null,
-     "description": "A RIFE or FILM checkpoint in ComfyUI's models/frame_interpolation folder (ComfyUI's own FrameInterpolate node). Default: the first one ComfyUI lists, else FFmpeg's motion-compensated interpolation (minterpolate), which needs no model",
+     "description": "A RIFE or FILM checkpoint in ComfyUI's models/frame_interpolation folder (ComfyUI's own FrameInterpolate node). Default: the first one ComfyUI lists",
      "title": "Interpolator"
     },
     "restore": {
@@ -3863,8 +3875,8 @@
      "title": "Restore"
     },
     "sharpen": {
-     "default": 0.0,
-     "description": "A light unsharp mask after the restore (0 = off; 0.3 is a gentle crispening, higher shows halos)",
+     "default": 0.3,
+     "description": "A light unsharp mask after the denoise (0 = off; 0.3, the default, gives back the fine detail the denoise softens without halos; higher shows halos)",
      "maximum": 1,
      "minimum": 0,
      "title": "Sharpen",
@@ -11648,6 +11660,49 @@
     "image"
    ],
    "title": "StripItem",
+   "type": "object"
+  },
+  "Subject": {
+   "additionalProperties": false,
+   "description": "The one subject a story film is about (a person, a product, an animal), kept the same from shot to shot. Every\ngenerated beat without its own `image` starts on a picture made from this reference by the local image editor\n(Qwen-Image-Edit): the beat's `prompt` as the new scene, the subject kept as it is in the reference. Within a shot the\nvideo model starts on that picture, so the subject keeps its identity across the film.",
+   "properties": {
+    "image": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "$ref": "#/$defs/ImageInput"
+      }
+     ],
+     "description": "The reference: a file (inputs/hero.png) or an image input (generate:, a product still ...). A clear, well-lit picture of the subject alone works best",
+     "title": "Image"
+    },
+    "keep": {
+     "default": "face, hair, clothes, shape and colours",
+     "description": "What must not change from the reference",
+     "title": "Keep",
+     "type": "string"
+    },
+    "name": {
+     "default": "the subject",
+     "description": "What the subject is, as you would say it to a person: 'the woman in the red coat', 'the white ceramic cup'. The editor is told to keep exactly that",
+     "title": "Name",
+     "type": "string"
+    },
+    "steps": {
+     "default": 30,
+     "description": "Image editor steps per start picture",
+     "maximum": 60,
+     "minimum": 4,
+     "title": "Steps",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "image"
+   ],
+   "title": "Subject",
    "type": "object"
   },
   "Take": {

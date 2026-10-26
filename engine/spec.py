@@ -1860,6 +1860,25 @@ class Finish(Model):
         return self
 
 
+class Subject(Model):
+    """The one subject a story film is about (a person, a product, an animal), kept the same from shot to shot. Every
+    generated beat without its own `image` starts on a picture made from this reference by the local image editor
+    (Qwen-Image-Edit): the beat's `prompt` as the new scene, the subject kept as it is in the reference. Within a shot the
+    video model starts on that picture, so the subject keeps its identity across the film."""
+    image: ImageRef = Field(..., description="The reference: a file (inputs/hero.png) or an image input (generate:, a "
+                                             "product still ...). A clear, well-lit picture of the subject alone works best")
+    name: str = Field("the subject", description="What the subject is, as you would say it to a person: 'the woman in the "
+                      "red coat', 'the white ceramic cup'. The editor is told to keep exactly that")
+    keep: str = Field("face, hair, clothes, shape and colours", description="What must not change from the reference")
+    steps: int = Field(30, ge=4, le=60, description="Image editor steps per start picture")
+
+
+def subject_instruction(subject: Subject, prompt: str) -> str:
+    """The editor's instruction for one beat's start picture."""
+    return (f"Show {subject.name} from this image in a new photograph: {prompt.rstrip('. ')}. Keep {subject.name} exactly "
+            f"as in the image (same {subject.keep}); everything else follows the description.")
+
+
 def _finish_in(v):
     if v is True:
         return {}

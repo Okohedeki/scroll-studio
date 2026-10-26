@@ -35,14 +35,19 @@ def backend_of(move) -> str:
 
 def start_ref(sec, i: int, size: tuple[int, int]):
     """The image beat `i` starts from: its own `image`; a camera beat that `continues` starts on the last frame of the beat
-    before it (exactly where that one ended); else its prompt, generated. One answer for the build, the storyboard and the
+    before it (exactly where that one ended); with the film's `subject`, the reference edited into the beat's prompt;
+    else its prompt, generated. One answer for the build, the storyboard and the
     `--only` stand-ins."""
-    from .spec import BeatFrame, ImageInput
+    from .spec import BeatFrame, ImageEdit, ImageInput, subject_instruction
     b = sec.beats[i]
     if b.image:
         return b.image
     if b.camera is not None and b.camera.continues and i > 0:
         return ImageInput(beat_frame=BeatFrame(beat=sec.beats[i - 1].id, at="last"))
+    subject = getattr(sec, "subject", None)
+    if subject is not None:         # the film's one subject, kept: the reference edited into this beat's scene
+        return ImageInput(edit=ImageEdit(source=subject.image, instruction=subject_instruction(subject, b.prompt),
+                                         seed=b.seed, steps=subject.steps))
     return ImageInput(generate=b.prompt, size=tuple(size), seed=b.seed)
 
 
