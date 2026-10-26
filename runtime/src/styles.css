@@ -620,6 +620,8 @@ html:not(.js) .ss-strip { overflow-x: auto; }
   /* a step's own place (`at`) is for wide screens: on a phone it reads where its layout puts every step */
   .ss-captions--box, .ss-captions--grid { left: var(--gutter); top: 26%; bottom: auto; width: var(--caption-w); min-height: 0;
     padding: 0; transform: none; display: block; }
+  /* the row rules are stronger than the one above: on a phone a middle or bottom slot must not keep its wide-screen shift */
+  .ss-captions--grid:is(.ss-captions--row-top, .ss-captions--row-middle, .ss-captions--row-bottom) { top: 26%; bottom: auto; transform: none; }
   .ss-steps--over .ss-step.ss-at--grid { display: block; }
   .ss-split .ss-step.ss-at .ss-card { top: 62svh; }
   .ss-steps--over .ss-step.ss-at .ss-card { top: auto; width: auto; max-width: none; margin-left: -16px; margin-right: -16px; }

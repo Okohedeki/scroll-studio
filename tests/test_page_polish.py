@@ -712,3 +712,39 @@ def test_a_split_scene_with_its_picture_on_the_left_stacks_on_a_phone(chromium, 
         httpd.shutdown()
         httpd.server_close()
     assert len(tracks.split()) == 1, tracks
+
+
+def test_a_grid_slot_in_the_middle_row_reads_on_a_phone(chromium, tmp_path):
+    """On a phone a slot caption reads where every caption does; a middle-row slot kept its wide-screen translate and
+    ran off the left edge."""
+    from playwright.sync_api import sync_playwright
+
+    from engine.compile import compiler, fonts
+    from engine.serve import serve
+    root = tmp_path / "site"
+    root.mkdir()
+    steps = [{"title": f"Slot in the {row} row", "body": "Short.", "at": {"grid": "1 / span 5", "row": row},
+              "show": [0.05, 0.95]} for row in ("top", "middle", "bottom")]
+    spec = {"name": "Rows", "theme": {"preset": "paper"}, "sections": [
+        {"id": "desk", "type": "diorama", "layout": "overlay", "world": {"kind": "desk", "seed": 4},
+         "places": [{"name": "Notebook", "kind": "notebook"}], "steps": steps}, {"type": "cta", "title": "End"}]}
+    (root / "site.yaml").write_text(yaml.safe_dump(spec, sort_keys=False), encoding="utf-8")
+    saved = fonts.vendor
+    fonts.vendor = lambda links, dist, log=print: None
+    try:
+        compiler.build_site(Project(root), log=lambda m: None)
+    finally:
+        fonts.vendor = saved
+    httpd = serve(root / "dist", 0, background=True)
+    try:
+        with sync_playwright() as p:
+            b = p.chromium.launch()
+            page = b.new_page(viewport={"width": 390, "height": 844}, reduced_motion="reduce")
+            page.goto(f"http://127.0.0.1:{httpd.server_address[1]}/", wait_until="load")
+            page.wait_for_timeout(400)
+            boxes = page.eval_on_selector_all("#desk .ss-captions--grid", "els => els.map(e => e.getBoundingClientRect().left)")
+            b.close()
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+    assert len(boxes) == 3 and all(x >= 0 for x in boxes), boxes
