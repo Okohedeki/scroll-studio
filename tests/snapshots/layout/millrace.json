@@ -1,0 +1,678 @@
+{
+ "example": "millrace",
+ "root": {
+  "class": [
+   "mode-light",
+   "layout-flow",
+   "hero-media"
+  ]
+ },
+ "cuts": [],
+ "sections": [
+  {
+   "id": null,
+   "type": "hero",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-hero",
+      "ss-hero--left",
+      "ss-surface-dark",
+      "ss-hero--media"
+     ],
+     "text": {
+      "title": "Every job lands. Even when the server do",
+      "title_tag": "h1"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-hero__media"
+       ]
+      },
+      {
+       "tag": "div",
+       "class": [
+        "ss-hero__shade"
+       ]
+      },
+      {
+       "tag": "div",
+       "class": [
+        "ss-hero__in"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "intro",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ],
+     "text": {
+      "kicker": "How it flows",
+      "title": "Built like a mill race. Steady, gated, n",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-intro2"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "flow",
+   "type": "parallax",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-scene",
+      "ss-overlay",
+      "ss-side-right",
+      "ss-type-parallax",
+      "ss-shade-none"
+     ],
+     "id": "flow",
+     "data": {
+      "data-scene": "parallax"
+     },
+     "text": {
+      "kicker": "01 · The weir",
+      "title": "Back-pressure at the door.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-track"
+       ],
+       "style": {
+        "height": "320vh"
+       },
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-stage"
+         ],
+         "children": [
+          {
+           "tag": "div",
+           "class": [
+            "ss-shade"
+           ]
+          },
+          {
+           "tag": "div",
+           "class": [
+            "ss-captions"
+           ]
+          },
+          {
+           "tag": "div",
+           "class": [
+            "ss-captions",
+            "ss-captions--grid",
+            "ss-captions--row-top"
+           ],
+           "style": {
+            "--col": "1 / span 4"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-caption"
+             ],
+             "data": {
+              "data-from": "0.06",
+              "data-to": "0.96",
+              "data-enter": "wipe"
+             },
+             "text": {
+              "kicker": "01 · The weir",
+              "title": "Back-pressure at the door.",
+              "title_tag": "h2"
+             }
+            }
+           ]
+          },
+          {
+           "tag": "div",
+           "class": [
+            "ss-captions",
+            "ss-captions--grid",
+            "ss-captions--row-top"
+           ],
+           "style": {
+            "--col": "5 / span 4"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-caption"
+             ],
+             "data": {
+              "data-from": "0.32",
+              "data-to": "0.96",
+              "data-enter": "type-on"
+             },
+             "text": {
+              "kicker": "02 · The sluices",
+              "title": "Ordered lanes, no queue-jumping.",
+              "title_tag": "h2"
+             }
+            }
+           ]
+          },
+          {
+           "tag": "div",
+           "class": [
+            "ss-captions",
+            "ss-captions--grid",
+            "ss-captions--row-top"
+           ],
+           "style": {
+            "--col": "9 / span 4"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-caption"
+             ],
+             "data": {
+              "data-from": "0.58",
+              "data-to": "0.96",
+              "data-enter": "wipe"
+             },
+             "text": {
+              "kicker": "03 · The wheels",
+              "title": "Workers that never spin twice.",
+              "title_tag": "h2"
+             }
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "sdata": {
+    "layout": "overlay",
+    "length": 3.2,
+    "steps": [
+     {
+      "kicker": "01 · The weir",
+      "title": "Back-pressure <em>at the door.</em>",
+      "body": "Producers slow down before the queue overflows, not after the disk is full.",
+      "fact": null,
+      "at": {
+       "grid": "1 / span 4",
+       "row": "top",
+       "align": "left"
+      },
+      "length": 1.2,
+      "intro": false,
+      "hint": null,
+      "place": null,
+      "surface": null,
+      "button": null,
+      "image": {
+       "file": "inputs/race.jpg",
+       "generate": null,
+       "gradient": null,
+       "product": null,
+       "scene": null,
+       "size": [
+        1920,
+        1088
+       ],
+       "seed": 7,
+       "crop": null,
+       "edit": null,
+       "beat_frame": null,
+       "match": null,
+       "credit": null,
+       "cinemagraph": null,
+       "medium": "ink"
+      },
+      "state": {},
+      "show": [
+       0.06,
+       0.96
+      ],
+      "enter": "wipe"
+     },
+     {
+      "kicker": "02 · The sluices",
+      "title": "Ordered lanes, <em>no queue-jumping.</em>",
+      "body": "Per-key ordering keeps one customer's jobs in line without holding up anyone else's.",
+      "fact": null,
+      "at": {
+       "grid": "5 / span 4",
+       "row": "top",
+       "align": "left"
+      },
+      "length": 1.2,
+      "intro": false,
+      "hint": null,
+      "place": null,
+      "surface": null,
+      "button": null,
+      "image": null,
+      "state": {},
+      "show": [
+       0.32,
+       0.96
+      ],
+      "enter": "type-on"
+     },
+     {
+      "kicker": "03 · The wheels",
+      "title": "Workers that <em>never spin twice.</em>",
+      "body": "Leases and idempotency keys run every job once, straight through a deploy.",
+      "fact": null,
+      "at": {
+       "grid": "9 / span 4",
+       "row": "top",
+       "align": "left"
+      },
+      "length": 1.2,
+      "intro": false,
+      "hint": null,
+      "place": null,
+      "surface": null,
+      "button": null,
+      "image": null,
+      "state": {},
+      "show": [
+       0.58,
+       0.96
+      ],
+      "enter": "wipe"
+     }
+    ],
+    "hud": {
+     "kind": "none",
+     "fields": [],
+     "events": [],
+     "clock": null,
+     "scales": [],
+     "legend": []
+    }
+   }
+  },
+  {
+   "id": "wire",
+   "type": "code",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-scene",
+      "ss-overlay",
+      "ss-side-right",
+      "ss-type-code",
+      "ss-shade-auto",
+      "ss-surface-dark"
+     ],
+     "id": "wire",
+     "data": {
+      "data-scene": "code"
+     },
+     "text": {
+      "title": "Five lines between you and a dropped job",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-track"
+       ],
+       "style": {
+        "height": "900vh"
+       },
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-stage"
+         ],
+         "children": [
+          {
+           "tag": "div",
+           "class": [
+            "ss-shade"
+           ]
+          },
+          {
+           "tag": "div",
+           "class": [
+            "ss-captions"
+           ]
+          },
+          {
+           "tag": "div",
+           "class": [
+            "ss-captions",
+            "ss-captions--grid",
+            "ss-captions--row-middle"
+           ],
+           "style": {
+            "--col": "1 / span 5"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-caption",
+              "ss-surface-dark"
+             ],
+             "data": {
+              "data-from": "0",
+              "data-to": "1",
+              "data-enter": "type-on"
+             },
+             "text": {
+              "title": "Five lines between you and a dropped job",
+              "title_tag": "h2"
+             }
+            }
+           ]
+          },
+          {
+           "tag": "div",
+           "class": [
+            "ss-captions",
+            "ss-captions--grid",
+            "ss-captions--row-middle"
+           ],
+           "style": {
+            "--col": "1 / span 5"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-caption",
+              "ss-surface-dark"
+             ],
+             "data": {
+              "data-from": "0",
+              "data-to": "1",
+              "data-enter": "wipe"
+             },
+             "text": {
+              "title": "Lanes and limits, in one file.",
+              "title_tag": "h2"
+             }
+            }
+           ]
+          },
+          {
+           "tag": "div",
+           "class": [
+            "ss-captions",
+            "ss-captions--grid",
+            "ss-captions--row-middle"
+           ],
+           "style": {
+            "--col": "1 / span 5"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-caption",
+              "ss-surface-dark"
+             ],
+             "data": {
+              "data-from": "0",
+              "data-to": "1",
+              "data-enter": "wipe"
+             },
+             "text": {
+              "title": "Replay the crash. Count the losses.",
+              "title_tag": "h2"
+             }
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "sdata": {
+    "layout": "overlay",
+    "length": 9.0,
+    "steps": [
+     {
+      "kicker": null,
+      "title": "Five lines <em>between you and a dropped job.</em>",
+      "body": "Wrap the function, name the key it orders by, and it survives retries, deploys and the worst night of the year.",
+      "fact": null,
+      "at": {
+       "grid": "1 / span 5",
+       "row": "middle",
+       "align": "left"
+      },
+      "length": 1.2,
+      "intro": false,
+      "hint": null,
+      "place": null,
+      "surface": "dark",
+      "button": null,
+      "image": null,
+      "state": {
+       "file": "app/jobs/invoices.py"
+      },
+      "enter": "type-on"
+     },
+     {
+      "kicker": null,
+      "title": "Lanes and limits, <em>in one file.</em>",
+      "body": "Concurrency, ordering and the dead-letter queue live in the repo, reviewed like everything else.",
+      "fact": null,
+      "at": {
+       "grid": "1 / span 5",
+       "row": "middle",
+       "align": "left"
+      },
+      "length": 1.2,
+      "intro": false,
+      "hint": null,
+      "place": null,
+      "surface": "dark",
+      "button": null,
+      "image": null,
+      "state": {
+       "file": "millrace.toml"
+      },
+      "enter": "wipe"
+     },
+     {
+      "kicker": null,
+      "title": "Replay the crash. <em>Count the losses.</em>",
+      "body": "Every enqueue is in the log, so last night can be run again until the number at the end is zero.",
+      "fact": null,
+      "at": {
+       "grid": "1 / span 5",
+       "row": "middle",
+       "align": "left"
+      },
+      "length": 1.2,
+      "intro": false,
+      "hint": null,
+      "place": null,
+      "surface": "dark",
+      "button": null,
+      "image": null,
+      "state": {
+       "file": "millrace replay --from 03:12"
+      },
+      "enter": "wipe"
+     }
+    ],
+    "hud": {
+     "kind": "none",
+     "fields": [],
+     "events": [],
+     "clock": null,
+     "scales": [],
+     "legend": []
+    }
+   },
+   "note": "steps pinned to a file (`state.file`) get their window from the file's span in the scene (engine/scenes/code.py), known only once the scene is built"
+  },
+  {
+   "id": null,
+   "type": "features",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ],
+     "text": {
+      "kicker": "The parts",
+      "title": "Three things a queue must never do.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-features",
+        "ss-features--3"
+       ],
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-feature",
+          "ss-reveal",
+          "ss-feature--art"
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-feature",
+          "ss-reveal",
+          "ss-feature--art"
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-feature",
+          "ss-reveal",
+          "ss-feature--art"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "stats",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-band",
+      "ss-surface-dark"
+     ],
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-stats",
+        "ss-stats--3"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "quote",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "start",
+   "type": "cta",
+   "markup": [
+    {
+     "tag": "div",
+     "class": [
+      "ss-backdrop"
+     ],
+     "children": [
+      {
+       "tag": "section",
+       "class": [
+        "ss-block",
+        "ss-cta"
+       ],
+       "id": "start",
+       "text": {
+        "kicker": "Free up to a million jobs a month",
+        "title": "Let the work flow.",
+        "title_tag": "h2"
+       },
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-cta__in"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "note": "not fully covered without a render: wire (see each section's note)"
+}

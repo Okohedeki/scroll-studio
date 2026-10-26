@@ -29,6 +29,7 @@ Every example is a `site.yaml` in [`examples/`](../examples/) and rebuilds with 
 | **A light in your hand** | `imagery.medium` + `pointer: light` | [Gloamery](../examples/gloamery/site.yaml) | An AI painting tool in gouache: the studio is dark and the lamplight follows your pointer; dust turns in the light (`live:`) |
 | **Colour under a lens** | two media + `pointer: lens` | [Tarnhollow](../examples/tarnhollow/site.yaml) | Walking holidays: one watercolour printed as an engraving, its colour showing through a lens that follows the pointer |
 | **Halftone on a deep colour** | `imagery.paper: bg` + light `inks` | [Tidelow](../examples/tidelow/site.yaml) | A sleep speaker printed as a negative halftone on indigo: cream and coral dots, a sea that breathes (`live: flow`), a line of type that grows heavier |
+| **Words in their slots** | `at: {grid}` + `code` | [Millrace](../examples/millrace/site.yaml) | A job queue in brush and ink: three captions take their own thirds of the grid over the mill race, then the change flies by as live code in a dark editor room |
 | **Direction boards** | `studio directions` | [Kiln & Kettle](../examples/kiln-and-kettle/site.yaml) | Six art directions for one brief, side by side |
 | **One take with a real product** | `film` + `take` | [Stillwater](../examples/one-take/site.yaml) | A mountain ridge down to a bottle on a lakeside table; the bottle is its real 3D model |
 | **Story film** | `film` | [Lodestar Orbital](../examples/lodestar-orbital/site.yaml) | A rocket launch to orbit, generated locally |

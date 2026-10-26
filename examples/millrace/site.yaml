@@ -1,0 +1,191 @@
+# Millrace: a fictional durable job queue, drawn in brush and ink, and the developer page of the second showcase.
+#
+#   studio build examples/millrace        # no GPU needed: the stills are in inputs/, the medium runs on the CPU
+#   studio inspect examples/millrace --page
+#
+# `imagery.medium: ink` prints every picture as black brush work with its washes in the brand's vermilion. The middle
+# of the page uses the layout model where it shows (docs/guide.md, "Placing words"): over the cut-away drawing of the
+# race, three captions take their own slots on the 12-column grid (`at: {grid, row}`), arrive by wipe and type-on, and
+# stay (`show`) until all three read left to right like the water. Then a `code` scene flies through the change that
+# wires Millrace into an app: the decorator types itself in, the config gets its lanes, and the replay test prints.
+#
+# inputs/ holds the raw Z-Image Turbo stills these were made from, before the medium was applied. With a GPU, swap a
+# `file:` for the `generate:` in the comment above it (and drop its `medium:`, which the site's own covers).
+name: Millrace
+description: A durable job queue for backend teams that cannot drop a message. A concept site.
+theme:
+  preset: paper
+  from:
+    mode: light
+    colors: { bg: "#f5f3ee", bg2: "#ebe8e0", ink: "#121417", accent: "#e4572e", accent2: "#2b59ff", accent_ink: "#ffffff" }
+    fonts: { display: Space Grotesk, body: Inter, mono: JetBrains Mono }
+    radius: 999px
+imagery:
+  medium: ink
+nav:
+  cta: { label: Start free, href: "#start" }
+sections:
+  - type: hero
+    align: left
+    badge: Millrace 3 is out, with exactly-once delivery
+    title: Every job lands. <em>Even when the server doesn't.</em>
+    body: A durable queue and scheduler for backend teams. Retries, ordering and back-pressure are built in, so 3 a.m. stays quiet.
+    buttons:
+      - { label: Start free, href: "#start" }
+      - { label: Read the docs, href: "#flow" }
+    image:
+      # generate: An old water mill standing at the far right edge of the picture, partly cut off by the frame, its big wooden waterwheel turned by a fast stone channel of water that runs in from the right, a sluice gate, drawn as a clean technical line drawing with crisp outlines, the left two thirds of the picture are empty paper
+      # (2048x1152, seed 601, the second of a batch of four; calm: left)
+      file: inputs/mill.jpg
+      medium: ink
+      live: [{ kind: flow, box: [0.55, 0.62, 1.0, 0.98], speed: 0.9, strength: 0.5, angle: 200 }]   # the race runs
+
+  - type: intro
+    kicker: How it flows
+    title: Built like a mill race. <em>Steady, gated, never dry.</em>
+    body: A race feeds a wheel only as fast as it can turn. Millrace works the same way, from the producer's first enqueue to the worker's last acknowledgement.
+
+  - id: flow
+    type: parallax
+    nav_label: How it flows
+    layout: overlay
+    length: 3.2
+    shade: none
+    moves: [pan]
+    strength: 0.35
+    steps:
+      - kicker: "01 · The weir"
+        title: Back-pressure <em>at the door.</em>
+        body: Producers slow down before the queue overflows, not after the disk is full.
+        at: { grid: "1 / span 4", row: top }
+        show: [0.06, 0.96]
+        enter: wipe
+        image:
+          # generate: A long cutaway diagram of a mill race, water flowing from a weir through three sluice gates into channels, three waterwheels in a row turning gears and shafts, technical line drawing, wide panorama, plenty of empty paper above
+          # (2048x1152, seed 21)
+          file: inputs/race.jpg
+          medium: ink
+      - kicker: "02 · The sluices"
+        title: Ordered lanes, <em>no queue-jumping.</em>
+        body: Per-key ordering keeps one customer's jobs in line without holding up anyone else's.
+        at: { grid: "5 / span 4", row: top }
+        show: [0.32, 0.96]
+        enter: type-on
+      - kicker: "03 · The wheels"
+        title: Workers that <em>never spin twice.</em>
+        body: Leases and idempotency keys run every job once, straight through a deploy.
+        at: { grid: "9 / span 4", row: top }
+        show: [0.58, 0.96]
+        enter: wipe
+
+  - id: wire
+    type: code
+    nav_label: In your code
+    surface: dark                  # an editor is dark: the code world and its captions on the ink, on this light page
+    length: 9
+    terminal: { logo: "mill|race", prompt: "make send_invoice a durable job: retry it, keep each customer's invoices in order", agent: Build, model: any coding agent }
+    files:
+      - path: app/jobs/invoices.py
+        todo: "send_invoice: a durable job"
+        kind: edit
+        code: |2
+           from app.billing import render_pdf, mailer
+          +import millrace
+          +
+          +@millrace.job(retries=5, backoff="exponential", key="customer_id")
+           def send_invoice(invoice_id: str, customer_id: str) -> None:
+               pdf = render_pdf(invoice_id)
+               mailer.send(customer_id, pdf)
+      - path: millrace.toml
+        todo: "lanes and limits"
+        kind: edit
+        code: |2
+           [queue.invoices]
+          -workers = 4
+          +workers = 16
+          +order_by = "customer_id"
+          +max_in_flight = 2000
+          +dead_letter = "invoices.failed"
+      - path: millrace replay --from 03:12
+        kind: run
+        todo: "replay last night's crash"
+        code: |
+          replaying queue invoices from 03:12:07
+          1,204 jobs found in the log
+          ordering by customer_id across 311 lanes
+          1,204 delivered   0 duplicated   0 lost
+          done in 41.8s
+    steps:
+      - title: Five lines <em>between you and a dropped job.</em>
+        body: Wrap the function, name the key it orders by, and it survives retries, deploys and the worst night of the year.
+        state: { file: app/jobs/invoices.py }
+        at: { grid: "1 / span 5", row: middle }
+        surface: dark                # a soft glow of the dark behind the words, where the code flies under them
+        enter: type-on
+      - title: Lanes and limits, <em>in one file.</em>
+        body: Concurrency, ordering and the dead-letter queue live in the repo, reviewed like everything else.
+        state: { file: millrace.toml }
+        at: { grid: "1 / span 5", row: middle }
+        surface: dark                # a soft glow of the dark behind the words, where the code flies under them
+        enter: wipe
+      - title: Replay the crash. <em>Count the losses.</em>
+        body: Every enqueue is in the log, so last night can be run again until the number at the end is zero.
+        state: { file: "millrace replay --from 03:12" }
+        at: { grid: "1 / span 5", row: middle }
+        surface: dark                # a soft glow of the dark behind the words, where the code flies under them
+        enter: wipe
+
+  - type: features
+    kicker: The parts
+    title: Three things a queue <em>must never do.</em>
+    items:
+      - tag: Gates
+        title: Never overflow
+        body: Back-pressure reaches the producer first, with a clear error it can retry on.
+        image:
+          # generate: A single wooden sluice gate holding back water, simple and centred on empty paper
+          # (1280x960, seed 5)
+          file: inputs/card-gate.jpg
+          medium: ink
+      - tag: Gears
+        title: Never run twice
+        body: Leases, fencing tokens and idempotency keys, on by default for every job.
+        image:
+          # generate: A set of three interlocking cog wheels, simple and centred on empty paper
+          # (1280x960, seed 5)
+          file: inputs/card-gears.jpg
+          medium: ink
+      - tag: Weir
+        title: Never run dry
+        body: Scheduled and recurring jobs are kept in the same log, so a restart picks up the flow.
+        image:
+          # generate: A small stone weir with water spilling evenly over it, simple and centred on empty paper
+          # (1280x960, seed 9)
+          file: inputs/card-weir.jpg
+          medium: ink
+
+  - type: stats
+    surface: dark
+    items:
+      - { value: "0", label: jobs lost in last year's chaos tests }
+      - { value: "38", unit: ms, label: median enqueue to start }
+      - { value: "1.4", unit: B, label: jobs a day on the biggest cluster }
+
+  - type: quote
+    text: We replayed our worst night. <em>Every invoice went out once.</em>
+    who: Tomas Reyes, platform lead at a fictional payments company
+
+  - type: cta
+    id: start
+    kicker: Free up to a million jobs a month
+    title: Let the work <em>flow.</em>
+    button: { label: Start free, href: "#start" }
+    backdrop:
+      # generate: A long low brush drawing of a river running over a weir and under a small stone bridge, along the very bottom edge of the picture; the upper three quarters of the picture are empty paper with nothing drawn on it
+      # (2048x1152, seed 901, the third of a batch of three; calm: center)
+      file: inputs/band.jpg
+      medium: ink
+      live: [{ kind: flow, box: [0.15, 0.82, 1.0, 0.98], speed: 0.8, strength: 0.4 }]
+
+footer:
+  left: Millrace is a fictional product. A Scroll Studio example.
