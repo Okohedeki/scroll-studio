@@ -1,0 +1,449 @@
+{
+ "example": "tarnhollow",
+ "root": {
+  "class": [
+   "mode-light",
+   "layout-flow"
+  ]
+ },
+ "cuts": [],
+ "sections": [
+  {
+   "id": "valley",
+   "type": "parallax",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-scene",
+      "ss-overlay",
+      "ss-side-right",
+      "ss-type-parallax",
+      "ss-shade-none"
+     ],
+     "id": "valley",
+     "data": {
+      "data-scene": "parallax"
+     },
+     "text": {
+      "kicker": "Guided hut-to-hut walking",
+      "title": "Walk the high fells, hut to hut.",
+      "title_tag": "h1"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-track"
+       ],
+       "style": {
+        "height": "160vh"
+       },
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-stage"
+         ],
+         "children": [
+          {
+           "tag": "div",
+           "class": [
+            "ss-shade"
+           ]
+          },
+          {
+           "tag": "div",
+           "class": [
+            "ss-captions"
+           ]
+          },
+          {
+           "tag": "div",
+           "class": [
+            "ss-captions",
+            "ss-captions--grid",
+            "ss-captions--row-top"
+           ],
+           "style": {
+            "--col": "1 / span 7"
+           },
+           "children": [
+            {
+             "tag": "div",
+             "class": [
+              "ss-caption"
+             ],
+             "data": {
+              "data-from": "0",
+              "data-to": "1"
+             },
+             "text": {
+              "kicker": "Guided hut-to-hut walking",
+              "title": "Walk the high fells, hut to hut.",
+              "title_tag": "h1"
+             }
+            }
+           ]
+          }
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ],
+   "sdata": {
+    "layout": "overlay",
+    "length": 1.6,
+    "steps": [
+     {
+      "kicker": "Guided hut-to-hut walking",
+      "title": "Walk the high fells, <em>hut to hut.</em>",
+      "body": "Seven days, five stone huts and one light pack. We carry the rest, cook the supper and have the fire lit before you arrive.",
+      "fact": null,
+      "at": {
+       "grid": "1 / span 7",
+       "row": "top",
+       "align": "left"
+      },
+      "length": 1.2,
+      "intro": true,
+      "hint": null,
+      "place": null,
+      "surface": null,
+      "button": {
+       "label": "Book a week",
+       "href": "#book"
+      },
+      "image": {
+       "file": "inputs/valley.jpg",
+       "generate": null,
+       "gradient": null,
+       "product": null,
+       "scene": null,
+       "size": [
+        1920,
+        1088
+       ],
+       "seed": 7,
+       "crop": null,
+       "edit": null,
+       "beat_frame": null,
+       "match": null,
+       "credit": null,
+       "cinemagraph": null,
+       "medium": "engraving",
+       "live": [
+        {
+         "kind": "flow",
+         "box": [
+          0.3,
+          0.6,
+          0.62,
+          0.72
+         ],
+         "prompt": null,
+         "pick": "all",
+         "speed": 0.5,
+         "strength": 0.35,
+         "color": null,
+         "angle": 0.0,
+         "origin": null,
+         "count": 12,
+         "softness": 0.25
+        }
+       ]
+      },
+      "state": {}
+     }
+    ],
+    "hud": {
+     "kind": "none",
+     "fields": [],
+     "events": [],
+     "clock": null,
+     "scales": [],
+     "legend": []
+    }
+   }
+  },
+  {
+   "id": "walk",
+   "type": "intro",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ],
+     "id": "walk",
+     "text": {
+      "kicker": "Seven days in the fells",
+      "title": "You walk. We do everything else.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-intro2"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "product",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-product",
+      "ss-product--right",
+      "ss-pose--beside"
+     ],
+     "text": {
+      "kicker": "The huts",
+      "title": "A fire lit before you arrive.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-product__in"
+       ],
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-product__media"
+         ],
+         "data": {
+          "data-float": ""
+         },
+         "children": [
+          {
+           "tag": "img",
+           "class": [
+            "ss-product__img"
+           ]
+          }
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-product__copy",
+          "ss-reveal"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "route",
+   "type": "strip",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-strip"
+     ],
+     "id": "route",
+     "text": {
+      "kicker": "The route",
+      "title": "Five days, five huts.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-head",
+        "ss-strip__head",
+        "ss-reveal"
+       ]
+      },
+      {
+       "tag": "div",
+       "class": [
+        "ss-strip__track"
+       ],
+       "data": {
+        "data-strip": ""
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "features",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ],
+     "text": {
+      "kicker": "What is included",
+      "title": "Carry a day bag. That's all.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-features",
+        "ss-features--3"
+       ],
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-feature",
+          "ss-reveal",
+          "ss-feature--art"
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-feature",
+          "ss-reveal",
+          "ss-feature--art"
+         ]
+        },
+        {
+         "tag": "div",
+         "class": [
+          "ss-feature",
+          "ss-reveal",
+          "ss-feature--art"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "stats",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-band"
+     ],
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-stats",
+        "ss-stats--3"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "quote",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ]
+    }
+   ]
+  },
+  {
+   "id": null,
+   "type": "faq",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block",
+      "ss-faq"
+     ],
+     "text": {
+      "title": "Before you book",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-wrap",
+        "ss-faq__in"
+       ],
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-faq__list"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "book",
+   "type": "cta",
+   "markup": [
+    {
+     "tag": "div",
+     "class": [
+      "ss-backdrop"
+     ],
+     "children": [
+      {
+       "tag": "section",
+       "class": [
+        "ss-block",
+        "ss-cta"
+       ],
+       "id": "book",
+       "text": {
+        "kicker": "Weeks from May to September",
+        "title": "The fells are waiting. The fire is lit.",
+        "title_tag": "h2"
+       },
+       "children": [
+        {
+         "tag": "div",
+         "class": [
+          "ss-cta__in"
+         ]
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

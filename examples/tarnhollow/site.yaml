@@ -1,0 +1,149 @@
+# Tarnhollow: fictional hut-to-hut walking holidays, drawn in pen and watercolour, with the colour under the pointer.
+#
+#   studio build examples/tarnhollow      # no GPU needed: the stills are in inputs/, the media run on the CPU
+#   studio inspect examples/tarnhollow --page
+#
+# `imagery.medium: watercolour` paints every picture in loose washes and pen line on the page's paper, the colours
+# leaning toward the brand's fell green and bracken rust. The opening is one watercolour printed twice from the same
+# raw still: as an engraving (one ink on paper) for the photo, and as the watercolour for `pointer: { mode: lens }`, so
+# a circle of colour follows the pointer over the black-and-white valley (on a phone it follows the finger and rests on
+# the hut). The tarn's water moves (`live: flow`). The route is a strip of four watercolours; the page closes on a
+# painted band of fells.
+#
+# inputs/ holds the raw Z-Image Turbo stills these were made from, before the media were applied. With a GPU, swap a
+# `file:` for the `generate:` in the comment above it (and drop its `medium:` where the site's own is the same).
+name: Tarnhollow
+description: Guided hut-to-hut walking holidays in the high fells, with your bag carried and the fire lit. A concept site.
+theme:
+  preset: paper
+  from:
+    mode: light
+    colors: { bg: "#f4efe4", bg2: "#e9e2d2", ink: "#1f2a24", accent: "#2f6b4f", accent2: "#c8643b", accent_ink: "#ffffff" }
+    fonts: { display: Newsreader, body: Inter Tight }
+    radius: 999px
+  labels: plain
+imagery:
+  medium: watercolour
+nav:
+  cta: { label: Book a week, href: "#book" }
+sections:
+  - id: valley
+    type: parallax
+    layout: overlay
+    length: 1.6
+    shade: none
+    moves: [dolly]
+    strength: 0.45
+    pointer:
+      mode: lens
+      layer: { file: inputs/valley.jpg, medium: watercolour }
+      radius: 0.26
+      rest: [0.6, 0.68]
+    steps:
+      - intro: true
+        at: { grid: "1 / span 7", row: top }
+        kicker: Guided hut-to-hut walking
+        title: Walk the high fells, <em>hut to hut.</em>
+        body: Seven days, five stone huts and one light pack. We carry the rest, cook the supper and have the fire lit before you arrive.
+        button: { label: Book a week, href: "#book" }
+        image:
+          # generate: A long low strip of fells, stone walls, a tarn and a tiny hut painted only along the very bottom edge of the picture; the upper three quarters of the picture are blank white paper with nothing painted on it
+          # (2048x1152, seed 204, the second of a batch of three)
+          file: inputs/valley.jpg
+          medium: engraving
+          live: [{ kind: flow, box: [0.3, 0.6, 0.62, 0.72], speed: 0.5, strength: 0.35 }]
+
+  - type: intro
+    id: walk
+    nav_label: The walk
+    kicker: Seven days in the fells
+    title: You walk. <em>We do everything else.</em>
+    body: Every morning your bag goes ahead by road while you take the ridges with a guide who knows each cairn by name. Every evening there is a hut, a hot shower and a pot of something on the stove.
+
+  - type: product
+    side: right
+    kicker: The huts
+    title: A fire lit <em>before you arrive.</em>
+    body: Five old shepherds' huts, rebuilt in the same stone, a day's walk apart. Bunks with real bedding, drying rooms for wet boots, and a long table for supper.
+    tags: [Five huts, Bag transfer, Suppers cooked, Small groups]
+    image:
+      # generate: A stone mountain hut with a slate roof and a glowing window at dusk, walking boots and a rucksack by the door, a stone wall and sheep
+      # (1600x1280, seed 30)
+      file: inputs/hut.jpg
+      medium: watercolour
+
+  - type: strip
+    id: route
+    nav_label: The route
+    kicker: The route
+    title: Five days, <em>five huts.</em>
+    body: Sixty-two kilometres of beck, ridge and lakeshore, at the pace of the slowest walker.
+    items:
+      # generate: An old stone packhorse bridge over a rushing beck, ferns and birch trees, a walker crossing (1600x1200, seed 12)
+      - { caption: "Day 1 · the packhorse bridge", image: { file: inputs/route-bridge.jpg, medium: watercolour } }
+      # generate: A lakeside village with whitewashed cottages and a little wooden ferry pier, a steamer on the lake, fells behind (1600x1200, seed 4)
+      - { caption: "Day 2 · the lake steamer", image: { file: inputs/route-village.jpg, medium: watercolour } }
+      # generate: A high mountain pass with a stone shelter and a winding path, wildflowers in the foreground, peaks beyond (1600x1200, seed 4)
+      - { caption: "Day 3 · over the col", image: { file: inputs/route-col.jpg, medium: watercolour } }
+      # generate: A ridge path above a sea of white cloud at sunrise, distant summits, a cairn (1600x1200, seed 4)
+      - { caption: "Day 4 · the ridge at sunrise", image: { file: inputs/route-ridge.jpg, medium: watercolour } }
+
+  - type: features
+    kicker: What is included
+    title: Carry a day bag. <em>That's all.</em>
+    items:
+      - tag: Bags
+        title: Your pack goes ahead
+        body: Leave the big bag at the door each morning. It is on your bunk when you arrive.
+        image:
+          # generate: A single walker's rucksack with a rolled sleeping mat and a tin mug hanging from it, standing on its own in the middle of white paper, small loose vignette with lots of white paper around it
+          # (1280x960, seed 201, the third of a batch of three)
+          file: inputs/card-pack.jpg
+          medium: watercolour
+      - tag: Suppers
+        title: A hot pot every night
+        body: Three courses cooked in the hut, from farms in the valley below, with a flask filled for tomorrow.
+        image:
+          # generate: A bowl of steaming stew with a hunk of bread and a candle on a small wooden table, on its own in the middle of white paper, small loose vignette with lots of white paper around it
+          # (1280x960, seed 202, the second of a batch of three)
+          file: inputs/card-supper.jpg
+          medium: watercolour
+      - tag: Guides
+        title: Someone who knows the way
+        body: Mountain leaders who grew up here, with the map in their heads and a plan for the weather.
+        image:
+          # generate: A folded paper walking map with a brass compass and a pencil lying on it, on its own in the middle of white paper, small loose vignette with lots of white paper around it
+          # (1280x960, seed 203, the third of a batch of three)
+          file: inputs/card-map.jpg
+          medium: watercolour
+
+  - type: stats
+    items:
+      - { value: "62", unit: km, label: of path over five days }
+      - { value: "5", label: stone huts a day's walk apart }
+      - { value: "8", label: walkers at most in a group }
+
+  - type: quote
+    text: I carried a sandwich and a raincoat for a week. <em>Somebody else carried everything else.</em>
+    who: Morven Hale, walked the route in May (a fictional quote)
+
+  - type: faq
+    title: Before you book
+    items:
+      - { q: "How fit do I need to be?", a: "Comfortable with six hours on your feet and a few steep climbs a day. The guide sets the pace by the group." }
+      - { q: "What if the weather turns?", a: "Every day has a low route. The guide decides each morning, and the huts are warm whatever happens." }
+      - { q: "Can I walk on my own?", a: "Yes. Self-guided weeks use the same huts and bag transfers, with a waterproof map and a phone number that answers." }
+
+  - type: cta
+    id: book
+    kicker: Weeks from May to September
+    title: The fells are waiting. <em>The fire is lit.</em>
+    button: { label: Book a week, href: "#book" }
+    backdrop:
+      # generate: A long low strip of fells, stone walls, a tarn and a tiny hut painted only along the very bottom edge of the picture; the upper three quarters of the picture are blank white paper with nothing painted on it
+      # (2048x1152, seed 204, the first of a batch of three)
+      file: inputs/band.jpg
+      medium: watercolour
+
+footer:
+  left: Tarnhollow is a fictional company. A Scroll Studio example.
