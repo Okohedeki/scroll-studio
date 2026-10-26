@@ -751,3 +751,36 @@ def test_a_grid_slot_in_the_middle_row_reads_on_a_phone(chromium, tmp_path):
         httpd.shutdown()
         httpd.server_close()
     assert len(boxes) == 3 and all(x >= 0 for x in boxes), boxes
+
+
+def test_a_count_up_keeps_its_thousands_separators(chromium, tmp_path):
+    from playwright.sync_api import sync_playwright
+
+    from engine.compile import compiler, fonts
+    from engine.serve import serve
+    root = tmp_path / "site"
+    root.mkdir()
+    spec = {"name": "Figures", "theme": {"preset": "paper"}, "sections": [
+        {"type": "intro", "title": "Hello"},
+        {"type": "stats", "items": [{"value": "1,400", "label": "varieties"}, {"value": "96", "unit": "%", "label": "grow"}]}]}
+    (root / "site.yaml").write_text(yaml.safe_dump(spec, sort_keys=False), encoding="utf-8")
+    saved = fonts.vendor
+    fonts.vendor = lambda links, dist, log=print: None
+    try:
+        compiler.build_site(Project(root), log=lambda m: None)
+    finally:
+        fonts.vendor = saved
+    httpd = serve(root / "dist", 0, background=True)
+    try:
+        with sync_playwright() as p:
+            b = p.chromium.launch()
+            page = b.new_page(viewport={"width": 1440, "height": 900}, reduced_motion="reduce")
+            page.goto(f"http://127.0.0.1:{httpd.server_address[1]}/", wait_until="load")
+            page.evaluate("document.querySelector('.ss-stats').scrollIntoView()")
+            page.wait_for_timeout(500)
+            shown = page.eval_on_selector_all(".ss-stat .ss-v", "els => els.map(e => e.textContent.trim())")
+            b.close()
+    finally:
+        httpd.shutdown()
+        httpd.server_close()
+    assert shown == ["1,400", "96%"], shown

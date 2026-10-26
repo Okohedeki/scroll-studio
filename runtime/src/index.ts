@@ -313,6 +313,7 @@ const reveals = [...document.querySelectorAll<HTMLElement>(".ss-reveal")].map((e
   counts: [...el.querySelectorAll<HTMLElement>("[data-count]")].map((v) => ({
     v, end: parseFloat(v.dataset.count!), sup: v.querySelector("sup")?.outerHTML || "",
     dec: (v.dataset.count!.split(".")[1] || "").length, k: -1,
+    group: /\d,\d{3}/.test(v.textContent || ""),          // written with thousands separators: count up with them
   })),
 }));
 const enterShare = themeTokens.enter ?? 0.2;     // theme.motion.enter: the share of the screen a block arrives over
@@ -332,7 +333,9 @@ function updateReveals() {
       const kc = reducedMotion ? 1 : clamp((innerHeight * 0.95 - top) / (innerHeight * 0.4 / pace));
       if (kc === c.k) continue;
       c.k = kc;
-      c.v.innerHTML = (c.end * (1 - Math.pow(1 - kc, 3))).toFixed(c.dec) + c.sup;
+      const n = c.end * (1 - Math.pow(1 - kc, 3));
+      c.v.innerHTML = (c.group ? n.toLocaleString("en-US", { minimumFractionDigits: c.dec, maximumFractionDigits: c.dec })
+        : n.toFixed(c.dec)) + c.sup;
     }
   }
 }
