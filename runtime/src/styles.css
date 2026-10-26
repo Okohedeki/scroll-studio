@@ -346,10 +346,11 @@ html.mode-dark.hero-light .ss-nav:not(.ss-solid) { --ink: var(--bg); --ink-rgb: 
   opacity: calc(1 - var(--hero-p, 0) * 1.4); transform: translateY(calc(var(--hero-p, 0) * -60px)); }
 .ss-hero--left { justify-content: flex-start; }
 /* A hero whose picture keeps one side calm for the words (engine/medium.py): a light scrim on that side only, no shade */
-.ss-hero--calm .ss-hero__shade { background: linear-gradient(90deg, color-mix(in srgb, var(--bg) 34%, transparent), transparent 58%); }
-.ss-hero--calm-right .ss-hero__shade { background: linear-gradient(270deg, color-mix(in srgb, var(--bg) 34%, transparent), transparent 58%); }
-.ss-hero--calm-center .ss-hero__shade, .ss-hero--calm-top .ss-hero__shade, .ss-hero--calm-bottom .ss-hero__shade {
-  background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--bg) 26%, transparent), transparent 62%); }
+.ss-hero--calm { --calm-scrim: linear-gradient(90deg, color-mix(in srgb, var(--bg) 34%, transparent), transparent 58%); }
+.ss-hero--calm-right { --calm-scrim: linear-gradient(270deg, color-mix(in srgb, var(--bg) 34%, transparent), transparent 58%); }
+.ss-hero--calm-center, .ss-hero--calm-top, .ss-hero--calm-bottom {
+  --calm-scrim: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--bg) 26%, transparent), transparent 62%); }
+.ss-hero--calm .ss-hero__shade { background: var(--calm-scrim); }
 .ss-hero--calm.ss-hero--media .ss-h1 { text-shadow: none; }
 .ss-hero--left .ss-hero__in { align-items: flex-start; text-align: left; margin-right: auto; max-width: var(--max); }
 /* a calm-left hero keeps its copy on the calm half the picture left for it, so a long headline wraps before the subject */
@@ -357,7 +358,7 @@ html.mode-dark.hero-light .ss-nav:not(.ss-solid) { --ink: var(--bg); --ink-rgb: 
 .ss-hero .ss-h1 { margin: 0; }
 .ss-hero .ss-lede { max-width: 46ch; }
 /* over a picture the lede is nearly the full ink: the dimmer running-text grey loses its contrast on a saturated colour */
-.ss-hero--media .ss-lede { color: color-mix(in srgb, var(--ink) 92%, transparent); }
+.ss-hero--media :is(.ss-lede, .ss-rating) { color: color-mix(in srgb, var(--ink) 92%, transparent); }
 .ss-hero--media .ss-h1 { text-shadow: 0 2px 40px rgba(0, 0, 0, .25); }
 .ss-badge { display: inline-flex; align-items: center; padding: 8px 16px; border-radius: 999px; font-size: 14px; font-weight: 500;
   background: rgba(var(--ink-rgb), .1); border: 1px solid rgba(var(--ink-rgb), .22); }
@@ -474,6 +475,9 @@ a.ss-rating:hover .ss-rating__text { text-decoration: underline; text-underline-
 .ss-hero--kit.ss-hero--left.ss-hero--media .ss-hero__shade { opacity: var(--shade-strength); background:
   linear-gradient(90deg, rgba(0, 0, 0, .42), rgba(0, 0, 0, .14) 55%, rgba(0, 0, 0, 0) 80%),
   linear-gradient(180deg, rgba(0, 0, 0, .28), rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0) 66%, rgba(0, 0, 0, .34)); }
+/* a calm hero (a picture made with quiet space for the words) keeps its light scrim and its copy on the calm half */
+.ss-hero--kit.ss-hero--calm.ss-hero--media .ss-hero__shade { opacity: 1; background: var(--calm-scrim); }
+.ss-hero--kit.ss-hero--calm-left .ss-hero__in { max-width: min(var(--max), 54vw); }
 /* the framed card: the section inset on a border in the theme's accents (wide screens; --frame-w is 0 on a phone) */
 .ss-block.ss-hero.ss-frame-card { background: var(--frame-bg); isolation: isolate;
   padding-inline: calc(var(--gutter) + var(--frame-w)); padding-bottom: calc(clamp(36px, 6vh, 64px) + var(--frame-w)); }
@@ -630,13 +634,16 @@ html:not(.js) .ss-strip { overflow-x: auto; }
   .ss-product__media { min-height: 52vh; }
   .ss-product__img { max-height: 52vh; }
   .ss-hero { padding: 110px var(--gutter) 70px; }
-  .ss-hero--calm-left .ss-hero__in { max-width: none; }
+  .ss-hero--calm-left .ss-hero__in, .ss-hero--kit.ss-hero--calm-left .ss-hero__in { max-width: none; }
   /* where the top of the phone's view of the picture is its calmest part (measured at build), the words go up into it */
   .ss-hero--phone-top { align-items: flex-start; padding-top: 128px; }
+  .ss-hero--kit.ss-hero--phone-top .ss-hero__in { margin-block: 0 auto; }
+  /* and the crop leans toward the calm side as far as the build measured it must (--phone-x on the picture) */
+  .ss-hero__media img { object-position: var(--phone-x, 50%) 50%; }
   /* on a phone the words run the full width, so a calm hero's light scrim follows them down the middle, not one side */
-  .ss-hero--calm-left .ss-hero__shade, .ss-hero--calm-right .ss-hero__shade { background: linear-gradient(180deg, transparent 6%,
+  .ss-hero--calm-left, .ss-hero--calm-right { --calm-scrim: linear-gradient(180deg, transparent 6%,
     color-mix(in srgb, var(--bg) 30%, transparent) 28%, color-mix(in srgb, var(--bg) 30%, transparent) 78%, transparent 96%); }
-  .ss-hero--phone-top .ss-hero__shade { background: linear-gradient(180deg, transparent 4%,
+  .ss-hero--phone-top { --calm-scrim: linear-gradient(180deg, transparent 4%,
     color-mix(in srgb, var(--bg) 30%, transparent) 14%, color-mix(in srgb, var(--bg) 30%, transparent) 66%, transparent 86%); }
   /* phones get the static layout (rings need more room): circles in rows under the brand */
   .ss-orbit__stage { --s: 96px; width: 100%; aspect-ratio: auto; padding: 8px 0; gap: 12px; }

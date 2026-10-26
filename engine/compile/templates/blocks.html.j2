@@ -164,8 +164,8 @@
 
 {% elif b.type == "hero" %}
 {% set media = e.img or e.video %}
-<section class="ss-block ss-hero ss-hero--{{ b.align }}{{ band }}{% if media and not b.surface %} ss-surface-{{ 'light' if e.calm and e.calm.tone == 'light' else 'dark' }} ss-hero--media{% endif %}{% if e.calm %} ss-hero--calm ss-hero--calm-{{ e.calm.side }}{% if e.calm.phone == 'top' %} ss-hero--phone-top{% endif %}{% endif %}{% if b.device %} ss-hero--device{% endif %}{% if b.kit %} ss-hero--kit{% endif %}{% if b.frame %} ss-frame-card{% endif %}"{% if b.id %} id="{{ b.id }}"{% endif %}>
-  {% if media %}<div class="ss-hero__media">{% if e.video %}<video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video>{% else %}<img src="{{ e.img }}" alt="" fetchpriority="high">{% endif %}</div><div class="ss-hero__shade"></div>{% endif %}
+<section class="ss-block ss-hero ss-hero--{{ b.align }}{{ band }}{% if media and not b.surface %} ss-surface-{{ 'light' if e.calm and e.calm.tone == 'light' else 'dark' }} ss-hero--media{% endif %}{% if e.calm %} ss-hero--calm ss-hero--calm-{{ e.calm.side }}{% if e.calm.phone and e.calm.phone.place == 'top' %} ss-hero--phone-top{% endif %}{% endif %}{% if b.device %} ss-hero--device{% endif %}{% if b.kit %} ss-hero--kit{% endif %}{% if b.frame %} ss-frame-card{% endif %}"{% if b.id %} id="{{ b.id }}"{% endif %}>
+  {% if media %}<div class="ss-hero__media">{% if e.video %}<video src="{{ e.video }}" autoplay muted loop playsinline{% if e.img %} poster="{{ e.img }}"{% endif %}></video>{% else %}<img src="{{ e.img }}" alt="" fetchpriority="high"{% if e.calm and e.calm.phone %} style="--phone-x: {{ (e.calm.phone.x * 100) | round | int }}%"{% endif %}>{% endif %}</div><div class="ss-hero__shade"></div>{% endif %}
   <div class="ss-hero__in">
     {% if b.badge %}{{ badge(b.badge) }}{% endif %}
     {% if e.first %}<h1 class="ss-h1">{{ b.title | rich }}</h1>{% else %}<h2 class="ss-h1">{{ b.title | rich }}</h2>{% endif %}

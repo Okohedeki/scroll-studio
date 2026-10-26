@@ -625,16 +625,33 @@ def busyness(image, box) -> float:
 PHONE = 390 / 844        # the shape of the phone the polish report checks
 
 
-def phone_place(image) -> str:
-    """'top' or 'middle': where a full-bleed hero's words read best on a phone. A phone shows a narrow column of the
-    middle of the picture; if the upper part of that column is calmer than where centred words would sit, the words go
-    up into it and the subject shows under them."""
+def phone_crop(image, side: str = "left", limit: float = CALM_LIMIT) -> dict:
+    """Where a full-bleed hero's words read best on a phone, which shows only a narrow column of the picture:
+    {"x": the crop's horizontal position, 0-1 as CSS object-position takes it, "place": "top" or "middle"}. The column
+    starts in the middle and leans toward the calm side (`side`) only as far as it must, until the words have calm space
+    behind them, either where centred words sit or, with the words moved up, in its upper part. When nothing is calm
+    enough the calmest try is used."""
     arr = _arr(image)
     h, w = arr.shape[:2]
     cw = min(1.0, PHONE / (w / h))
-    x0, x1 = 0.5 - cw / 2, 0.5 + cw / 2
-    top, middle = busyness(arr, (x0, 0.14, x1, 0.6)), busyness(arr, (x0, 0.28, x1, 0.72))
-    return "top" if top + 0.02 < middle else "middle"
+    steps = [0.5, 0.42, 0.34, 0.26, 0.18, 0.1, 0.0]
+    if side == "right":
+        steps = [1 - p for p in steps]
+    elif side not in ("left", "right"):
+        steps = [0.5]
+    best = None
+    for p in steps:
+        x0 = p * (1 - cw)
+        middle = busyness(arr, (x0, 0.3, x0 + cw, 0.8))
+        top = busyness(arr, (x0, 0.14, x0 + cw, 0.6))
+        if middle <= limit:
+            return {"x": p, "place": "middle"}
+        if top <= limit:
+            return {"x": p, "place": "top"}
+        score, place = min((middle, "middle"), (top + 0.01, "top"))
+        if best is None or score < best[0]:
+            best = (score, {"x": p, "place": place})
+    return best[1]
 
 
 def calm(image, side: str, limit: float = CALM_LIMIT) -> tuple[bool, float]:

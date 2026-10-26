@@ -414,8 +414,12 @@ def test_a_phone_puts_the_words_where_its_column_of_the_picture_is_calm():
             x, y = rng.integers(560, 1040), rng.integers(*busy_rows)
             d.rectangle((x, y, x + 12, y + 12), fill=(20, 20, 20))
         return im
-    assert medium.phone_place(picture((380, 900))) == "top"          # a mill low in the middle: words above it
-    assert medium.phone_place(picture((0, 360))) == "middle"         # a kite up top: words stay centred
+    assert medium.phone_crop(picture((560, 900))) == {"x": 0.5, "place": "top"}    # a mill low in the middle: words above it
+    assert medium.phone_crop(picture((0, 220))) == {"x": 0.5, "place": "middle"}   # a kite up top: words stay centred
+    busy = picture((0, 900))                                          # busy all the way down the middle column
+    crop = medium.phone_crop(busy)
+    assert crop["x"] < 0.5                                            # the crop leans toward the calm left side
+    assert medium.phone_crop(busy, "right")["x"] > 0.5
 
 
 def test_a_full_bleed_print_is_made_at_the_width_the_page_serves(tmp_path):

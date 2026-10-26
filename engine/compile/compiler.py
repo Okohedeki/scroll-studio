@@ -332,10 +332,10 @@ def build_site(project: Project, log: Callable[[str], None] = print,
             img, side = hero_image(project, s)
             x["img"], x["video"] = block_image(img, 2560), publish(s.video)
             if side and x["img"] and not s.video:      # words over a calm side: their colour from the picture
-                from ..medium import phone_place, tone
+                from ..medium import phone_crop, tone
                 from PIL import Image
                 shown = Image.open(media / Path(x["img"]).name)
-                x["calm"] = {"side": side, "tone": tone(shown, side), "phone": phone_place(shown)}
+                x["calm"] = {"side": side, "tone": tone(shown, side), "phone": phone_crop(shown, side)}
             x["screen"] = block_image(s.device.image, 800) if s.device and s.device.image else None
             x["clip"] = publish(s.device.video) if s.device and s.device.video else None
         elif s.type == "product":
