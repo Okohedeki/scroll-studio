@@ -34,6 +34,11 @@ PREVIEW_SECONDS = 2.0
 PREVIEW_TIMEOUT = 12 * 60     # a preview stuck in a busy ComfyUI is dropped (the shot keeps its still move)
 
 
+def _box(k) -> list:
+    """A camera key's box, whether a FreezeKey or the dict a named move's view keys are."""
+    return list(k["box"]) if isinstance(k, dict) else list(k.box)
+
+
 @dataclass
 class Frame:
     path: Path
@@ -337,19 +342,26 @@ class Maker:
         image when it is cached, else the storyboard still; the clip itself is a flat preview of the camera path."""
         from PIL import Image
         from .. import freeze_beats as fbm
-        from ..freeze import CameraPath
         f = b.freeze
         W, H = fbm.beat_size(sec)
         secs = b.seconds - b.trim
-        path = CameraPath(f.camera, f.ease)
+        path = fbm.camera_path(f)
+        keys = fbm.camera_keys(f)
         src_text = f"the last frame of beat '{f.from_}'" if f.from_ else describe(f.image)
-        fp = _digest({"freeze": f.model_dump(mode="json", by_alias=True, exclude={"image"}), "seconds": b.seconds,
+        fz_dump = f.model_dump(mode="json", by_alias=True, exclude={"image"} | ({"move"} if f.move is None else set()))
+        fp = _digest({"freeze": fz_dump, "seconds": b.seconds,
                       "trim": b.trim, "res": [W, H], "image": image_key(f.image) if f.image is not None else None})
-        boxes = "; ".join(f"{k.t:g}: {', '.join(f'{v:g}' for v in k.box)}" + (f" (hold {k.hold:g})" if k.hold else "")
-                          for k in f.camera) or "the whole frame"
+        if f.move is not None:
+            m = f.move
+            motion = (f"camera move {m.move}" + (f" x{m.amount:g}" if m.amount != 1 else "")
+                      + (f" at {m.at[0]:g}, {m.at[1]:g}" if m.at else ""))
+        else:
+            boxes = "; ".join(f"{k.t:g}: {', '.join(f'{v:g}' for v in k.box)}" + (f" (hold {k.hold:g})" if k.hold else "")
+                              for k in f.camera) or "the whole frame"
+            motion = f"camera {boxes}; parallax {f.parallax:g}, {f.ease}"
         c = Card(b.id, sec.id, "freeze", f"{sec.id} / {b.id}", prompt=f"frozen moment: {src_text}"
                  + (f", upscaled x{f.upscale:g}" if f.upscale > 1 else ""),
-                 motion=f"camera {boxes}; parallax {f.parallax:g}, {f.ease}", caption=caption, seconds=secs, scroll=scroll,
+                 motion=motion, caption=caption, seconds=secs, scroll=scroll,
                  locked=b.locked or sec.locked, fingerprint=fp, captions=sorted(step_captions(sec.steps, b.id) + spans))
         name = f"beat_{b.id}"
         state = self.plan.stage_state(sec.id, name)
@@ -357,7 +369,10 @@ class Maker:
         c.rendered = state in ("fresh", "migrated", "locked") and clip.exists()
         st = [s for s in self.plan.stale(sec.id) if s.name == name]
         c.stages, c.estimate = [s.name for s in st], sum(s.estimate for s in st)
-        times = sorted({0.0, 1.0} | {k.t for k in f.camera} | {min(1.0, k.t + k.hold) for k in f.camera if k.hold})
+        if f.move is not None:
+            times = [0.0, 0.5, 1.0]
+        else:
+            times = sorted({0.0, 1.0} | {k.t for k in f.camera} | {min(1.0, k.t + k.hold) for k in f.camera if k.hold})
         total = secs + b.trim
         if c.rendered:
             c.frames = [Frame(self.grab(clip, max(0.0, min(t * total - b.trim, secs - 0.05)) if t < 1 else -1, f"{b.id}_{t:.2f}"),
@@ -387,12 +402,12 @@ class Maker:
         im = fbm._fit(Image.open(src), (W, H))
         c.frames = []
         for t in times:
-            p = out / f"{b.id}_{_digest([file_key(src), t, [k.box for k in f.camera], f.ease, W, H])}.jpg"
+            p = out / f"{b.id}_{_digest([file_key(src), t, [_box(k) for k in keys], f.ease, W, H])}.jpg"
             if not p.exists():
                 fbm.crop_view(im, path.at(t), (640, round(640 * H / W))).save(p, quality=88)
             c.frames.append(Frame(p, f"t={t:g}", level, t * secs))
         try:      # the clip as a flat camera move over the frame (no depth, no parallax), kept in the storyboard folder
-            pv = out / f"{b.id}_{_digest([file_key(src), [k.box for k in f.camera], f.ease, secs, b.trim])}.mp4"
+            pv = out / f"{b.id}_{_digest([file_key(src), [_box(k) for k in keys], f.ease, secs, b.trim])}.mp4"
             if not pv.exists():
                 fbm.flat_clip(src, b, pv, (640, round(640 * H / W) // 2 * 2))
             c.pieces = [Piece(secs, video=pv, label=b.id)]

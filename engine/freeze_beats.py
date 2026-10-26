@@ -42,6 +42,20 @@ def fkey(p: Path) -> Optional[dict]:
     return {"path": p.name, "size": st.st_size, "mtime": int(st.st_mtime)}
 
 
+def camera_keys(f) -> list:
+    """The camera keys of a frozen beat: its own `camera`, or, for a named `move`, the move's view (centre and width) as
+    dense keys under linear easing: what the frame pick, the storyboard and the stand-ins look at."""
+    if f.move is not None:
+        from .camera_moves import view_keys
+        return view_keys(f.move.move, f.move.amount, f.move.at)
+    return list(f.camera)
+
+
+def camera_path(f) -> CameraPath:
+    """The view path of a frozen beat (see camera_keys)."""
+    return CameraPath(camera_keys(f), "linear" if f.move is not None else f.ease)
+
+
 # ---------------------------------------------------------------- finding beats
 
 def beat_dir(project, sec, b) -> Path:
@@ -189,7 +203,7 @@ def standin_frame(project, sec, b, at, log) -> Path:
     if b.freeze is None or at == "first":
         return img
     size = beat_size(sec)
-    view = CameraPath(b.freeze.camera, b.freeze.ease).at(1.0)
+    view = camera_path(b.freeze).at(1.0)
     out = project.build / "_storyboard" / "freeze" / f"end_{digest(str(img), fkey(img), view.__dict__, size)}.png"
     if not out.exists():
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -266,7 +280,7 @@ def beat_key(project, sec, b) -> dict:
     f = b.freeze
     W, H = beat_size(sec)
     d = f.model_dump(mode="json", by_alias=True, exclude={"image"})
-    for late in ("detail", "layers"):             # fields added later: part of a key only when set, so old renders stay valid
+    for late in ("detail", "layers", "move"):             # fields added later: part of a key only when set, so old renders stay valid
         if d.get(late) is None:
             d.pop(late, None)
     key = {"freeze": d, "res": [W, H], "seconds": b.seconds, "v": VERSION}
@@ -291,7 +305,7 @@ def _source_frame(project, sec, b, log) -> Path:
     f = b.freeze
     size = beat_size(sec)
     bdir = beat_dir(project, sec, b)
-    views = CameraPath(f.camera, f.ease).boxes()
+    views = camera_path(f).boxes()
     if f.from_:
         ssec, sb = (sec, next(x for x in sec.beats if x.id == f.from_)) if any(x.id == f.from_ for x in sec.beats) \
             else find_beat(project, f.from_)
@@ -382,6 +396,9 @@ def render_beat(project, sec, b, log=print, preview_size: Optional[tuple[int, in
     rkey = {"up": digest(upkey), "depth": digest(dkey), "cam": f.model_dump(mode="json", by_alias=True,
             include={"camera", "parallax", "dolly", "ease", "blur", "grain", "seed"}), "seconds": b.seconds,
             "trim": trim_n, "size": size, "v": VERSION}
+    if f.move is not None:                        # only when set, so keyed renders keep their stamps
+        from .camera_moves import VERSION as MOVES_VERSION
+        rkey["move"] = {**f.move.model_dump(mode="json"), "v": MOVES_VERSION}
     zoomed, layered = f.detail is not None, f.layers is not None
     lkey = ""
     if layered:                                   # layered depth: the render is keyed by the planes it is made of
@@ -413,6 +430,9 @@ def render_beat(project, sec, b, log=print, preview_size: Optional[tuple[int, in
         frames = zoom_render.render_frames(rgb, depth, [x.image() for x in built], f.camera, size=size, seconds=b.seconds,
                                            first_frame=trim_n, parallax=f.parallax, dolly=f.dolly, ease=f.ease,
                                            blur=f.blur, grain=f.grain, seed=f.seed, layers=ls)
+    elif f.move is not None:                      # a named move: the rig flown through the frame
+        frames = fz.render_move_frames(rgb, depth, f.move.move, amount=f.move.amount, at=f.move.at, size=size,
+                                       seconds=b.seconds, first_frame=trim_n, blur=f.blur, grain=f.grain, seed=f.seed)
     else:
         frames = fz.render_frames(rgb, depth, f.camera, size=size, seconds=b.seconds, first_frame=trim_n,
                                   parallax=f.parallax, dolly=f.dolly, ease=f.ease, blur=f.blur, grain=f.grain, seed=f.seed)
@@ -452,8 +472,9 @@ def flat_clip(still: Path, b, out: Path, size: tuple[int, int]) -> Path:
     f = b.freeze
     rgb = np.asarray(_fit(Image.open(still), size))
     depth = np.zeros((size[1], size[0]), np.float32)
-    fz.encode_frames(fz.render_frames(rgb, depth, f.camera, size=size, seconds=b.seconds, first_frame=round(b.trim * FPS),
-                                      parallax=0.0, ease=f.ease), out, size, crf=18)
+    ease = "linear" if f.move is not None else f.ease
+    fz.encode_frames(fz.render_frames(rgb, depth, camera_keys(f), size=size, seconds=b.seconds,
+                                      first_frame=round(b.trim * FPS), parallax=0.0, ease=ease), out, size, crf=18)
     return out
 
 
@@ -461,7 +482,7 @@ def standin_clip(project, sec, b, out: Path, size: tuple[int, int], log) -> Path
     """A frozen beat's stand-in clip (flat move over its storyboard still), at the beat's size; never stamped."""
     still = standin_image(project, sec, b, log, "last")
     stamp = out.with_suffix(".json")
-    k = digest(str(still), fkey(still), b.freeze.model_dump(mode="json", by_alias=True, include={"camera", "ease"}),
+    k = digest(str(still), fkey(still), b.freeze.model_dump(mode="json", by_alias=True, include={"camera", "ease", "move"}, exclude_none=True),
                b.seconds, b.trim, size)
     if not (out.exists() and stamp.exists() and stamp.read_text() == k):
         out.parent.mkdir(parents=True, exist_ok=True)
