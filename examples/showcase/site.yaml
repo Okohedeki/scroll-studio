@@ -9,7 +9,8 @@ theme:
   fonts: { display: "Bricolage Grotesque", body: "Inter", mono: "JetBrains Mono" }
 nav:
   links:
-    - { label: New in 1.4, href: "#new" }
+    - { label: New in 1.5, href: "#new" }
+    - { label: In 1.4, href: "#v1-4" }
     - { label: Every scene, href: "#examples" }
     - { label: Concepts, href: ../concepts/dist/index.html }
   cta: { label: GitHub, href: "https://github.com/Okohedeki/scroll-studio" }
@@ -21,8 +22,21 @@ sections:
     length: 2.4
   - type: gallery
     id: new
-    nav_label: New in 1.4
-    kicker: New in 1.4
+    nav_label: New in 1.5
+    kicker: New in 1.5 · make it yours
+    title: Six brands, <em>six hand-made looks.</em>
+    items:
+      - { title: Thirty seconds of 1.5, kicker: "the launch film · all six pages", href: ../recordings/1.5.mp4, image: previews/film-1.5.jpg, video: previews/film-1.5.mp4, body: "The six heroes, the lamp on Gloamery, the colour lens on Tarnhollow, Kitewell's clouds and Millrace's captions, recorded from the built pages." }
+      - { title: "Risograph, with clouds that drift", kicker: "risograph · Kitewell, business banking", href: ../kitewell/dist/index.html, image: previews/kitewell.jpg, video: previews/kitewell.mp4, body: "Every picture printed in two inks taken from the brand, the headline's side kept calm, and two clouds drifting in a still sky." }
+      - { title: "Gouache, lit by your pointer", kicker: "gouache · Gloamery, an AI painting tool", href: ../gloamery/dist/index.html, image: previews/gloamery.jpg, video: previews/gloamery.mp4, body: "A dark painter's attic in matte gouache. The pointer is the lamp, and its light falls off with the picture's depth." }
+      - { title: "Watercolour under a colour lens", kicker: "watercolour · Tarnhollow, walking holidays", href: ../tarnhollow/dist/index.html, image: previews/tarnhollow.jpg, video: previews/tarnhollow.mp4, body: "The valley is an engraving in one ink. A circle of watercolour follows the pointer across it." }
+      - { title: "Halftone on a dark page", kicker: "halftone · Tidelow, a sleep speaker", href: ../tidelow/dist/index.html, image: previews/tidelow.jpg, video: previews/tidelow.mp4, body: "A real dot screen in cream and coral, printed on the page's own indigo, with a moonlit sea that moves." }
+      - { title: "Ink, with captions on the grid", kicker: "ink · Millrace, a job queue", href: ../millrace/dist/index.html, image: previews/millrace.jpg, video: previews/millrace.mp4, body: "Brush-and-ink drawings, three captions that take their own grid slots and arrive in turn, then a flight through the code." }
+      - { title: "A plain page, remade in gouache", kicker: "studio remake · Bramblecote Seeds", href: ../bramblecote/dist/index.html, image: previews/bramblecote.jpg, video: previews/bramblecote.mp4, body: "An ordinary seed-company page read by studio remake, its brand and copy kept, then art-directed in one medium." }
+  - type: gallery
+    id: v1-4
+    nav_label: In 1.4
+    kicker: The previous release, 1.4
     title: Nine new ways <em>to move through a page.</em>
     items:
       - { title: The one-take page, kicker: "journey · Fenmoor, a farmhouse stay", href: ../recordings/journey.mp4, image: previews/journey.jpg, video: previews/journey.mp4, body: "The whole page is one camera journey through one world: door, hall, hearth, library, table, window, moor. Each section waits at its stop." }
@@ -68,7 +82,7 @@ sections:
   - type: stats
     items:
       - { value: "15", label: Scene types }
-      - { value: "12", label: Content blocks }
+      - { value: "14", label: Content blocks }
       - { value: "32", label: Styles }
       - { value: "0", label: API keys }
   - type: cta

@@ -85,7 +85,33 @@
      ],
      "id": "new",
      "text": {
-      "kicker": "New in 1.4",
+      "kicker": "New in 1.5 · make it yours",
+      "title": "Six brands, six hand-made looks.",
+      "title_tag": "h2"
+     },
+     "children": [
+      {
+       "tag": "div",
+       "class": [
+        "ss-gallery"
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "v1-4",
+   "type": "gallery",
+   "markup": [
+    {
+     "tag": "section",
+     "class": [
+      "ss-block"
+     ],
+     "id": "v1-4",
+     "text": {
+      "kicker": "The previous release, 1.4",
       "title": "Nine new ways to move through a page.",
       "title_tag": "h2"
      },
