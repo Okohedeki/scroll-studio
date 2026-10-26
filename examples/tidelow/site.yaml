@@ -1,0 +1,149 @@
+# Tidelow: a fictional bedside sleep speaker, printed as a halftone on deep indigo. Minimal and dark on purpose.
+#
+#   studio build examples/tidelow         # no GPU needed: the stills are in inputs/, the medium runs on the CPU
+#   studio inspect examples/tidelow --page
+#
+# `imagery.medium: halftone` with `paper: bg` and light inks prints every picture on the page's own indigo: a real
+# dot screen in cream for the light and coral for the colour, the dark of each picture left as bare stock (a negative,
+# as a screen print on dark paper is). The hero keeps its left side calm for the headline. The sea scene moves with
+# the scroll as a slow 2.5D drift, and the breathing line sets itself from thin to heavy as it is read.
+#
+# inputs/ holds the raw Z-Image Turbo stills these were made from, before the medium was applied. With a GPU, swap a
+# `file:` for the `generate:` in the comment above it (and drop its `medium:`, which the site's own covers).
+name: Tidelow
+description: A bedside speaker that plays the sea at the pace you breathe, until you are asleep. A concept site.
+theme:
+  preset: night
+  from:
+    mode: dark
+    colors: { bg: "#16142b", bg2: "#1f1c3a", ink: "#efe7da", accent: "#ff7a59", accent2: "#8fb8ff", accent_ink: "#1a0d08" }
+    fonts: { display: DM Serif Display, body: Inter }
+    radius: 999px
+  labels: plain
+imagery:
+  medium: halftone
+  paper: bg
+  inks: [ink, accent]
+nav:
+  cta: { label: Reserve yours, href: "#reserve" }
+sections:
+  - type: hero
+    align: left
+    badge: Tidelow One, shipping in November
+    title: Fall asleep <em>on the tide.</em>
+    body: A bedside speaker that plays a living sea and slows its waves to your breathing until you are under. No screen, and no app to open at midnight.
+    buttons:
+      - { label: Reserve yours, href: "#reserve" }
+      - { label: How it works, href: "#how" }
+    image:
+      # generate: A dark bedroom at night, mostly deep shadow, a tall open window on the right showing a full moon over a calm sea and a tiny distant lighthouse, a small round speaker glowing softly on a bedside table under the window, a sliver of moonlight on the floor
+      # (2048x1152, seed 301, the fourth of a batch of four; calm: left)
+      file: inputs/hero.jpg
+      medium: halftone
+      # living details, drawn by the page: the moonlit sea in the window moves, and the moon's halo glints
+      live:
+        - { kind: flow, box: [0.66, 0.36, 0.9, 0.52], speed: 0.5, strength: 0.4 }
+        - { kind: glint, box: [0.68, 0.0, 0.88, 0.3], count: 4 }
+
+  - type: intro
+    id: how
+    nav_label: How it works
+    kicker: How it works
+    title: Twelve breaths a minute, <em>then ten, then six.</em>
+    body: Tidelow hears the rhythm of your breathing from across the room and lets the sea follow it down. Once you are asleep it fades to a hush and stays there until morning.
+
+  - type: product
+    side: right
+    kicker: The speaker
+    title: Nothing to look at. <em>Everything to hear.</em>
+    body: A wool-covered sphere the size of an orange, one ring of light that dims as you do, and a driver tuned for low, slow water.
+    stats:
+      - { value: "50", unit: mm, label: driver tuned for low water }
+      - { value: "9", unit: h, label: of sea on one charge }
+    image:
+      # generate: A round fabric bedside speaker with one soft ring of light on its face, standing on folded linen, seen at three quarters
+      # (1600x1280, seed 30)
+      file: inputs/device.jpg
+      medium: halftone
+
+  - id: sea
+    type: parallax
+    nav_label: The sea
+    layout: split
+    side: left
+    moves: [dolly]
+    strength: 0.7
+    steps:
+      - kicker: Recorded on four coasts
+        title: A real sea, <em>never a loop.</em>
+        body: Eleven nights of shoreline, recorded on quiet beaches and woven together live, so no wave ever comes round twice.
+        length: 1.4
+        image:
+          # generate: Slow waves rolling onto a moonlit sandy shore, the moon low over the sea, long reflections
+          # (1600x1280, seed 12)
+          file: inputs/shore.jpg
+          medium: halftone
+          live: [{ kind: flow, box: [0.0, 0.3, 1.0, 0.75], speed: 0.45, strength: 0.5 }]   # the sea breathes
+
+  - id: breathe
+    type: type
+    mode: weight
+    size: display
+    length: 2.4
+    weights: [300, 900]
+    text: Breathe in. / Hold it. / Let the tide take it.
+
+  - type: features
+    kicker: Built for the dark
+    title: Quiet in every way <em>that matters.</em>
+    items:
+      - tag: Light
+        title: It dims with you
+        body: The ring fades with your breathing and is out before you are.
+        image:
+          # generate: A single soft ring of light glowing on a dark bedside table, a glass of water beside it, simple and centred
+          # (1280x960, seed 802, the first of a batch of two)
+          file: inputs/card-ring.jpg
+          medium: halftone
+      - tag: Sound
+        title: Sea, not static
+        body: Recorded water with its own swell and lulls, mixed live so the sound never repeats.
+        image:
+          # generate: A crescent moon low over a perfectly calm sea, one long reflection on the water, simple and centred
+          # (1280x960, seed 801, the first of a batch of two)
+          file: inputs/card-moon.jpg
+          medium: halftone
+      - tag: Sleep
+        title: Off when you are
+        body: When your breathing settles, it holds a hush through the night and wakes you with the tide coming in.
+        image:
+          # generate: A cat curled up asleep on a quilted blanket at the foot of a bed, moonlight falling across it
+          # (1600x1280, seed 4)
+          file: inputs/cat.jpg
+          medium: halftone
+
+  - type: stats
+    items:
+      - { value: "11", label: nights of sea from four coasts }
+      - { value: "0", label: screens or apps to open at night }
+      - { value: "1", label: ring of light that goes out before you do }
+
+  - type: quote
+    text: I used to count sheep. Now I count waves, <em>and I never get past forty.</em>
+    who: Hanne, an early tester (a fictional quote)
+
+  - type: cta
+    id: reserve
+    kicker: Tidelow One, £149, shipping in November
+    title: Sleep <em>at low tide.</em>
+    button: { label: Reserve yours, href: "#reserve" }
+    surface: dark
+    backdrop:               # drawn on the spot, no model: the night sky, and the last of the light on the horizon
+      gradient:
+        colors: ["#100e22", "#16142b", "#1f1a3a"]
+        glows: [{ x: 0.5, y: 1.08, color: "#ff7a59", radius: 0.45, strength: 0.35 }]
+        stars: 140
+        grain: 0.04
+
+footer:
+  left: Tidelow is a fictional product. A Scroll Studio example.
