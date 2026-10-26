@@ -214,7 +214,8 @@ def make_frames(project, sec, i: int, still: Path, bdir: Path, text: str, negati
     else:           # a named move that starts on a crop (dolly-out, orbit ...): its first frame is the pure camera's first
         Image.fromarray(cg.read_video(guide.rgb, size)[0]).save(gstill)
     if backend == "ltx":
-        anchors = _anchors(guide, size, move.anchor, bdir) if move.anchor > 0 else None
+        anchor = cm.anchor_of(move)
+        anchors = _anchors(guide, size, anchor, bdir) if anchor > 0 else None
         pngs = cg.generate_ltx(gstill, guide.depth, text, negative, size, guide.frames, seed, bdir, move.guide_strength, log,
                                anchors=anchors)
         src_fps = FPS

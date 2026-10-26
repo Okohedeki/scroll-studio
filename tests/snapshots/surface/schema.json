@@ -1019,12 +1019,19 @@
      "type": "number"
     },
     "anchor": {
-     "default": 0.6,
-     "description": "ltx: how firmly the pure-camera render of the start image (the picture flown along the keys) is pinned as keyframes along the way, once a second and at the end. It keeps what things look like and sharpens close-ups (in tests: Laplacian variance 48-63 against 29-48 without, 66 in the pure render) and tightens the camera (0.8% against 1.3% zoom error). 0 = only the first frame is pinned",
-     "maximum": 1,
-     "minimum": 0,
-     "title": "Anchor",
-     "type": "number"
+     "anyOf": [
+      {
+       "maximum": 1,
+       "minimum": 0,
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "How firmly the pure-camera render is pinned along the way (as a keyed move's `anchor`). Default: the move's tested value, 0.6 for dollies, zooms, whip pans and static shots, 0.3 for moves that open gaps behind near things (orbit, crane, dolly zoom, fpv, push-through), which the model then repaints",
+     "title": "Anchor"
     },
     "at": {
      "anyOf": [

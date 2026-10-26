@@ -33,7 +33,7 @@ from typing import Callable, Optional
 
 import numpy as np
 
-VERSION = 5           # bump when a recipe changes, so the guides of named moves are re-rendered
+VERSION = 6           # bump when a recipe changes, so the guides of named moves are re-rendered
 
 MOVES = ("static", "dolly-in", "dolly-out", "crash-zoom", "dolly-zoom", "orbit-left", "orbit-right", "crane-up",
          "crane-down", "fpv", "whip-pan", "push-through")
@@ -44,6 +44,10 @@ class Recipe:
     phrase: str           # added to the video prompt (the guide does the work; the words agree with it)
     negative: str         # added to the negative prompt
     blur: float = 0.0     # motion blur of the guide, in frames (sub-frame cameras averaged)
+    anchor: float = 0.6   # how firmly the pure-camera render is pinned along the way (CameraMove.anchor). Moves that
+                          # open gaps behind near things (orbit, crane, dolly zoom, fpv, push-through) pin it lightly: in
+                          # tests the model then repainted those gaps with real background instead of copying the render's
+                          # stretched pixels, and still followed the move (orbit: gain 1.06-1.09 at 0 and 0.3 against 1.02)
 
 
 RECIPES: dict[str, Recipe] = {
@@ -53,17 +57,20 @@ RECIPES: dict[str, Recipe] = {
                         "scene", "static camera"),
     "crash-zoom": Recipe("A sudden fast crash zoom into the subject, then the frame holds", "static camera, slow zoom", 1.0),
     "dolly-zoom": Recipe("Dolly zoom vertigo effect: the subject stays the same size while the background stretches and "
-                         "warps behind it", "static camera"),
-    "orbit-left": Recipe("The camera orbits around the subject, arcing to the left, smooth parallax", "static camera"),
-    "orbit-right": Recipe("The camera orbits around the subject, arcing to the right, smooth parallax", "static camera"),
+                         "warps behind it", "static camera", anchor=0.3),
+    "orbit-left": Recipe("The camera orbits around the subject, arcing to the left, smooth parallax", "static camera",
+                         anchor=0.3),
+    "orbit-right": Recipe("The camera orbits around the subject, arcing to the right, smooth parallax", "static camera",
+                          anchor=0.3),
     "crane-up": Recipe("The camera cranes up, rising smoothly while tilting down to keep the subject in frame",
-                       "static camera"),
+                       "static camera", anchor=0.3),
     "crane-down": Recipe("The camera cranes down, descending smoothly while tilting up to keep the subject in frame",
-                         "static camera"),
-    "fpv": Recipe("FPV drone shot flying fast forward through the scene, banking smoothly", "static camera", 0.6),
+                         "static camera", anchor=0.3),
+    "fpv": Recipe("FPV drone shot flying fast forward through the scene, banking smoothly", "static camera", 0.6,
+                  anchor=0.3),
     "whip-pan": Recipe("A fast whip pan across the scene with motion blur", "static camera", 1.5),
     "push-through": Recipe("The camera pushes forward through the foreground into the scene beyond, smooth continuous "
-                           "forward motion", "static camera"),
+                           "forward motion", "static camera", anchor=0.3),
 }
 
 
@@ -155,12 +162,13 @@ def cam_at(move: str, u: float, amount: float = 1.0, at: Optional[tuple[float, f
         k = _sine(u)
         sign = 1.0 if move == "orbit-left" else -1.0
         cx, cy = _aimed(tgt, SIDE_W, 1.0)
-        return Cam(cx, cy, SIDE_W, sx=sign * ORBIT * A * (2 * k - 1), e=0.05 * A * math.sin(math.pi * k))
+        # from no shift (the first frame is a clean crop, nothing pinned with a gap in it) to the end of the arc
+        return Cam(cx, cy, SIDE_W, sx=sign * ORBIT * 1.6 * A * k, e=0.05 * A * math.sin(math.pi * k))
     if move in ("crane-up", "crane-down"):
         k = _sine(u)
         sign = 1.0 if move == "crane-up" else -1.0
         cx, cy = _aimed(tgt, SIDE_W, 1.0)
-        return Cam(cx, cy, SIDE_W, sy=sign * CRANE * A * (2 * k - 1))
+        return Cam(cx, cy, SIDE_W, sy=sign * CRANE * 1.6 * A * k)
     if move == "fpv":
         k = _lerp(u, _sine(u), 0.35)              # mostly constant speed: a drone does not ease
         w = math.exp(_lerp(math.log(0.9), math.log(0.9 / (1 + 0.9 * A)), k))
@@ -227,6 +235,15 @@ def view_keys(move: str, amount: float = 1.0, at: Optional[tuple[float, float]] 
         c = cam_at(move, t, amount, at)
         out.append({"t": t, "box": [c.cx - c.w / 2, c.cy - c.w / 2, c.cx + c.w / 2, c.cy + c.w / 2], "hold": 0.0})
     return out
+
+
+def anchor_of(camera) -> float:
+    """How firmly the pure-camera render is pinned for this beat's camera: its own `anchor`, or, for a named move that
+    leaves it out, the move's tested default."""
+    name = getattr(camera, "move", None)
+    if name and camera.anchor is None:
+        return RECIPES[name].anchor
+    return float(camera.anchor)
 
 
 def phrase(camera) -> str:

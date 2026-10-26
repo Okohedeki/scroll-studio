@@ -116,9 +116,24 @@ def test_orbit_crane_and_dolly_zoom_move_against_depth_not_the_view():
     for m, field, sign in (("orbit-left", "sx", 1), ("orbit-right", "sx", -1), ("crane-up", "sy", 1), ("crane-down", "sy", -1)):
         r = cm.rig(m, 25)
         vals = [getattr(c, field) for c in r]
-        assert sign * (vals[-1] - vals[0]) > 0.15 and len({(c.cx, c.cy, c.w) for c in r}) == 1
+        assert sign * (vals[-1] - vals[0]) > 0.12 and len({(c.cx, c.cy, c.w) for c in r}) == 1
     dz = cm.rig("dolly-zoom", 25)
     assert len({c.w for c in dz}) == 1 and dz[0].e == 0 and dz[-1].e > 0.4
+
+
+def test_orbit_and_crane_start_with_no_shift():
+    for m in ("orbit-left", "orbit-right", "crane-up", "crane-down"):
+        c = cm.cam_at(m, 0.0)
+        assert c.sx == 0 and c.sy == 0 and c.e == 0                         # the first frame is a clean crop, no gaps
+
+
+def test_anchor_defaults_follow_the_move_and_a_written_one_wins():
+    assert cm.anchor_of(beat(camera="dolly-in").camera) == 0.6
+    assert cm.anchor_of(beat(camera="orbit-left").camera) == 0.3            # gaps behind near things: pinned lightly
+    assert cm.anchor_of(beat(camera={"move": "orbit-left", "anchor": 0.0}).camera) == 0.0
+    assert cm.anchor_of(beat(camera=KEYS).camera) == 0.6                    # keyed moves keep their own default
+    assert set(cm.RECIPES) == {m for m in cm.MOVES}
+    assert all(0 <= r.anchor <= 1 for r in cm.RECIPES.values())
 
 
 def test_whip_pan_crosses_the_picture_fast_and_lands_on_the_point():
@@ -204,7 +219,7 @@ def test_orbit_slides_foreground_against_background_around_a_still_subject():
 def test_crane_up_sinks_the_foreground_and_lifts_the_background():
     f = frames("crane-up")
     assert abs(centroid(f[-1], RED)[1] - centroid(f[0], RED)[1]) < 2.0
-    assert centroid(f[-1], GREEN)[1] - centroid(f[0], GREEN)[1] > 6
+    assert centroid(f[-1], GREEN)[1] - centroid(f[0], GREEN)[1] > 4.5
     assert centroid(f[-1], YELLOW)[1] - centroid(f[0], YELLOW)[1] < -3
 
 

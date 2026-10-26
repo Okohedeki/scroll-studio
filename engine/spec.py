@@ -1677,6 +1677,10 @@ class CameraPreset(CameraMove):
                                   "leave it out")
     amount: float = Field(1.0, ge=0.25, le=2.0, description="How far the move goes: 1 is the tested recipe, 0.5 half as "
                           "far, 1.5 further (a deeper push, a wider arc, a faster zoom)")
+    anchor: Optional[float] = Field(None, ge=0, le=1, description="How firmly the pure-camera render is pinned along the "
+                                    "way (as a keyed move's `anchor`). Default: the move's tested value, 0.6 for dollies, "
+                                    "zooms, whip pans and static shots, 0.3 for moves that open gaps behind near things "
+                                    "(orbit, crane, dolly zoom, fpv, push-through), which the model then repaints")
     at: Optional[tuple[float, float]] = Field(None, description="The point the move is about, x y in 0-1 of the start image "
                                               "(the subject): where a dolly or a zoom goes, what an orbit or a crane keeps "
                                               "still, what a dolly zoom keeps the same size. Default: the centre")
