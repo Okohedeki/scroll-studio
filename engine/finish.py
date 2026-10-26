@@ -11,8 +11,9 @@ stages over the film file, in the section's work folder:
                              a pixel is averaged with its neighbours in time only while it stays within a threshold of
                              them, so shimmer goes and motion stays) and an optional unsharp mask
     gen/finish/smooth.mp4    frame interpolation to twice the frame rate: ComfyUI's FrameInterpolate (a RIFE or FILM
-                             checkpoint in models/frame_interpolation) when one is installed, else FFmpeg minterpolate
-                             (motion compensated); `auto` only when the film's motion is slow
+                             checkpoint in models/frame_interpolation) when one is installed; `auto` runs only then and
+                             only when the film's motion is slow; `on` falls back to FFmpeg minterpolate (motion
+                             compensated, no model, but it leaves halos along moving edges: measured, docs/scenes.md)
 
 `studio inspect` measures the result (softness, pops and flicker, morphs): docs/scenes.md has before/after numbers.
 """
@@ -178,6 +179,10 @@ def run(sec, ctx, src: Path) -> Path:
                     "interpolating fast motion morphs it")
             return cur
         kind, model = interpolator(fin)
+        if kind == "ffmpeg" and fin.interpolate == "auto":
+            ctx.log("  finish_interpolate: skipped, no RIFE or FILM checkpoint in ComfyUI's models/frame_interpolation "
+                    "(FFmpeg's minterpolate leaves halos along moving edges, so `auto` does not use it; `on` does)")
+            return cur
         out = fdir / "smooth.mp4"
 
         def smooth(cur=cur, out=out, kind=kind, model=model):

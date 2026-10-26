@@ -48,6 +48,7 @@ def checks() -> list[dict]:
         add("ComfyUI", False, str(e), "film, generated images")
     res.extend(wan_checks())
     res.extend(uni3c_checks())
+    res.extend(interpolation_checks())
     res.extend(reveal_checks())
     res.extend(checksum_checks())
     add("Chrome", shutil.which("chrome") or Path(r"C:\Program Files\Google\Chrome\Application\chrome.exe").exists() or s["chrome"],
@@ -95,6 +96,20 @@ def uni3c_checks() -> list[dict]:
     hit = next((h for h in have if h.replace("\\", "/").rsplit("/", 1)[-1] == cg.UNI3C_FILE), None)
     return [{"name": name, "ok": True, "detail": f"model_patches/{hit}" if hit else
              f"not installed (optional, ~2 GB, Apache-2.0): {cg.UNI3C_SOURCE}", "needed_by": need}]
+
+
+def interpolation_checks() -> list[dict]:
+    """The optional frame interpolation checkpoint of `finish.interpolate` (RIFE or FILM in ComfyUI's
+    models/frame_interpolation): listed when present, a note when not (the finishing pass then uses FFmpeg's)."""
+    from .backends import comfy
+    have = comfy.listed("frame_interpolation")
+    name = "Frame interpolation model (optional)"
+    need = "film finish.interpolate"
+    if have is None:
+        return [{"name": name, "ok": False, "detail": "ComfyUI not running, can't check", "needed_by": need}]
+    return [{"name": name, "ok": True, "detail": f"frame_interpolation/{sorted(have)[0]}" if have else
+             "not installed (optional: a RIFE or FILM checkpoint in <ComfyUI>/models/frame_interpolation); FFmpeg "
+             "minterpolate is used instead", "needed_by": need}]
 
 
 def reveal_checks() -> list[dict]:

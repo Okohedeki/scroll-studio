@@ -161,3 +161,33 @@ def test_the_clean_stage_is_cached_by_the_film_and_its_settings(tmp_path):
     auto = film(finish={"restore": None, "interpolate": "auto", "slow": 0.0001})
     assert finish.run(auto, ctx, src).name == "clean.mp4"                 # testsrc moves: not slow, so not interpolated
     assert any("skipped" in m for m in logs)
+
+
+def test_doctor_notes_the_interpolator(monkeypatch):
+    from engine import doctor
+    from engine.backends import comfy
+    monkeypatch.setattr(comfy, "listed", lambda folder: [])
+    row = doctor.interpolation_checks()[0]
+    assert row["ok"] and "minterpolate" in row["detail"]
+    monkeypatch.setattr(comfy, "listed", lambda folder: ["rife49.safetensors"])
+    assert doctor.interpolation_checks()[0]["detail"] == "frame_interpolation/rife49.safetensors"
+    monkeypatch.setattr(comfy, "listed", lambda folder: None)
+    assert not doctor.interpolation_checks()[0]["ok"]
+
+
+@needs_ffmpeg
+def test_auto_never_falls_back_to_minterpolate(tmp_path, monkeypatch):
+    from engine.backends import comfy
+    from engine.project import BuildContext, Project, ffmpeg
+    monkeypatch.setattr(comfy, "listed", lambda folder: [])
+    monkeypatch.setattr(finish, "motion_px", lambda p, *a, **k: 0.5)      # slow
+    (tmp_path / "p").mkdir()
+    src = tmp_path / "film.mp4"
+    ffmpeg("-f", "lavfi", "-i", "testsrc2=size=160x90:rate=24:duration=0.5", "-pix_fmt", "yuv420p", src)
+    logs: list[str] = []
+    ctx = BuildContext(Project(tmp_path / "p"), "s", log=logs.append)
+    out = finish.run(film(finish={"restore": None, "deflicker": False, "denoise": 0, "interpolate": "auto"}), ctx, src)
+    assert out == src and any("no RIFE or FILM" in m for m in logs)
+    out = finish.run(film(finish={"restore": None, "deflicker": False, "denoise": 0, "interpolate": "on"}), ctx, src)
+    from engine.project import probe
+    assert out.name == "smooth.mp4" and probe(out)["r_frame_rate"] == "48/1"

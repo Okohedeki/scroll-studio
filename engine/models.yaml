@@ -236,9 +236,11 @@ optional:
   - name: Hunyuan3D-2 or TRELLIS
     note: image -> 3D model for `sequence` from product photos (planned)
     licence: Tencent Hunyuan Community (region limits) / MIT
-  - name: RIFE 4.x
-    note: frame interpolation for smoother sequences and the planned `morph` type
-    licence: MIT
+  - name: RIFE 4.x or FILM (frame interpolation)
+    note: "`finish.interpolate` (doubles a film's frame rate where motion is slow) runs ComfyUI's own FrameInterpolate node
+      with a RIFE or FILM checkpoint placed in <ComfyUI>/models/frame_interpolation/; not installed by default, and without
+      one the finishing pass uses FFmpeg's motion-compensated minterpolate (no model)"
+    licence: MIT (RIFE) / Apache-2.0 (FILM)
   - name: MusicGen (stereo large)
     note: optional music beds for recordings
     licence: CC-BY-NC-4.0 (non-commercial)

@@ -1842,13 +1842,14 @@ class Finish(Model):
                            "crispening, higher shows halos)")
     interpolate: Literal["off", "auto", "on"] = Field("off", description="Double the frame rate with a frame interpolator "
                                                      "(smoother slow scrolling, twice the frames in the page's film). auto: "
-                                                     "only when the film's motion is slow (`slow`), where interpolation is "
-                                                     "clean; fast motion is where interpolators morph")
+                                                     "only with a RIFE/FILM checkpoint in ComfyUI and only when the film's "
+                                                     "motion is slow (`slow`), where interpolation is clean; on: always, "
+                                                     "with FFmpeg's minterpolate when there is no checkpoint (it leaves "
+                                                     "halos along moving edges)")
     slow: float = Field(6.0, gt=0, le=60, description="interpolate auto: the most motion, in pixels a frame at 1920 wide "
                         "(the film's median), that still counts as slow")
     interpolator: Optional[str] = Field(None, description="A RIFE or FILM checkpoint in ComfyUI's models/frame_interpolation "
-                                        "folder (ComfyUI's own FrameInterpolate node). Default: the first one ComfyUI lists, "
-                                        "else FFmpeg's motion-compensated interpolation (minterpolate), which needs no model")
+                                        "folder (ComfyUI's own FrameInterpolate node). Default: the first one ComfyUI lists")
 
     @model_validator(mode="after")
     def _batch_shape(self):
@@ -1882,6 +1883,9 @@ class FilmScene(SceneBase):
     finish: Optional[Finish] = Field(None, description="The finishing pass over the finished film (see Finish): SeedVR2 "
                                      "restore, deflicker, temporal denoise, sharpen, frame interpolation where motion is "
                                      "slow. `finish: true` for the defaults")
+    subject: Optional[Subject] = Field(None, description="beats: the one subject the story is about, kept the same from "
+                                       "shot to shot (see Subject): beats without an `image` start on a picture of it made "
+                                       "from the reference by the image editor")
     gop: int = 6
     # ---- the one-take page (engine/journey.py)
     journey: Optional["Journey"] = Field(None, description="The page as one camera journey (see Journey): the world "
