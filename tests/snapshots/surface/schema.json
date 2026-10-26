@@ -596,6 +596,21 @@
      "default": null,
      "description": "`restore`: repair the faces in this beat's clip (GFPGAN), after it is generated. Off by default; or a mapping with strength, min_size, smooth"
     },
+    "fade": {
+     "anyOf": [
+      {
+       "maximum": 2,
+       "minimum": 0,
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "The join into this beat from the one before, in seconds of crossfade: 0 is a hard cut (a change of angle, a jump to a new moment), more is a longer dissolve. Default: the film's `beat_fade`. Not used on the first beat, or on a camera beat that `continues` the one before (that join is always frame-exact)",
+     "title": "Fade"
+    },
     "freeze": {
      "anyOf": [
       {

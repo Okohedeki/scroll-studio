@@ -98,11 +98,13 @@ def plan_spans(project, sec, film_seconds: float) -> tuple[list[A.BeatSpan], flo
         durs.append(d if d else float(b.seconds))
         clips.append(clip if d else None)
     fade = min(sec.beat_fade, *(d / 3 for d in durs)) if len(durs) > 1 else 0.0
+    from ..scenes.film import join_fades
+    joins = join_fades(sec, durs) if any(b.fade is not None for b in sec.beats[1:]) else [fade] * (len(durs) - 1)
     spans, t = [], 0.0
-    for b, d, c in zip(sec.beats, durs, clips):
+    for i, (b, d, c) in enumerate(zip(sec.beats, durs, clips)):
         spans.append(A.BeatSpan(b.id, t, t + d, c, "freeze" if b.freeze is not None else "generated",
                                 beat_zoom(b, sec), b.freeze.upscale if b.freeze is not None else 1.0))
-        t += d - fade
+        t += d - (joins[i] if i < len(joins) else fade)
     total = t + fade
     if abs(total - film_seconds) > 0.35 and total > 0:         # the build moved on from the spec: spread the beats over the film
         k = film_seconds / total

@@ -1761,6 +1761,10 @@ class Beat(Model):
     motion_seed: Optional[int] = Field(None, description="Seed for the motion only, to re-roll a clip and keep its still")
     trim: float = Field(0.0, ge=0, description="Seconds cut from the start of the clip (an action shot that holds its "
                                                "first frame before moving). Re-uses the render: nothing is re-animated")
+    fade: Optional[float] = Field(None, ge=0, le=2, description="The join into this beat from the one before, in seconds of "
+                                  "crossfade: 0 is a hard cut (a change of angle, a jump to a new moment), more is a longer "
+                                  "dissolve. Default: the film's `beat_fade`. Not used on the first beat, or on a camera "
+                                  "beat that `continues` the one before (that join is always frame-exact)")
     video_model: Optional[VideoModel] = Field(None, description=VIDEO_MODEL_DOC + ". `strength` applies to ltx only")
     locked: bool = Field(False, description="Keep this beat's clip (and its storyboard still) as rendered, even when "
                                             "its prompt or motion changes; the rest of the film still builds around it")

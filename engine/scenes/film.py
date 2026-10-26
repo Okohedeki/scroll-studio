@@ -479,39 +479,12 @@ def beats_film(sec: FilmScene, ctx: BuildContext) -> Path:
     out = ctx.work / "gen" / "beats.mp4"
 
     def join():
-        out.parent.mkdir(parents=True, exist_ok=True)
-        if len(clips) == 1:
-            shutil.copy(clips[0], out)
-            return
-        groups: list = []                       # (file, seconds): continued beats merged into one clip
-        for i, c in enumerate(clips):
-            if cont[i] and groups:
-                prev, pd = groups[-1]
-                merged = ctx.work / "gen" / f"chain_{sec.beats[i].id}.mp4"
-                ffmpeg("-i", prev, "-i", c, "-filter_complex",
-                       "[1:v]trim=start_frame=1,setpts=PTS-STARTPTS[b];[0:v][b]concat=n=2:v=1:a=0[v]", "-map", "[v]",
-                       "-c:v", "libx264", "-crf", "13", "-preset", "slow", "-pix_fmt", "yuv420p", "-r", str(FPS), merged,
-                       log=ctx.log)
-                groups[-1] = (merged, pd + durs[i] - 1 / FPS)
-            else:
-                groups.append((c, durs[i]))
-        if len(groups) == 1:
-            shutil.copy(groups[0][0], out)
-            return
-        args, graph, last, t = [], [], "[0:v]", 0.0
-        for c, _ in groups:
-            args += ["-i", c]
-        gfade = min(sec.beat_fade, *(d / 3 for _, d in groups))
-        for i in range(1, len(groups)):
-            t += groups[i - 1][1] - gfade
-            tag = f"[v{i}]"
-            graph.append(f"{last}[{i}:v]xfade=transition=fade:duration={gfade:.3f}:offset={t:.3f}{tag}")
-            last = tag
-        ffmpeg(*args, "-filter_complex", ";".join(graph), "-map", last, "-c:v", "libx264", "-crf", "14", "-preset", "slow",
-               "-pix_fmt", "yuv420p", "-r", str(FPS), out, log=ctx.log)
+        join_beats(sec, clips, durs, out, ctx.work / "gen", ctx.log)
     jkey = {"clips": [file_key(c) for c in clips], "fade": fade}
     if any(cont):
         jkey["continued"] = cont                # only when there is one, so every other film keeps its cache
+    if any(b.fade is not None for b in sec.beats[1:]):
+        jkey["fades"] = [round(f, 4) for f in fades]      # only when a beat sets its own, so other films keep their cache
     ctx.stage("beats_join", jkey, [out], join)
     if sec.beat_restore and standing:
         ctx.log(f"  beats_restore: skipped while {', '.join(standing)} stand in; a full build restores the film")
@@ -549,13 +522,77 @@ def restore_beat(ctx: BuildContext, b, clip: Path, bdir: Path, size: tuple[int, 
     return out
 
 
+def join_beats(sec: FilmScene, clips: list[Path], durs: list[float], out: Path, work: Path, log=print) -> None:
+    """Join a beats film's clips into `out`: each join a crossfade (the film's `beat_fade`, or the beat's own `fade`),
+    a hard cut where a beat's `fade` is 0, or frame-exact where a camera beat `continues` the one before (its first
+    frame, the last of the one before, is dropped). Frame-exact joins are merged into one clip first (in `work`)."""
+    import shutil
+    from ..animate import FPS
+    fades = join_fades(sec, durs)
+    cont = [i > 0 and b.camera is not None and b.camera.continues for i, b in enumerate(sec.beats)]
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if len(clips) == 1:
+        shutil.copy(clips[0], out)
+        return
+    groups: list = []                       # (file, seconds, first beat): beats joined frame-exact merged into one clip
+    for i, c in enumerate(clips):
+        cut = sec.beats[i].fade is not None and fades[i - 1] < 0.5 / FPS if i else False
+        if (cont[i] or cut) and groups:
+            # a continued camera beat drops its first frame (the last frame of the one before); a hard cut keeps it
+            prev, pd, first = groups[-1]
+            merged = work / f"chain_{sec.beats[i].id}.mp4"
+            head = "[1:v]trim=start_frame=1,setpts=PTS-STARTPTS[b];" if cont[i] else "[1:v]null[b];"
+            ffmpeg("-i", prev, "-i", c, "-filter_complex",
+                   head + "[0:v][b]concat=n=2:v=1:a=0[v]", "-map", "[v]",
+                   "-c:v", "libx264", "-crf", "13", "-preset", "slow", "-pix_fmt", "yuv420p", "-r", str(FPS), merged,
+                   log=log)
+            groups[-1] = (merged, pd + durs[i] - (1 / FPS if cont[i] else 0.0), first)
+        else:
+            groups.append((c, durs[i], i))
+    if len(groups) == 1:
+        shutil.copy(groups[0][0], out)
+        return
+    gfade = min(sec.beat_fade, *(d / 3 for _, d, _ in groups))
+    # each join's crossfade: the film's, or the beat's own `fade`
+    joins = [fades[g[2] - 1] if sec.beats[g[2]].fade is not None else gfade for g in groups[1:]]
+    crossfade_clips([(c, d) for c, d, _ in groups], joins, out, log)
+
+
+def crossfade_clips(clips: list[tuple], joins: list[float], out: Path, log=print) -> None:
+    """Join clips (file, seconds) in order into `out`, each join a crossfade of its length in `joins` (seconds). Every clip
+    has the film's frame rate and size."""
+    from ..animate import FPS
+    args, graph, last = [], [], "[0:v]"
+    for c, _ in clips:
+        args += ["-i", c]
+    length = clips[0][1]                         # of the joined stream so far
+    for i in range(1, len(clips)):
+        f = joins[i - 1]
+        tag = f"[v{i}]"
+        graph.append(f"{last}[{i}:v]xfade=transition=fade:duration={f:.3f}:offset={length - f:.3f}{tag}")
+        length += clips[i][1] - f
+        last = tag
+    ffmpeg(*args, "-filter_complex", ";".join(graph), "-map", last, "-c:v", "libx264", "-crf", "14", "-preset", "slow",
+           "-pix_fmt", "yuv420p", "-r", str(FPS), out, log=log)
+
+
 def join_fades(sec: FilmScene, durs: list[float]) -> list[float]:
-    """The overlap at each join of a beats film, in seconds (one per join): the crossfade, or, for a camera beat that
-    `continues` the one before it, one frame (the duplicate first frame of the continued beat, which is dropped: a hard cut)."""
+    """The overlap at each join of a beats film, in seconds (one per join): the crossfade (the film's `beat_fade`, or the
+    beat's own `fade`, 0 for a hard cut), or, for a camera beat that `continues` the one before it, one frame (the
+    duplicate first frame of the continued beat, which is dropped: a hard cut)."""
     from ..animate import FPS
     n = len(durs)
     fade = min(sec.beat_fade, *(d / 3 for d in durs)) if n > 1 else 0
-    return [1 / FPS if (sec.beats[i].camera is not None and sec.beats[i].camera.continues) else fade for i in range(1, n)]
+    out = []
+    for i in range(1, n):
+        b = sec.beats[i]
+        if b.camera is not None and b.camera.continues:
+            out.append(1 / FPS)
+        elif b.fade is not None:
+            out.append(min(b.fade, durs[i - 1] / 3, durs[i] / 3))
+        else:
+            out.append(fade)
+    return out
 
 
 def beat_spans(sec: FilmScene, durs: list[float], fade) -> dict[str, tuple[float, float]]:
