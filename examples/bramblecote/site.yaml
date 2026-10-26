@@ -55,7 +55,7 @@ sections:
   buttons:
   - { label: Start a box, href: '#start', icon: arrow }
   - { label: How it works, href: '#how', look: ghost }
-  rating: { score: 4.8, text: 'from 2,300 member gardens' }
+  rating: { score: 4.8, text: 'from 1,760 member gardens' }
   image:
     # generate: A sunny walled kitchen garden in early summer seen from the side, an old brick wall with a green door and raised wooden beds of tomatoes, beans on bamboo canes and lettuces, all standing in the right third of the picture, a watering can beside them; the left two thirds are open sandy gravel under a wide pale sky, with nothing in it
     # (2048x1152, seed 711, the second of a batch of four; calm: left)
