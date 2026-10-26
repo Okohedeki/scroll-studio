@@ -193,9 +193,23 @@ def write_guide(out_dir: Path, rgb: np.ndarray, depth: np.ndarray, people: Optio
         for p in procs:
             p.stdin.close()
         rcs = [p.wait() for p in procs]
+        release_gpu()
     if any(rcs):
         raise BuildError(f"ffmpeg failed encoding the camera guide (exit {rcs})")
     return Guide(paths[0], paths[1], paths[2], n_frames, fps)
+
+
+def release_gpu() -> None:
+    """Hand the GPU memory the guide render cached back to the driver: the video model runs next, in ComfyUI's process, and
+    needs nearly all of a 24 GB card (memory torch keeps cached here would push it into offloading)."""
+    import gc
+    gc.collect()
+    try:
+        import torch
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+    except ImportError:           # pragma: no cover - torch is installed wherever a guide renders
+        pass
 
 
 # ---------------------------------------------------------------- generating along the guide
