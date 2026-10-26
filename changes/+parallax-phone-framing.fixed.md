@@ -1,0 +1,1 @@
+A parallax photo with `calm: left` or `right` now leans its phone view toward the calm side, as far as the build measured the words need, the way a hero's picture already did; before, a phone always showed its middle, so a caption set beside the subject on a wide screen landed on top of it on a phone.

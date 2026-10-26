@@ -192,3 +192,24 @@ def test_steps_without_a_photo_are_captions_over_the_photo_before_them(photo_pro
     (photo_project / "site.yaml").write_text(yaml.safe_dump({"name": "x", "sections": [sec]}))
     with pytest.raises(BuildError, match="has no images"):
         builder.build(Project(photo_project).load().sections[0], BuildContext(Project(photo_project), "p"), {})
+
+
+def test_a_photo_with_a_calm_side_tells_a_phone_where_to_look(photo_project):
+    """A parallax photo with `calm: left` gets a `frame` (where a phone's narrow view sits across it): leaning left, as
+    far as the words need, as a hero's picture does. A photo without a calm side has none and is shown from the middle."""
+    im = Image.new("RGB", (1280, 720), (236, 238, 240))
+    px = im.load()
+    for x in range(600, 1280):                     # a busy right half: fine stripes where the words would sit
+        for y in range(0, 720, 2):
+            px[x, y] = (30, 30, 40)
+    im.save(photo_project / "inputs" / "plate.png")
+    sec = {"id": "p", "type": "parallax", "layout": "overlay", "steps": [
+        {"title": "Calm on the left", "image": {"file": "inputs/plate.png", "calm": "left"}},
+        {"title": "No calm side", "image": "inputs/p0.jpg"}]}
+    (photo_project / "site.yaml").write_text(yaml.safe_dump({"name": "x", "sections": [sec]}))
+    project = Project(photo_project)
+    from engine.scenes import parallax as builder
+    cfg = builder.build(project.load().sections[0], BuildContext(project, "p", log=lambda m: None), {})
+    first, second = cfg["chapters"]
+    assert 0 <= first["frame"] < 0.5                # toward the calm left
+    assert "frame" not in second

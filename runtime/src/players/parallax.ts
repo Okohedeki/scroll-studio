@@ -8,7 +8,7 @@
  * of it; surface: it is painted on a surface found in the photo, in the surface's own perspective, light and grain.
  */
 import type { PlayerFactory } from "../lib/types";
-import { clamp, easeInOut, loadImage, reducedMotion, smooth } from "../lib/util";
+import { clamp, easeInOut, frameOffset, isMobile, loadImage, reducedMotion, smooth } from "../lib/util";
 import { baseGlsl, POINTER_GLSL, pointerEnv, readPointer, trackPointer, uniforms as pointerUniforms, type PointerCfg } from "../lib/pointer";
 import { WORLD_GLSL } from "../lib/worldGlsl";
 import type { LiveDetail } from "../lib/live";
@@ -36,6 +36,7 @@ ${ptr ? `vec3 ptrBase(vec3 c, vec3 bl) { return ${baseGlsl(ptr.base)}; }` : ""}
 uniform sampler2D imgA, depA, imgB, depB, mskA, mskB, uText, layA, layB;
 uniform float hasLayA, hasLayB;
 uniform vec2 scaleA, scaleB;      // cover-fit uv scale per image
+uniform vec2 shiftA, shiftB;      // where a phone's narrow view sits across a photo with a calm side (uv offset)
 uniform vec3 camA, camB;          // x, y offset and zoom per chapter
 uniform float mixAB, strength, focusA, focusB;
 uniform float grade;              // 0..1 vignette amount
@@ -45,8 +46,8 @@ uniform int uKindT[2];
 uniform mat3 uMT[2];
 uniform vec4 uBoxT[2], uCellT[2], uAT[2], uBT[2];
 
-vec3 sampleView(sampler2D img, sampler2D dep, sampler2D msk, sampler2D lay, float hasLay, vec2 sc, vec3 cam, float focus, int v){
-  vec2 c = (uv - .5) / (sc * cam.z) + .5;
+vec3 sampleView(sampler2D img, sampler2D dep, sampler2D msk, sampler2D lay, float hasLay, vec2 sc, vec2 sh, vec3 cam, float focus, int v){
+  vec2 c = (uv - .5) / (sc * cam.z) + .5 + sh;
   vec2 dir = cam.xy * strength;
   // solve uv' + (d(uv') - focus) * dir = c by fixed-point iteration: near pixels move further
   vec2 q = c;
@@ -101,8 +102,8 @@ vec3 sampleView(sampler2D img, sampler2D dep, sampler2D msk, sampler2D lay, floa
   return col;
 }
 void main(){
-  vec3 a = sampleView(imgA, depA, mskA, layA, hasLayA, scaleA, camA, focusA, 0);
-  vec3 b = mixAB > 0.001 ? sampleView(imgB, depB, mskB, layB, hasLayB, scaleB, camB, focusB, 1) : a;
+  vec3 a = sampleView(imgA, depA, mskA, layA, hasLayA, scaleA, shiftA, camA, focusA, 0);
+  vec3 b = mixAB > 0.001 ? sampleView(imgB, depB, mskB, layB, hasLayB, scaleB, shiftB, camB, focusB, 1) : a;
   vec3 c = mix(a, b, mixAB);
   float v = smoothstep(1.15, .35, length((uv - .5) * vec2(1.1, 1.)));
   o = vec4(c * mix(1., v, grade), 1.);
@@ -141,7 +142,7 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   // living details, one list per photo (engine/live.py); none with reduced motion, and then the module is not even loaded
   const liveMod = !reducedMotion && cfg.chapters.some((c: any) => Array.isArray(c.live) && c.live.length) ? await import("../lib/live") : null;
   const lives: LiveDetail[][] = liveMod ? cfg.chapters.map((c: any) => liveMod.readLive(c.live)) : [];
-  const chapters: { img: WebGLTexture; dep: WebGLTexture; msk: WebGLTexture; lay: WebGLTexture | null; w: number; h: number; focus: number; move: string }[] = [];
+  const chapters: { img: WebGLTexture; dep: WebGLTexture; msk: WebGLTexture; lay: WebGLTexture | null; w: number; h: number; focus: number; move: string; frame: number | null }[] = [];
 
   const sh = (type: number, src: string) => { const s = gl.createShader(type)!; gl.shaderSource(s, src); gl.compileShader(s);
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s) || "shader"); return s; };
@@ -153,7 +154,7 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   const loc = gl.getAttribLocation(prog, "p");
   gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
   const U = (n: string) => gl.getUniformLocation(prog, n);
-  const u = { imgA: U("imgA"), depA: U("depA"), imgB: U("imgB"), depB: U("depB"), scaleA: U("scaleA"), scaleB: U("scaleB"),
+  const u = { imgA: U("imgA"), depA: U("depA"), imgB: U("imgB"), depB: U("depB"), scaleA: U("scaleA"), scaleB: U("scaleB"), shiftA: U("shiftA"), shiftB: U("shiftB"),
     camA: U("camA"), camB: U("camB"), mixAB: U("mixAB"), strength: U("strength"), focusA: U("focusA"), focusB: U("focusB"), grade: U("grade"),
     mskA: U("mskA"), mskB: U("mskB"), uText: U("uText"), on: U("uOnT[0]"), inn: U("uInT[0]"), kind: U("uKindT[0]"), m: U("uMT[0]"),
     box: U("uBoxT[0]"), cell: U("uCellT[0]"), A: U("uAT[0]"), B: U("uBT[0]"),
@@ -183,7 +184,7 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     const [im, dp, mk, ly] = await Promise.all([loadImage(ch.image), loadImage(ch.depth), ch.world?.mask ? loadImage(ch.world.mask) : Promise.resolve(null),
       layer ? loadImage(layer).catch(() => null) : Promise.resolve(null)]);
     chapters[i] = { img: texture(im), dep: texture(dp), msk: texture(mk), lay: ly ? texture(ly) : null, w: im.naturalWidth, h: im.naturalHeight,
-      focus: ch.focus ?? 0.5, move: ch.move || cfg.move || "dolly" };
+      focus: ch.focus ?? 0.5, move: ch.move || cfg.move || "dolly", frame: ch.frame ?? null };
     ctx.progress(++loaded / cfg.chapters.length);
   }));
 
@@ -237,6 +238,10 @@ const factory: PlayerFactory = async (cfg, ctx) => {
     const ca = cw / ch, ia = c.w / c.h;
     return ca > ia ? [1, ca / ia] : [ia / ca, 1];
   };
+  // a photo with a calm side (`frame`, measured at build): on a phone its narrow view leans toward that side, as far as the
+  // build measured the words need, the way a hero's picture does (object-position); elsewhere it is centred as before
+  const frameShift = (c: { w: number; h: number; frame: number | null }, zoom: number): [number, number] =>
+    frameOffset(c.frame, cover(c)[0] * zoom, isMobile());
   // a title that the cover-fit would crop (a narrow screen) stays an ordinary card
   function fits() {
     for (const L of live) {
@@ -359,8 +364,10 @@ const factory: PlayerFactory = async (cfg, ctx) => {
         gl.uniform2fv(u.ptrC, pu.centre); gl.uniform1f(u.ptrR, pu.radius); gl.uniform1f(u.ptrAsp, pu.aspect);
       }
       gl.uniform2fv(u.scaleA, cover(a)); gl.uniform2fv(u.scaleB, cover(b));
-      gl.uniform3fv(u.camA, camFor(ka, ka === c ? local : 1));
-      gl.uniform3fv(u.camB, camFor(c, local));
+      const camA = camFor(ka, ka === c ? local : 1), camB = camFor(c, local);
+      gl.uniform2fv(u.shiftA, frameShift(a, camA[2])); gl.uniform2fv(u.shiftB, frameShift(b, camB[2]));
+      gl.uniform3fv(u.camA, camA);
+      gl.uniform3fv(u.camB, camB);
       gl.uniform1f(u.mixAB, a === b ? 0 : fade);
       gl.uniform1f(u.focusA, a.focus); gl.uniform1f(u.focusB, b.focus);
       gl.uniform1f(u.strength, cfg.strength ?? 1);

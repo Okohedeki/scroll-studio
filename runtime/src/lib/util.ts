@@ -13,6 +13,15 @@ export const follow = reducedMotion || debugP !== null ? 1 : 0.14;
 export const themeTokens: { phone?: number; enter?: number; follow?: number } = (globalThis as any).__ssTheme || {};
 export const isMobile = () => matchMedia(`(max-width: ${themeTokens.phone || 760}px)`).matches;
 
+/** The uv offset that puts a phone's view of a photo at `frame` across it (0 its left edge, 1 its right; CSS
+ * object-position): `span` is how many screen widths the photo covers (cover-fit times the camera's zoom), so the view can
+ * move by the part of the photo off screen, and never past an edge. No offset without a frame, off a phone, or when the
+ * photo is no wider than the screen. */
+export function frameOffset(frame: number | null, span: number, phone: boolean): [number, number] {
+  if (frame == null || !phone || span <= 1) return [0, 0];
+  return [(clamp(frame) - 0.5) * (1 - 1 / span), 0];
+}
+
 export function hexToRgb(hex: string): [number, number, number] {
   let h = hex.replace("#", "");
   if (h.length === 3) h = [...h].map((c) => c + c).join("");

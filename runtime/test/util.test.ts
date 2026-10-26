@@ -1,6 +1,24 @@
 import { describe, expect, it, vi } from "vitest";
-import { clamp, easeInOut, fetchBlobURL, formatScale, hexToRgb, lerp, loadBitmap, parseScale, rng, scaleAt, smooth } from "../src/lib/util";
+import { clamp, easeInOut, fetchBlobURL, formatScale, frameOffset, hexToRgb, lerp, loadBitmap, parseScale, rng, scaleAt, smooth } from "../src/lib/util";
 import { fresh, media } from "./helpers";
+
+describe("a phone's view of a photo with a calm side", () => {
+  it("leans toward the frame by the part of the photo off screen, never past an edge", () => {
+    // a 16:9 photo on a 390x844 phone covers about 3.85 screen widths
+    const span = (16 / 9) / (390 / 844);
+    const [x] = frameOffset(0.26, span, true);
+    expect(x).toBeCloseTo((0.26 - 0.5) * (1 - 1 / span), 6);
+    expect(frameOffset(0, span, true)[0]).toBeCloseTo(-(1 - 1 / span) / 2, 6);       // its left edge, exactly
+    expect(frameOffset(1, span, true)[0]).toBeCloseTo((1 - 1 / span) / 2, 6);
+    expect(frameOffset(-2, span, true)[0]).toBeCloseTo(-(1 - 1 / span) / 2, 6);      // clamped to the edge
+  });
+  it("stays centred without a frame, off a phone, or when the photo fits the screen", () => {
+    expect(frameOffset(null, 3, true)).toEqual([0, 0]);
+    expect(frameOffset(0.2, 3, false)).toEqual([0, 0]);
+    expect(frameOffset(0.2, 1, true)).toEqual([0, 0]);
+    expect(frameOffset(0.5, 3, true)[0]).toBeCloseTo(0, 9);
+  });
+});
 
 describe("scroll maths", () => {
   it("clamp holds a value inside [a, b] and defaults to 0-1", () => {
