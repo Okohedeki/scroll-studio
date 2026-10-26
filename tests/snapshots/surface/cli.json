@@ -1319,6 +1319,17 @@
   "record": {
    "help": "Record a scroll-through to MP4 (for README, social posts, Reddit).",
    "params": {
+    "cursor": {
+     "default": true,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--cursor",
+      "--no-cursor"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
     "gif": {
      "default": false,
      "kind": "option",
@@ -1369,6 +1380,16 @@
      ],
      "required": false,
      "type": "int"
+    },
+    "pointer": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--pointer"
+     ],
+     "required": false,
+     "type": "str"
     },
     "poster_at": {
      "default": 0.5,
