@@ -414,6 +414,63 @@ and grain from showing at the cut.
 frame). Cost: the depth and the people mask once per start image (about a minute, mostly model loading), the guide in
 seconds, the shot as long as any LTX beat of that length (about 10 minutes for 5 s on a 4090). Changing a box re-renders the guide and the shot, not the depth.
 
+#### Named moves (`camera: dolly-in`)
+
+The moves a director asks for by name, each a tested recipe for the same pipeline: instead of boxes, the move is a rig
+(one camera per frame for the 2.5D renderer: the view, a sideways shift and a push per unit of depth against the
+subject's depth, and a roll), flown through the start image's depth into the guide, with the pure-camera render pinned
+along the way. The prompt gets the move's words too (and a static shot drops "static camera" from the negative prompt).
+
+```yaml
+      - id: hero
+        seconds: 4
+        prompt: A white ceramic cup with steam rising on a cafe table, a plant close in the foreground, a window behind
+        motion: steam curls up from the cup, cars pass outside
+        camera: orbit-left                       # or { move: orbit-left, amount: 0.8, at: [0.55, 0.6] }
+```
+
+`amount` scales how far the move goes (1 is the tested recipe, 0.25 to 2), `at` is the subject (x y in 0-1 of the start
+image): where a dolly or a zoom goes, the pivot an orbit or a crane keeps still, what a dolly zoom keeps the same size
+(default the centre). Every keyed-move setting applies (`backend`, `subjects`, `soften`, `guide_strength`, `res`,
+`anchor`, `match`, `seed`); `continues` does not (a named move starts its own shot; chain keyed moves across a cut).
+Moves that start on a crop (dolly-out, orbit, crane, fpv, whip-pan, dolly-zoom) begin on the pure-camera render of the
+first camera, sampled from the full-size start image so the crop stays sharp.
+
+How each move reads on LTX-2.3, judged on contact sheets of two test subjects (a cup on a cafe table with a plant close in
+front and a street behind; a woman standing in a long cobbled street), 4 s at 1024x576, and measured against its
+pure-camera render (gain / parallax cosine, below):
+
+| move | how it is made | verdict |
+|---|---|---|
+| `static` | the view held; the subjects free in the guide | **reads**: the frame stays put (0.008 px a frame of drift) while cars pass and steam curls |
+| `dolly-in` / `dolly-out` | view 1 to ~0.7 on `at`, near things pushed harder (e up to 0.32) | **reads clearly** (gain 0.99-1.05) |
+| `crash-zoom` | a lens zoom (no parallax) from wide to 2.6x in a fifth of the beat, then a hold, guide motion-blurred | **reads clearly**; the close-up is soft until the finishing pass |
+| `dolly-zoom` | a constant 0.7 view while near things grow and far ones shrink about the subject's depth | **reads** on a deep scene (the street stretches away behind the woman, who keeps her size); subtle on a shallow one (the cup's background is close) |
+| `orbit-left` / `orbit-right` | a sideways shift per unit of depth that ramps from none to 0.16, pivoting on the subject's depth | **reads** as an arc of roughly 10-15 degrees: the foreground and background slide past the still subject (parallax cosine 0.92-0.99). Wider arcs need what 2.5D cannot show: the subject's other side |
+| `crane-up` / `crane-down` | the same, vertical | **reads**, modestly: vertical parallax with the subject held; LTX adds a little of the change of angle (more of the coffee's surface as the camera rises) but the camera never gets to look down onto the subject |
+| `fpv` | a fast push (0.9 to ~0.5) with a 4-degree banking roll and a little sway | **reads as a banking push**, not a fly-through: nothing is passed or flown around. With its light pinning (0.3) a face that ends up filling the frame drifts a little in look; set `anchor: 0.6` for a person |
+| `whip-pan` | a 0.62 view swept across the picture in a third of the beat, 1.5 frames of motion blur | **reads clearly**; LTX smooths the guide's sub-frame strobing into real blur and adds matching motion (a passing car) |
+| `push-through` | a deep push (to ~0.3) with strong depth push, aimed past the foreground | **reads as a deep push-in**; travelling *through* an opening does not work in 2.5D (there is no picture behind the foreground to enter), so it is the same move as a stronger dolly-in. A close-up face drifts a little at its 0.3 pinning, as with `fpv` |
+
+![Every named move on the street test, five frames across](media/film-quality/moves-walker.jpg)
+
+![Every named move on the cafe test](media/film-quality/moves-cup.jpg)
+
+![Before and after: the move asked for in words (left), the named move with the finishing pass (right)](media/film-quality/before-after.jpg)
+
+Two things the tests changed in the recipes. The subject's depth is the pivot (`at`, else the `subjects` mask, else the
+nearer things in the middle of the picture): pivoting on the centre, which is often the background, made the subject
+slide. And moves that open gaps behind near things pin the pure-camera render lightly (`anchor` 0.3 by default for orbit,
+crane, dolly-zoom, fpv and push-through, against 0.6): pinned at 0.6, LTX copied the render's stretched pixels in those
+gaps; at 0.3 (or 0) it repainted them with background that fits and still followed the move (orbit gain 1.06-1.09).
+Rays that leave the picture see it mirrored rather than its edge pixel streaked.
+
+Whether a beat reads as its move is measured on its frames, against the pure-camera render of the same rig
+(`engine/camera_moves.py` `move_agreement`): dense optical flow of the generated frames against the render's, as a gain
+(1 = the same motion, as much of it), a direction cosine, and a parallax cosine with each field's mean taken out (the
+depth structure of the move: an orbit scores ~0 there if the model only slides the picture). A static shot is measured as
+drift (pixels a frame) instead.
+
 ### Edit only inside a region (`edit.region`)
 
 A plain image edit (Qwen-Image-Edit) redraws a little of everything: ask for richer shoes and the crowd around them
@@ -879,6 +936,83 @@ what is wrong, and a score table per beat. Reports are cached by the film's cont
 an unchanged film answers at once), a rebuilt beat re-measures. The storyboard editor (`studio storyboard --edit`) shows a
 badge on every beat card with its worst problem, linking to the report, and a **Polish check** button; MCP: `inspect_film`.
 `--video` judges any video file as one shot, e.g. a `studio record` scroll-through.
+
+### The finishing pass (`finish:`)
+
+A generated film comes out of the video model soft (a camera beat runs near 1024x576 and is scaled up), with grain that
+shimmers from frame to frame. `finish:` on a film section runs a finishing pass over the finished film, after the join
+and before the encode, each step its own cached stage keyed by the film and its settings:
+
+```yaml
+  - id: story
+    type: film
+    beats: [...]
+    finish: true                 # or { restore: 1088, batch: 21, denoise: 0.25, sharpen: 0.3, deflicker: false, interpolate: auto }
+```
+
+1. **Restore** (`restore`, default 1088; `null` skips it): SeedVR2 7B sharp over the film at that height, in batches of
+   `batch` frames (21 by default against `beat_restore`'s 9: a batch is restored together, so larger batches shimmer
+   less), chunked and cross-faded, colour kept by a Lab match.
+2. **Clean**: FFmpeg `atadenoise` (`denoise`, 0-1, default 0.25: a pixel is averaged with its neighbours in time only
+   while it stays within a threshold of them, so the shimmer goes and real motion stays), then a light unsharp mask
+   (`sharpen`, default 0.3) that gives back the fine detail the denoise softens. `deflicker: true` adds FFmpeg's
+   brightness deflicker for a clip that visibly pulses; it is off by default because on a moving camera it chases real
+   changes of light (measured below).
+3. **Interpolate** (`interpolate`, off by default): twice the frame rate, for smoother slow scrolling. It uses ComfyUI's
+   own FrameInterpolate node with a RIFE or FILM checkpoint in `<ComfyUI>/models/frame_interpolation/` (not installed by
+   default; `studio doctor` says whether one is there). `auto` runs only with such a checkpoint and only when the film's
+   median motion is at most `slow` pixels a frame (at 1920 wide), where interpolation is clean. `on` always runs, with
+   FFmpeg's `minterpolate` when there is no checkpoint; measured, it leaves halos along moving edges (below), so `auto`
+   never falls back to it.
+
+`studio build --plan` prices each stage (SeedVR2 about 95 s per second of film at 1088, scaled by the square of the
+height; the clean-up seconds). Measured with `studio inspect` on the same clip before and after:
+
+| clip (LTX-2.3 camera beat, 1024x576 scaled to 1920x1088, 4 s) | fine detail | edge width | luma zigzag | inspect: softness / morphs / halos | verdict |
+|---|---|---|---|---|---|
+| walker, dolly-in: as generated | 0.000057 | 6.1 px | 0.225 | 0 / 96 / 100 | bad (soft) |
+| ... SeedVR2 restore at 1088, batch 21 | 0.000294 | 5.8 px | 0.233 | 40 / 92 / 100 | visible |
+| ... `finish: true` (restore + denoise 0.25 + sharpen 0.3) | **0.000418** | 5.7 px | **0.142** | **67** / 91 / 92 | **clean** |
+| cup, orbit-left: as generated | 0.000065 | 5.8 px | 0.133 | 0 / 100 / 100 | bad (soft) |
+| ... SeedVR2 restore at 1088, batch 21 | 0.000230 | 5.8 px | 0.138 | 50 / 100 / 100 | slight |
+| ... `finish: true` | **0.000373** | 5.8 px | **0.036** | **88** / 100 / 100 | **clean** |
+
+Fine detail is `studio inspect`'s softness measure (higher is sharper; under 0.00025 reads as enlarged), the luma zigzag
+is the mean size of a frame's brightness step that reverses at the next frame (the continuous form of inspect's flicker
+check; lower is steadier). What did not help, on the same clips: `deflicker` after the restore raised the zigzag (0.233
+to 0.360) and lost a fifth of the detail; giving SeedVR2 the clip at the video model's own 1024x576 (a real 2x upscale)
+instead of at the film's size restored less (detail 0.000223, softness 21); FFmpeg `minterpolate` to 48 fps turned halos
+from 100 to 43 (visible double edges along the moving plant). The edges stay wider than native 1080p footage (1.5-2.5 px):
+the restore redraws texture, not the video model's resolution.
+
+### One subject across shots (`subject:`)
+
+A film about one person or one product has to keep it the same from shot to shot. `subject:` names it once, with a
+reference picture:
+
+```yaml
+  - id: story
+    type: film
+    subject: { image: inputs/hero.png, name: the woman in the red coat }
+    beats:
+      - { id: street, prompt: "She stands on a cobblestone street, overcast light", motion: ..., camera: dolly-in }
+      - { id: cafe, prompt: "She sits by a cafe window, morning light", motion: ..., camera: orbit-left }
+```
+
+Every generated beat without its own `image` then starts on a picture made from the reference by the local image editor
+(Qwen-Image-Edit): the beat's `prompt` as the new scene, `name` kept exactly as in the reference (`keep`: what must not
+change, by default face, hair, clothes, shape and colours). Inside each shot the video model starts on that picture and,
+on a camera beat, is pinned to pure-camera renders of it along the way, so the subject keeps its identity through the
+move. A beat with its own `image`, a frozen moment and a camera beat that `continues` the one before are unchanged; a new
+reference file re-makes the start pictures of the beats that use it.
+
+![The reference, then two beats made from it: a cafe (dolly-in) and a bridge at dusk (orbit-left)](media/film-quality/subject.jpg)
+
+Tested with one reference (the woman in the red coat in a street) and two new scenes (a cafe window, a dolly-in; a bridge
+at dusk, an orbit): her face, hair, coat and its buttons stayed the same in both start pictures and through both moves.
+What it does not do: it keeps the subject's look, not the scene's (each beat's place comes from its prompt), and Qwen
+can add small inventions (a reflection of her in the cafe window). Each start picture costs one image edit (about a
+minute on a 4090, plus loading the editor).
 
 ### Two video models: LTX-2.3 and Wan 2.2
 

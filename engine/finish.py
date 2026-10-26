@@ -7,9 +7,10 @@ stages over the film file, in the section's work folder:
     gen/finish/restore.mp4   SeedVR2 (7B sharp) at `restore` height: one diffusion step over batches of `batch` frames
                              that redraws fine detail and cleans grain, temporally consistent inside a batch (larger
                              batches shimmer less); chunked and cross-faded like every SeedVR2 pass (film_build.stage_upscale)
-    gen/finish/clean.mp4     FFmpeg: deflicker (brightness evened over 5 frames), atadenoise (adaptive temporal averaging:
-                             a pixel is averaged with its neighbours in time only while it stays within a threshold of
-                             them, so shimmer goes and motion stays) and an optional unsharp mask
+    gen/finish/clean.mp4     FFmpeg: atadenoise (adaptive temporal averaging: a pixel is averaged with its neighbours in
+                             time only while it stays within a threshold of them, so shimmer goes and motion stays), a
+                             light unsharp mask that gives back the detail it softens, and, when asked, deflicker
+                             (brightness evened over 5 frames; off by default, it chases real light changes)
     gen/finish/smooth.mp4    frame interpolation to twice the frame rate: ComfyUI's FrameInterpolate (a RIFE or FILM
                              checkpoint in models/frame_interpolation) when one is installed; `auto` runs only then and
                              only when the film's motion is slow; `on` falls back to FFmpeg minterpolate (motion
