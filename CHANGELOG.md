@@ -190,7 +190,7 @@ storyboards, a polish report, product integration, launch trailers and Wan 2.2.
   line density and saturation; optional OpenCLIP embedding distance with local weights, nothing downloaded) and **morphs**
   (the share of the change between frames that optical flow cannot explain). Beats that join like one scene (the meeting
   frames look alike) are scored as a continuation; a join between unlike frames is a scene change and is not flagged.
-  Every measure is a number that reads as a sentence, calibrated on the Presence landing page (the hands close-up is soft
+  Every measure is a number that reads as a sentence, calibrated on a story-film test page (the hands close-up is soft
   and haloed, the turn beat drifts to a pencil look and rearranges the crowd, the stage changes pop) and checked against
   `examples/feel` and `examples/one-take` for false alarms. Output: `.build/inspect/<section>.json` (per-beat scores, issues
   with level, span, one-line reason and a hint, per-second timeline) and `.html` (timeline strip, the worst moments as
