@@ -259,6 +259,20 @@ def test_roll_zero_is_the_old_render_and_a_roll_turns_the_picture():
                                                                            # the other way, and the turn is not skewed by aspect
 
 
+def test_a_ray_past_the_edge_sees_the_picture_mirrored_not_a_streak():
+    import cv2
+    rng = np.random.default_rng(4)
+    rgb = cv2.GaussianBlur(rng.integers(0, 255, (H, W, 3), dtype=np.uint8), (0, 0), 1.5)
+    d = np.full((H, W), 0.9, np.float32)                                  # all near: a sideways shift reaches past the edge
+    args = (0.5, 0.5, 1.0, 0.08, 0.0, 0.0, 0.2)
+    clamp = fz.Renderer(rgb, d, (W, H), "cpu")
+    mirror = fz.Renderer(rgb, d, (W, H), "cpu", edge="mirror")
+    a, b = clamp.to_u8(clamp.frame(*args)), mirror.to_u8(mirror.frame(*args))
+    edge_cols = lambda img: float(img[:, :8].astype(np.float32).std(axis=1).mean())   # across the first columns
+    assert edge_cols(a) < 1.0 < edge_cols(b)                               # clamp: one colour per row (a streak)
+    assert np.array_equal(a[:, 40:], b[:, 40:])                            # inside the picture they agree
+
+
 def test_motion_blur_averages_sub_frame_cameras():
     rgb, d = world()
     cams = cm.rig("whip-pan", 25)

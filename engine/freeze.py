@@ -238,9 +238,14 @@ class Renderer:
     chain of the upscaled frame."""
     STEPS = 24
 
-    def __init__(self, rgb: np.ndarray, depth: np.ndarray, size: tuple[int, int], device: Optional[str] = None):
+    def __init__(self, rgb: np.ndarray, depth: np.ndarray, size: tuple[int, int], device: Optional[str] = None,
+                 edge: str = "clamp"):
+        """`edge`: what a ray that leaves the picture sees: "clamp" (the edge pixel, stretched into streaks; a frozen
+        moment's camera never leaves the picture) or "mirror" (the picture reflected at its edge, which reads as more of
+        the scene; named camera moves, whose parallax can reach past the edge)."""
         import torch
         self.torch = torch
+        self.edge = edge
         self.dev = torch.device(device or ("cuda" if torch.cuda.is_available() else "cpu"))
         self.W, self.H = size
         t = torch.from_numpy(np.array(rgb, dtype=np.uint8)).to(self.dev).permute(2, 0, 1)[None].float()
@@ -279,7 +284,7 @@ class Renderer:
         hit = star = prev_gap = prev_d = None
         for k in range(n + 1):
             d = 1.0 - k / n
-            u = self._source_at(c, s, w, e, f, d, o).clamp(0, 1)
+            u = self._wrap(self._source_at(c, s, w, e, f, d, o))
             gap = F.grid_sample(self.depth, self._grid(u), mode="bilinear", padding_mode="border", align_corners=False)[0, 0] - d
             if k == 0:
                 hit = gap >= 0
@@ -291,6 +296,10 @@ class Renderer:
                 hit = hit | new
             prev_gap, prev_d = gap, d
         return star
+
+    def _wrap(self, u):
+        """Source positions brought into the picture (0-1): clamped to its edge, or reflected at it (`edge`)."""
+        return u.clamp(0, 1) if self.edge == "clamp" else 1 - (1 - u.abs().remainder(2)).abs()
 
     def _rolled(self, o, roll: float):
         """The view grid `o` turned by `roll` radians about the view's centre (in pixels, so the turn is not skewed by the
@@ -320,7 +329,7 @@ class Renderer:
             u = self._source_at(c, s, w, e, f, star, o_full)
         else:
             u = c + w * o_full
-        grid = self._grid(u.clamp(0, 1))
+        grid = self._grid(self._wrap(u))
         ratio = max(w * self.src_w / self.W, 1e-6)          # source pixels per output pixel
         lod = min(max(math.log2(ratio), 0.0), len(self.levels) - 1)
         lo, fr = int(lod), lod - int(lod)

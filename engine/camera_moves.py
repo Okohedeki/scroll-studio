@@ -33,7 +33,7 @@ from typing import Callable, Optional
 
 import numpy as np
 
-VERSION = 4           # bump when a recipe changes, so the guides of named moves are re-rendered
+VERSION = 5           # bump when a recipe changes, so the guides of named moves are re-rendered
 
 MOVES = ("static", "dolly-in", "dolly-out", "crash-zoom", "dolly-zoom", "orbit-left", "orbit-right", "crane-up",
          "crane-down", "fpv", "whip-pan", "push-through")
@@ -256,7 +256,7 @@ def render(rgb: np.ndarray, depth: np.ndarray, cams: list[Cam], *, size: tuple[i
     """Yield the frames (uint8 H x W x 3) of `rgb` flown along `cams` through `depth` (freeze.Renderer). With `blur` > 0 and
     `move` given, each frame averages sub-frame cameras over `blur` frames (motion blur where the camera is fast)."""
     from . import freeze as fz
-    r = fz.Renderer(rgb, depth, size, device)
+    r = fz.Renderer(rgb, depth, size, device, edge="mirror")    # parallax can reach past the edge: reflect, never streak
     n = len(cams)
     subs = 7 if blur > 0 and move else 1
     for i, c in enumerate(cams):
