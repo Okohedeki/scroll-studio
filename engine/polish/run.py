@@ -52,11 +52,35 @@ def film_candidates(project, sec) -> list[Path]:
     if sec.video:
         return [project.path(sec.video)]
     if sec.beats:
-        return [g / "gen_sr.mp4", g / "beats.mp4"] if sec.beat_restore else [g / "beats.mp4", g / "gen_sr.mp4"]
-    names = ["take.mp4", "gen_sr.mp4", "gen_up.mp4", "gen.mp4"]
+        base = [g / "gen_sr.mp4", g / "beats.mp4"] if sec.beat_restore else [g / "beats.mp4", g / "gen_sr.mp4"]
+        return finished(sec, g, base) + base
+    return finished(sec, g, _generated(sec, g)) + _generated(sec, g) + [project.build / sec.id / "wan" / "gen" / n for n in
+                                                                        _names(sec)]
+
+
+def finished(sec, g: Path, before: list[Path]) -> list[Path]:
+    """The film after the section's `finish:` pass (engine/finish.py), last stage first: what the page plays. A finished
+    file older than the film it was made from is a leftover of an earlier build and is not offered."""
+    fin = getattr(sec, "finish", None)
+    if fin is None:
+        return []
+    from ..finish import clean_filter
+    f = g / "finish"
+    names = (["smooth.mp4"] if fin.interpolate != "off" else []) + (["clean.mp4"] if clean_filter(fin) else []) \
+        + (["restore.mp4"] if fin.restore else [])
+    src = next((p for p in before if p.exists()), None)
+    newer = lambda p: src is None or not p.exists() or p.stat().st_mtime >= src.stat().st_mtime
+    return [f / n for n in names if newer(f / n)]
+
+
+def _names(sec) -> list[str]:
     if sec.take and not sec.take.product:
-        names = ["gen_sr.mp4", "gen_up.mp4", "gen.mp4"]
-    return [g / n for n in names] + [project.build / sec.id / "wan" / "gen" / n for n in names]
+        return ["gen_sr.mp4", "gen_up.mp4", "gen.mp4"]
+    return ["take.mp4", "gen_sr.mp4", "gen_up.mp4", "gen.mp4"]
+
+
+def _generated(sec, g: Path) -> list[Path]:
+    return [g / n for n in _names(sec)]
 
 
 def find_film(project, sec) -> Path:
