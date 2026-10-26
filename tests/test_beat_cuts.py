@@ -130,3 +130,12 @@ def test_inspect_judges_a_hard_cut_on_the_two_frames_it_joins(tmp_path):
     assert j[0]["kind"] == "cut" and j[0]["t1"] == pytest.approx(2.0)
     spans[1].fade_in = None
     assert A.score_joins(spans, 1.0)[0]["kind"] == "dissolve"
+
+
+def test_a_moment_next_to_a_hard_cut_belongs_to_its_own_beat():
+    from engine.polish import analyze as A
+    from engine.polish.run import _owner
+    spans = [A.BeatSpan("a", 0.0, 3.0), A.BeatSpan("b", 3.0, 6.0, fade_in=0.0), A.BeatSpan("c", 5.6, 9.0)]
+    assert _owner(spans, 0.4, 2.95).id == "a"
+    assert _owner(spans, 0.4, 3.05).id == "b"        # no gap at the cut: the next beat starts right there
+    assert _owner(spans, 0.4, 5.85).id == "c"        # the film's crossfade keeps its middle
