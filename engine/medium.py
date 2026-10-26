@@ -622,6 +622,21 @@ def busyness(image, box) -> float:
     return float((part > 0.3).mean()) + 0.2 * spread
 
 
+PHONE = 390 / 844        # the shape of the phone the polish report checks
+
+
+def phone_place(image) -> str:
+    """'top' or 'middle': where a full-bleed hero's words read best on a phone. A phone shows a narrow column of the
+    middle of the picture; if the upper part of that column is calmer than where centred words would sit, the words go
+    up into it and the subject shows under them."""
+    arr = _arr(image)
+    h, w = arr.shape[:2]
+    cw = min(1.0, PHONE / (w / h))
+    x0, x1 = 0.5 - cw / 2, 0.5 + cw / 2
+    top, middle = busyness(arr, (x0, 0.14, x1, 0.6)), busyness(arr, (x0, 0.28, x1, 0.72))
+    return "top" if top + 0.02 < middle else "middle"
+
+
 def calm(image, side: str, limit: float = CALM_LIMIT) -> tuple[bool, float]:
     """(is the headline's side calm enough, its busyness)."""
     score = busyness(image, REGIONS[side])

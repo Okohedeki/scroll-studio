@@ -404,6 +404,20 @@ def test_a_light_hero_keeps_a_dark_nav_over_it(tmp_path):
     assert " hero-media" in dark and " hero-light" not in dark
 
 
+def test_a_phone_puts_the_words_where_its_column_of_the_picture_is_calm():
+    """A phone sees a narrow column of a hero's middle: calm at the top and busy lower down sends the words up."""
+    def picture(busy_rows):
+        im = Image.new("RGB", (1600, 900), (240, 236, 228))
+        d = ImageDraw.Draw(im)
+        rng = np.random.default_rng(2)
+        for _ in range(900):
+            x, y = rng.integers(560, 1040), rng.integers(*busy_rows)
+            d.rectangle((x, y, x + 12, y + 12), fill=(20, 20, 20))
+        return im
+    assert medium.phone_place(picture((380, 900))) == "top"          # a mill low in the middle: words above it
+    assert medium.phone_place(picture((0, 360))) == "middle"         # a kite up top: words stay centred
+
+
 def test_a_full_bleed_print_is_made_at_the_width_the_page_serves(tmp_path):
     """A picture with a calm side (a hero or a backdrop with words over it) is printed at PRINT_WIDTH, so a phone's narrow
     crop shows the medium's own grain instead of a small print blown up; other pictures keep their size."""

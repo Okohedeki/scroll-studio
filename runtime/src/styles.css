@@ -352,6 +352,8 @@ html.mode-dark.hero-light .ss-nav:not(.ss-solid) { --ink: var(--bg); --ink-rgb: 
   background: radial-gradient(ellipse at 50% 50%, color-mix(in srgb, var(--bg) 26%, transparent), transparent 62%); }
 .ss-hero--calm.ss-hero--media .ss-h1 { text-shadow: none; }
 .ss-hero--left .ss-hero__in { align-items: flex-start; text-align: left; margin-right: auto; max-width: var(--max); }
+/* a calm-left hero keeps its copy on the calm half the picture left for it, so a long headline wraps before the subject */
+.ss-hero--calm-left .ss-hero__in { max-width: min(var(--max), 54vw); }
 .ss-hero .ss-h1 { margin: 0; }
 .ss-hero .ss-lede { max-width: 46ch; }
 /* over a picture the lede is nearly the full ink: the dimmer running-text grey loses its contrast on a saturated colour */
@@ -626,9 +628,14 @@ html:not(.js) .ss-strip { overflow-x: auto; }
   .ss-product__media { min-height: 52vh; }
   .ss-product__img { max-height: 52vh; }
   .ss-hero { padding: 110px var(--gutter) 70px; }
+  .ss-hero--calm-left .ss-hero__in { max-width: none; }
+  /* where the top of the phone's view of the picture is its calmest part (measured at build), the words go up into it */
+  .ss-hero--phone-top { align-items: flex-start; padding-top: 128px; }
   /* on a phone the words run the full width, so a calm hero's light scrim follows them down the middle, not one side */
   .ss-hero--calm-left .ss-hero__shade, .ss-hero--calm-right .ss-hero__shade { background: linear-gradient(180deg, transparent 6%,
     color-mix(in srgb, var(--bg) 30%, transparent) 28%, color-mix(in srgb, var(--bg) 30%, transparent) 78%, transparent 96%); }
+  .ss-hero--phone-top .ss-hero__shade { background: linear-gradient(180deg, transparent 4%,
+    color-mix(in srgb, var(--bg) 30%, transparent) 14%, color-mix(in srgb, var(--bg) 30%, transparent) 66%, transparent 86%); }
   /* phones get the static layout (rings need more room): circles in rows under the brand */
   .ss-orbit__stage { --s: 96px; width: 100%; aspect-ratio: auto; padding: 8px 0; gap: 12px; }
   .ss-orbit__center { margin-bottom: 8px; }
