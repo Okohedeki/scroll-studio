@@ -152,7 +152,7 @@ def spectral_detail(gray: np.ndarray) -> dict:
     averaged over the busiest quarter of 256 px tiles (so a sharp subject in a blurry frame counts as sharp).
 
     detail   the index. Clean ink and wash 0.002-0.006, sharp photo 0.0002-0.003, a picture enlarged 3.5x or more
-             0.00003-0.0001 (Presence: the hands close-up, the boots, the end of the zoom)
+             0.00003-0.0001 (test page: the hands close-up, the boots, the end of the zoom)
     busy     mean gradient of those tiles (levels per pixel); tiny means there was nothing to judge
     """
     h, w = gray.shape

@@ -154,21 +154,21 @@ UI (React) ◄─► engine server (FastAPI + job queue + websocket events) ◄�
   a 12 fps clip written at 24 repeats every frame, and a held shot repeats its frame) and edge, fine-detail and style
   statistics of every sixth frame at full size. Each scorer returns severities 0 (fine) to 1 (clearly visible) with the
   numbers behind them; stretches at 0.4 or more become issues (a reason, a hint, a picture), and every beat is scored 100
-  minus 100 x its worst severity per metric. Calibration (Presence landing page, `examples/feel`, `examples/one-take`):
+  minus 100 x its worst severity per metric. Calibration (a story-film test page, `examples/feel`, `examples/one-take`):
 
-  | measure | clean | broken (Presence) | severity from, to |
+  | measure | clean | broken (test page) | severity from, to |
   |---|---|---|---|
-  | fine-detail index | 0.0003-0.01 (feel: lowest frame 0.00027; Presence beats 0.0006-0.006) | hands close-up median 0.00012, boots 0.00004, end of the zoom 0.00004 | 0.00025 to 0.00008 (log) |
-  | rim share / film baseline | Presence 3% baseline, others under 7%; feel baseline 10%, max 26% (2.5x gate) | hands close-up 19-20% (6.2x), boots 9-19% | 2.5x to 5x, never under 6-10% |
+  | fine-detail index | 0.0003-0.01 (feel: lowest frame 0.00027; test page beats 0.0006-0.006) | hands close-up median 0.00012, boots 0.00004, end of the zoom 0.00004 | 0.00025 to 0.00008 (log) |
+  | rim share / film baseline | test page 3% baseline, others under 7%; feel baseline 10%, max 26% (2.5x gate) | hands close-up 19-20% (6.2x), boots 9-19% | 2.5x to 5x, never under 6-10% |
   | hatch share (drawn plate only) | ink and wash 0.37 | pencil look 0.64-0.66 | 1 to 2 JND of 0.15 |
   | unexplained change / residual | walking crowd, camera push 0.2-0.5 | crowd dissolving into rows 0.93 at 4.7 levels | 0.55 to 0.85, scaled by 1.2 to 4.5 levels |
-  | join, edges that differ at mid-fade | (continuation, same drawing) 0 | Presence stage changes 0.67-0.90, colour +1.6 to 3.1 | 0.45 to 0.85 |
+  | join, edges that differ at mid-fade | (continuation, same drawing) 0 | test page stage changes 0.67-0.90, colour +1.6 to 3.1 | 0.45 to 0.85 |
 
   Limits worth knowing: halos and softness are scored against what this film's own look makes normal (so a film that is
   soft or haloed everywhere reads clean on halos); drift only trusts hatch against a drawn plate (in a photograph weak
   texture is the content) and tone/line/saturation only while the picture barely moves; a morph is a morph whether the
   story wanted the dissolve or not (`examples/feel` has a few real ones). `--embed` (OpenCLIP ViT-H/14, about 1 s a frame on
-  the CPU) is a weak extra: on Presence the distance to the scene's first second is 0.10-0.15 for clean wide frames and
+  the CPU) is a weak extra: on the test page the distance to the scene's first second is 0.10-0.15 for clean wide frames and
   0.19-0.22 once the turn beat goes pencil, but 0.3-0.55 for any close-up, so it measures framing as much as look; it is
   therefore judged against each beat's own first second, only while the picture hardly moves, and agrees with the hatch
   measure without adding to it. Reports are cached under `.build/inspect/` by the
@@ -236,7 +236,7 @@ UI (React) ◄─► engine server (FastAPI + job queue + websocket events) ◄�
   noise level). Measuring (`studio camera --check`, MCP `camera_check`): `track_views` registers every frame against the
   first on the static world (SIFT + RANSAC similarity), `follow_error` compares the implied view with the keyed one,
   `people_displacement` takes the camera out and reads how far the people have walked, and the same numbers for the
-  pure-camera render are the measurement's floor. Measured on the Presence street (3 s, 768x448, the keys push from the
+  pure-camera render are the measurement's floor. Measured on a street test shot (3 s, 768x448, the keys push from the
   wide frame to the girl and back): `ltx` follows the keys within 0.7-0.9% rms of view width (the floor is 0.15-0.2%),
   `wan` (Fun Control, start image pinned) lags and never completes the pull-out (22.6% rms, 43% at worst), so `auto` is
   `ltx`; `uni3c` could not be measured (its file is not installed). Stage key: a beat gets a `camera` entry only when it has `camera:`

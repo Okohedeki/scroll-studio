@@ -3,7 +3,7 @@
 `scan_film` reads a film once and measures it; `score` turns the measurements into severities (0 fine, 1 clearly
 visible) for the five things a viewer notices without being able to say why: pops, softness, halos, style drift and
 morphs. Thresholds are constants at the top of each scorer, with the clean and the broken values they were set between
-(measured on the Presence landing page and on examples/feel; see docs/ENGINE.md, "Polish report").
+(measured on a story-film test page and on examples/feel; see docs/ENGINE.md, "Polish report").
 
 Time is in seconds of the joined film. Everything here is CPU, numpy and OpenCV.
 """
@@ -323,7 +323,7 @@ def width_reference(samples: dict) -> Optional[float]:
 def score_softness(sc: Scan) -> list[dict]:
     """Effective detail: how much fine detail the busiest parts of the frame hold (`detail`, see metrics.spectral_detail).
     Clean footage and drawings: 0.0003 to 0.01 whatever the content (examples/feel: lowest frame 0.00027, median 0.002;
-    Presence's clean beats 0.0006-0.006); a picture enlarged 3.5x or more: 0.00001-0.00013 (the Presence hands close-up
+    the test page's clean beats 0.0006-0.006); a picture enlarged 3.5x or more: 0.00001-0.00013 (the test page's hands close-up
     median 0.00012, the boots 0.00004). Severity from 0.00025 (fine) to 0.00008 (clearly upscaled), on a log scale. Needs
     1.5 levels of gradient in the busy tiles (a blank frame is not soft). The reason also quotes the edge width in pixels (clean 1.5-2.5, upscaled 3+)."""
     out = []
@@ -356,7 +356,7 @@ def rim_baseline(sc: Scan) -> tuple[float, int]:
 def score_halos(sc: Scan) -> list[dict]:
     """Bright rims and seams beside clean edges: the share of flat-sided strong edges with one, scored against the film's
     own baseline (`rim_baseline`) so that rim-lit photography is not a halo and ink art with a seam is. Severity from 2.5x
-    the baseline (fine) to 5x, and never under 6-10% (at 6% or less a rim is just how edges look). Presence: baseline 3%,
+    the baseline (fine) to 5x, and never under 6-10% (at 6% or less a rim is just how edges look). Test page: baseline 3%,
     the hands close-up 19-20% (7x), the boots 9-19%, everything else under 7%. A film under six seconds has no baseline to
     speak of: it is judged on the share alone, from 15% (fine) to 25%. Needs 300 such edges."""
     out = []
@@ -390,14 +390,14 @@ def score_drift(sc: Scan, st: dict, spans: list[BeatSpan], fade: float, groups: 
     like one scene, see `groups_of`) and, for what a moving camera does not explain, from where the beat itself started.
 
     hatch    share of the picture's structure that is weak texture (hatching, pencil, grain) rather than strong lines.
-             Presence: clean ink and wash 0.37, the pencil look the turn beat drifts to 0.64. One JND = 0.15. Only against
+             Test page: clean ink and wash 0.37, the pencil look the turn beat drifts to 0.64. One JND = 0.15. Only against
              a drawn plate (under 0.55): in photographs (feel: 0.71) weak texture is just the content.
     grain    noise in flat areas, only while the frame is as sharp as the plate (a zoom loses grain by itself) and the
              picture has barely moved since the beat began. One JND = x1.65.
     tone, line, sat   histogram, line density, saturation against the beat's own first second, only while the picture
              has barely moved, and only when the change is gross (3 JND: 0.30 / x2.7 / 0.18).
     embed    (with --embed) 1 - cosine of a CLIP image embedding to the beat's own first second, while the picture
-             is nearly still (against the scene's plate it measures the content, not the look: Presence's close-ups).
+             is nearly still (against the scene's plate it measures the content, not the look: the test page's close-ups).
 
     Severity from 1 JND (fine) to 2 JND (clearly a different look); the worst component is the one reported."""
     out = []
@@ -485,14 +485,14 @@ RELATED_CHROMA = 10.0
 
 
 def score_joins(spans: list[BeatSpan], fade: float, log: Callable[[str], None] = lambda s: None) -> list[dict]:
-    """The dissolve between two shots. Two kinds: a scene change (the frames that meet look nothing alike: Presence 1-12 luma
+    """The dissolve between two shots. Two kinds: a scene change (the frames that meet look nothing alike: the test page 1-12 luma
     levels apart, a cut between unrelated scenes 70-80) is a dissolve on purpose and is never a problem; a continuation (the
     new shot picks up where the old one ended) must look like one. In the middle of the crossfade the viewer sees both
     pictures at half strength, so what shows is how far out of line they are (`disp`: the 90th percentile of the optical
     flow that would lay one on the other, in pixels of a 1920 frame; a gap under 20 px is a soft edge, 100 px a plain
     double image) and whether the colours change (`chroma`, Lab levels). Severity from 20 to 100 px, and from 1.0 to 3.5
     levels of colour change; the worse of the two. A hard cut (no fade) is judged on the two frames it joins.
-    Presence at mid-fade: walk to zoom 15 px (fine), zoom to shoes 99 px, shoes to hands 68 px, hands to her 43 px and
+    On the test page at mid-fade: walk to zoom 15 px (fine), zoom to shoes 99 px, shoes to hands 68 px, hands to her 43 px and
     3.1 levels (black coat to orange), her to turn 27 px."""
     out = []
     for i, (prev, cur) in enumerate(zip(spans[:-1], spans[1:]), start=1):
