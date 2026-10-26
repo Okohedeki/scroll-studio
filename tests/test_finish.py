@@ -26,7 +26,8 @@ def film(**kw) -> FilmScene:
 def test_finish_true_takes_the_defaults_and_old_films_have_none():
     assert film().finish is None
     f = film(finish=True).finish
-    assert f == Finish() and f.restore == 1088 and f.deflicker and f.denoise > 0 and f.interpolate == "off"
+    assert f == Finish() and f.restore == 1088 and not f.deflicker and f.denoise > 0 and f.sharpen == 0.3
+    assert f.interpolate == "off"
     assert film(finish=False).finish is None
     assert "finish" not in film().model_dump(mode="json", exclude_defaults=True)
 
@@ -45,9 +46,10 @@ def test_finish_settings_validate():
 
 def test_clean_filter_follows_the_settings():
     chain = finish.clean_filter(Finish())
-    assert chain.startswith("deflicker=size=5") and "atadenoise=" in chain and "unsharp" not in chain
-    assert finish.clean_filter(Finish(deflicker=False, denoise=0)) is None
-    strong, light = finish.clean_filter(Finish(denoise=1, deflicker=False)), finish.clean_filter(Finish(denoise=0.1, deflicker=False))
+    assert chain.startswith("atadenoise=") and chain.endswith("unsharp=5:5:0.36:5:5:0") and "deflicker" not in chain
+    assert finish.clean_filter(Finish(deflicker=True)).startswith("deflicker=size=5:mode=pm,atadenoise=")
+    assert finish.clean_filter(Finish(deflicker=False, denoise=0, sharpen=0)) is None
+    strong, light = finish.clean_filter(Finish(denoise=1)), finish.clean_filter(Finish(denoise=0.1))
     a = lambda c: float(c.split("0a=")[1].split(":")[0])
     assert a(strong) > a(light)                                   # stronger: a wider threshold
     assert "unsharp=5:5:0.36" in finish.clean_filter(Finish(sharpen=0.3))
@@ -132,7 +134,7 @@ def test_the_plan_lists_the_finish_before_the_encode():
     i = names.index("encode")
     assert names[i - 3:i] == ["finish_restore", "finish_clean", "finish_interpolate"]
     assert "finish_restore" not in plan.expected(film())
-    assert plan.expected(film(finish={"restore": None, "deflicker": False, "denoise": 0})).count("finish_clean") == 0
+    assert plan.expected(film(finish={"restore": None, "denoise": 0, "sharpen": 0})).count("finish_clean") == 0
     sec = film(finish={"restore": 2160})
     kind, units = plan.units(sec, "finish_restore")
     assert kind == "film:finish_restore" and units == pytest.approx(3 * (2160 / 1088) ** 2, rel=0.01)   # 2x the height: 4x the work
@@ -186,8 +188,8 @@ def test_auto_never_falls_back_to_minterpolate(tmp_path, monkeypatch):
     ffmpeg("-f", "lavfi", "-i", "testsrc2=size=160x90:rate=24:duration=0.5", "-pix_fmt", "yuv420p", src)
     logs: list[str] = []
     ctx = BuildContext(Project(tmp_path / "p"), "s", log=logs.append)
-    out = finish.run(film(finish={"restore": None, "deflicker": False, "denoise": 0, "interpolate": "auto"}), ctx, src)
+    out = finish.run(film(finish={"restore": None, "denoise": 0, "sharpen": 0, "interpolate": "auto"}), ctx, src)
     assert out == src and any("no RIFE or FILM" in m for m in logs)
-    out = finish.run(film(finish={"restore": None, "deflicker": False, "denoise": 0, "interpolate": "on"}), ctx, src)
+    out = finish.run(film(finish={"restore": None, "denoise": 0, "sharpen": 0, "interpolate": "on"}), ctx, src)
     from engine.project import probe
     assert out.name == "smooth.mp4" and probe(out)["r_frame_rate"] == "48/1"

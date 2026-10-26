@@ -1834,12 +1834,14 @@ class Finish(Model):
                                    "about a minute and a half per second of film at 1088")
     batch: int = Field(21, ge=5, le=49, description="SeedVR2 frames restored together (4n+1). More frames: steadier "
                        "detail from frame to frame (less shimmer), more VRAM")
-    deflicker: bool = Field(True, description="Even out frame-to-frame brightness flicker (FFmpeg deflicker, over 5 frames)")
+    deflicker: bool = Field(False, description="Even out frame-to-frame brightness flicker (FFmpeg deflicker, over 5 "
+                            "frames). Off by default: on a moving camera it chases real changes of light and measured "
+                            "worse; turn it on for a clip that visibly pulses")
     denoise: float = Field(0.25, ge=0, le=1, description="Temporal denoise: pixels that only shimmer from frame to frame "
                            "are averaged with their neighbours in time (FFmpeg atadenoise; edges and real motion are kept "
                            "by its thresholds). 0 = off, 1 = strong (can smear fine moving texture)")
-    sharpen: float = Field(0.0, ge=0, le=1, description="A light unsharp mask after the restore (0 = off; 0.3 is a gentle "
-                           "crispening, higher shows halos)")
+    sharpen: float = Field(0.3, ge=0, le=1, description="A light unsharp mask after the denoise (0 = off; 0.3, the default, "
+                           "gives back the fine detail the denoise softens without halos; higher shows halos)")
     interpolate: Literal["off", "auto", "on"] = Field("off", description="Double the frame rate with a frame interpolator "
                                                      "(smoother slow scrolling, twice the frames in the page's film). auto: "
                                                      "only with a RIFE/FILM checkpoint in ComfyUI and only when the film's "
