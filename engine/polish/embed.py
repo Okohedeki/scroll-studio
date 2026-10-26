@@ -15,7 +15,7 @@ import numpy as np
 from . import analyze as A
 
 MODEL, PRETRAINED = "ViT-H-14", "laion2b_s32b_b79k"
-JND = 0.12                      # embedding cosine distance that counts as one noticeable step (set on Presence, see ENGINE.md)
+JND = 0.12                      # embedding cosine distance that counts as one noticeable step (set on the test page, see ENGINE.md)
                                 # against the beat's own start, and only while the picture hardly moves: a push, a new
                                 # framing or a different person in shot moves an embedding as far as a new style does
 EVERY = 2                       # embed every 2nd sample (two frames a second)
