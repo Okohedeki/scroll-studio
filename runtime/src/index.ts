@@ -177,9 +177,16 @@ const surfaced = [...document.querySelectorAll<HTMLElement>("main [class*='ss-su
   .filter((el) => el.matches("section, .ss-panel, .ss-backdrop") && !el.closest(".ss-caption--block, .ss-card--block"));   // not a block shown as a step
 let navSurface = "";
 
-/** A title's words without its markup (`<em>` and the like), parsed rather than pattern-stripped. */
+/** A title's words without its markup (`<em>` and the like), for a `textContent` slot. Tags are removed until none are
+ *  left, so a nested `<<em>em>` can't leave one behind. */
 function plainText(html: string): string {
-  return new DOMParser().parseFromString(html, "text/html").body.textContent || "";
+  let text = html;
+  let before;
+  do {
+    before = text;
+    text = text.replace(/<[^<>]*>/g, "");
+  } while (text !== before);
+  return text;
 }
 
 function surfaceUnderNav() {
