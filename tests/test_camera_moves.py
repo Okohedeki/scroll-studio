@@ -84,7 +84,7 @@ def test_every_view_stays_inside_the_picture(move, amount):
             assert 0.02 <= c.w <= 1.0
             assert c.cx - c.w / 2 >= -1e-9 and c.cx + c.w / 2 <= 1 + 1e-9
             assert c.cy - c.w / 2 >= -1e-9 and c.cy + c.w / 2 <= 1 + 1e-9
-            assert -0.7 <= c.e <= 0.7 * 2 and abs(c.roll) < math.radians(12)
+            assert 0 <= c.e <= 1.4 and abs(c.roll) < math.radians(12)
 
 
 def test_static_holds_and_starts_on_the_picture():
@@ -118,7 +118,7 @@ def test_orbit_crane_and_dolly_zoom_move_against_depth_not_the_view():
         vals = [getattr(c, field) for c in r]
         assert sign * (vals[-1] - vals[0]) > 0.15 and len({(c.cx, c.cy, c.w) for c in r}) == 1
     dz = cm.rig("dolly-zoom", 25)
-    assert len({c.w for c in dz}) == 1 and dz[0].e == 0 and dz[-1].e < -0.4
+    assert len({c.w for c in dz}) == 1 and dz[0].e == 0 and dz[-1].e > 0.4
 
 
 def test_whip_pan_crosses_the_picture_fast_and_lands_on_the_point():
@@ -148,6 +148,14 @@ def test_focus_is_the_depth_at_the_point():
     d[30:60, 60:100] = 0.7
     assert cm.focus_depth(d, (0.5, 0.5)) == pytest.approx(0.7)
     assert cm.focus_depth(d, (0.05, 0.05)) == pytest.approx(0.0)
+    off = np.zeros((90, 160), np.float32)                                   # a subject low and right of the centre
+    off[50:80, 85:110] = 0.6
+    assert cm.focus_depth(off, None) == pytest.approx(0.6)                  # is still the focus without `at`
+    person = np.zeros((90, 160), np.uint8)
+    person[10:30, 10:30] = 255
+    off[10:30, 10:30] = 0.33
+    assert cm.focus_depth(off, None, subjects=person) == pytest.approx(0.33)   # the named subjects win over the guess
+    assert cm.focus_depth(off, (0.6, 0.72), subjects=person) == pytest.approx(0.6)   # and `at` over them
 
 
 # ---------------------------------------------------------------- renders on a synthetic world
@@ -200,15 +208,25 @@ def test_crane_up_sinks_the_foreground_and_lifts_the_background():
     assert centroid(f[-1], YELLOW)[1] - centroid(f[0], YELLOW)[1] < -3
 
 
-def test_dolly_zoom_keeps_the_subject_size_while_the_background_swells():
+def test_dolly_zoom_keeps_the_subject_size_while_the_background_stretches_away():
     f = frames("dolly-zoom")
     r0, r1 = centroid(f[0], RED), centroid(f[-1], RED)
     assert abs(r1[2] / r0[2] - 1) < 0.08                                   # the subject's area holds
     _, _, ya0 = centroid(f[0], YELLOW)
     _, _, ya1 = centroid(f[-1], YELLOW)
-    _, _, ga0 = centroid(f[0], GREEN)
-    _, _, ga1 = centroid(f[-1], GREEN)
-    assert ya1 / ya0 > 1.25 and ga1 / ga0 < 0.85                            # far swells, near shrinks
+    tall = lambda img: np.ptp(np.nonzero(np.all(np.abs(img.astype(int) - np.array(GREEN)) < 60, axis=2))[0])
+    assert ya1 / ya0 < 0.8 and tall(f[-1]) / tall(f[0]) > 1.1              # far shrinks away, near grows (the post is
+                                                                           # cut by the frame's edge, so its height)
+
+
+def test_dolly_zoom_never_needs_picture_from_beyond_the_frame():
+    rgb, d = world()
+    rgb = rgb.copy()
+    rgb[:, :3] = rgb[:, -3:] = rgb[:3] = rgb[-3:] = (255, 0, 255)          # a magenta border: smearing it shows
+    cams = cm.rig("dolly-zoom", 5, 1.0, (0.5, 0.5))
+    last = list(cm.render(rgb, d, cams, size=(W, H), focus=0.5, device="cpu"))[-1]
+    magenta = np.all(np.abs(last.astype(int) - (255, 0, 255)) < 40, axis=2)
+    assert magenta.mean() < 0.002
 
 
 def test_dolly_in_grows_the_near_post_faster_than_the_subject():

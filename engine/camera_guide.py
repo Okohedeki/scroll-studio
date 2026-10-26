@@ -144,7 +144,7 @@ def render_streams(rgb: np.ndarray, depth: np.ndarray, people: Optional[np.ndarr
     if preset:
         name, amount, at = preset
         cams = cm.rig(name, n_frames, amount, at)
-        kw = dict(size=size, focus=cm.focus_depth(depth, at), blur=cm.RECIPES[name].blur, device=device, move=name,
+        kw = dict(size=size, focus=cm.focus_depth(depth, at, subjects=people), blur=cm.RECIPES[name].blur, device=device, move=name,
                   amount=amount, at=at)
         g_d = cm.render(_gray3(geom), geom, cams, **kw)
         g_c = cm.render(np.asarray(rgb if rgb_full is None else rgb_full), geom, cams, **kw)

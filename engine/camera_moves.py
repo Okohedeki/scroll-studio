@@ -10,8 +10,8 @@ keyframes), exactly like keyed moves. What each recipe does, in the renderer's t
     dolly-in      the view closes in on `at` (w 1 -> ~0.7) and near things grow faster than far ones (e > 0)
     dolly-out     dolly-in backwards: it starts close on `at` and pulls back to the whole picture
     crash-zoom    a lens zoom (no parallax: e = 0) that snaps from wide to ~2.6x in a fifth of the beat, then holds
-    dolly-zoom    the vertigo shot: the subject at `at` keeps its size while the background swells and the foreground
-                  shrinks (e from 0 to < 0 at a constant view: the push and the zoom cancel on the subject's plane)
+    dolly-zoom    the vertigo shot: the subject keeps its size while the background stretches away behind it and the
+                  foreground grows (e from 0 to > 0 at a constant view: the push and the zoom cancel on its plane)
     orbit-left    the camera arcs left around the subject (sx ramps up): near things slide right, far things left,
     orbit-right   the subject at the focus plane stays put; -right is the mirror
     crane-up      the camera rises (sy ramps up) tilting to keep the subject: near things sink, the background rises;
@@ -33,7 +33,7 @@ from typing import Callable, Optional
 
 import numpy as np
 
-VERSION = 1           # bump when a recipe changes, so the guides of named moves are re-rendered
+VERSION = 4           # bump when a recipe changes, so the guides of named moves are re-rendered
 
 MOVES = ("static", "dolly-in", "dolly-out", "crash-zoom", "dolly-zoom", "orbit-left", "orbit-right", "crane-up",
          "crane-down", "fpv", "whip-pan", "push-through")
@@ -144,10 +144,13 @@ def cam_at(move: str, u: float, amount: float = 1.0, at: Optional[tuple[float, f
         cx, cy = _aimed(tgt, w, k)
         return Cam(cx, cy, w)
     if move == "dolly-zoom":
+        # the push grows near things and shrinks far ones about the subject's plane, which keeps its size: the background
+        # stretches away behind it. This way round the picture never runs out: the far plane shrinks inside the margin
+        # the 0.7 view leaves (the other way, a shrinking foreground needs picture from beyond the frame's edge)
         k = _sine(u)
-        w = 0.76                                  # room for the foreground to shrink without running out of picture
+        w = 0.7
         cx, cy = _aimed(tgt, w, 1.0)
-        return Cam(cx, cy, w, e=-min(0.5 * A, 0.65) * k)     # past -0.7 the near plane folds (den clamp)
+        return Cam(cx, cy, w, e=min(0.45 * A, 0.46) * k)
     if move in ("orbit-left", "orbit-right"):
         k = _sine(u)
         sign = 1.0 if move == "orbit-left" else -1.0
@@ -195,11 +198,20 @@ def starts_full(move: str, amount: float = 1.0, at: Optional[tuple[float, float]
     return c.w >= 0.999 and abs(c.sx) < 1e-9 and abs(c.sy) < 1e-9 and abs(c.e) < 1e-9 and abs(c.roll) < 1e-9
 
 
-def focus_depth(depth: np.ndarray, at: Optional[tuple[float, float]], radius: float = 0.06) -> float:
-    """The focus plane: the median depth in a small square around `at` (the centre when None): what stays put in an
-    orbit or a crane, and keeps its size in a dolly zoom."""
+def focus_depth(depth: np.ndarray, at: Optional[tuple[float, float]], radius: float = 0.06,
+                subjects: Optional[np.ndarray] = None) -> float:
+    """The focus plane, the subject's depth: what stays put in an orbit or a crane and keeps its size in a dolly zoom.
+    With `at`, the median depth in a small square around it. Else, with a `subjects` mask (uint8, the beat's
+    `camera.subjects` cut out), the median depth inside it. Else the subject is taken to be the nearer things in the
+    middle of the picture: the 90th percentile of the depth over its central area (the median there is often the
+    background behind a subject that does not sit exactly in the centre)."""
     H, W = depth.shape[:2]
-    x, y = at if at is not None else (0.5, 0.5)
+    if at is None and subjects is not None and subjects.shape[:2] == (H, W) and (subjects > 127).mean() > 0.002:
+        return float(np.median(depth[subjects > 127]))
+    if at is None:
+        mid = depth[int(0.25 * H):int(math.ceil(0.85 * H)), int(0.3 * W):int(math.ceil(0.7 * W))]
+        return float(np.percentile(mid, 90))
+    x, y = at
     r = max(radius, 2.0 / W)
     x0, x1 = int((x - r) * W), int(math.ceil((x + r) * W))
     y0, y1 = int((y - r) * H), int(math.ceil((y + r) * H))
