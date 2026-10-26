@@ -126,27 +126,37 @@ def plan_spans(project, sec, film_seconds: float) -> tuple[list[A.BeatSpan], flo
         durs.append(d if d else float(b.seconds))
         clips.append(clip if d else None)
     fade = min(sec.beat_fade, *(d / 3 for d in durs)) if len(durs) > 1 else 0.0
+    from ..scenes.film import join_fades
+    joins = join_fades(sec, durs) if any(b.fade is not None for b in sec.beats[1:]) else [fade] * (len(durs) - 1)
     spans, t = [], 0.0
-    for b, d, c in zip(sec.beats, durs, clips):
+    for i, (b, d, c) in enumerate(zip(sec.beats, durs, clips)):
+        own = joins[i - 1] if i and b.fade is not None else None     # the beat's own join (a hard cut at 0)
         spans.append(A.BeatSpan(b.id, t, t + d, c, "freeze" if b.freeze is not None else "generated",
-                                beat_zoom(b, sec), b.freeze.upscale if b.freeze is not None else 1.0))
-        t += d - fade
+                                beat_zoom(b, sec), b.freeze.upscale if b.freeze is not None else 1.0, fade_in=own))
+        t += d - (joins[i] if i < len(joins) else fade)
     total = t + fade
     if abs(total - film_seconds) > 0.35 and total > 0:         # the build moved on from the spec: spread the beats over the film
         k = film_seconds / total
         for s in spans:
             s.start *= k; s.end *= k
+            if s.fade_in is not None:
+                s.fade_in *= k
         fade *= k
     return spans, fade
 
 
 # ---------------------------------------------------------------- issues
 
+def _fade_in(s: A.BeatSpan, fade: float) -> float:
+    """The overlap of the join into a beat: its own (a beat's `fade`, 0 at a hard cut) or the film's crossfade."""
+    return fade if s.fade_in is None else s.fade_in
+
+
 def _owner(spans: list[A.BeatSpan], fade: float, t: float) -> A.BeatSpan:
     """The beat a moment of the film belongs to: its own clip, up to the middle of a crossfade."""
     for i, s in enumerate(spans):
-        lo = s.start + (fade / 2 if i > 0 else 0.0)
-        hi = s.end - (fade / 2 if i < len(spans) - 1 else 0.0)
+        lo = s.start + (_fade_in(s, fade) / 2 if i > 0 else 0.0)
+        hi = s.end - (_fade_in(spans[i + 1], fade) / 2 if i < len(spans) - 1 else 0.0)
         if lo <= t < hi:
             return s
     return spans[-1] if t >= spans[-1].end else spans[0]
@@ -197,7 +207,11 @@ def inspect_film(path: Path, spans: list[A.BeatSpan], fade: float, out_dir: Path
     progress(0.88, "scoring")
     fps = sc.fps
     seconds = sc.n / fps
-    joins_win = [(s.start - 0.1, s.start + fade + 0.1) for s in spans[1:]] if fade > 0 else []
+    # every join is judged by the join metric (score_joins), so the frame-change metrics leave its window alone; a beat's
+    # own hard cut counts too (a film-wide cut, beat_fade 0, is left to them as before)
+    pad = lambda s: 0.1 if _fade_in(s, fade) > 0 else 0.3          # a cut is one instant: a row's width either side
+    joins_win = [(s.start - pad(s), s.start + _fade_in(s, fade) + pad(s)) for s in spans[1:]
+                 if _fade_in(s, fade) > 0 or s.fade_in is not None]
 
     joins = A.score_joins(spans, fade, log)
     groups = A.groups_of(joins, len(spans))
@@ -208,7 +222,10 @@ def inspect_film(path: Path, spans: list[A.BeatSpan], fade: float, out_dir: Path
         emb = E.embed_samples(sc, spans, fade, log)
 
     rows = {m: [] for m in METRICS}
+    own = [(s.start - pad(s), s.start + _fade_in(s, fade) + pad(s)) for s in spans[1:] if s.fade_in is not None]
     for r in A.score_pops(st):
+        if any(a <= r["t"] <= b for a, b in own):        # a beat's own join (a cut) is judged by score_joins below
+            continue
         r["_beat"] = _owner(spans, fade, r["t"]).id
         r["metric"] = "pops"
         rows["pops"].append(r)
