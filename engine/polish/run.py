@@ -105,9 +105,13 @@ def beat_zoom(b, sec) -> Optional[float]:
     """A frozen beat's tightest framing as a share of the frame's width (the camera's smallest box, widened to the
     beat's aspect, as the engine does)."""
     f = b.freeze
-    if f is None or not f.camera:
+    if f is None:
         return None
-    return float(min(max(k.box[2] - k.box[0], k.box[3] - k.box[1]) for k in f.camera))
+    from ..freeze_beats import camera_keys
+    keys = [k["box"] if isinstance(k, dict) else k.box for k in camera_keys(f)]
+    if not keys:
+        return None
+    return float(min(max(x1 - x0, y1 - y0) for x0, y0, x1, y1 in keys))
 
 
 def plan_spans(project, sec, film_seconds: float) -> tuple[list[A.BeatSpan], float]:

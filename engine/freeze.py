@@ -379,6 +379,34 @@ def render_frames(rgb: np.ndarray, depth: np.ndarray, camera, *, size: tuple[int
         yield r.to_u8(fr)
 
 
+def render_move_frames(rgb: np.ndarray, depth: np.ndarray, move: str, *, size: tuple[int, int], seconds: float,
+                       amount: float = 1.0, at: Optional[tuple[float, float]] = None, first_frame: int = 0,
+                       blur: float = 0.0, grain: float = 0.0, seed: int = 7, fps: int = FPS,
+                       device: Optional[str] = None) -> "Iterator[np.ndarray]":
+    """Yield a frozen beat's frames along a named camera move (engine/camera_moves.py) instead of keys: the rig a
+    generated beat's guide is flown along, here rendered as the beat itself. The focus plane is the subject's depth at
+    `at` (else the nearer things in the middle of the picture), so an orbit pivots on the subject and a dolly zoom keeps
+    it the same size. Rays that leave the picture see it mirrored (a move's parallax can reach past the edge). `blur`
+    (frames of shutter) is at least the move's own (a whip pan or a crash zoom is blurred by its recipe)."""
+    from . import camera_moves as cm
+    n = max(2, int(round(seconds * fps)))
+    focus = cm.focus_depth(depth, at)
+    r = Renderer(rgb, depth, size, device, edge="mirror")
+    blur = max(float(blur), cm.RECIPES[move].blur)
+    subs = 5 if blur > 0 else 1
+    for i in range(first_frame, n):
+        acc = None
+        for j in range(subs):
+            off = (j / (subs - 1) - 0.5) * blur if subs > 1 else 0.0       # in frames
+            u = min(1.0, max(0.0, (i + off) / (n - 1)))
+            fr = r.frame(**cm.cam_at(move, u, amount, at).args(focus))
+            acc = fr if acc is None else acc + fr
+        fr = acc / subs
+        if grain > 0:
+            fr = r.grain(fr, grain, seed * 100003 + i)
+        yield r.to_u8(fr)
+
+
 def encode_frames(frames, out: Path, size: tuple[int, int], fps: int = FPS, crf: int = 13, log: Callable = print) -> tuple:
     """Pipe frames into FFmpeg (libx264, the same encode as a generated beat). Returns (first frame, last frame)."""
     from .config import settings
