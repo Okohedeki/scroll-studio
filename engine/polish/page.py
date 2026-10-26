@@ -378,7 +378,8 @@ def _type_facts(items: list[dict]) -> dict:
             continue
         seen.add(key)
         f = out.setdefault((it["viewport"], it["section"]), {"headline": [], "body": [], "bodies": [], "headlines": []})
-        entry = {"text": it["text"], "lines": it["chars"], "nlines": it["nlines"], "shot": it["shot"], "box": it["rect"]}
+        entry = {"text": it["text"], "lines": it["chars"], "nlines": it["nlines"], "shot": it["shot"], "box": it["rect"],
+                 "size": it["size"]}
         if it["role"] == "headline":
             f["headline"].append(it["size"])
             f["headlines"].append(entry)

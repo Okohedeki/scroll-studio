@@ -256,7 +256,7 @@ def type_findings(section: str, viewport: str, headline_px: Optional[float], bod
                                "break the copy into two shorter paragraphs, or give it a narrower column: "
                                "`layout: split` on a scene, `side:` on a product block, or a smaller `theme.space.max`",
                                b.get("shot"), b.get("box")))
-        elif n < LINE_NARROW and b["nlines"] >= 4:
+        elif n < LINE_NARROW and b["nlines"] >= 4 and b.get("size", 0) < LARGE_PX:   # a display-size pull quote is set short
             out.append(finding("warn", "line-length", section, viewport,
                                f"{_quote(b['text'])} runs {n} characters a line over {b['nlines']} lines (flag under {LINE_NARROW})",
                                "give the copy a wider column (`theme.space.caption` for scene captions) or cut it down",

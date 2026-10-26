@@ -193,6 +193,9 @@ def test_type_rules():
     assert checks(fs) == [("warn", "hierarchy"), ("warn", "line-length"), ("warn", "line-length")]
     assert sorted(f["what"].split(" runs ")[1].split(" ")[0] for f in fs if f["check"] == "line-length") == ["22", "96"]
     assert M.type_findings("intro", "desktop", 60, 17, [], []) == []
+    pull = dict(narrow, size=30.0)                                    # a pull quote at display size: short lines are its measure
+    assert M.type_findings("quote", "phone", 0, 0, [pull], []) == []
+    assert checks(M.type_findings("quote", "phone", 0, 0, [dict(narrow, size=17.0)], [])) == [("warn", "line-length")]
 
     def head(n):
         return [{"text": "A long headline", "nlines": n, "lines": [10] * n}]
