@@ -219,6 +219,11 @@ cached on its own, so changing one shot re-renders only that shot. Steps pin the
       - { title: A landing page is the door <em>to a world.</em>, intro: true, state: { beat: door } }
 ```
 
+Each join is a crossfade of the film's `beat_fade`; a beat's own `fade:` sets the join into it: `fade: 0` is a hard cut
+(a reverse angle, a jump to a new moment, where a dissolve would show two poses at once as a double image), and a longer
+value a slower dissolve. Every timing that reads the film (steps pinned to a beat, `reveal` regions, `studio inspect`,
+the trailer) follows it; the storyboard's stand-in film still dissolves every shot with `beat_fade`.
+
 `beat_res` sets the render size (default 1920x1088; about seven minutes a five-second beat on an RTX 4090). LTX animates
 slow, camera-led motion best; for an action shot that holds its first frame, lower `strength` (0.7-0.85), re-roll the
 motion alone with `motion_seed`, and cut the hold with `trim` (seconds, re-uses the render).
