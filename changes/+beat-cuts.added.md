@@ -1,0 +1,1 @@
+A story film's beat can set its own join: `fade: 0` on a beat is a hard cut into it (no double image where two different poses would dissolve), and any other value a crossfade of that length; beats without it keep the film's `beat_fade`. Steps pinned to beats, `reveal` regions, `studio inspect` and the trailer follow the per-beat joins.

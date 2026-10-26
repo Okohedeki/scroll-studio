@@ -137,11 +137,15 @@ def load_film(project: Project, sec: FilmScene) -> Optional[Film]:
             clip = project.build / sec.id / "beats" / b.id / "clip.mp4"
             durs.append(float(probe(clip)["duration"]) if clip.exists() else b.seconds - b.trim)
         fade = min(sec.beat_fade, *(d / 3 for d in durs)) if len(durs) > 1 else 0
-        total = sum(durs) - fade * (len(durs) - 1)
+        joins = [fade] * (len(durs) - 1)
+        if any(b.fade is not None for b in sec.beats[1:]):        # a beat with its own crossfade (or a hard cut)
+            from ..scenes.film import join_fades
+            joins = join_fades(sec, durs)
+        total = sum(durs) - sum(joins)
         k, t = dur / total if total else 1.0, 0.0     # scale to the footage actually on disk
-        for b, d in zip(sec.beats, durs):
+        for i, (b, d) in enumerate(zip(sec.beats, durs)):
             spans[b.id] = (t * k, (t + d) * k)
-            t += d - fade
+            t += d - (joins[i] if i < len(joins) else 0)
     return Film(sec, src, dur, fps, spans)
 
 
