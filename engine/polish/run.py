@@ -102,14 +102,17 @@ def plan_spans(project, sec, film_seconds: float) -> tuple[list[A.BeatSpan], flo
     joins = join_fades(sec, durs) if any(b.fade is not None for b in sec.beats[1:]) else [fade] * (len(durs) - 1)
     spans, t = [], 0.0
     for i, (b, d, c) in enumerate(zip(sec.beats, durs, clips)):
+        own = joins[i - 1] if i and b.fade is not None else None     # the beat's own join (a hard cut at 0)
         spans.append(A.BeatSpan(b.id, t, t + d, c, "freeze" if b.freeze is not None else "generated",
-                                beat_zoom(b, sec), b.freeze.upscale if b.freeze is not None else 1.0))
+                                beat_zoom(b, sec), b.freeze.upscale if b.freeze is not None else 1.0, fade_in=own))
         t += d - (joins[i] if i < len(joins) else fade)
     total = t + fade
     if abs(total - film_seconds) > 0.35 and total > 0:         # the build moved on from the spec: spread the beats over the film
         k = film_seconds / total
         for s in spans:
             s.start *= k; s.end *= k
+            if s.fade_in is not None:
+                s.fade_in *= k
         fade *= k
     return spans, fade
 
@@ -171,7 +174,8 @@ def inspect_film(path: Path, spans: list[A.BeatSpan], fade: float, out_dir: Path
     progress(0.88, "scoring")
     fps = sc.fps
     seconds = sc.n / fps
-    joins_win = [(s.start - 0.1, s.start + fade + 0.1) for s in spans[1:]] if fade > 0 else []
+    joins_win = [(s.start - 0.1, s.start + (fade if s.fade_in is None else s.fade_in) + 0.1) for s in spans[1:]
+                 if (fade if s.fade_in is None else s.fade_in) > 0]
 
     joins = A.score_joins(spans, fade, log)
     groups = A.groups_of(joins, len(spans))

@@ -37,6 +37,7 @@ class BeatSpan:
     kind: str = "generated"            # generated | freeze | film
     zoom: Optional[float] = None       # freeze: the tightest framing, as a share of the frame's width
     upscale: float = 1.0
+    fade_in: Optional[float] = None    # the join into this beat, seconds of overlap, when it has its own (0: a hard cut)
 
     @property
     def dur(self) -> float:
@@ -503,7 +504,8 @@ def score_joins(spans: list[BeatSpan], fade: float, log: Callable[[str], None] =
         na = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)); cap.release()
         cap = open_film(cur.clip)
         nb = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)); cap.release()
-        nf = max(1, int(round(fade * fps)))
+        f = fade if cur.fade_in is None else cur.fade_in      # this join's own crossfade (a beat's `fade`), else the film's
+        nf = max(1, int(round(f * fps)))
         ia = {s: (na - nf + int(round(s * nf)) - (1 if s == 1.0 else 0)) for s in (0.0, 0.5, 1.0)}
         ib = {s: min(nb - 1, int(round(s * nf))) for s in (0.0, 0.5, 1.0)}
         fa = read_frames(prev.clip, list(ia.values()) + [na - 1], 480)
@@ -511,13 +513,13 @@ def score_joins(spans: list[BeatSpan], fade: float, log: Callable[[str], None] =
         mm = {s: M.mismatch(fa[ia[s]], fb[ib[s]]) for s in (0.0, 0.5, 1.0)}
         meet = M.mismatch(fa[na - 1], fb[0])                       # the two frames a cut would join
         related = meet["luma"] <= RELATED_LUMA and meet["chroma"] <= RELATED_CHROMA
-        if fade < 0.15:
+        if f < 0.15:
             m0, kind, pair = meet, "cut", (fa[na - 1], fb[0])
         else:
             m0, kind, pair = mm[0.5], "dissolve", (fa[ia[0.5]], fb[ib[0.5]])
         mis = M.misalignment(*pair)
         sev = max(ramp(mis["disp"], 20.0, 100.0), ramp(m0["chroma"], 1.0, 3.5)) if related else 0.0
-        out.append({"t": cur.start + fade / 2, "t0": cur.start, "t1": cur.start + fade, "sev": sev, "kind": kind,
+        out.append({"t": cur.start + f / 2, "t0": cur.start, "t1": cur.start + f, "sev": sev, "kind": kind,
                     "related": bool(related), "from": prev.id, "to": cur.id, "to_index": i, "disp": mis["disp"],
                     "edges": m0["edges"], "luma": m0["luma"], "chroma": m0["chroma"], "meet_luma": meet["luma"],
                     "meet_chroma": meet["chroma"], "phases": {f"{s:.1f}": mm[s]["edges"] for s in mm},

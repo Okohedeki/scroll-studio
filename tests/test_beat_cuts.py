@@ -109,3 +109,24 @@ def test_polish_spans_follow_a_beats_own_join(tmp_path):
     spans, fade = plan_spans(Project(tmp_path), sec, 3 * 3.0 - 1.0)
     assert [round(s.start, 2) for s in spans] == [0.0, 3.0, 5.0]
     assert [round(s.end, 2) for s in spans] == [3.0, 6.0, 8.0]
+
+
+def test_polish_spans_carry_each_beats_own_join(tmp_path):
+    from engine.polish.run import plan_spans
+    from engine.project import Project
+    (tmp_path / "site.yaml").write_text("name: T\nsections: []\n", encoding="utf-8")
+    spans, fade = plan_spans(Project(tmp_path), film(None, 0, None, beat_fade=1.0), 8.0)
+    assert [s.fade_in for s in spans] == [None, 0.0, None]
+
+
+@needs_ffmpeg
+def test_inspect_judges_a_hard_cut_on_the_two_frames_it_joins(tmp_path):
+    """A beat with `fade: 0` is a cut, not a dissolve: the join is judged on the frames that meet."""
+    from engine.polish import analyze as A
+    a = _clip(tmp_path / "a.mp4", "808080", 2.0)
+    b = _clip(tmp_path / "b.mp4", "808080", 2.0)
+    spans = [A.BeatSpan("a", 0.0, 2.0, a), A.BeatSpan("b", 2.0, 4.0, b, fade_in=0.0)]
+    j = A.score_joins(spans, 1.0)
+    assert j[0]["kind"] == "cut" and j[0]["t1"] == pytest.approx(2.0)
+    spans[1].fade_in = None
+    assert A.score_joins(spans, 1.0)[0]["kind"] == "dissolve"
