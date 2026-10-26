@@ -1,0 +1,1 @@
+`studio inspect` on a film section with `finish:` measures the finished film the page plays (the last finishing stage that is newer than the film it was made from), not the film before the finishing pass.
