@@ -8,6 +8,9 @@ from __future__ import annotations
 
 import json
 
+import hashlib
+
+from ..inputs import resolve_image
 from ..project import BuildContext
 from ..spec import DioramaScene
 
@@ -26,7 +29,9 @@ _TOP = {"tree": ("o", "#3f8f45", 0.7), "pine": ("o", "#2d6e49", 0.6), "bush": ("
         "house": ("s", None, 1.0), "shop": ("s", None, 1.15), "cafe": ("s", None, 1.15), "warehouse": ("s", "#8fa2b6", 2.0),
         "office": ("s", None, 1.4), "stall": ("s", None, 0.9), "container": ("s", None, 1.0), "boat": ("o", "#fffaf0", 0.55),
         "lamp": ("o", "#f2c95a", 0.12), "crane": ("s", "#f2b21c", 1.5), "lighthouse": ("o", "#d9503a", 1.1), "windmill": ("o", "#c4433a", 1.2),
-        "ferry": ("o", "#fffaf0", 1.2), "crate": ("s", "#c9914f", 0.3), "barrel": ("o", "#8a5a34", 0.2)}
+        "ferry": ("o", "#fffaf0", 1.2), "crate": ("s", "#c9914f", 0.3), "barrel": ("o", "#8a5a34", 0.2),
+        "printer": ("s", "#eef1f4", 1.2), "placer": ("s", "#eef1f4", 1.3), "oven": ("s", "#eef1f4", 1.6), "scanner": ("s", "#eef1f4", 1.2),
+        "storage": ("s", "#eef1f4", 1.2), "arm": ("o", "#eef1f4", 0.5)}
 
 
 def _props(d, plan: dict, ox: int, oy: int, s: int):
@@ -83,6 +88,17 @@ def _map_image(plan: dict, tex, table: str, size: int = 1280):
     return bg
 
 
+def carried(sec: DioramaScene) -> list:
+    """Every picture the scene's movers carry, in order (the same picture may appear more than once)."""
+    out = []
+    for m in sec.movers:
+        out += [m.carry] if m.carry is not None else []
+        out += [st.carry for st in m.stops if st.carry is not None]
+    for tr in sec.traffic:
+        out += list(tr.carry)
+    return out
+
+
 def stage_key(sec: DioramaScene, table: str, draft: bool) -> dict:
     """What the layout depends on: the world, the places, the camera and the steps' timing and targets. The look
     (tilt-shift, sun, grade) is drawn live and is not here, so changing it rebuilds nothing."""
@@ -90,7 +106,9 @@ def stage_key(sec: DioramaScene, table: str, draft: bool) -> dict:
     from ..layout import scene_layout
     key = {"v": VERSION + diorama.plan.VERSION, "draft": draft, "table": table, "layout": sec.layout, "side": sec.side,
            "scene": sec.model_dump(mode="json", include={"world", "places", "camera"}),
-           "steps": [{"intro": s.intro, "length": s.length, "place": (s.state or {}).get("place"), "wide": (s.state or {}).get("wide")}
+           "movers": sec.model_dump(mode="json", include={"movers", "traffic"}) if (sec.movers or sec.traffic) else None,
+           "steps": [{"intro": s.intro, "length": s.length, "place": (s.state or {}).get("place"), "wide": (s.state or {}).get("wide"),
+                       "look": (s.state or {}).get("look")}
                      for s in sec.steps]}
     # overlay: the side each placed caption takes decides the side its place is framed on (diorama.plan.camera_plan)
     copy = [e.side if e.by else None for e in scene_layout(sec).elements] if sec.layout == "overlay" else []
@@ -106,9 +124,28 @@ def build(sec: DioramaScene, ctx: BuildContext, theme: dict) -> dict:
     out_plan, out_ground, out_map = ctx.web / "world.json", ctx.web / "ground.jpg", ctx.web / "map.jpg"
     key = stage_key(sec, table, draft)
 
+    refs = carried(sec)
+    files: dict[int, object] = {}
+    if refs:
+        from ..inputs import image_key
+        from ..project import file_key
+        srcs = {id(r): resolve_image(ctx.project, r, ctx.log) for r in refs}
+        key["carried"] = [[image_key(r), file_key(srcs[id(r)])] for r in refs]
+        for r in refs:
+            digest = hashlib.sha1(json.dumps([image_key(r), file_key(srcs[id(r)])], sort_keys=True).encode()).hexdigest()[:10]
+            files[id(r)] = ctx.web / f"carry-{digest}.webp"
+
+    def carry_url(ref):
+        """The page's URL of a picture a mover carries (written beside the plan, up to 512 px, by run())."""
+        return None if ref is None else ctx.url(files[id(ref)])
+
     def run():
         from PIL import Image
-        plan, tex, w = diorama.build(sec, table, draft)
+        for r in refs:                       # the carried pictures, small: they are a hand's width on the page
+            im = Image.open(srcs[id(r)]).convert("RGB")
+            im.thumbnail((512, 512), Image.LANCZOS)
+            im.save(files[id(r)], "WEBP", quality=88, method=4)
+        plan, tex, w = diorama.build(sec, table, draft, carry_url if refs else None)
         counts: dict[str, int] = {}
         for p in plan["props"]:
             counts[p["k"]] = counts.get(p["k"], 0) + 1
@@ -116,9 +153,11 @@ def build(sec: DioramaScene, ctx: BuildContext, theme: dict) -> dict:
         Image.fromarray(tex).save(out_ground, quality=88 if not draft else 80)
         _map_image(plan, tex, table).save(out_map, quality=86)
         ctx.log(f"  {len(plan['props'])} props, {len(plan['places'])} places, {len(plan['camera']['beats'])} beats "
-                f"({', '.join(f'{k} {v}' for k, v in sorted(counts.items(), key=lambda kv: -kv[1])[:6])})")
+                f"({', '.join(f'{k} {v}' for k, v in sorted(counts.items(), key=lambda kv: -kv[1])[:6])})"
+                + (f", {len(plan.get('movers', []))} movers, {sum(len(c['keys']) for c in plan.get('traffic', []))} in traffic"
+                   if refs or sec.movers or sec.traffic else ""))
 
-    ctx.stage("diorama", key, [out_plan, out_ground, out_map], run)
+    ctx.stage("diorama", key, [out_plan, out_ground, out_map, *dict.fromkeys(files.values())], run)
     return {
         "plan": ctx.url(out_plan), "ground": ctx.url(out_ground), "map": ctx.url(out_map),
         "look": {**sec.look.model_dump(mode="json"), "table": table},

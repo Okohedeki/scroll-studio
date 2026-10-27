@@ -12,8 +12,8 @@ from . import recipes, recipes2
 from .recipes import HERO, WATER_KINDS, dress, pal_of, resolve_where, snap_free, face_default
 from .world import GRID, World
 
-VERSION = 1
-DEFAULT_SIZE = {"harbour": 30.0, "town": 30.0, "desk": 22.0, "factory": 26.0, "studio": 22.0}
+VERSION = 2
+DEFAULT_SIZE = {"harbour": 30.0, "town": 30.0, "desk": 22.0, "factory": 26.0, "studio": 22.0, "plain": 26.0}
 
 
 def _base_of(sec) -> str:
@@ -66,14 +66,19 @@ def resolve_places(w: World, sec, pal, rng) -> list[dict]:
         yaw = face if face is not None else face_default(w, x, z, water_pref=not water_kind)
         if pl.where is not None and not isinstance(pl.where, str) and face is None:
             yaw = face_default(w, x, z)
+        if pl.turn is not None:
+            yaw = math.radians(pl.turn)
         rec = {"name": pl.name, "kind": kind, "x": x, "z": z, "yaw": yaw, "scale": pl.scale, "h": h * pl.scale,
-               "r": r * pl.scale, "step": pl.step, "side": pl.side, "sign": pl.sign or pl.name, "color": pl.color}
+               "r": r * pl.scale, "step": pl.step, "side": pl.side, "sign": pl.name if pl.sign is None else pl.sign,
+               "color": pl.color}
         placed.append(rec)
     # the heroes first (they reserve their ground), then each place's dressing and sign
     for pl in placed:
         w.add(pl["kind"], pl["x"], pl["z"], pl["yaw"], pl["scale"], pl["color"], 0, pl["r"] * 0.9, place=placed.index(pl))
     for pl in placed:
         dress(sec.world.kind, w, pl, pal, rng)
+        if not pl["sign"]:
+            continue
         sx, sz = recipes.local(pl["x"], pl["z"], pl["yaw"], -(pl["r"] + 1.1), min(pl["r"] * 0.15, 0.6) + 0.3)
         if not w.inside_pt(sx, sz, 0.3) or (w.water_at(sx, sz) and pl["kind"] not in WATER_KINDS):
             sx, sz = recipes.local(pl["x"], pl["z"], pl["yaw"], (pl["r"] + 1.1), min(pl["r"] * 0.15, 0.6) + 0.3)
@@ -107,7 +112,7 @@ def assign_steps(sec, placed: list[dict]) -> list[Optional[int]]:
             taken.add(names[nm])
     rest = [pi for pi in range(len(placed)) if pi not in taken]
     for si, st in enumerate(sec.steps):
-        if out[si] is None and not st.intro and rest and not (st.state or {}).get("wide"):
+        if out[si] is None and not st.intro and rest and not (st.state or {}).get("wide") and not (st.state or {}).get("look"):
             out[si] = rest.pop(0)
     return out
 
@@ -117,11 +122,12 @@ BLOCKERS = {"tree": (2.2, 0.7), "pine": (2.0, 0.6), "house": (3.0, 1.2), "shop":
             "office": (3.8, 1.6), "container": (1.1, 1.3), "lighthouse": (8.6, 1.2), "windmill": (7.0, 1.4), "crane": [(5.2, 1.9, 0, 0), (5.7, 1.4, 0, 2.0), (5.7, 1.4, 0, 4.5), (5.7, 1.4, 0, 7.0)],
             "stall": (2.2, 1.0), "tank": (5.0, 1.8), "silo": (7.0, 1.5), "chimney": (9.0, 0.9), "clocktower": (8.0, 1.3), "ferry": (3.0, 1.8),
             "monitor": (3.0, 1.6), "laptop": (1.5, 1.8), "sofa": (2.0, 2.0), "shelf": (4.2, 1.5), "softbox": (5.0, 1.0), "easel": (4.2, 1.3),
-            "plant": (2.6, 1.0), "deskLamp": (3.8, 0.8), "robot": (3.8, 1.4), "conveyor": (1.8, 2.2), "boat": (1.5, 0.9), "fountain": (2.2, 1.5)}
+            "plant": (2.6, 1.0), "deskLamp": (3.8, 0.8), "robot": (3.8, 1.4), "conveyor": (1.8, 2.2), "boat": (1.5, 0.9), "fountain": (2.2, 1.5),
+            "printer": (2.2, 1.4), "placer": (2.6, 1.6), "oven": (2.0, 1.8), "scanner": (2.5, 1.3), "storage": (4.8, 1.5), "arm": (2.6, 0.7)}
 
 
 # how far from its front a kind of hero reads best (a crane's boom wants a profile, a stall a three-quarter view)
-PREFER = {"crane": 64.0, "conveyor": 50.0, "robot": 40.0, "windmill": 30.0, "ferry": 45.0, "boat": 45.0, "easel": 32.0}
+PREFER = {"oven": 18.0, "storage": 30.0, "crane": 64.0, "conveyor": 50.0, "robot": 40.0, "windmill": 30.0, "ferry": 45.0, "boat": 45.0, "easel": 32.0}
 OFFSETS = (-84, -72, -64, -56, -42, -30, -18, -6, 0, 6, 18, 30, 42, 56, 64, 72, 84)
 
 
@@ -238,14 +244,27 @@ def camera_plan(w: World, sec, placed: list[dict], stepmap: list[Optional[int]])
             cap = copy[si] if copy and si < len(copy) else None
             if cap and cap.by and not pl["side"]:   # a caption placed on the left leaves the world the right of the picture
                 side = -1 if cap.side == "right" else 1 if cap.side == "left" else side
-            beats.append({"kind": "place", "place": pi, "yaw": yaw, "pitch": cam.dive_pitch, "dist": round(dist, 2),
+            beats.append({"kind": "place", "place": pi, "yaw": yaw, "pitch": cam.dive_pitch, "dist": round(dist, 2), "r": round(pl["r"], 2),
                           "target": [round(pl["x"], 3), round(gy + min(pl["h"], 9.0) * 0.44, 3), round(pl["z"], 3)],
                           "side": side})
+        elif isinstance((sec.steps[si].state or {}).get("look"), dict):
+            # a step that looks at a point of the world: a view of its own, framed like a place
+            lk = sec.steps[si].state["look"]
+            x, z = (float(v) for v in lk.get("at", (0.0, 0.0)))
+            gy = w.height_at(x, z)
+            beats.append({"kind": "place", "place": None, "yaw": float(lk.get("yaw", cam.yaw if cam.yaw is not None else 0.0)),
+                          "pitch": float(lk.get("pitch", cam.pitch)), "dist": round(float(lk.get("dist", w.R)), 2),
+                          "target": [round(x, 3), round(gy + float(lk.get("height", 0.5)), 3), round(z, 3)],
+                          "side": view_side, "fixed": True})
         else:
             beats.append({"kind": "wide", "yaw": None, "pitch": cam.pitch, "dist": None, "target": [0, 0.5, 0], "side": 0})
     # wide beats take their yaw from the neighbours: before the first place, 38 degrees behind it; after, 38 past it
     place_idx = [i for i, b in enumerate(beats) if b["kind"] == "place"]
-    if place_idx:
+    if cam.yaw is not None:
+        for b in beats:
+            if b["kind"] == "wide":
+                b["yaw"] = float(cam.yaw)
+    elif place_idx:
         first, last = place_idx[0], place_idx[-1]
         for i, b in enumerate(beats):
             if b["kind"] != "wide":
@@ -280,7 +299,7 @@ def camera_plan(w: World, sec, placed: list[dict], stepmap: list[Optional[int]])
     for b, (a, c) in zip(beats, wins):
         b["a"], b["b"] = round(a, 5), round(c, 5)
     return {"fov": cam.fov, "pitch": cam.pitch, "dive_pitch": cam.dive_pitch, "hold": cam.hold, "drift": cam.drift,
-            "fit": round(w.R * 1.14, 2), "beats": beats}
+            "fit": round(w.R * 1.14, 2), "beats": beats, "travel": cam.travel}
 
 
 def seat_signs(w: World, placed: list[dict], camera: dict):
@@ -306,8 +325,75 @@ def seat_signs(w: World, placed: list[dict], camera: dict):
         p.pop("of", None)
 
 
-def build(sec, table: str, draft: bool = False):
-    """The whole plan and the ground texture (uint8 N x N x 3) for a diorama scene."""
+def plan_movers(w: World, sec, placed: list[dict], stepmap: list[Optional[int]], carry_url) -> tuple[list[dict], list[dict]]:
+    """The movers' paths and stops, and each traffic crowd's simulated routes (engine/diorama/movers.py)."""
+    from . import movers as mv
+    step_of = {pi: si for si, pi in enumerate(stepmap) if pi is not None}
+    names = {pl["name"]: pi for pi, pl in enumerate(placed)}
+    url = carry_url or (lambda ref: None)
+    out = []
+    for m in sec.movers:
+        rec = {"id": m.id, "kind": m.kind, "drive": m.drive, "scale": m.scale, "color": m.color, "hover": m.hover,
+               "carry": url(m.carry), "carry_size": list(m.carry_size), "speed": m.speed}
+        if m.drive == "scroll":
+            stops = []
+            for st in m.stops:
+                if st.place is not None:
+                    pi = names[st.place]
+                    stops.append({"x": placed[pi]["x"], "z": placed[pi]["z"], "step": step_of.get(pi), "carry": url(st.carry)})
+                else:
+                    stops.append({"x": st.at[0], "z": st.at[1], "step": st.step, "carry": url(st.carry)})
+            r = mv.scroll_mover(m.route, stops)
+            rec.update(path=r["path"], len=r["len"], stops=[{k: v for k, v in s.items() if k != "off"} for s in r["stops"]])
+        else:
+            path, total = mv.route_path(list(m.route) + [m.route[0]] if len(m.route) > 2 else list(m.route))
+            rec.update(path=path, len=total, stops=[])
+        out.append(rec)
+    paths = [np.array(r["path"]) for r in out if r["path"]]
+    crowds = []
+    for k, tr in enumerate(sec.traffic):
+        props = [(p["x"], p["z"], (w.AO.get(p["k"], (0.5, 0))[0]) * p["s"]) for p in w.props if p["k"] not in ("tiles", "sign")]
+
+        def blocked(x, z, tr=tr, props=props):
+            for x0, z0, x1, z1 in tr.keep_off:
+                if min(x0, x1) - 1e-6 <= x <= max(x0, x1) + 1e-6 and min(z0, z1) - 1e-6 <= z <= max(z0, z1) + 1e-6:
+                    return True
+            for pa in paths:
+                if len(pa) and float(np.min(np.hypot(pa[:, 0] - x, pa[:, 1] - z))) < tr.cell * 0.8:
+                    return True
+            for px, pz, pr in props:
+                if (x - px) ** 2 + (z - pz) ** 2 < (pr + tr.cell * 0.35) ** 2:
+                    return True
+            return False
+        sim = mv.simulate_traffic(tr.area, tr.cell, tr.count, tr.speed, tr.pause, blocked, seed=tr.seed + k)
+        crowds.append({"kind": tr.kind, "scale": tr.scale, "hover": tr.hover, "colors": list(tr.colors),
+                       "carry": [url(c) for c in tr.carry], "carry_size": list(tr.carry_size), **sim})
+    return out, crowds
+
+
+def look_at_mover(w: World, sec, camera: dict, moving: list[dict]):
+    """Glide: at each stop of the scroll mover, the camera looks at the mover and what it carries (lower and closer than
+    a dive to the place's hero), so the load can be read while it waits."""
+    tan_half = math.tan(math.radians(sec.camera.fov) / 2)
+    for m in moving:
+        if m["drive"] != "scroll":
+            continue
+        from .movers import path_at
+        for st in m["stops"]:
+            if st["step"] is None or st["step"] >= len(camera["beats"]):
+                continue
+            b = camera["beats"][st["step"]]
+            if b["kind"] != "place":
+                continue
+            x, z = path_at(m["path"], m["len"], st["s"])
+            gy = w.height_at(x, z)
+            b["target"] = [round(x, 3), round(gy + m["hover"] + 0.35 * m["scale"], 3), round(z, 3)]
+            b["dist"] = round(max(3.0, 3.4 / (0.72 * 2 * tan_half) / sec.camera.dive), 2)
+
+
+def build(sec, table: str, draft: bool = False, carry_url=None):
+    """The whole plan and the ground texture (uint8 N x N x 3) for a diorama scene. `carry_url(image)` gives the page's
+    URL of a picture a mover carries (the scene builder copies them in)."""
     wd = sec.world
     kind = wd.kind
     size = wd.size or DEFAULT_SIZE[kind]
@@ -318,13 +404,18 @@ def build(sec, table: str, draft: bool = False):
     placed = resolve_places(w, sec, pal, rng)
     recipes.fill(kind, w, pal, info, rng)
     for ex in wd.props:
-        w.add(ex.kind, ex.at[0], ex.at[1], math.radians(ex.turn), ex.scale, ex.color, 0, 0.5 * ex.scale)
+        extra = {"size": [round(ex.size[0], 3), round(ex.size[1], 3)]} if ex.size else {}
+        rad = 0.0 if ex.size else 0.5 * ex.scale
+        w.add(ex.kind, ex.at[0], ex.at[1], math.radians(ex.turn), ex.scale, ex.color, 0, rad, **extra)
     w.finish_props()
     for pl in placed:
         pl["y"] = round(w.height_at(pl["x"], pl["z"]), 3)
     stepmap = assign_steps(sec, placed)
     camera = camera_plan(w, sec, placed, stepmap)
     seat_signs(w, placed, camera)
+    moving, crowds = plan_movers(w, sec, placed, stepmap, carry_url)
+    if sec.camera.travel == "glide":
+        look_at_mover(w, sec, camera, moving)
     w.bake_ao()
     hg = w.height_grid(GRID)
     plan = {
@@ -338,4 +429,8 @@ def build(sec, table: str, draft: bool = False):
         "steps": stepmap,
         "camera": camera,
     }
+    if moving:
+        plan["movers"] = moving
+    if crowds:
+        plan["traffic"] = crowds
     return plan, w.texture(), w

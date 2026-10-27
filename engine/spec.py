@@ -2389,6 +2389,8 @@ class DioramaProp(Model):
     turn: float = Field(0.0, description="Degrees the front is turned (0 faces the viewer)")
     scale: float = 1.0
     color: Optional[str] = Field(None, description="Main colour (roof, hull, body), hex")
+    size: Optional[tuple[float, float]] = Field(None, description="Width and depth in world units, for props that cover an "
+                                                                  "area (tiles, rug)")
 
 
 class DioramaPlace(Model):
@@ -2409,16 +2411,20 @@ class DioramaPlace(Model):
                                 "places take the steps in order, skipping a leading intro step")
     side: Optional[Literal["left", "right"]] = Field(None, description="Which side of the screen the place sits on once "
                                                      "the camera has dived to it (the copy takes the other). Unset: opposite the card column")
-    sign: Optional[str] = Field(None, description="Text on the little sign at the place (default: the name)")
+    sign: Optional[str] = Field(None, description="Text on the little sign at the place (default: the name; an empty "
+                                                  "text: no sign)")
     scale: float = Field(1.0, gt=0, description="Size of the hero prop")
     color: Optional[str] = Field(None, description="Main colour of the hero prop, hex")
+    turn: Optional[float] = Field(None, description="Degrees the hero prop is turned (0 faces the viewer, 90 faces right). "
+                                                    "Unset: the world decides (towards the water, or the viewer)")
 
 
 class DioramaWorld(Model):
     """The world, described once. The engine lays out the ground (water, roads, hills, paving), the scenery and the
     places' dressing from this and the seed; the same spec always gives the same world."""
-    kind: Literal["harbour", "town", "desk", "factory", "studio"] = Field(
-        "harbour", description="The kind of world: sets the ground plan, the scenery and the prop vocabulary")
+    kind: Literal["harbour", "town", "desk", "factory", "studio", "plain"] = Field(
+        "harbour", description="The kind of world: sets the ground plan, the scenery and the prop vocabulary. plain: an "
+                               "empty floor, for a world made of its places, props and movers")
     seed: int = Field(7, description="Seed for the layout: another seed is another arrangement of the same kind of world")
     size: Optional[float] = Field(None, ge=16, le=60, description="Width of the diorama in world units (a house is about 2). Unset: 30 for a harbour or town, 22 for a desk or studio, 26 for a factory")
     base: Optional[Literal["round", "square"]] = Field(
@@ -2426,6 +2432,7 @@ class DioramaWorld(Model):
     palette: list[str] = Field(default_factory=list, description="Hex colours for roofs, hulls and containers, replacing the world's own (2-8)")
     density: float = Field(1.0, ge=0, le=2.0, description="How much scenery fills the world: trees, houses, boats, lamps")
     props: list[DioramaProp] = Field(default_factory=list, description="Extra props set by hand")
+    floor: Optional[str] = Field(None, description="plain: the floor's colour, hex (default: a pale concrete)")
 
 
 class DioramaCamera(Model):
@@ -2439,6 +2446,13 @@ class DioramaCamera(Model):
     dive: float = Field(1.0, ge=0.4, le=2.0, description="How close the dive lands (above 1 is closer)")
     hold: float = Field(0.5, ge=0.1, le=0.9, description="Share of each step's scroll the camera rests at its place; the rest is travel")
     drift: float = Field(1.0, ge=0, le=3, description="The camera's idle breathing, and how far the pointer can turn it (0: still)")
+    travel: Literal["orbit", "glide"] = Field(
+        "orbit", description="Between two places: orbit lifts out over the whole world and dives to the next; glide goes "
+                             "straight from one to the next at the same height, following a scroll mover that travels "
+                             "between them, and at a place where that mover stops it looks at the mover and what it "
+                             "carries")
+    yaw: Optional[float] = Field(None, description="Degrees round the world the wide views look from (0: from the front, "
+                                                   "90: from the right). Unset: beside the first and last places")
 
 
 class DioramaLook(Model):
@@ -2453,6 +2467,87 @@ class DioramaLook(Model):
     vignette: float = Field(0.25, ge=0, le=1.0, description="Darkening towards the corners")
 
 
+class DioramaStop(Model):
+    """A stop on a mover's route: where it waits while a step is on screen, and what it carries from there on."""
+    place: Optional[str] = Field(None, description="The name of a place: the mover stops at that place (its position on "
+                                                   "the route), while that place's step is on screen")
+    at: Optional[tuple[float, float]] = Field(None, description="Or a point [x, z] in world units; it waits there while "
+                                                                "`step` is on screen")
+    step: Optional[int] = Field(None, ge=0, description="With `at`: which step (0-based) it waits through")
+    carry: Optional[ImageRef] = Field(None, description="What it carries from this stop on (a picture laid on its deck); "
+                                                        "it changes while the mover waits here")
+
+    @model_validator(mode="after")
+    def _where(self):
+        if (self.place is None) == (self.at is None):
+            raise ValueError("a stop names a `place` or gives `at` (not both)")
+        if self.at is not None and self.step is None:
+            raise ValueError("a stop with `at` needs the `step` it waits through")
+        return self
+
+
+class DioramaMover(Model):
+    """Something that travels a route on the diorama: a vehicle, a cart, a carrier. With `drive: scroll` its place on the
+    route follows the page: it waits at each stop while that stop's step is on screen and travels between stops as the
+    page scrolls, and the camera follows it there (`camera.travel: glide`). With `drive: time` it goes round its route on
+    its own, at `speed`."""
+    id: str = Field(..., description="A name for it")
+    kind: str = Field("carrier", description="What it is, a prop of the kit: carrier (a flat, levitating deck), forklift, "
+                                             "boat ... (unknown kinds are drawn as a block)")
+    route: list[tuple[float, float]] = Field(default_factory=list, description="The way it goes, points [x, z] in world "
+                                                                              "units in order; corners are rounded. Its "
+                                                                              "stops are joined to it in order")
+    stops: list[DioramaStop] = Field(default_factory=list, description="drive: scroll: where it waits and what it "
+                                                                       "carries from there on, in route order")
+    drive: Literal["scroll", "time"] = Field("scroll", description="scroll: its place follows the page (see above); "
+                                                                   "time: it loops its route on its own")
+    speed: float = Field(1.2, gt=0, le=20, description="drive: time: world units per second")
+    carry: Optional[ImageRef] = Field(None, description="What it carries at the start, a picture laid on its deck")
+    carry_size: tuple[float, float] = Field((1.0, 0.9), description="The carried picture's width and depth, world units")
+    scale: float = Field(1.0, gt=0, le=5)
+    color: Optional[str] = Field(None, description="Its main colour, hex")
+    hover: float = Field(0.0, ge=0, le=1, description="How high it floats over the floor (a levitating deck), world units")
+
+    @model_validator(mode="after")
+    def _route(self):
+        if self.drive == "scroll" and not self.stops:
+            raise ValueError(f"mover '{self.id}': drive: scroll needs `stops` (where it waits)")
+        if self.drive == "time" and len(self.route) < 2:
+            raise ValueError(f"mover '{self.id}': drive: time needs a `route` of at least two points")
+        return self
+
+
+class DioramaTraffic(Model):
+    """Many movers wandering a grid on their own, each its own way: they drive straight along the grid's lines, stop,
+    turn, and never run into each other or into what stands on the grid (the routes are worked out at build time, a few
+    minutes of traffic that the page plays on a loop). Warehouse robots, planar-motor decks, carts in a yard."""
+    area: tuple[float, float, float, float] = Field(..., description="x0, z0, x1, z1: the rectangle they move in, world units")
+    cell: float = Field(1.0, ge=0.3, le=6, description="The grid's spacing, world units: one move is one cell")
+    count: int = Field(12, ge=1, le=80, description="How many movers")
+    speed: float = Field(1.6, gt=0, le=20, description="World units per second while moving")
+    pause: float = Field(0.25, ge=0, le=5, description="Seconds they rest at a cell before moving on")
+    kind: str = Field("carrier", description="What each is, a prop of the kit (see DioramaMover.kind)")
+    carry: list[ImageRef] = Field(default_factory=list, description="Pictures laid on their decks; mover i carries "
+                                                                    "picture i (mod the list), so a few pictures make a "
+                                                                    "varied crowd")
+    carry_size: tuple[float, float] = Field((0.7, 0.6), description="The carried picture's width and depth, world units")
+    scale: float = Field(1.0, gt=0, le=5)
+    colors: list[str] = Field(default_factory=list, description="Hex colours for the movers, used in turn")
+    hover: float = Field(0.0, ge=0, le=1, description="How high they float over the floor, world units")
+    keep_off: list[tuple[float, float, float, float]] = Field(default_factory=list, description="More rectangles "
+                                                              "(x0, z0, x1, z1) they never enter; the routes of scroll "
+                                                              "movers and the props standing in the area are kept off "
+                                                              "by themselves")
+    seed: int = 7
+
+    @model_validator(mode="after")
+    def _area(self):
+        x0, z0, x1, z1 = self.area
+        if x1 - x0 < 2 * self.cell or z1 - z0 < 2 * self.cell:
+            raise ValueError("traffic.area must be at least two cells each way")
+        return self
+
+
 class DioramaScene(SceneBase):
     """A miniature world: a tilt-shift diorama (a tiny harbour town, a desk, a factory floor, a studio) rendered live in
     the page. Scrolling orbits the camera round the whole thing, dives to a place where that step's content sits,
@@ -2464,7 +2559,31 @@ class DioramaScene(SceneBase):
     places: list[DioramaPlace] = Field(..., min_length=1)
     camera: DioramaCamera = Field(default_factory=DioramaCamera)
     look: DioramaLook = Field(default_factory=DioramaLook)
+    movers: list[DioramaMover] = Field(default_factory=list, description="Things that travel routes (see DioramaMover); "
+                                                                         "one may be driven by the scroll")
+    traffic: list[DioramaTraffic] = Field(default_factory=list, description="Crowds of movers wandering grids on their "
+                                                                            "own (see DioramaTraffic)")
     length: float = 10.0
+
+    @model_validator(mode="after")
+    def _movers(self):
+        names = {pl.name for pl in self.places}
+        scroll = [m for m in self.movers if m.drive == "scroll"]
+        if len(scroll) > 1:
+            raise ValueError(f"diorama '{self.id}': one mover can be driven by the scroll ({', '.join(m.id for m in scroll)})")
+        ids: set[str] = set()
+        for m in self.movers:
+            if m.id in ids:
+                raise ValueError(f"diorama '{self.id}': two movers are called '{m.id}'")
+            ids.add(m.id)
+            for st in m.stops:
+                if st.place is not None and st.place not in names:
+                    raise ValueError(f"diorama '{self.id}': mover '{m.id}' stops at '{st.place}', which is not one of the "
+                                     f"places ({', '.join(sorted(names))})")
+                if st.step is not None and st.step >= len(self.steps):
+                    raise ValueError(f"diorama '{self.id}': mover '{m.id}' waits through step {st.step}, but there are "
+                                     f"{len(self.steps)} steps")
+        return self
 
     @model_validator(mode="after")
     def _windows(self):
