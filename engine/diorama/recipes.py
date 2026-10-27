@@ -24,6 +24,8 @@ HERO = {
     "plant": (2.6, 1.2), "deskLamp": (3.8, 1.4), "monitor": (3.0, 1.9), "notebook": (0.5, 1.5), "easel": (4.4, 1.7),
     "softbox": (5.0, 1.4), "camera": (3.4, 1.2), "speaker": (3.4, 1.0), "sofa": (2.0, 2.5), "shelf": (4.2, 1.8),
     "boat": (2.2, 1.6), "container": (1.2, 1.4),
+    "printer": (2.2, 1.7), "placer": (2.6, 1.8), "oven": (2.0, 2.3), "scanner": (2.5, 1.6), "storage": (4.8, 1.7),
+    "arm": (2.6, 1.0), "carrier": (0.3, 0.5),
 }
 WATER_KINDS = {"ferry", "boat"}
 
@@ -33,6 +35,7 @@ PALETTES = {
     "desk": ["#e0564a", "#3d8fb0", "#e8b23a", "#6aa56a", "#8a6ab0"],
     "factory": ["#e8a23a", "#d9503a", "#3d8fb0", "#6aa56a", "#cfd3d8"],
     "studio": ["#e0564a", "#3d8fb0", "#e8b23a", "#2d3a4a", "#cfd3d8"],
+    "plain": ["#0085e0", "#2f3a4a", "#e8a23a", "#5cb8ff", "#cfd3d8"],
 }
 WALLS = ["#f4ead8", "#f0dcc0", "#e9efe8", "#f7e3d0", "#efe2c6"]
 

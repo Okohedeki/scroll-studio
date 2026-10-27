@@ -1196,7 +1196,7 @@ budget, reduced motion gets one still view per place, and without WebGL the page
 
 `studio diorama <project> [--strip]` says what was laid out (places, camera azimuths, the map in `diorama/<id>-map.jpg`) and,
 with `--strip`, photographs the built site at every place and between places; the MCP tool `diorama_layout` does the same.
-Fields, the worlds' vocabularies, how it is built, what was measured instead (a generated photo, 2.5D, image-to-3D, splats)
+Things can move on it: one mover that the page follows from place to place (`movers`, with `camera.travel: glide`), and crowds wandering a grid on their own that never collide (`traffic`). Fields, the worlds' vocabularies, how it is built, what was measured instead (a generated photo, 2.5D, image-to-3D, splats)
 and its limits are in [docs/miniature.md](miniature.md). The showcase is `examples/little-harbour`.
 
 ### Edited like a film (`transition:`)

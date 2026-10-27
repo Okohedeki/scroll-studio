@@ -16,6 +16,8 @@ import { buildTable, buildTerrain } from "./diorama/terrain";
 import { builderFor, type KitCtx } from "./diorama/kit";
 import { Post } from "./diorama/post";
 import { Rig, type CamState } from "./diorama/camera";
+import { Movers, type PropMaker } from "./diorama/movers";
+import { Mesher as MesherT } from "./diorama/mesher";
 
 const SUN: Record<string, { dir: [number, number, number]; color: string; i: number; sky: string; ground: string; hemi: number; env: number; exposure: number }> = {
   golden: { dir: [-0.55, 0.62, 0.62], color: "#ffd6a0", i: 3.3, sky: "#c6dcff", ground: "#e9cfa6", hemi: 0.8, env: 0.7, exposure: 1.02 },
@@ -172,18 +174,52 @@ const factory: PlayerFactory = async (cfgIn, ctx) => {
         outer.add(obj); world.add(outer);
         if (tick) anims.push({ o: obj, tick });
       },
+      meshOf(build) { const pm = new Mesher(); pm.begin(0, 0, 0, 0, 1); pm.aoOn = false; build(pm); const g = new THREE.Group(); mesh(pm, g); return g; },
     };
     M.begin(p.x, p.y, p.z, p.r, p.s);
     if (p.k === "sign") {
       const bw = signWidth(p.text || "");
-      M.cyl(0.045, 0.055, 1.35, -bw / 2 + 0.2, 0, 0, "#6e4b2e", 8);
-      M.cyl(0.045, 0.055, 1.35, bw / 2 - 0.2, 0, 0, "#6e4b2e", 8);
+      const post = plan.kind === "plain" ? "#8d96a0" : "#6e4b2e";
+      M.cyl(0.045, 0.055, 1.35, -bw / 2 + 0.2, 0, 0, post, 8);
+      M.cyl(0.045, 0.055, 1.35, bw / 2 - 0.2, 0, 0, post, 8);
       M.rbox(bw + 0.08, 0.54, 0.07, 0, 0.8, 0, "#fffaf0", 0.03);
     } else {
       builderFor(p.k)(kctx);
     }
   }
   mesh(M, world);
+
+  // ---- movers: props of the kit built on their own, carried pictures on their decks (diorama/movers.ts)
+  const makeProp: PropMaker = (kind, colors, scale) => {
+    const obj = new THREE.Group();
+    const ticks: { o: THREE.Object3D; tick: (o: any, t: number) => void }[] = [];
+    const pm = new MesherT();
+    const rec: PropRec = { k: kind, x: 0, y: 0, z: 0, r: 0, s: scale, v: 0, c: colors.length ? colors : undefined };
+    const kc: KitCtx = {
+      M: pm, p: rec, palette,
+      pick: (arr) => arr[0], rnd: () => 0.5,
+      part(lx, ly, lz, build, tick) {
+        const q = new MesherT(); q.begin(0, 0, 0, 0, 1); build(q);
+        const outer = new THREE.Group(); outer.position.set(lx * scale, ly * scale, lz * scale); outer.scale.setScalar(scale);
+        const inner = new THREE.Group(); outer.add(inner); mesh(q, inner); obj.add(outer);
+        if (tick) ticks.push({ o: inner, tick });
+      },
+      add(o, lx, ly, lz, tick) {
+        const outer = new THREE.Group(); outer.position.set(lx * scale, ly * scale, lz * scale); outer.scale.setScalar(scale);
+        outer.add(o); obj.add(outer); if (tick) ticks.push({ o, tick });
+      },
+      meshOf(build) { const q = new MesherT(); q.begin(0, 0, 0, 0, 1); q.aoOn = false; build(q); const g = new THREE.Group(); mesh(q, g); return g; },
+    };
+    pm.begin(0, 0, 0, 0, scale);
+    pm.aoOn = false;
+    builderFor(kind)(kc);
+    mesh(pm, obj);
+    const box = new THREE.Box3().setFromObject(obj);
+    return { obj, top: Number.isFinite(box.max.y) ? box.max.y : 0.2, tick: (t) => { for (const a of ticks) a.tick(a.o, t); } };
+  };
+  const movers = (plan.movers?.length || plan.traffic?.length)
+    ? new Movers(world, plan.movers || [], plan.traffic || [], makeProp, (x, z) => terrain.heightAt(x, z)) : null;
+
   // sign faces: a text plane on each sign's board
   await (document as any).fonts?.ready;
   for (const { p } of signs) {
@@ -209,7 +245,11 @@ const factory: PlayerFactory = async (cfgIn, ctx) => {
     return Math.max(byW, byH);
   };
   const rig = new Rig(plan.camera, wideDist, cfg.side, () => (mobile ? 0 : 0.17), () => (mobile || aspect < 1.05 ? 0 : cfg.side * 0.16),
-    () => Math.tan(THREE.MathUtils.degToRad(plan.camera.fov / 2)) / Math.tan(THREE.MathUtils.degToRad(fovFor() / 2)));
+    () => Math.tan(THREE.MathUtils.degToRad(plan.camera.fov / 2)) / Math.tan(THREE.MathUtils.degToRad(fovFor() / 2)),
+    () => movers?.hero ?? null,
+    // a portrait screen is narrow: a place is framed so its whole width fits, not only its height
+    (r) => aspect < 0.9 ? (r * 0.95) / (Math.tan(THREE.MathUtils.degToRad(fovFor() / 2)) * aspect) : 0);
+  movers?.setRests(rig.rest);
   const state: CamState = { yaw: 0, pitch: 30, dist: 40, target: new THREE.Vector3(), shift: 0, open: 1, beat: 0 };
   const drift = plan.camera.drift;
 
@@ -260,12 +300,18 @@ const factory: PlayerFactory = async (cfgIn, ctx) => {
 
   const v3 = new THREE.Vector3();
   const pos = new THREE.Vector3();
-  let mxs = 0, mys = 0, first = true;
+  let mxs = 0, mys = 0, first = true, shiftYs = -0.2;
   function frame(p: number, active: number, t: number, mx: number, my: number) {
     if (reducedMotion) {
       const beatIdx = active >= 0 ? active : Math.min(plan.camera.beats.length - 1, plan.camera.beats.findIndex((b) => p <= b.b));
-      rig.still(Math.max(0, beatIdx), state);
-    } else rig.at(p, state);
+      const bi = Math.max(0, beatIdx);
+      // the movers as they are while this beat rests: the scroll mover at its stop, carrying what it has there
+      if (movers) { const [r0, r1] = rig.rest[bi]; movers.update(Math.min(1, Math.max(0, r1 > 1 ? 1 : r1 - 0.001, r0 < 0 ? 0 : r0)), 0, true); }
+      rig.still(bi, state);
+    } else {
+      movers?.update(p, t, false);
+      rig.at(p, state);
+    }
     mxs += (mx - mxs) * 0.06; mys += (my - mys) * 0.06;
     const k = reducedMotion ? 0 : drift;
     const yaw = THREE.MathUtils.degToRad(state.yaw + mxs * 12 * k + Math.sin(t * 0.17) * 1.4 * k);
@@ -277,7 +323,19 @@ const factory: PlayerFactory = async (cfgIn, ctx) => {
     camera.position.copy(pos);
     camera.lookAt(state.target);
     const shiftX = state.shift * W;
-    const shiftY = mobile ? -(0.1 + 0.1 * (1 - state.open)) * H : 0;
+    // on a phone the copy scrolls over the scene: the subject keeps to the half of the screen the copy is not in (up
+    // while the step's card is low on the screen, down once it has risen past the middle)
+    if (mobile) {
+      const el = stepEls[order.indexOf(active >= 0 ? active : state.beat)];
+      const card = (el?.querySelector<HTMLElement>(".ss-card") ?? el) || null;
+      let want = -(0.1 + 0.1 * (1 - state.open));
+      if (card) {
+        const r = card.getBoundingClientRect(), vh = innerHeight || H;
+        if (r.bottom > 0 && r.top < vh) want = Math.max(-0.22, Math.min(0.22, (0.5 - (r.top + r.bottom) / 2 / vh) * 0.6));
+      }
+      shiftYs += (want - shiftYs) * (reducedMotion ? 1 : 0.08);
+    }
+    const shiftY = mobile ? shiftYs * H : 0;
     camera.setViewOffset(W, H, -shiftX, -shiftY, W, H);
     if (!reducedMotion) adapt(t);
     uni.uTime.value = reducedMotion ? 0 : t;

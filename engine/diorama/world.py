@@ -224,7 +224,9 @@ class World:
           "bench": (0.6, 0.3), "bollard": (0.25, 0.3), "sign": (0.5, 0.28), "tank": (2.2, 0.4), "silo": (1.9, 0.42), "chimney": (1.3, 0.4),
           "sofa": (2.4, 0.38), "shelf": (1.9, 0.4), "easel": (1.6, 0.3), "laptop": (2.4, 0.4), "monitor": (2.0, 0.4), "mug": (0.9, 0.4),
           "books": (1.5, 0.4), "plant": (1.2, 0.4), "deskLamp": (1.5, 0.36), "notebook": (1.6, 0.3), "softbox": (1.5, 0.3), "camera": (1.2, 0.34),
-          "speaker": (1.1, 0.38), "robot": (2.0, 0.36), "conveyor": (3.2, 0.3), "fountain": (2.2, 0.3), "clocktower": (1.7, 0.42)}
+          "speaker": (1.1, 0.38), "robot": (2.0, 0.36), "conveyor": (3.2, 0.3), "fountain": (2.2, 0.3), "clocktower": (1.7, 0.42),
+          "printer": (1.7, 0.36), "placer": (1.9, 0.36), "oven": (2.3, 0.34), "scanner": (1.7, 0.34), "storage": (1.8, 0.42),
+          "arm": (0.9, 0.34)}
 
     def bake_ao(self):
         N, S, R = self.N, self.S, self.R

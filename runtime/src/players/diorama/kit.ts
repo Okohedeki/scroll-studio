@@ -8,6 +8,7 @@ import * as THREE from "three";
 import { Mesher, PAT, hash, shade } from "./mesher";
 import type { PropRec } from "./types";
 import { KIT2 } from "./kit2";
+import { KIT3 } from "./kit3";
 
 export interface KitCtx {
   M: Mesher;
@@ -19,6 +20,8 @@ export interface KitCtx {
   part(lx: number, ly: number, lz: number, build: (m: Mesher) => void, tick?: (o: THREE.Group, t: number) => void): void;
   /** any object, positioned at a local point of the prop, with an optional animation */
   add(obj: THREE.Object3D, lx: number, ly: number, lz: number, tick?: (o: THREE.Object3D, t: number) => void): void;
+  /** a piece drawn in its own frame as a group of meshes in the world's materials (for jointed things built as a hierarchy) */
+  meshOf(build: (m: Mesher) => void): THREE.Group;
 }
 type Builder = (c: KitCtx) => void;
 
@@ -388,6 +391,7 @@ export const KIT: Record<string, Builder> = {
   tree, pine, bush, rock, lamp, bench, fence, crate, barrel, bollard, buoy, flag,
   house, shop, cafe: shop, warehouse, office, stall, container, boat, ferry: boat, pier, lighthouse, crane, windmill,
   ...KIT2,
+  ...KIT3,
 };
 
 export function builderFor(kind: string): Builder {

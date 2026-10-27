@@ -15,6 +15,7 @@ EDGES = {
     "desk": {"lip": "#c99a63", "soil": "#b4824d", "clay": "#a47340", "stone": "#8d6236", "plinth": "#6d4a2c", "plinthTop": "#8a6038"},
     "factory": {"lip": "#c9ccd0", "soil": "#b5b9be", "clay": "#9fa4aa", "stone": "#7e848b", "plinth": "#4a5058", "plinthTop": "#6a727b"},
     "studio": {"lip": "#e3c496", "soil": "#cfa974", "clay": "#b98f5c", "stone": "#8f6a40", "plinth": "#3a3f47", "plinthTop": "#555c66"},
+    "plain": {"lip": "#d5d9de", "soil": "#c3c8ce", "clay": "#aeb4bb", "stone": "#8e959d", "plinth": "#3c424b", "plinthTop": "#5a616b"},
 }
 
 
@@ -348,3 +349,26 @@ def dress_studio(w: World, pl: dict, pal, rng):
         D(w, pl, [("plant", 3.6, 0.0, 0, 0.8), ("pencils", -3.4, 2.0, 0, 0.7)])
     elif k == "easel":
         D(w, pl, [("crate", 2.4, 0.6, 0.2, 1.0, None, 0, 0.6), ("plant", -2.6, -0.4, 0, 0.7)])
+
+
+# ---------------------------------------------------------------- plain: an empty floor, the world is what is set on it
+
+def plain(w: World, pal, spec_world):
+    k = w.R / 15.0
+    P = lambda x, z: (x * k, z * k)
+    w.h[:] = 0
+    w.finish_terrain()
+    paint_concrete(w, spec_world.floor or "#dcdfe3", 4.0 * k)
+    spots = [Spot(n, *P(x, z), f, ()) for n, x, z, f in (
+        ("centre", 0, 0, 0.0), ("back", 0, -9, 0.0), ("front", 0, 9, 0.0), ("left", -10, 0, 1.57), ("right", 10, 0, -1.57),
+        ("back-left", -9, -9, 0.6), ("back-right", 9, -9, -0.6), ("front-left", -9, 9, 0.6), ("front-right", 9, 9, -0.6))]
+    w.spots = {s.name: s for s in spots}
+    return {"k": k}
+
+
+def plain_fill(w: World, pal, info, rng):
+    """Nothing: a plain world is made of its places, its props and its movers."""
+
+
+def dress_plain(w: World, pl: dict, pal, rng):
+    """Nothing round a place on a plain world."""

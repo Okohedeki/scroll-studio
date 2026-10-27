@@ -58,6 +58,63 @@ the pointer can turn the view).
 extreme), `saturation`, `sun` (`morning`, `noon`, `golden`, `dusk`), `table` (the surface it stands on; default the
 theme background), `grain`, `vignette`.
 
+## Things that move: movers and traffic
+
+A diorama can have things travelling round it: one thing the page follows, and crowds that go about their own business.
+Both are laid out at build time on the CPU and drawn live, so they cost no GPU job.
+
+```yaml
+- id: floor
+  type: diorama
+  world:
+    kind: plain                         # an empty floor: the world is its places, props and movers
+    floor: "#e3e6ea"
+    props:
+      - { kind: tiles, at: [0, 0], size: [20, 10] }       # a floor of one-unit tiles
+  places:
+    - { name: Cutting, kind: printer, where: [-6, 7], turn: 0, sign: "" }
+    - { name: Baking, kind: oven, where: [2, 7], turn: 0, sign: "" }
+  movers:
+    - id: tray
+      kind: carrier                     # a flat deck that floats over the floor
+      drive: scroll                     # its place on the route follows the page
+      hover: 0.12
+      route: [[-12, 7.4], [12, 7.4]]
+      stops:                            # where it waits while that place's step is on screen, and what it carries from there
+        - { place: Cutting, carry: inputs/tray-cut.png }
+        - { place: Baking, carry: inputs/tray-baked.png }
+  traffic:
+    - area: [-10, -5, 10, 4]            # a grid they wander, one move a cell
+      cell: 1.0
+      count: 24
+      carry: [inputs/a.png, inputs/b.png, inputs/c.png]   # mover i carries picture i (mod the list)
+  camera: { travel: glide, yaw: 10 }
+  steps: [...]                          # an intro, one step per place, a closing wide step
+```
+
+- **A scroll mover** (`drive: scroll`, at most one per scene) waits at each stop through the rest of that stop's step and
+  travels between stops as the page scrolls (easing in and out). Before its first stop it sits at the start of its route;
+  when the route goes on past the last stop it reaches the end as the last step comes to rest. A stop names a `place`
+  (the mover stops where the route passes it) or gives `at: [x, z]` with the `step` it waits through. `carry` lays a
+  picture on its deck; a stop's `carry` replaces it over the middle of that stop's rest, so a thing can change while the
+  camera is looking at it.
+- **A time mover** (`drive: time`) goes round its `route` on its own at `speed` (a closed loop when the route has three
+  or more points).
+- **Traffic** is a crowd on a grid: each mover drives straight from cell to cell, rests, and picks its next way (more
+  often straight on than turning). A mover reserves the next cell before it sets off and keeps its own until it arrives,
+  so two never share a cell, meet head on or swap places. Cells near a mover's route, near props that stand in the area
+  and inside `keep_off` rectangles are left alone. The build simulates two minutes of it (deterministic by `seed`) and
+  the page plays them on a loop.
+- **`camera.travel: glide`** goes straight from one place to the next at about the same height instead of lifting out
+  over the world, the target riding with the scroll mover; at each of its stops the camera looks at the mover and what it
+  carries rather than at the middle of the place's hero. `camera.yaw` sets the azimuth of the wide views.
+- **The kit** has an automation set for worlds like this: `printer`, `placer`, `oven` and `scanner` (production machines,
+  each a tunnel along x at floor height, open at the front with a light inside, so a mover passing through shows what it
+  carries), `storage` (a tower of shelves with a lift), `arm` (a robot arm), `carrier` (the floating deck) and `tiles` (a
+  floor of tiles, `size: [w, d]`). A place takes `turn` (degrees) and an empty `sign` for no sign.
+- **Phones** frame a place so its whole width fits the narrow screen. **Reduced motion** shows each place still, the
+  movers where they are while that step rests and the scroll mover carrying what it has there.
+
 ## Worlds and their vocabulary
 
 | world | base | what is on it | hero kinds (`places[].kind`) | spots (`where`) |
@@ -67,6 +124,7 @@ theme background), `grain`, `vignette`.
 | `desk` | square | a wood desk with a mat | laptop, monitor, mug, books, plant, deskLamp, notebook | centre, back, right, left, corner, lamp, front, front-right |
 | `factory` | square | a concrete floor with safety lines, cells and aisles | conveyor, robot, tank, silo, chimney, warehouse, office | line, cell, tanks, silo, stack, dock, office, yard |
 | `studio` | square | a wood floor with a rug and a paper sweep | easel, softbox, camera, monitor, speaker, sofa, shelf, plant | sweep, easel, lights, desk, lounge, shelf, speaker, corner |
+| `plain` | square | an empty floor (`world.floor` sets its colour) | any kind of the kit | centre, back, front, left, right, back-left, back-right, front-left, front-right |
 
 The kit also draws, as scenery or for `world.props`: tree, pine, bush, rock, lamp, bench, fence, crate, barrel, flag, sign,
 house, container, boat, buoy, bollard, pier, bridge, forklift, pencils, rug. Things move: water, a lighthouse beam, a

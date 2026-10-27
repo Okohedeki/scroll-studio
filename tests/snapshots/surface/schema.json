@@ -2536,6 +2536,29 @@
      "minimum": 10,
      "title": "Pitch",
      "type": "number"
+    },
+    "travel": {
+     "default": "orbit",
+     "description": "Between two places: orbit lifts out over the whole world and dives to the next; glide goes straight from one to the next at the same height, following a scroll mover that travels between them, and at a place where that mover stops it looks at the mover and what it carries",
+     "enum": [
+      "orbit",
+      "glide"
+     ],
+     "title": "Travel",
+     "type": "string"
+    },
+    "yaw": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Degrees round the world the wide views look from (0: from the front, 90: from the right). Unset: beside the first and last places",
+     "title": "Yaw"
     }
    },
    "title": "DioramaCamera",
@@ -2604,6 +2627,135 @@
     }
    },
    "title": "DioramaLook",
+   "type": "object"
+  },
+  "DioramaMover": {
+   "additionalProperties": false,
+   "description": "Something that travels a route on the diorama: a vehicle, a cart, a carrier. With `drive: scroll` its place on the\nroute follows the page: it waits at each stop while that stop's step is on screen and travels between stops as the\npage scrolls, and the camera follows it there (`camera.travel: glide`). With `drive: time` it goes round its route on\nits own, at `speed`.",
+   "properties": {
+    "carry": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "$ref": "#/$defs/ImageInput"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "What it carries at the start, a picture laid on its deck",
+     "title": "Carry"
+    },
+    "carry_size": {
+     "default": [
+      1.0,
+      0.9
+     ],
+     "description": "The carried picture's width and depth, world units",
+     "maxItems": 2,
+     "minItems": 2,
+     "prefixItems": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "number"
+      }
+     ],
+     "title": "Carry Size",
+     "type": "array"
+    },
+    "color": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Its main colour, hex",
+     "title": "Color"
+    },
+    "drive": {
+     "default": "scroll",
+     "description": "scroll: its place follows the page (see above); time: it loops its route on its own",
+     "enum": [
+      "scroll",
+      "time"
+     ],
+     "title": "Drive",
+     "type": "string"
+    },
+    "hover": {
+     "default": 0.0,
+     "description": "How high it floats over the floor (a levitating deck), world units",
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Hover",
+     "type": "number"
+    },
+    "id": {
+     "description": "A name for it",
+     "title": "Id",
+     "type": "string"
+    },
+    "kind": {
+     "default": "carrier",
+     "description": "What it is, a prop of the kit: carrier (a flat, levitating deck), forklift, boat ... (unknown kinds are drawn as a block)",
+     "title": "Kind",
+     "type": "string"
+    },
+    "route": {
+     "description": "The way it goes, points [x, z] in world units in order; corners are rounded. Its stops are joined to it in order",
+     "items": {
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "number"
+       }
+      ],
+      "type": "array"
+     },
+     "title": "Route",
+     "type": "array"
+    },
+    "scale": {
+     "default": 1.0,
+     "exclusiveMinimum": 0,
+     "maximum": 5,
+     "title": "Scale",
+     "type": "number"
+    },
+    "speed": {
+     "default": 1.2,
+     "description": "drive: time: world units per second",
+     "exclusiveMinimum": 0,
+     "maximum": 20,
+     "title": "Speed",
+     "type": "number"
+    },
+    "stops": {
+     "description": "drive: scroll: where it waits and what it carries from there on, in route order",
+     "items": {
+      "$ref": "#/$defs/DioramaStop"
+     },
+     "title": "Stops",
+     "type": "array"
+    }
+   },
+   "required": [
+    "id"
+   ],
+   "title": "DioramaMover",
    "type": "object"
   },
   "DioramaPlace": {
@@ -2675,7 +2827,7 @@
       }
      ],
      "default": null,
-     "description": "Text on the little sign at the place (default: the name)",
+     "description": "Text on the little sign at the place (default: the name; an empty text: no sign)",
      "title": "Sign"
     },
     "step": {
@@ -2691,6 +2843,19 @@
      "default": null,
      "description": "Which of the scene's steps (0-based) lives here. Unset: the places take the steps in order, skipping a leading intro step",
      "title": "Step"
+    },
+    "turn": {
+     "anyOf": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Degrees the hero prop is turned (0 faces the viewer, 90 faces right). Unset: the world decides (towards the water, or the viewer)",
+     "title": "Turn"
     },
     "where": {
      "anyOf": [
@@ -2766,6 +2931,29 @@
      "default": 1.0,
      "title": "Scale",
      "type": "number"
+    },
+    "size": {
+     "anyOf": [
+      {
+       "maxItems": 2,
+       "minItems": 2,
+       "prefixItems": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "number"
+        }
+       ],
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Width and depth in world units, for props that cover an area (tiles, rug)",
+     "title": "Size"
     },
     "turn": {
      "default": 0.0,
@@ -2862,6 +3050,14 @@
     "look": {
      "$ref": "#/$defs/DioramaLook"
     },
+    "movers": {
+     "description": "Things that travel routes (see DioramaMover); one may be driven by the scroll",
+     "items": {
+      "$ref": "#/$defs/DioramaMover"
+     },
+     "title": "Movers",
+     "type": "array"
+    },
     "nav_label": {
      "anyOf": [
       {
@@ -2927,6 +3123,14 @@
      "description": "Colour scheme for the scene's panel in the stack layout (see blocks); sets the text colour over a backdrop",
      "title": "Surface"
     },
+    "traffic": {
+     "description": "Crowds of movers wandering grids on their own (see DioramaTraffic)",
+     "items": {
+      "$ref": "#/$defs/DioramaTraffic"
+     },
+     "title": "Traffic",
+     "type": "array"
+    },
     "transition": {
      "anyOf": [
       {
@@ -2954,6 +3158,236 @@
     "places"
    ],
    "title": "DioramaScene",
+   "type": "object"
+  },
+  "DioramaStop": {
+   "additionalProperties": false,
+   "description": "A stop on a mover's route: where it waits while a step is on screen, and what it carries from there on.",
+   "properties": {
+    "at": {
+     "anyOf": [
+      {
+       "maxItems": 2,
+       "minItems": 2,
+       "prefixItems": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "number"
+        }
+       ],
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Or a point [x, z] in world units; it waits there while `step` is on screen",
+     "title": "At"
+    },
+    "carry": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "$ref": "#/$defs/ImageInput"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "What it carries from this stop on (a picture laid on its deck); it changes while the mover waits here",
+     "title": "Carry"
+    },
+    "place": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "The name of a place: the mover stops at that place (its position on the route), while that place's step is on screen",
+     "title": "Place"
+    },
+    "step": {
+     "anyOf": [
+      {
+       "minimum": 0,
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "With `at`: which step (0-based) it waits through",
+     "title": "Step"
+    }
+   },
+   "title": "DioramaStop",
+   "type": "object"
+  },
+  "DioramaTraffic": {
+   "additionalProperties": false,
+   "description": "Many movers wandering a grid on their own, each its own way: they drive straight along the grid's lines, stop,\nturn, and never run into each other or into what stands on the grid (the routes are worked out at build time, a few\nminutes of traffic that the page plays on a loop). Warehouse robots, planar-motor decks, carts in a yard.",
+   "properties": {
+    "area": {
+     "description": "x0, z0, x1, z1: the rectangle they move in, world units",
+     "maxItems": 4,
+     "minItems": 4,
+     "prefixItems": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "number"
+      },
+      {
+       "type": "number"
+      },
+      {
+       "type": "number"
+      }
+     ],
+     "title": "Area",
+     "type": "array"
+    },
+    "carry": {
+     "description": "Pictures laid on their decks; mover i carries picture i (mod the list), so a few pictures make a varied crowd",
+     "items": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "$ref": "#/$defs/ImageInput"
+       }
+      ]
+     },
+     "title": "Carry",
+     "type": "array"
+    },
+    "carry_size": {
+     "default": [
+      0.7,
+      0.6
+     ],
+     "description": "The carried picture's width and depth, world units",
+     "maxItems": 2,
+     "minItems": 2,
+     "prefixItems": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "number"
+      }
+     ],
+     "title": "Carry Size",
+     "type": "array"
+    },
+    "cell": {
+     "default": 1.0,
+     "description": "The grid's spacing, world units: one move is one cell",
+     "maximum": 6,
+     "minimum": 0.3,
+     "title": "Cell",
+     "type": "number"
+    },
+    "colors": {
+     "description": "Hex colours for the movers, used in turn",
+     "items": {
+      "type": "string"
+     },
+     "title": "Colors",
+     "type": "array"
+    },
+    "count": {
+     "default": 12,
+     "description": "How many movers",
+     "maximum": 80,
+     "minimum": 1,
+     "title": "Count",
+     "type": "integer"
+    },
+    "hover": {
+     "default": 0.0,
+     "description": "How high they float over the floor, world units",
+     "maximum": 1,
+     "minimum": 0,
+     "title": "Hover",
+     "type": "number"
+    },
+    "keep_off": {
+     "description": "More rectangles (x0, z0, x1, z1) they never enter; the routes of scroll movers and the props standing in the area are kept off by themselves",
+     "items": {
+      "maxItems": 4,
+      "minItems": 4,
+      "prefixItems": [
+       {
+        "type": "number"
+       },
+       {
+        "type": "number"
+       },
+       {
+        "type": "number"
+       },
+       {
+        "type": "number"
+       }
+      ],
+      "type": "array"
+     },
+     "title": "Keep Off",
+     "type": "array"
+    },
+    "kind": {
+     "default": "carrier",
+     "description": "What each is, a prop of the kit (see DioramaMover.kind)",
+     "title": "Kind",
+     "type": "string"
+    },
+    "pause": {
+     "default": 0.25,
+     "description": "Seconds they rest at a cell before moving on",
+     "maximum": 5,
+     "minimum": 0,
+     "title": "Pause",
+     "type": "number"
+    },
+    "scale": {
+     "default": 1.0,
+     "exclusiveMinimum": 0,
+     "maximum": 5,
+     "title": "Scale",
+     "type": "number"
+    },
+    "seed": {
+     "default": 7,
+     "title": "Seed",
+     "type": "integer"
+    },
+    "speed": {
+     "default": 1.6,
+     "description": "World units per second while moving",
+     "exclusiveMinimum": 0,
+     "maximum": 20,
+     "title": "Speed",
+     "type": "number"
+    }
+   },
+   "required": [
+    "area"
+   ],
+   "title": "DioramaTraffic",
    "type": "object"
   },
   "DioramaWorld": {
@@ -2985,15 +3419,29 @@
      "title": "Density",
      "type": "number"
     },
+    "floor": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "plain: the floor's colour, hex (default: a pale concrete)",
+     "title": "Floor"
+    },
     "kind": {
      "default": "harbour",
-     "description": "The kind of world: sets the ground plan, the scenery and the prop vocabulary",
+     "description": "The kind of world: sets the ground plan, the scenery and the prop vocabulary. plain: an empty floor, for a world made of its places, props and movers",
      "enum": [
       "harbour",
       "town",
       "desk",
       "factory",
-      "studio"
+      "studio",
+      "plain"
      ],
      "title": "Kind",
      "type": "string"
