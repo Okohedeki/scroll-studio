@@ -2650,6 +2650,135 @@ class LightScene(SceneBase):
         return self
 
 
+# ---------------------------------------------------------------- stages: one subject, state by state (engine/scenes/stages.py)
+
+STAGE_COLOURS = ("accent", "accent2", "ink", "bg", "bg2", "light", "dark")
+
+
+class StageFront(Model):
+    """A band of light that travels with a reveal's front: a scanning head, a band of heat, a sweep of light. It is drawn
+    where the front is, so it moves exactly with the scroll."""
+    color: str = Field("accent", description="Its colour: a theme role (accent, accent2, ink, bg, bg2, light, dark) or a "
+                                             "hex colour")
+    width: float = Field(0.02, ge=0.002, le=0.3, description="How wide the band is, as a share of the front's travel")
+    strength: float = Field(0.8, ge=0, le=2, description="How bright the band is")
+    where: Literal["change", "all"] = Field("change", description="change: the band shows only where the picture changes "
+                                                               "between the two stages (each part lights up as it "
+                                                               "lands); all: across the whole picture (a band of heat, "
+                                                               "a scan line)")
+
+    @field_validator("color")
+    @classmethod
+    def _colour(cls, v: str) -> str:
+        if v not in STAGE_COLOURS and not _HEX.fullmatch(v):
+            raise ValueError(f"front.color {v[:40]!r} is a theme role ({', '.join(STAGE_COLOURS)}) or a hex colour")
+        return v
+
+
+class StageReveal(Model):
+    """How a stage arrives over the one before. A bare string is the kind (`fade`, `wipe`, `map`)."""
+    kind: Literal["fade", "wipe", "map"] = Field("fade", description="fade: the whole picture at once; wipe: a straight "
+                                                                     "front crosses the picture along `angle`; map: each "
+                                                                     "pixel arrives when the scroll reaches its grey in "
+                                                                     "`map` (black first, white last), so parts can land "
+                                                                     "one by one in any order")
+    angle: float = Field(0.0, description="wipe: the direction the front travels, in degrees (0 left to right, 90 top to "
+                                          "bottom, 180 right to left)")
+    map: Optional[ImageRef] = Field(None, description="map: a greyscale picture of the same view: when each pixel arrives "
+                                                      "(black first). Flat greys make whole parts arrive together")
+    softness: float = Field(0.06, ge=0.0, le=1.0, description="How soft the front is, as a share of its travel (0 a hard "
+                                                              "edge)")
+    front: Optional[StageFront] = Field(None, description="A band of light that travels with the front (see StageFront)")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _bare(cls, v):
+        return {"kind": v} if isinstance(v, str) else v
+
+    @model_validator(mode="after")
+    def _map(self):
+        if self.kind == "map" and self.map is None:
+            raise ValueError("reveal: kind map needs `map` (a greyscale picture: black arrives first)")
+        return self
+
+
+class Stage(Model):
+    """One state of the subject: a picture of exactly the same view as the others (same framing, same size)."""
+    id: Optional[str] = Field(None, description="Name to pin steps to (`state: {stage: <id>}`); default s0, s1 ...")
+    image: ImageRef = Field(..., description="The picture of this state; every stage is the same view")
+    reveal: StageReveal = Field(default_factory=StageReveal, description="How this stage arrives over the one before "
+                                                                         "(fade, wipe or map; ignored on the first)")
+
+    @model_validator(mode="before")
+    @classmethod
+    def _bare(cls, v):
+        return {"image": v} if isinstance(v, str) else v
+
+
+class StageFrame(Model):
+    """How the pictures sit in the stage: cropped to fill it (cover) or whole (contain)."""
+    fit: Literal["cover", "contain"] = Field("cover", description="cover: fill the stage, cropping what does not fit; "
+                                                                  "contain: show the whole picture, the stage's background "
+                                                                  "around it")
+    position: tuple[float, float] = Field((0.5, 0.5), description="contain: where the picture sits in the stage, 0-1 across "
+                                                                  "and down ([1, 0.5] is against the right edge); cover: "
+                                                                  "the point of the picture kept in view")
+    zoom: float = Field(1.0, ge=0.5, le=3.0, description="Scale on top of the fit (1.1 is a tenth larger)")
+
+    @field_validator("position")
+    @classmethod
+    def _pos(cls, v):
+        if not all(0 <= c <= 1 for c in v):
+            raise ValueError("frame.position is x, y in 0-1")
+        return v
+
+
+class StagesScene(SceneBase):
+    """One subject through its states, in order: a sequence of stills of exactly the same view (a drawing becoming the
+    thing, a room before and after, a product being made), scrolled through so every state lines up with the one before.
+    Each change is revealed by a fade, a wipe or a map (each pixel arrives when the scroll reaches its grey, so parts can
+    land one by one), optionally with a band of light travelling with the front. The scroll holds on each state while its
+    step is read. Steps sit at stages (`state: {stage: <id or index>}`, or in order). Reduced motion and no WebGL show one
+    still per step."""
+    type: Literal["stages"] = "stages"
+    length: float = Field(0.0, description="overlay layout: scroll distance in screen heights (0: 2.2 per stage)")
+    stages: list[Stage] = Field(..., min_length=2, description="The states in order; the first is shown as it is")
+    hold: float = Field(0.35, ge=0, le=0.9, description="Share of each step the picture holds still at its stage, so a "
+                                                        "headline reads over a picture that is not changing")
+    drift: float = Field(0.5, ge=0, le=2, description="A slow push-in over the scene and an idle breath (0 off; reduced "
+                                                      "motion always off)")
+    fit: StageFrame = Field(default_factory=StageFrame, description="How the pictures sit in the stage (see StageFrame)")
+    phone: Optional[StageFrame] = Field(None, description="The same, on a phone (default: `fit`). `{fit: contain, "
+                                                          "position: [0.5, 1]}` keeps the whole subject in view below the "
+                                                          "words, which a phone sets near the top")
+    pointer: Optional[Pointer] = Field(None, description=POINTER_DOC + ". Here it shows on the last stage, as the "
+                                                         "sequence arrives there; a second picture is one picture of the "
+                                                         "same view, and `rest` is a point of the picture")
+    width: int = Field(2048, ge=640, le=3840, description="Width of the pictures served to desktop browsers (phones get "
+                                                          "two thirds)")
+
+    @model_validator(mode="after")
+    def _stages(self):
+        used: list[str] = []
+        for i, st in enumerate(self.stages):
+            if not st.id:
+                st.id = f"s{i}"
+            if st.id in used:
+                raise ValueError(f"stages '{self.id}': two stages are called '{st.id}'")
+            used.append(st.id)
+        if self.pointer is not None and len(self.pointer.pictures) > 1:
+            raise ValueError(f"stages '{self.id}': pointer.layer is one picture here (the last stage's second picture)")
+        for step in self.steps:
+            pin = (step.state or {}).get("stage")
+            if pin is None:
+                continue
+            ok = (isinstance(pin, int) and not isinstance(pin, bool) and 0 <= pin < len(self.stages)) or pin in used
+            if not ok:
+                raise ValueError(f"stages '{self.id}': step '{step.title}' sits at stage {pin!r}, which is not one of the "
+                                 f"stages ({', '.join(used)}, or 0-{len(self.stages) - 1})")
+        return self
+
+
 # ---------------------------------------------------------------- content blocks
 
 class BlockBase(Model):
@@ -3095,13 +3224,13 @@ InsideScene.model_rebuild()
 
 Section = Annotated[Union[
     FilmScene, ArtworkScene, Scene3DScene, SequenceScene, ParallaxScene, TypeScene, VectorScene, ChartScene, MapScene,
-    SplatScene, CodeScene, ShowroomScene, DioramaScene, InsideScene, LightScene,
+    SplatScene, CodeScene, ShowroomScene, DioramaScene, InsideScene, LightScene, StagesScene,
     IntroBlock, FeaturesBlock, StatsBlock, TimelineBlock, QuoteBlock, CtaBlock, GalleryBlock,
     HeroBlock, ProductBlock, StripBlock, OrbitBlock, FaqBlock, LogosBlock, SignupBlock,
 ], Field(discriminator="type")]
 
 SCENE_TYPES = ("film", "artwork", "scene3d", "sequence", "parallax", "type", "vector", "chart", "map", "splat", "code",
-               "showroom", "diorama", "inside", "light")
+               "showroom", "diorama", "inside", "light", "stages")
 
 
 # ---------------------------------------------------------------- site

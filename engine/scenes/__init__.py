@@ -20,6 +20,7 @@ MODULES = {
     "diorama": "diorama",
     "inside": "inside",
     "light": "light",
+    "stages": "stages",
 }
 
 

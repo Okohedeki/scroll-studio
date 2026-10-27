@@ -916,6 +916,59 @@ page's own scroll.
 drift), `strip_*.jpg` (the built page across each transition, at the scroll positions a viewer passes through) and `light.json`.
 `studio light --presets` lists the named times. Example: [Quay House](../examples/harbour-light/site.yaml).
 
+### One subject, state by state (`type: stages`)
+
+Show a thing being made, or changing, by scrolling through its states: a drawing becoming the object, a room before and
+after, a product through each step of its making. A `stages` scene is a sequence of stills of exactly the same view; the
+scroll holds on each state while its step is read and reveals the next one over it between steps, so every state lines up
+with the one before.
+
+```yaml
+- id: making
+  type: stages
+  layout: overlay
+  shade: none
+  fit: { fit: contain, position: [1, 0.5], zoom: 0.9 }     # the whole picture, against the right edge
+  phone: { fit: contain, position: [0.5, 1] }              # on a phone: whole, below the words
+  stages:
+    - { id: drawn, image: inputs/stage-drawing.png }
+    - id: cut
+      image: inputs/stage-cut.png
+      reveal: { kind: wipe, angle: 90, front: { color: accent, width: 0.012, where: all } }   # a scan line, top to bottom
+    - id: assembled
+      image: inputs/stage-assembled.png
+      reveal: { kind: map, map: inputs/order.png, softness: 0.03, front: { color: accent2 } } # parts land one by one
+    - { id: done, image: inputs/stage-finished.png, reveal: fade }
+  pointer: { mode: lens, layer: inputs/inside.png }        # on the last stage: a lens onto a second picture
+  steps:
+    - { title: "First, <em>a drawing.</em>", intro: true, state: { stage: drawn } }
+    - { title: "Cut to shape.", state: { stage: cut }, at: { grid: "1 / span 4", row: middle } }
+    - { title: "Every part <em>in its place.</em>", state: { stage: assembled } }
+    - { title: "Finished.", state: { stage: done } }
+```
+
+- **Stages.** Each `image` is any image input; every stage is fitted to the first stage's size (the build says when a
+  shape differs, since the states only line up when they are the same view). The strongest way to get aligned stages is to
+  make them from one picture: generate or photograph the finished thing once, then derive the earlier states from it (parts
+  masked out and filled, a line drawing traced from it) rather than asking an image editor for each one, which moves things.
+- **Reveals.** `fade` (the whole picture at once), `wipe` (a straight front along `angle`: 0 left to right, 90 top to bottom)
+  or `map` (a greyscale picture of the same view: each pixel arrives when the scroll reaches its grey, black first, so flat
+  greys make whole parts land together, in any order you paint). `softness` is the front's soft edge, a share of its travel.
+- **A band of light on the front** (`front`): a scanning head, a band of heat, a sweep of light, drawn where the front is,
+  so it moves exactly with the scroll. `color` is a theme role or a hex colour, `width` and `strength` its size and
+  brightness, and `where: change` lights it only where the picture changes between the two stages (each part lights up as
+  it lands) or `where: all` across the whole subject (not the stage's background around it).
+- **Timing.** Steps sit at stages with `state: {stage: <id or index>}`, or spread over them in order. The picture holds
+  still for the middle `hold` share of each step's stretch, and overlay captions are timed to be on screen while it does.
+  `length` 0 is 2.2 screen heights per stage.
+- **Framing.** `fit` and `phone` (`fit: cover | contain`, `position`, `zoom`): cover fills the stage and keeps `position`
+  of the picture in view; contain shows the whole picture placed at `position` in the stage, the page's background around
+  it. A phone sets every caption near the top, so `phone: {fit: contain, position: [0.5, 1]}` keeps the whole subject in
+  view below the words. `drift` is a slow push-in over the scene and an idle breath.
+- **Pointer.** `pointer` works as on a parallax photo, and shows as the sequence arrives at its last stage; a lens's second
+  picture is one picture of the same view (an X-ray, a cutaway). Its `rest` is a point of the picture, so it stays on the subject whatever the framing.
+- **Reduced motion and no WebGL:** one still per step. Everything is built on the CPU (no GPU needed).
+
 ### Faces, repaired (`faces: restore`)
 
 Generated video bends faces. `faces: restore` on a film or on a beat repairs them after generation: faces above

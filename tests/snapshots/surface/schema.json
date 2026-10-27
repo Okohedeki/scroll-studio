@@ -12277,6 +12277,413 @@
    "title": "SplatScene",
    "type": "object"
   },
+  "Stage": {
+   "additionalProperties": false,
+   "description": "One state of the subject: a picture of exactly the same view as the others (same framing, same size).",
+   "properties": {
+    "id": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Name to pin steps to (`state: {stage: <id>}`); default s0, s1 ...",
+     "title": "Id"
+    },
+    "image": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "$ref": "#/$defs/ImageInput"
+      }
+     ],
+     "description": "The picture of this state; every stage is the same view",
+     "title": "Image"
+    },
+    "reveal": {
+     "$ref": "#/$defs/StageReveal",
+     "description": "How this stage arrives over the one before (fade, wipe or map; ignored on the first)"
+    }
+   },
+   "required": [
+    "image"
+   ],
+   "title": "Stage",
+   "type": "object"
+  },
+  "StageFrame": {
+   "additionalProperties": false,
+   "description": "How the pictures sit in the stage: cropped to fill it (cover) or whole (contain).",
+   "properties": {
+    "fit": {
+     "default": "cover",
+     "description": "cover: fill the stage, cropping what does not fit; contain: show the whole picture, the stage's background around it",
+     "enum": [
+      "cover",
+      "contain"
+     ],
+     "title": "Fit",
+     "type": "string"
+    },
+    "position": {
+     "default": [
+      0.5,
+      0.5
+     ],
+     "description": "contain: where the picture sits in the stage, 0-1 across and down ([1, 0.5] is against the right edge); cover: the point of the picture kept in view",
+     "maxItems": 2,
+     "minItems": 2,
+     "prefixItems": [
+      {
+       "type": "number"
+      },
+      {
+       "type": "number"
+      }
+     ],
+     "title": "Position",
+     "type": "array"
+    },
+    "zoom": {
+     "default": 1.0,
+     "description": "Scale on top of the fit (1.1 is a tenth larger)",
+     "maximum": 3.0,
+     "minimum": 0.5,
+     "title": "Zoom",
+     "type": "number"
+    }
+   },
+   "title": "StageFrame",
+   "type": "object"
+  },
+  "StageFront": {
+   "additionalProperties": false,
+   "description": "A band of light that travels with a reveal's front: a scanning head, a band of heat, a sweep of light. It is drawn\nwhere the front is, so it moves exactly with the scroll.",
+   "properties": {
+    "color": {
+     "default": "accent",
+     "description": "Its colour: a theme role (accent, accent2, ink, bg, bg2, light, dark) or a hex colour",
+     "title": "Color",
+     "type": "string"
+    },
+    "strength": {
+     "default": 0.8,
+     "description": "How bright the band is",
+     "maximum": 2,
+     "minimum": 0,
+     "title": "Strength",
+     "type": "number"
+    },
+    "where": {
+     "default": "change",
+     "description": "change: the band shows only where the picture changes between the two stages (each part lights up as it lands); all: across the whole picture (a band of heat, a scan line)",
+     "enum": [
+      "change",
+      "all"
+     ],
+     "title": "Where",
+     "type": "string"
+    },
+    "width": {
+     "default": 0.02,
+     "description": "How wide the band is, as a share of the front's travel",
+     "maximum": 0.3,
+     "minimum": 0.002,
+     "title": "Width",
+     "type": "number"
+    }
+   },
+   "title": "StageFront",
+   "type": "object"
+  },
+  "StageReveal": {
+   "additionalProperties": false,
+   "description": "How a stage arrives over the one before. A bare string is the kind (`fade`, `wipe`, `map`).",
+   "properties": {
+    "angle": {
+     "default": 0.0,
+     "description": "wipe: the direction the front travels, in degrees (0 left to right, 90 top to bottom, 180 right to left)",
+     "title": "Angle",
+     "type": "number"
+    },
+    "front": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/StageFront"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "A band of light that travels with the front (see StageFront)"
+    },
+    "kind": {
+     "default": "fade",
+     "description": "fade: the whole picture at once; wipe: a straight front crosses the picture along `angle`; map: each pixel arrives when the scroll reaches its grey in `map` (black first, white last), so parts can land one by one in any order",
+     "enum": [
+      "fade",
+      "wipe",
+      "map"
+     ],
+     "title": "Kind",
+     "type": "string"
+    },
+    "map": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "$ref": "#/$defs/ImageInput"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "map: a greyscale picture of the same view: when each pixel arrives (black first). Flat greys make whole parts arrive together",
+     "title": "Map"
+    },
+    "softness": {
+     "default": 0.06,
+     "description": "How soft the front is, as a share of its travel (0 a hard edge)",
+     "maximum": 1.0,
+     "minimum": 0.0,
+     "title": "Softness",
+     "type": "number"
+    }
+   },
+   "title": "StageReveal",
+   "type": "object"
+  },
+  "StagesScene": {
+   "additionalProperties": false,
+   "description": "One subject through its states, in order: a sequence of stills of exactly the same view (a drawing becoming the\nthing, a room before and after, a product being made), scrolled through so every state lines up with the one before.\nEach change is revealed by a fade, a wipe or a map (each pixel arrives when the scroll reaches its grey, so parts can\nland one by one), optionally with a band of light travelling with the front. The scroll holds on each state while its\nstep is read. Steps sit at stages (`state: {stage: <id or index>}`, or in order). Reduced motion and no WebGL show one\nstill per step.",
+   "properties": {
+    "backdrop": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "$ref": "#/$defs/ImageInput"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Full-bleed image behind the whole section: a file, URL, generate: or gradient:. In the stack layout it is the panel's own backdrop. Pair with `surface` for legible text.",
+     "title": "Backdrop"
+    },
+    "cue": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "'Scroll to …' hint shown at the start",
+     "title": "Cue"
+    },
+    "drift": {
+     "default": 0.5,
+     "description": "A slow push-in over the scene and an idle breath (0 off; reduced motion always off)",
+     "maximum": 2,
+     "minimum": 0,
+     "title": "Drift",
+     "type": "number"
+    },
+    "fit": {
+     "$ref": "#/$defs/StageFrame",
+     "description": "How the pictures sit in the stage (see StageFrame)"
+    },
+    "frame": {
+     "anyOf": [
+      {
+       "const": "card",
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "card: present the section as a rounded card inset on a border in the theme's accent colours (accent to accent2), as many current landing pages frame their opening. Wide screens only: on a phone it stays full-bleed. Overlay and cards scenes frame their stage, split scenes their picture, a hero its whole panel",
+     "title": "Frame"
+    },
+    "hold": {
+     "default": 0.35,
+     "description": "Share of each step the picture holds still at its stage, so a headline reads over a picture that is not changing",
+     "maximum": 0.9,
+     "minimum": 0,
+     "title": "Hold",
+     "type": "number"
+    },
+    "hud": {
+     "$ref": "#/$defs/Hud"
+    },
+    "id": {
+     "title": "Id",
+     "type": "string"
+    },
+    "layout": {
+     "default": "overlay",
+     "description": "overlay: captions over a full-bleed stage; split: pinned visual beside scrolling cards; cards: full-bleed stage with cards scrolling over it",
+     "enum": [
+      "overlay",
+      "split",
+      "cards"
+     ],
+     "title": "Layout",
+     "type": "string"
+    },
+    "length": {
+     "default": 0.0,
+     "description": "overlay layout: scroll distance in screen heights (0: 2.2 per stage)",
+     "title": "Length",
+     "type": "number"
+    },
+    "locked": {
+     "default": false,
+     "description": "Keep this scene's renders as they are: `studio build` and `studio storyboard` never re-render it, even when its settings change (a log line says so). A locked scene that was never rendered is rendered once. Unlock (or delete the render) to redo it",
+     "title": "Locked",
+     "type": "boolean"
+    },
+    "nav_label": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Nav Label"
+    },
+    "phone": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/StageFrame"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "The same, on a phone (default: `fit`). `{fit: contain, position: [0.5, 1]}` keeps the whole subject in view below the words, which a phone sets near the top"
+    },
+    "pointer": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Pointer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "The visitor's pointer reveals the picture (see Pointer): `{mode: lens}` shows the colour (or a second picture) through a soft circle under the pointer, `{mode: light}` is a torch on a darkened picture. Here it shows on the last stage, as the sequence arrives there; a second picture is one picture of the same view, and `rest` is a point of the picture"
+    },
+    "shade": {
+     "default": "auto",
+     "enum": [
+      "auto",
+      "none",
+      "strong"
+     ],
+     "title": "Shade",
+     "type": "string"
+    },
+    "side": {
+     "default": "right",
+     "description": "split/cards: which side the visual sits on",
+     "enum": [
+      "left",
+      "right"
+     ],
+     "title": "Side",
+     "type": "string"
+    },
+    "stages": {
+     "description": "The states in order; the first is shown as it is",
+     "items": {
+      "$ref": "#/$defs/Stage"
+     },
+     "minItems": 2,
+     "title": "Stages",
+     "type": "array"
+    },
+    "steps": {
+     "items": {
+      "$ref": "#/$defs/Step"
+     },
+     "title": "Steps",
+     "type": "array"
+    },
+    "surface": {
+     "anyOf": [
+      {
+       "enum": [
+        "light",
+        "dark",
+        "accent"
+       ],
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Colour scheme for the scene's panel in the stack layout (see blocks); sets the text colour over a backdrop",
+     "title": "Surface"
+    },
+    "transition": {
+     "anyOf": [
+      {
+       "$ref": "#/$defs/Transition"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "How this section hands over to the next one, in film grammar: cut, dissolve, wipe, iris, whip, match (a shared shape) or carry (an element travels over). Unset: the sections just follow one another. A bare name works: `transition: whip`. See Transition"
+    },
+    "type": {
+     "const": "stages",
+     "default": "stages",
+     "title": "Type",
+     "type": "string"
+    },
+    "width": {
+     "default": 2048,
+     "description": "Width of the pictures served to desktop browsers (phones get two thirds)",
+     "maximum": 3840,
+     "minimum": 640,
+     "title": "Width",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "id",
+    "stages"
+   ],
+   "title": "StagesScene",
+   "type": "object"
+  },
   "Stat": {
    "additionalProperties": false,
    "properties": {
@@ -15474,6 +15881,7 @@
       "showroom": "#/$defs/ShowroomScene",
       "signup": "#/$defs/SignupBlock",
       "splat": "#/$defs/SplatScene",
+      "stages": "#/$defs/StagesScene",
       "stats": "#/$defs/StatsBlock",
       "strip": "#/$defs/StripBlock",
       "timeline": "#/$defs/TimelineBlock",
@@ -15527,6 +15935,9 @@
      },
      {
       "$ref": "#/$defs/LightScene"
+     },
+     {
+      "$ref": "#/$defs/StagesScene"
      },
      {
       "$ref": "#/$defs/IntroBlock"

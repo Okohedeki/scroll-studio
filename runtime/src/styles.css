@@ -611,6 +611,7 @@ html:not(.js) .ss-strip { overflow-x: auto; }
   .ss-captions:not(:is(.ss-captions--top, .ss-captions--bottom, .ss-captions--box, .ss-captions--grid, .ss-captions--top-left,
     .ss-captions--top-right, .ss-captions--bottom-left, .ss-captions--bottom-right)) > .ss-caption { transform: translateY(max(-50%, calc(96px - 26svh))); }
   .ss-overlay .ss-shade { background: linear-gradient(to bottom, rgba(var(--bg-rgb), .75), transparent 55%), linear-gradient(to top, rgba(var(--bg-rgb), .7), transparent 30%); }
+  .ss-shade-none .ss-shade { background: none; }   /* `shade: none` holds on a phone too */
   .ss-split-grid, .ss-side-left .ss-split-grid { grid-template-columns: 1fr; }   /* the picture on the left stacks too */
   .ss-split .ss-pin { order: -1; height: 60svh; padding-top: 60px; gap: 8px; z-index: 5; background: linear-gradient(var(--bg) 96%, rgba(var(--bg-rgb), 0)); }   /* opaque under the chart's source line */
   .ss-split .ss-visual { height: calc(60svh - 96px); }
