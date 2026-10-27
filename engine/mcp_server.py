@@ -134,6 +134,7 @@ def spec_schema(part: Optional[str] = None) -> dict:
              "parallax": "ParallaxScene", "type": "TypeScene", "code": "CodeScene", "showroom": "ShowroomScene", "diorama": "DioramaScene",
              "inside": "InsideScene", "stop": "InsideStop",
              "light": "LightScene", "time": "LightTime", "lamps": "LightLamps", "sun": "LightSun", "structure": "LightStructure",
+             "stages": "StagesScene", "stage": "Stage", "reveal": "StageReveal", "front": "StageFront",
              "product": "Product", "parts": "PartMaterial", "shot": "ProductShot", "intro": "IntroBlock", "features": "FeaturesBlock",
              "stats": "StatsBlock", "timeline": "TimelineBlock", "quote": "QuoteBlock", "cta": "CtaBlock", "gallery": "GalleryBlock"}
     key = names.get(part, part)
