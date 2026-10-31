@@ -99,6 +99,7 @@ nav:
   - Guides:
       - Make a site: guide.md
       - The project file: project-file.md
+      - Product stills: stills.md
       - Examples: examples.md
   - Scenes:
       - Scenes: scenes.md

@@ -553,6 +553,28 @@ def record(project: str, section: Optional[str] = None, seconds: float = 12.0) -
 
 
 @mcp.tool()
+def make_stills(project: str, more: Optional[str] = None, different: bool = False, pick: Optional[str] = None) -> dict:
+    """Product stills from one photo (background job; needs outputs.stills in project.yaml): art directions, candidates
+    per shot, critics and a varied shortlist, on <project>/stills/board.html with every record in stills.json.
+    more=<candidate id>: more seeds in its direction. different=True: new directions unlike the existing ones.
+    pick=<candidate id>: mark its shot's final (returns at once)."""
+    from .stills import run as stills_run
+    p = _find(project)
+    if pick:
+        try:
+            st = stills_run.make(p, pick=pick, log=lambda m: None)
+        except BuildError as e:
+            return {"ok": False, "error": str(e)}
+        return {"ok": True, "picked": st["picked"]}
+
+    def run(job):
+        log, _ = logger(job)
+        st = stills_run.make(p, more=more, different=different, log=log)
+        return {"shortlist": st["shortlist"], "board": str(stills_run.folder(p) / "board.html")}
+    return jobs.submit("stills", p.name, "product stills", run).public(tail=5)
+
+
+@mcp.tool()
 def trailer(project: str, formats: Optional[list[str]] = None, force: bool = False, plan_only: bool = False) -> dict:
     """Cut the launch trailer from the site's own renders (background job): dist/trailer/trailer-16x9.mp4 and
     trailer-9x16.mp4 + posters, from the spec's `trailer:` (an empty `trailer: {}` derives the cut). formats: 16x9,

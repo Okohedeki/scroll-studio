@@ -18,6 +18,7 @@
   studio inspect my-site --page [--section hero]      polish report of the built page: text over pictures, type, pictures, layout; exit 1 on a fail
   studio trailer my-site [--format 9x16] [--plan]      launch trailer from the site's renders -> dist/trailer/
   studio ui                                         the Studio app (http://localhost:5180)
+  studio stills my-site [--more id | --different | --pick id]   product stills from one photo: directions, candidates, shortlist
   studio models [my-site]                           model backends (local and provider) and which one each job uses
   studio doctor                                     check Python, Node, FFmpeg, Blender, GPU, ComfyUI, models
   studio setup-comfy                                install the ComfyUI nodes for `reveal` and `faces` (restart ComfyUI after)
@@ -1161,6 +1162,31 @@ def migrate(name: str, write: bool = typer.Option(False, "--write", help="Write 
         raise typer.Exit(1)
     typer.echo(r["diff"])
     typer.echo(f"wrote {r['path']} (the old file is {r['backup']})" if write else "nothing written: run again with --write")
+
+
+@app.command()
+def stills(name: str,
+           more: Optional[str] = typer.Option(None, "--more", help="More seeds in this candidate's direction and shot"),
+           different: bool = typer.Option(False, "--different", help="New art directions, unlike the ones there"),
+           pick: Optional[str] = typer.Option(None, "--pick", help="Mark this candidate as its shot's final"),
+           open_board: bool = typer.Option(False, "--open", help="Open the board in a browser")):
+    """Product stills from one photo (outputs.stills in project.yaml): art directions, candidates, critics and a
+    shortlist per shot, on a board at <project>/stills/board.html."""
+    from .project import BuildError, Project
+    from .stills import run as stills_run
+    project = Project(resolve(name))
+    try:
+        state = stills_run.make(project, more=more, different=different, pick=pick, log=typer.echo)
+    except BuildError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(1)
+    for shot, ids in state["shortlist"].items():
+        mark = state["picked"].get(shot)
+        typer.echo(f"  {shot:<10} " + "  ".join(f"{i}{' *' if i == mark else ''}" for i in ids))
+    board = stills_run.folder(project) / "board.html"
+    if open_board:
+        import webbrowser
+        webbrowser.open(board.as_uri())
 
 
 @app.command()

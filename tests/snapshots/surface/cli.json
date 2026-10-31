@@ -1604,6 +1604,61 @@
     }
    }
   },
+  "stills": {
+   "help": "Product stills from one photo (outputs.stills in project.yaml): art directions, candidates, critics and a",
+   "params": {
+    "different": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--different"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "more": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--more"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "open_board": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--open"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "pick": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--pick"
+     ],
+     "required": false,
+     "type": "str"
+    }
+   }
+  },
   "storyboard": {
    "help": "Storyboard the site before the full render: <project>/storyboard/ (the page with stills standing in for films,",
    "params": {
