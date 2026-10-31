@@ -21,6 +21,7 @@
   studio stills my-site [--more id | --different | --pick id]   product stills from one photo: directions, candidates, shortlist
   studio ads my-site                                placement-sized ads from the picked stills (outputs.ads)
   studio listing my-site                            store listing copy: title, bullets, description (outputs.listing)
+  studio video my-site                              a short product video from the picked stills (outputs.video)
   studio models [my-site]                           model backends (local and provider) and which one each job uses
   studio doctor                                     check Python, Node, FFmpeg, Blender, GPU, ComfyUI, models
   studio setup-comfy                                install the ComfyUI nodes for `reveal` and `faces` (restart ComfyUI after)
@@ -1218,6 +1219,19 @@ def listing(name: str):
 
 
 @app.command()
+def video(name: str):
+    """A short product video from the picked stills (outputs.video in project.yaml) -> <project>/video/."""
+    from .project import BuildError, Project
+    from .video import make as make_video
+    try:
+        r = make_video(Project(resolve(name)), log=typer.echo)
+    except BuildError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(1)
+    typer.echo(f"{r['file']}: {r['seconds']} s, {r['voice']}")
+
+
+@app.command()
 def models(name: Optional[str] = typer.Argument(None, help="A project: also show which backend its `models:` picks")):
     """The model backends (engine/router): local workers and provider APIs, and whether each can run here."""
     from . import router
@@ -1230,7 +1244,7 @@ def models(name: Optional[str] = typer.Argument(None, help="A project: also show
         kinds = ", ".join(b.kinds)
         typer.echo(f"  {b.name:<18} {'local' if b.local else 'provider':<9} {kinds:<18} "
                    + (f"ready ({b.model(b.kinds[0])})" if ok else f"off: {why}"))
-    for kind in ("image", "edit", "text"):
+    for kind in ("image", "edit", "text", "speech"):
         try:
             typer.echo(f"{kind}: {router.choose(kind, policy).name}")
         except router.NoBackend as e:

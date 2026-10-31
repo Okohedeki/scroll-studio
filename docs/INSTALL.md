@@ -43,7 +43,7 @@ weights (`laion/CLIP-ViT-H-14-laion2B-s32B-b79K`, 3.9 GB, MIT) already in the Hu
 
 **Provider models (optional).** Every build works with local models only. To also let the model router
 (`engine/router`) use a provider, set its key: `ANTHROPIC_API_KEY` for text (`pip install -e .[providers]`),
-`OPENAI_API_KEY` for images and edits, or `text_url` in studio.toml for an OpenAI-style text server (one on this machine
+`OPENAI_API_KEY` for images and edits, `ELEVENLABS_API_KEY` for voiceovers, or `text_url` in studio.toml for an OpenAI-style text server (one on this machine
 counts as local). `studio models` lists what can run here, and a spec's `models:` picks
 ([the project file](project-file.md)). Each provider's own terms apply to what it makes.
 

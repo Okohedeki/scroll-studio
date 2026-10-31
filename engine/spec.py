@@ -3775,7 +3775,7 @@ class Directions(Model):
     stills: int = Field(4, ge=1, le=6, description="Storyboard stills per board: the hero, then key sections")
 
 
-RouterKind = Literal["image", "edit", "text"]
+RouterKind = Literal["image", "edit", "text", "speech"]
 
 
 class Models(Model):

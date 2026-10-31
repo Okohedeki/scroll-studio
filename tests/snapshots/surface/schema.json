@@ -9144,7 +9144,8 @@
       "enum": [
        "image",
        "edit",
-       "text"
+       "text",
+       "speech"
       ]
      },
      "title": "Model",
@@ -9169,7 +9170,8 @@
       "enum": [
        "image",
        "edit",
-       "text"
+       "text",
+       "speech"
       ]
      },
      "title": "Use",

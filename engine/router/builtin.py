@@ -1,5 +1,5 @@
 """The built-in backends. Local: ComfyUI (Z-Image Turbo stills, Qwen-Image-Edit edits). Providers, each used only when
-its key is set: Anthropic (text), OpenAI (images and edits) and any OpenAI-compatible text server (`text_url` in
+its key is set: Anthropic (text), OpenAI (images and edits), ElevenLabs (speech) and any OpenAI-compatible text server (`text_url` in
 studio.toml, for example a model served on this machine). Licences and terms belong to each provider."""
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ from typing import Optional
 from urllib.parse import urlparse
 
 from ..config import settings
-from .core import EditJob, ImageJob, Job, Kind, Result, TextJob, register
+from .core import EditJob, ImageJob, Job, Kind, Result, SpeechJob, TextJob, register
 
 
 def _key(*names: str) -> Optional[str]:
@@ -178,5 +178,34 @@ class OpenAIImages:
         return Result(self.name, model, 0.0, path=out)
 
 
-for _b in (ComfyBackend(), OpenAICompatibleText(), AnthropicBackend(), OpenAIImages()):
+class ElevenLabsSpeech:
+    """Voiceover through ElevenLabs' text-to-speech API. Key: ELEVENLABS_API_KEY; voice and model from studio.toml
+    (elevenlabs_voice, elevenlabs_model) or the job. Writes an MP3."""
+    name = "elevenlabs"
+    local = False
+    kinds: tuple[Kind, ...] = ("speech",)
+    base = "https://api.elevenlabs.io/v1"
+    default_voice = "21m00Tcm4TlvDq8ikWAM"
+
+    def available(self) -> tuple[bool, str]:
+        return (True, "") if _key("ELEVENLABS_API_KEY") else (False, "ELEVENLABS_API_KEY is not set")
+
+    def model(self, kind: Kind) -> str:
+        return settings().get("elevenlabs_model") or "eleven_multilingual_v2"
+
+    def run(self, job: Job, out: Optional[Path], model: Optional[str] = None) -> Result:
+        import httpx
+        assert isinstance(job, SpeechJob) and out is not None
+        model = model or self.model("speech")
+        voice = job.voice or settings().get("elevenlabs_voice") or self.default_voice
+        r = httpx.post(f"{self.base}/text-to-speech/{voice}", timeout=300,
+                       headers={"xi-api-key": _key("ELEVENLABS_API_KEY"), "accept": "audio/mpeg"},
+                       json={"text": job.text, "model_id": model})
+        r.raise_for_status()
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_bytes(r.content)
+        return Result(self.name, model, 0.0, path=out, meta={"voice": voice})
+
+
+for _b in (ComfyBackend(), OpenAICompatibleText(), AnthropicBackend(), OpenAIImages(), ElevenLabsSpeech()):
     register(_b)

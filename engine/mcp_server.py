@@ -598,6 +598,20 @@ def write_listing(project: str) -> dict:
 
 
 @mcp.tool()
+def make_video(project: str) -> dict:
+    """A short product video from the picked stills (background job; needs outputs.video in project.yaml and
+    `make_stills` run first): push-ins, dissolves, an end card with the ads' copy, and a voiceover where a speech
+    backend can run. Written to <project>/video/."""
+    from .video import make
+    p = _find(project)
+
+    def run(job):
+        log, _ = logger(job)
+        return make(p, log=log)
+    return jobs.submit("video", p.name, "product video", run).public(tail=5)
+
+
+@mcp.tool()
 def trailer(project: str, formats: Optional[list[str]] = None, force: bool = False, plan_only: bool = False) -> dict:
     """Cut the launch trailer from the site's own renders (background job): dist/trailer/trailer-16x9.mp4 and
     trailer-9x16.mp4 + posters, from the spec's `trailer:` (an empty `trailer: {}` derives the cut). formats: 16x9,
