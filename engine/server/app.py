@@ -18,7 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ValidationError
 
 from ..config import ROOT, settings
-from ..project import BuildError, Project, child, safe_name
+from ..project import BuildError, Project, child, has_spec, safe_name
 from ..spec import SCENE_TYPES, Site, deprecations
 from .jobs import JobQueue, logger
 from .local_only import UI_DEV_PORTS, LocalOnly
@@ -121,7 +121,7 @@ def projects():
     PROJECTS.mkdir(parents=True, exist_ok=True)
     for base, kind in ((PROJECTS, "project"), (EXAMPLES, "example")):
         for d in sorted(base.iterdir()) if base.exists() else []:
-            if (d / "site.yaml").exists():
+            if has_spec(d):
                 out.append(summary(Project(d), kind))
     return out
 
@@ -170,16 +170,17 @@ class SpecUpdate(BaseModel):
 def put_spec(name: str, req: SpecUpdate):
     p = find(name)
     try:
-        data = yaml.safe_load(req.yaml) if req.yaml is not None else req.data
-        site = Site.model_validate(data)
+        if req.yaml is not None:
+            site = p.put_text(req.yaml)
+        else:
+            site = Site.model_validate(req.data)
+            p.save(req.data)
     except ValidationError as e:
         return JSONResponse({"ok": False, "errors": [{"loc": ".".join(map(str, er["loc"])), "msg": er["msg"]} for er in e.errors()]}, 422)
     except yaml.YAMLError as e:
         return JSONResponse({"ok": False, "errors": [{"loc": "yaml", "msg": str(e)}]}, 422)
-    if req.yaml is not None:
-        p.spec_path.write_text(req.yaml, encoding="utf-8")
-    else:
-        p.save(data)
+    except BuildError as e:
+        return JSONResponse({"ok": False, "errors": [{"loc": "spec", "msg": str(e)}]}, 422)
     return {"ok": True, "modified": p.spec_path.stat().st_mtime, "deprecations": [d.as_dict() for d in deprecations(site)]}
 
 

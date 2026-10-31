@@ -3775,6 +3775,23 @@ class Directions(Model):
     stills: int = Field(4, ge=1, le=6, description="Storyboard stills per board: the hero, then key sections")
 
 
+RouterKind = Literal["image", "edit", "text"]
+
+
+class Models(Model):
+    """Which backend does each job (engine/router). Local models come first unless `prefer: provider`; a provider
+    backend (Anthropic, OpenAI, an OpenAI-style text server) is used only when its key or URL is set. `studio models`
+    lists what is available here."""
+    prefer: Literal["local", "provider"] = Field("local", description="local: this machine's models first. provider: "
+                                                                      "a provider's API first, where a key is set")
+    fallback: bool = Field(True, description="When the preferred kind (or the backend in `use`) can't run here, use "
+                                             "another that can")
+    use: dict[RouterKind, str] = Field(default_factory=dict, description="A backend per job kind, e.g. "
+                                                                          "`{image: openai, text: anthropic}`")
+    model: dict[RouterKind, str] = Field(default_factory=dict, description="The model the backend in `use` runs for "
+                                                                            "that kind, when not its default")
+
+
 class Site(Model):
     name: str
     description: str = ""
@@ -3800,6 +3817,8 @@ class Site(Model):
     imagery: Optional[Imagery] = Field(None, description="How every generated image and film is phrased (medium, light, "
                                                          "lens, mood, palette), so the page looks like one shoot; "
                                                          "written by picking a direction (`studio directions`)")
+    models: Optional[Models] = Field(None, description="Which backend does each image, edit and text job: local "
+                                                       "models first by default; provider APIs where a key is set")
     directions: Optional[Directions] = Field(None, description="Brief and constraints for `studio directions`: several "
                                                                "complete art directions as side-by-side boards")
 

@@ -3,7 +3,7 @@
   studio new my-site [--example lodestar-orbital]   create projects/my-site (from an example or a starter)
   studio new my-site --laptop [--image photo.jpg]   a starter that builds on any laptop: no GPU, ComfyUI or Blender
   studio remake https://example.com/ [--name x] [--style bauhaus] [--no-gpu]   a live landing page told as a scroll site
-  studio build my-site [--only hero,door] [--force] [--draft] [--yes] [--plan]
+  studio build my-site [--only hero,door] [--force] [--draft] [--yes] [--plan] [--profile]
   studio storyboard my-site [--level sketch|stills|animatic] [--only id,id] [--motion] [--open]
   studio storyboard my-site --edit [--port 8971]    edit every shot in the browser: notes, captions, regenerate one image, play it
   studio storyboard my-site --notes                 the open notes written there, with each shot's current values
@@ -18,9 +18,11 @@
   studio inspect my-site --page [--section hero]      polish report of the built page: text over pictures, type, pictures, layout; exit 1 on a fail
   studio trailer my-site [--format 9x16] [--plan]      launch trailer from the site's renders -> dist/trailer/
   studio ui                                         the Studio app (http://localhost:5180)
+  studio models [my-site]                           model backends (local and provider) and which one each job uses
   studio doctor                                     check Python, Node, FFmpeg, Blender, GPU, ComfyUI, models
   studio setup-comfy                                install the ComfyUI nodes for `reveal` and `faces` (restart ComfyUI after)
-  studio schema                                     JSON Schema of site.yaml
+  studio schema [--project]                         JSON Schema of site.yaml (or project.yaml)
+  studio migrate my-site [--write]                  turn site.yaml into project.yaml (the same site builds)
   studio product my-site [--parts] [--still three-quarter]   the site's product: parts, stills
   studio light my-site [--section day] [--presets]   a `light` scene (one place, dawn to night): build it, the times with their measured drift, frame strips across each transition
 """
@@ -123,8 +125,9 @@ def laptop_starter(title: str, image: Optional[str] = None) -> str:
 
 
 def resolve(name: str) -> Path:
+    from .project import has_spec
     for cand in (Path(name), Path(settings()["projects"]) / name, ROOT / "examples" / name):
-        if (cand / "site.yaml").exists():
+        if has_spec(cand):
             return cand.resolve()
     raise typer.BadParameter(f"no project '{name}' (looked in ., {settings()['projects']}, examples/)")
 
@@ -205,7 +208,9 @@ def build(name: str, only: Optional[str] = typer.Option(None, help="Render only 
           force: bool = typer.Option(False, help="Ignore the cache (locked scenes and beats are still kept)"),
           draft: bool = typer.Option(False, help="Fast low-quality renders where supported"),
           yes: bool = typer.Option(False, "--yes", "-y", help="Don't ask, even over studio.toml's confirm_over"),
-          plan: bool = typer.Option(False, "--plan", help="Print what would render and the estimate, then stop")):
+          plan: bool = typer.Option(False, "--plan", help="Print what would render and the estimate, then stop"),
+          profile: bool = typer.Option(False, "--profile", help="Time every stage and backend; write "
+                                                                ".build/profile.json and print the slowest")):
     """Build a project into dist/. Prints what will render and about how long it takes here before starting."""
     import sys
     from .compile.compiler import build_site
@@ -217,6 +222,9 @@ def build(name: str, only: Optional[str] = typer.Option(None, help="Render only 
     est = announce(project, only=ids.split(",") if ids else None, force=force, options={"draft": draft}, log=typer.echo)
     for d in deprecations(project.load()):
         typer.echo(f"warning: {d}")
+    if not project.is_project_file:
+        typer.echo(f"note: {project.name} uses site.yaml; `studio migrate {name}` turns it into a project.yaml "
+                   "(site.yaml keeps working)")
     if plan:
         return
     limit = settings().get("confirm_over")
@@ -228,8 +236,17 @@ def build(name: str, only: Optional[str] = typer.Option(None, help="Render only 
             typer.echo(f"stopping: about {fmt(est.total())} of rendering is over confirm_over = {limit:g} min; "
                        f"run with --yes for unattended builds")
             raise typer.Exit(2)
-    out = build_site(project, only=ids, force=force, options={"draft": draft})
+    options: dict = {"draft": draft}
+    prof = None
+    if profile:
+        from .profile import Profiler, table
+        prof = Profiler(project.build, draft)
+        options["profile"] = prof.stages
+    out = build_site(project, only=ids, force=force, options=options)
     typer.echo(f"built {out}")
+    if prof is not None:
+        typer.echo(table(prof.finish()))
+        typer.echo(f"profile written to {project.build / 'profile.json'}")
 
 
 @app.command()
@@ -1123,10 +1140,47 @@ def journey_cmd(name: str, section: Optional[str] = typer.Option(None, help="The
 
 
 @app.command()
-def schema():
-    """Print the site.yaml JSON Schema."""
+def schema(project: bool = typer.Option(False, "--project", help="The project.yaml schema instead of site.yaml's")):
+    """Print the site.yaml JSON Schema (or project.yaml's, with --project)."""
+    from .project_spec import ProjectSpec
     from .spec import Site
-    typer.echo(json.dumps(Site.model_json_schema(), indent=2))
+    typer.echo(json.dumps((ProjectSpec if project else Site).model_json_schema(), indent=2))
+
+
+@app.command()
+def migrate(name: str, write: bool = typer.Option(False, "--write", help="Write project.yaml and keep the old file as "
+                                                                        "site.yaml.bak (default: only show the change)")):
+    """Turn a project's site.yaml into a project.yaml: the brand, product and imagery move up to the project, the rest
+    becomes outputs.site. The site it builds is the same. Comments are not carried over."""
+    from .migrate import migrate as run_migrate
+    from .project import BuildError, Project
+    try:
+        r = run_migrate(Project(resolve(name)), write=write)
+    except BuildError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(1)
+    typer.echo(r["diff"])
+    typer.echo(f"wrote {r['path']} (the old file is {r['backup']})" if write else "nothing written: run again with --write")
+
+
+@app.command()
+def models(name: Optional[str] = typer.Argument(None, help="A project: also show which backend its `models:` picks")):
+    """The model backends (engine/router): local workers and provider APIs, and whether each can run here."""
+    from . import router
+    policy = None
+    if name:
+        from .project import Project
+        policy = Project(resolve(name)).raw().get("models")
+    for b in router.backends():
+        ok, why = b.available()
+        kinds = ", ".join(b.kinds)
+        typer.echo(f"  {b.name:<18} {'local' if b.local else 'provider':<9} {kinds:<18} "
+                   + (f"ready ({b.model(b.kinds[0])})" if ok else f"off: {why}"))
+    for kind in ("image", "edit", "text"):
+        try:
+            typer.echo(f"{kind}: {router.choose(kind, policy).name}")
+        except router.NoBackend as e:
+            typer.echo(f"{kind}: none ({e})")
 
 
 @app.command()

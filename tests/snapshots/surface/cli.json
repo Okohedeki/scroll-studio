@@ -111,6 +111,16 @@
      "required": false,
      "type": "boolean"
     },
+    "profile": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--profile"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
     "section": {
      "default": null,
      "kind": "option",
@@ -995,6 +1005,46 @@
     }
    }
   },
+  "migrate": {
+   "help": "Turn a project's site.yaml into a project.yaml: the brand, product and imagery move up to the project, the rest",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "write": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--write"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "models": {
+   "help": "The model backends (engine/router): local workers and provider APIs, and whether each can run here.",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": false,
+     "type": "str"
+    }
+   }
+  },
   "new": {
    "help": "Create a project.",
    "params": {
@@ -1479,8 +1529,19 @@
    }
   },
   "schema": {
-   "help": "Print the site.yaml JSON Schema.",
-   "params": {}
+   "help": "Print the site.yaml JSON Schema (or project.yaml's, with --project).",
+   "params": {
+    "project": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--project"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
   },
   "setup-comfy": {
    "help": "Install the ComfyUI custom nodes that `reveal` (scroll-driven colour) and `faces: restore` use.",

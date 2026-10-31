@@ -9125,6 +9125,60 @@
    "title": "Marker",
    "type": "object"
   },
+  "Models": {
+   "additionalProperties": false,
+   "description": "Which backend does each job (engine/router). Local models come first unless `prefer: provider`; a provider\nbackend (Anthropic, OpenAI, an OpenAI-style text server) is used only when its key or URL is set. `studio models`\nlists what is available here.",
+   "properties": {
+    "fallback": {
+     "default": true,
+     "description": "When the preferred kind (or the backend in `use`) can't run here, use another that can",
+     "title": "Fallback",
+     "type": "boolean"
+    },
+    "model": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "description": "The model the backend in `use` runs for that kind, when not its default",
+     "propertyNames": {
+      "enum": [
+       "image",
+       "edit",
+       "text"
+      ]
+     },
+     "title": "Model",
+     "type": "object"
+    },
+    "prefer": {
+     "default": "local",
+     "description": "local: this machine's models first. provider: a provider's API first, where a key is set",
+     "enum": [
+      "local",
+      "provider"
+     ],
+     "title": "Prefer",
+     "type": "string"
+    },
+    "use": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "description": "A backend per job kind, e.g. `{image: openai, text: anthropic}`",
+     "propertyNames": {
+      "enum": [
+       "image",
+       "edit",
+       "text"
+      ]
+     },
+     "title": "Use",
+     "type": "object"
+    }
+   },
+   "title": "Models",
+   "type": "object"
+  },
   "MotionTokens": {
    "additionalProperties": false,
    "description": "How the page moves. Each value defaults to what the runtime has always used; `scroll.speed` still paces it.",
@@ -16270,6 +16324,18 @@
   },
   "loader": {
    "$ref": "#/$defs/Loader"
+  },
+  "models": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Models"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "description": "Which backend does each image, edit and text job: local models first by default; provider APIs where a key is set"
   },
   "name": {
    "title": "Name",

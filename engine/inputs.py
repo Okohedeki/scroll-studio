@@ -200,10 +200,10 @@ def _art_directed(project: Project, ref: ImageInput, raw: Path, log=print, regen
 
 
 def generate_image(project: Project, prompt: str, w: int, h: int, seed: int, log=print, free: bool = True) -> Path:
-    """A Z-Image Turbo still for exactly this prompt, cached by prompt, size and seed in .build/_generated. The prompt is
-    sent as given (an `imagery:` treatment is already in it); `studio directions` renders its boards through here too."""
+    """A still for exactly this prompt, cached by prompt, size and seed in .build/_generated: Z-Image Turbo locally, or
+    the image backend the spec's `models:` picks (engine/router). The prompt is sent as given (an `imagery:` treatment
+    is already in it); `studio directions` renders its boards through here too."""
     out = project.build / "_generated" / f"{generated_digest(prompt, w, h, seed)}.png"
-    digest = out.stem
     if out.exists():
         return out
     from .fidelity import placeholder, preview, would_render
@@ -212,18 +212,31 @@ def generate_image(project: Project, prompt: str, w: int, h: int, seed: int, log
     if pv is not None and not pv.comfy:   # a sketch storyboard: a card for the shot to come, outside the cache
         return placeholder(project.build / "_storyboard" / "placeholders", prompt, (w, h))
     from .backends import comfy
-    if not comfy.alive():
+    from .router import ImageJob, NoBackend, choose, route
+    policy = _models_policy(project)
+    try:
+        backend = choose("image", policy)
+    except NoBackend as e:
         raise BuildError("this image is generated locally, but ComfyUI is not running at "
-                         f"{comfy.COMFY}. Start it (docs/INSTALL.md) or replace `generate:` with a `file:`.")
-    log(f"  generating image ({w}x{h}, seed {seed}): {prompt[:80]}…")
-    if free:         # a batch of stills (storyboard boards) frees the other models once, then keeps Z-Image loaded
+                         f"{comfy.COMFY}. Start it (docs/INSTALL.md), set a provider key (docs/project-file.md), or "
+                         f"replace `generate:` with a `file:`. ({e})") from None
+    if not backend.local:     # a provider's image is its own file: the local cache key stays the local model's
+        out = out.with_name(f"{generated_digest(f'{prompt}|{backend.name}', w, h, seed)}.png")
+        if out.exists():
+            return out
+    log(f"  generating image ({w}x{h}, seed {seed}) on {backend.name}: {prompt[:80]}…")
+    if free and backend.name == "local:comfy":   # a batch of stills frees the other models once, then keeps Z-Image loaded
         comfy.free()
-    images = comfy.run(comfy.build_txt2img_graph(prompt, w, h, seed, prefix=f"studio/{digest}"), poll=2)
-    tmp = comfy.fetch(images, str(out.parent / f"_{digest}"))
-    out.parent.mkdir(parents=True, exist_ok=True)
-    shutil.move(str(Path(tmp) / "0001.png"), out)
-    shutil.rmtree(tmp, ignore_errors=True)
+    route(ImageJob(prompt, w, h, seed), out, policy, build=project.build, log=log)
     return out
+
+
+def _models_policy(project: Project):
+    """The spec's `models:` (engine/router), or None; an unreadable spec routes by the defaults."""
+    try:
+        return project.raw().get("models")
+    except Exception:
+        return None
 
 
 def _edit(project: Project, ref: ImageInput, log=print) -> Path:

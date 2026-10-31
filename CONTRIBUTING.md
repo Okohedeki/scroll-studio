@@ -51,8 +51,10 @@ These are what make Scroll Studio what it is. A change that breaks one is not me
 1. **Engine features, never one-off pages.** If a site needs something the engine can't do, add it to the engine (a
    spec field, a builder stage, a runtime player or preset) so every site can use it. No hand-written pages, no
    scripts tied to one image or one shot, nothing hard-coded for one example.
-2. **Local models only, no API keys.** Every model runs on the user's machine (ComfyUI, Blender, local weights). A
-   feature that needs a hosted API or a key will not be merged.
+2. **Local-first; hosted models optional.** Everything works on the user's machine (ComfyUI, Blender, local weights)
+   with no API keys. A provider API (Anthropic, OpenAI, an OpenAI-style server) is a backend of the model router
+   (`engine/router`), used only when its key is set; a feature that works *only* through a hosted API will not be
+   merged. Each backend names its licence or terms.
 3. **The spec is the source of truth.** `engine/spec.py` (Pydantic) defines `site.yaml`, and the Studio UI forms and the
    MCP tools are generated from it. Every field has a `description` written for a person.
 4. **Old sites keep building the same page.** A change may add, never silently change, what an existing spec produces.

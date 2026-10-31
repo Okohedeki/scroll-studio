@@ -65,4 +65,9 @@ def settings() -> dict:
         # `studio build` asks before starting when its estimate is over this many minutes (unset: just print it);
         # --yes skips the question, and without a terminal the build stops instead of waiting
         "confirm_over": float(get("STUDIO_CONFIRM_OVER", "confirm_over", 0) or 0) or None,
+        # model router (engine/router): an OpenAI-style text server, and the models provider backends use
+        "text_url": get("STUDIO_TEXT_URL", "text_url", None),
+        "text_model": get("STUDIO_TEXT_MODEL", "text_model", None),
+        "anthropic_model": get("STUDIO_ANTHROPIC_MODEL", "anthropic_model", None),
+        "openai_image_model": get("STUDIO_OPENAI_IMAGE_MODEL", "openai_image_model", None),
     }

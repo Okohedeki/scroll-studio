@@ -73,7 +73,10 @@ def lock(project: Project) -> threading.RLock:
 # ---------------------------------------------------------------- reading
 
 def read_text(project: Project) -> str:
-    """The file as written: line endings kept (Path.read_text would translate CRLF)."""
+    """The file as written: line endings kept (Path.read_text would translate CRLF). A project file's site is laid
+    out afresh (engine/project.py site_text)."""
+    if project.is_project_file:
+        return project.site_text()
     raw = project.spec_path.read_bytes()
     if raw.startswith(b"\xef\xbb\xbf"):
         raw = raw[3:]
@@ -458,6 +461,10 @@ def history_dir(project: Project) -> Path:
 
 
 def _write(project: Project, text: str) -> None:
+    if project.is_project_file:
+        project.write_site_text(text)
+        _REV_CACHE.pop(str(project.spec_path), None)
+        return
     raw = text.encode("utf-8")
     tmp = project.spec_path.with_suffix(".yaml.tmp")
     tmp.write_bytes(raw)
