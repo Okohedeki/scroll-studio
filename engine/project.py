@@ -161,10 +161,10 @@ class Project:
             site = Site.model_validate(site_dict(data))
         except ProjectFileError as e:
             raise BuildError(str(e)) from None
-        old = self.root / SITE_FILE
-        (self.root / PROJECT_FILE).write_text(text, encoding="utf-8")
+        old, new = within(self.root, SITE_FILE), within(self.root, PROJECT_FILE)
+        new.write_text(text, encoding="utf-8")
         if old.exists():
-            os.replace(old, old.with_name(SITE_FILE + ".bak"))
+            os.replace(old, within(self.root, SITE_FILE + ".bak"))
         return site
 
     def write_site_text(self, text: str) -> None:
@@ -174,9 +174,9 @@ class Project:
             self.spec_path.write_text(text, encoding="utf-8")
             return
         data = project_dict(yaml.safe_load(text) or {}, keep=self._file())
-        tmp = self.spec_path.with_suffix(".yaml.tmp")
+        tmp, dst = within(self.root, PROJECT_FILE + ".tmp"), within(self.root, PROJECT_FILE)
         tmp.write_text(yaml.safe_dump(data, sort_keys=False, allow_unicode=True, width=110), encoding="utf-8")
-        os.replace(tmp, self.spec_path)
+        os.replace(tmp, dst)
 
     def path(self, rel: str) -> Path:
         """A path named in the spec, resolved (links followed) and required to stay inside the project folder. An
