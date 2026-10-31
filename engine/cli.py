@@ -19,6 +19,8 @@
   studio trailer my-site [--format 9x16] [--plan]      launch trailer from the site's renders -> dist/trailer/
   studio ui                                         the Studio app (http://localhost:5180)
   studio stills my-site [--more id | --different | --pick id]   product stills from one photo: directions, candidates, shortlist
+  studio ads my-site                                placement-sized ads from the picked stills (outputs.ads)
+  studio listing my-site                            store listing copy: title, bullets, description (outputs.listing)
   studio models [my-site]                           model backends (local and provider) and which one each job uses
   studio doctor                                     check Python, Node, FFmpeg, Blender, GPU, ComfyUI, models
   studio setup-comfy                                install the ComfyUI nodes for `reveal` and `faces` (restart ComfyUI after)
@@ -1187,6 +1189,32 @@ def stills(name: str,
     if open_board:
         import webbrowser
         webbrowser.open(board.as_uri())
+
+
+@app.command()
+def ads(name: str):
+    """Placement-sized ads from the picked product stills (outputs.ads in project.yaml) -> <project>/ads/."""
+    from .ads import make as make_ads
+    from .project import BuildError, Project
+    try:
+        r = make_ads(Project(resolve(name)), log=typer.echo)
+    except BuildError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(1)
+    typer.echo(f"{len(r['ads'])} ads in {r['folder']}")
+
+
+@app.command()
+def listing(name: str):
+    """Store listing copy (outputs.listing in project.yaml): title, bullets, description -> <project>/listing/."""
+    from .listing import make as make_listing
+    from .project import BuildError, Project
+    try:
+        r = make_listing(Project(resolve(name)), log=typer.echo)
+    except BuildError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(1)
+    typer.echo(r["title"])
 
 
 @app.command()

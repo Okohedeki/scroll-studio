@@ -575,6 +575,29 @@ def make_stills(project: str, more: Optional[str] = None, different: bool = Fals
 
 
 @mcp.tool()
+def make_ads(project: str) -> dict:
+    """Placement-sized ads from the picked product stills (needs outputs.ads in project.yaml and `make_stills` run
+    first): each shot's pick (else its best) reframed to every size with the headline and call to action set in.
+    Returns the files written to <project>/ads/."""
+    from .ads import make
+    try:
+        return {"ok": True, **make(_find(project), log=lambda m: None)}
+    except BuildError as e:
+        return {"ok": False, "error": str(e)}
+
+
+@mcp.tool()
+def write_listing(project: str) -> dict:
+    """Store listing copy (needs outputs.listing in project.yaml): title, bullets and description, from a text
+    backend when one can run, else a marked draft. Written to <project>/listing/; returned too."""
+    from .listing import make
+    try:
+        return {"ok": True, **make(_find(project), log=lambda m: None)}
+    except BuildError as e:
+        return {"ok": False, "error": str(e)}
+
+
+@mcp.tool()
 def trailer(project: str, formats: Optional[list[str]] = None, force: bool = False, plan_only: bool = False) -> dict:
     """Cut the launch trailer from the site's own renders (background job): dist/trailer/trailer-16x9.mp4 and
     trailer-9x16.mp4 + posters, from the spec's `trailer:` (an empty `trailer: {}` derives the cut). formats: 16x9,

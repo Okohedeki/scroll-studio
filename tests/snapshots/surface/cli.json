@@ -1,5 +1,20 @@
 {
  "commands": {
+  "ads": {
+   "help": "Placement-sized ads from the picked product stills (outputs.ads in project.yaml) -> <project>/ads/.",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    }
+   }
+  },
   "brand": {
    "help": "Set the theme's colours from a logo (contrast-checked) and use it as the nav logo, or (--from) write a brand's",
    "params": {
@@ -966,6 +981,21 @@
      ],
      "required": false,
      "type": "boolean"
+    }
+   }
+  },
+  "listing": {
+   "help": "Store listing copy (outputs.listing in project.yaml): title, bullets, description -> <project>/listing/.",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
     }
    }
   },
