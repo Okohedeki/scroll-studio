@@ -174,3 +174,18 @@ def test_storyboard_edits_reach_a_project_file(tmp_path):
     specdoc._write(p, text.replace("Hello", "Welcome"))
     data = yaml.safe_load(p.spec_path.read_text(encoding="utf-8"))
     assert data["brief"] == "Autumn range" and data["outputs"]["site"]["sections"][0]["title"] == "Welcome"
+
+
+def test_the_studio_server_edits_a_project_file_as_a_site(tmp_path, monkeypatch):
+    from fastapi.testclient import TestClient
+
+    from engine.server import app as server
+    write_project(tmp_path / "demo", {**project_dict(SITE), "brief": "Autumn range"})
+    monkeypatch.setattr(server, "PROJECTS", tmp_path)
+    c = TestClient(server.app, base_url="http://127.0.0.1:8970")
+    r = c.get("/api/projects/demo/spec").json()
+    assert r["file"] == "project.yaml" and r["data"] == SITE and "outputs:" in r["yaml"]
+    r = c.put("/api/projects/demo/spec", json={"data": {**SITE, "description": "From the form"}})
+    assert r.status_code == 200
+    data = yaml.safe_load((tmp_path / "demo" / "project.yaml").read_text(encoding="utf-8"))
+    assert data["description"] == "From the form" and data["brief"] == "Autumn range"

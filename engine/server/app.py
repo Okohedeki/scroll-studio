@@ -158,7 +158,12 @@ def create(req: NewProject):
 def get_spec(name: str):
     p = find(name)
     text = p.spec_path.read_text(encoding="utf-8")
-    return {"yaml": text, "data": yaml.safe_load(text), "modified": p.spec_path.stat().st_mtime}
+    try:
+        data = p.raw()           # the site the forms edit: a project file's shared fields folded in
+    except BuildError:
+        data = yaml.safe_load(text)
+    return {"yaml": text, "data": data, "modified": p.spec_path.stat().st_mtime,
+            "file": p.spec_path.name}
 
 
 class SpecUpdate(BaseModel):
