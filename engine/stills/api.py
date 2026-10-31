@@ -17,6 +17,9 @@ from ..server.jobs import JobQueue, logger
 from . import run
 
 
+NO_STILLS = "this project has no outputs.stills in a project.yaml (docs/stills.md)"
+
+
 class StillsReq(BaseModel):
     more: Optional[str] = None
     different: bool = False
@@ -62,12 +65,12 @@ def make_router(find: Callable[[str], Project], jobs: JobQueue) -> APIRouter:
         if req.pick:
             try:
                 return {"ok": True, "state": view(p, run.make(p, pick=req.pick, log=lambda m: None))}
-            except BuildError as e:
-                raise HTTPException(400, str(e)) from None
+            except BuildError:
+                raise HTTPException(400, "no such candidate: pick one of the ids the stills view lists") from None
         try:
             run.spec_of(p)
-        except BuildError as e:
-            raise HTTPException(400, str(e)) from None
+        except BuildError:
+            raise HTTPException(400, NO_STILLS) from None
 
         def work(job):
             log, _ = logger(job)
