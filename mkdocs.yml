@@ -156,5 +156,6 @@ nav:
       - Design:
           - design/index.md
           - "1.5: Make it yours": design/1.5-make-it-yours.md
+          - "DesignAI: generation engine": design/generation-engine.md
       - Licence: licence.md
       - Notice: project/notice.md
