@@ -166,6 +166,10 @@ def get_spec(name: str):
             "file": p.spec_path.name}
 
 
+PROJECT_FILE_HELP = ("not a valid project file: it needs outputs.site, and a field the project sets once (brand, "
+                     "product, imagery, models) may not also be set differently inside the site (docs/project-file.md)")
+
+
 class SpecUpdate(BaseModel):
     data: Optional[dict] = None
     yaml: Optional[str] = None
@@ -184,8 +188,8 @@ def put_spec(name: str, req: SpecUpdate):
         return JSONResponse({"ok": False, "errors": [{"loc": ".".join(map(str, er["loc"])), "msg": er["msg"]} for er in e.errors()]}, 422)
     except yaml.YAMLError as e:
         return JSONResponse({"ok": False, "errors": [{"loc": "yaml", "msg": str(e)}]}, 422)
-    except BuildError as e:
-        return JSONResponse({"ok": False, "errors": [{"loc": "spec", "msg": str(e)}]}, 422)
+    except BuildError:
+        return JSONResponse({"ok": False, "errors": [{"loc": "spec", "msg": PROJECT_FILE_HELP}]}, 422)
     return {"ok": True, "modified": p.spec_path.stat().st_mtime, "deprecations": [d.as_dict() for d in deprecations(site)]}
 
 
