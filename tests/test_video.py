@@ -67,7 +67,7 @@ def test_a_silent_video_on_a_laptop(tmp_path):
 @needs_ffmpeg
 def test_a_voiceover_from_a_speech_backend(tmp_path, monkeypatch):
     class Voice:
-        name, local, kinds = "voice", False, ("speech",)
+        name, local, kinds = "voice", True, ("speech",)
 
         def available(self):
             return True, ""

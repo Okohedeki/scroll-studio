@@ -46,10 +46,14 @@ its key is set (see [install](INSTALL.md)). `studio models my-site` shows what c
 # docs: no-validate (a project file)
 models:
   prefer: local            # or provider
-  fallback: true           # when the preferred kind can't run here, use another that can
+  fallback: true           # also try providers when local models can't run (unset: never a silent paid call)
   use: { image: openai }   # pin a backend per job kind: image, edit, text
   model: { image: gpt-image-1 }
 ```
+
+Image edits route too: `edit:` images, light-scene relighting, the layers plate, the product-in-scene blend and the deep zoom's detail pass. With local models chosen (the default) they run in ComfyUI exactly as before; with a provider chosen, the edit runs there (a region's mask is still found locally, and the local editor's strength and size settings don't apply). A stage already built keeps its picture until its settings change or `--force`.
+
+A paid provider is never a silent fallback: when local models can't run, providers are tried only with `prefer: provider`, a backend in `use`, or `fallback: true`. A provider that can't run falls back to local models.
 
 Each routed job is recorded in `.build/_router/records.jsonl` (backend, model, seed), so a result can be made again.
 A provider's image is cached apart from the local model's, so switching back never reuses it.

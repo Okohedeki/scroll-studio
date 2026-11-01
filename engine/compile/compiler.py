@@ -157,6 +157,8 @@ def build_site(project: Project, log: Callable[[str], None] = print,
     from ..scenes import builder_for
 
     site = project.load()
+    from ..router import use_policy
+    use_policy(site.models)       # builders' image edits route by the spec's models: (engine/router)
     if isinstance(only, str):
         only = [x for x in only.split(",") if x.strip()]
     selected, beat_sel = selection(site, only)

@@ -3784,8 +3784,9 @@ class Models(Model):
     lists what is available here."""
     prefer: Literal["local", "provider"] = Field("local", description="local: this machine's models first. provider: "
                                                                       "a provider's API first, where a key is set")
-    fallback: bool = Field(True, description="When the preferred kind (or the backend in `use`) can't run here, use "
-                                             "another that can")
+    fallback: Optional[bool] = Field(None, description="Unset: a provider falls back to local models, never the other "
+                                                       "way (no paid call you didn't ask for). true: either way. false: "
+                                                       "only the preferred kind")
     use: dict[RouterKind, str] = Field(default_factory=dict, description="A backend per job kind, e.g. "
                                                                           "`{image: openai, text: anthropic}`")
     model: dict[RouterKind, str] = Field(default_factory=dict, description="The model the backend in `use` runs for "

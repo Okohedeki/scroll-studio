@@ -211,7 +211,7 @@ def test_generated_scenes_go_through_the_router(tmp_path, monkeypatch):
     from engine.router.core import Result
 
     class Painter:
-        name, local, kinds = "painter", False, ("image",)
+        name, local, kinds = "painter", True, ("image",)
 
         def available(self):
             return True, ""

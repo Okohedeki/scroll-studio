@@ -60,12 +60,22 @@ def test_prefer_provider(fakes):
     assert router.choose("image", {"prefer": "provider"}) is provider
 
 
-def test_falls_back_when_the_preferred_kind_is_off(fakes):
+def test_a_paid_provider_is_never_a_silent_fallback(fakes):
     local, provider = fakes
     local.ok = False
-    assert router.choose("image") is provider
+    with pytest.raises(NoBackend, match="not tried: cloud"):
+        router.choose("image")
+    assert router.choose("image", {"fallback": True}) is provider
     with pytest.raises(NoBackend, match="local:fake is off"):
         router.choose("image", {"fallback": False})
+
+
+def test_a_provider_falls_back_to_local_for_free(fakes):
+    local, provider = fakes
+    provider.ok = False
+    assert router.choose("image", {"prefer": "provider"}) is local
+    with pytest.raises(NoBackend, match="cloud is off"):
+        router.choose("image", {"prefer": "provider", "fallback": False})
 
 
 def test_use_pins_a_backend(fakes):
@@ -87,7 +97,7 @@ def test_no_backend_says_why(fakes):
     for b in fakes:
         b.ok = False
     with pytest.raises(NoBackend, match="local:fake is off; cloud: cloud is off"):
-        router.choose("image")
+        router.choose("image", {"fallback": True})
     with pytest.raises(NoBackend, match="none registered"):
         router.choose("text")
 
@@ -109,7 +119,7 @@ def test_availability_is_remembered_briefly(fakes, monkeypatch):
     local.ok = False
     assert router.choose("image") is local          # still trusted within the TTL
     core._SEEN.clear()
-    assert router.choose("image") is provider
+    assert router.choose("image", {"fallback": True}) is provider
 
 
 def test_a_spec_models_block_works_as_a_policy(fakes):
@@ -219,7 +229,7 @@ def test_generate_image_uses_a_provider_backend_and_keeps_it_apart(fakes, tmp_pa
     local, provider = fakes
     local.ok = False
     (tmp_path / "p").mkdir()
-    (tmp_path / "p" / "site.yaml").write_text("name: T\nsections: []\n", encoding="utf-8")
+    (tmp_path / "p" / "site.yaml").write_text("name: T\nsections: []\nmodels: {fallback: true}\n", encoding="utf-8")
     monkeypatch.setattr(fidelity, "preview", lambda: None)
     p = Project(tmp_path / "p")
     out: Optional[Path] = inputs.generate_image(p, "a jug", 64, 64, 1, log=lambda m: None)
@@ -239,3 +249,23 @@ def test_generate_image_without_any_backend_says_what_to_do(fakes, tmp_path, mon
     monkeypatch.setattr(fidelity, "preview", lambda: None)
     with pytest.raises(BuildError, match="ComfyUI is not running"):
         inputs.generate_image(Project(tmp_path / "p"), "a jug", 64, 64, 1, log=lambda m: None)
+
+
+def test_edit_on_provider_only_when_the_policy_picks_one(fakes, tmp_path):
+    local, provider = fakes
+    local.kinds = provider.kinds = ("image", "edit")
+    src = tmp_path / "in.png"
+    Image.new("RGB", (8, 8)).save(src)
+    out = tmp_path / "out.png"
+    assert not router.edit_on_provider([src], "warmer", 1, 20, out)            # local preferred: the caller runs ComfyUI
+    assert not provider.calls and not out.exists()
+    assert router.edit_on_provider([src], "warmer", 1, 20, out, policy={"prefer": "provider"})
+    assert out.exists() and provider.calls[-1][0].instruction == "warmer"
+    router.use_policy({"use": {"edit": "cloud"}})
+    try:
+        assert router.edit_on_provider([src], "cooler", 1, 20, tmp_path / "o2.png")   # the build's policy, set once
+    finally:
+        router.use_policy(None)
+    for b in fakes:
+        b.ok = False
+    assert not router.edit_on_provider([src], "x", 1, 20, tmp_path / "o3.png", policy={"fallback": True})

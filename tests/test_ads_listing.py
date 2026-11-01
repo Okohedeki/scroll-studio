@@ -95,7 +95,7 @@ def test_listing_from_a_text_backend(tmp_path, monkeypatch):
     from engine.router.core import Result
 
     class Writer:
-        name, local, kinds = "writer", False, ("text",)
+        name, local, kinds = "writer", True, ("text",)
 
         def available(self):
             return True, ""
