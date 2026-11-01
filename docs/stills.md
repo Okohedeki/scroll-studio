@@ -104,3 +104,22 @@ outputs:
 ```
 
 Written to `video/video-<aspect>.mp4` with `video/video.json`. The MCP tool is `make_video`.
+
+## Page layouts
+
+`studio layouts my-shop` writes several product pages from the project's own material: the picked stills and
+shortlist, the listing copy, and the ads' headline and call to action. Each layout is arranged differently. A text
+backend writes them when one can run; otherwise a local composer arranges the same material in distinct orders.
+Every layout is checked against the site spec, and only blocks that build without a GPU are used (hero, intro,
+features, gallery, faq, cta).
+
+```yaml
+# docs: no-validate (a project file)
+outputs:
+  layouts:
+    count: 3
+```
+
+`layouts/board.html` shows each layout as a wireframe page with its stills. `studio layouts my-shop --pick l2` writes
+that layout's sections into `outputs.site`, keeping the site's other settings and saving the old sections in
+`layouts/site-before-pick.yaml`; then `studio build my-shop`. The MCP tool is `make_layouts`.

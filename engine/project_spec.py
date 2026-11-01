@@ -98,6 +98,13 @@ class Video(Model):
                                                    "(you need the right to use it)")
 
 
+class Layouts(Model):
+    """Generated page layouts (engine/layouts.py, `studio layouts`): several pages written from the brief, the stills
+    and the listing, each a different arrangement; picking one writes its sections into outputs.site."""
+    count: int = Field(3, ge=1, le=8, description="How many layouts to write")
+    seed: int = Field(1, description="Which arrangements the local composer starts from")
+
+
 class Outputs(Model):
     site: Optional[SiteOutput] = Field(None, description="A scroll-driven site, written as a site.yaml would be "
                                                          "(without the fields the project sets once)")
@@ -108,6 +115,8 @@ class Outputs(Model):
                                                          "(`studio listing`)")
     video: Optional[Video] = Field(None, description="A short product video from the picked stills, with a voiceover "
                                                      "where a speech backend can run (`studio video`)")
+    layouts: Optional[Layouts] = Field(None, description="Generated page layouts to pick from; the pick becomes "
+                                                         "outputs.site (`studio layouts`)")
 
 
 class ProjectSpec(Model):

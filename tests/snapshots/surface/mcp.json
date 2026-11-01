@@ -842,6 +842,34 @@
    "type": "object"
   }
  },
+ "make_layouts": {
+  "description": "Generated page layouts (needs outputs.layouts in project.yaml; best after make_stills and write_listing):",
+  "input": {
+   "properties": {
+    "pick": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Pick"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "make_layoutsArguments",
+   "type": "object"
+  }
+ },
  "make_stills": {
   "description": "Product stills from one photo (background job; needs outputs.stills in project.yaml): art directions, candidates",
   "input": {

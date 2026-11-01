@@ -22,6 +22,7 @@
   studio ads my-site                                placement-sized ads from the picked stills (outputs.ads)
   studio listing my-site                            store listing copy: title, bullets, description (outputs.listing)
   studio video my-site                              a short product video from the picked stills (outputs.video)
+  studio layouts my-site [--pick l2]                generated page layouts from the stills and listing; pick one as the site
   studio models [my-site]                           model backends (local and provider) and which one each job uses
   studio doctor                                     check Python, Node, FFmpeg, Blender, GPU, ComfyUI, models
   studio setup-comfy                                install the ComfyUI nodes for `reveal` and `faces` (restart ComfyUI after)
@@ -1229,6 +1230,23 @@ def video(name: str):
         typer.echo(f"error: {e}", err=True)
         raise typer.Exit(1)
     typer.echo(f"{r['file']}: {r['seconds']} s, {r['voice']}")
+
+
+@app.command()
+def layouts(name: str, pick: Optional[str] = typer.Option(None, "--pick", help="Make this layout the site "
+                                                                          "(writes its sections into outputs.site)")):
+    """Generated page layouts (outputs.layouts in project.yaml): several pages from the brief, stills and listing, on
+    <project>/layouts/board.html; --pick makes one the site."""
+    from .layouts import make as make_layouts
+    from .project import BuildError, Project
+    try:
+        r = make_layouts(Project(resolve(name)), pick=pick, log=typer.echo)
+    except BuildError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(1)
+    if not pick:
+        for x in r["layouts"]:
+            typer.echo(f"  {x['id']}  {x['name']:<16} {x['source']:<10} {len(x['sections'])} sections")
 
 
 @app.command()
