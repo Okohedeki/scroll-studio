@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import time
+from contextvars import ContextVar
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Literal, Optional, Protocol, Union
@@ -116,9 +117,12 @@ def _policy(policy: Any) -> dict:
 
 
 def choose(kind: Kind, policy: Any = None) -> Backend:
-    """The backend for a job of `kind`: the one the policy pins, else the preferred kind (local first by default),
-    else (with fallback on) any available one. Raises NoBackend saying what to set up."""
+    """The backend for a job of `kind`: the one the policy pins, else the first available of the preferred kind (local
+    by default). A paid provider is never a silent fallback: when local is preferred, providers are tried only with an
+    explicit `fallback: true` (or a pin). Falling back from a provider to local models is free, so it is the default;
+    `fallback: false` keeps to the preferred kind alone. Raises NoBackend saying what to set up."""
     p = _policy(policy)
+    fb = p.get("fallback")
     name = (p.get("use") or {}).get(kind)
     candidates = [b for b in backends() if kind in b.kinds]
     if name:
@@ -129,19 +133,45 @@ def choose(kind: Kind, policy: Any = None) -> Backend:
         ok, why = check(b)
         if ok:
             return b
-        if not p.get("fallback", True):
+        if fb is False:
             raise NoBackend(f"models.use.{kind} is {name}, which is not available: {why}")
     prefer_local = p.get("prefer", "local") == "local"
-    ordered = sorted(candidates, key=lambda b: (b.local != prefer_local, candidates.index(b)))
-    if not p.get("fallback", True):
-        ordered = [b for b in ordered if b.local == prefer_local]
+
+    def allowed(b: Backend) -> bool:
+        return (prefer_local or fb is not False) if b.local else (not prefer_local or fb is True)
+    ordered = sorted((b for b in candidates if allowed(b)), key=lambda b: (b.local != prefer_local, candidates.index(b)))
     reasons = []
     for b in ordered:
         ok, why = check(b)
         if ok:
             return b
         reasons.append(f"{b.name}: {why}")
-    raise NoBackend(f"no {kind} backend can run here ({'; '.join(reasons) or 'none registered'})")
+    skipped = [b.name for b in candidates if not allowed(b)]
+    extra = f"; not tried: {', '.join(skipped)} (set models.prefer: provider or fallback: true)" if skipped else ""
+    raise NoBackend(f"no {kind} backend can run here ({'; '.join(reasons) or 'none registered'}{extra})")
+
+
+CURRENT: ContextVar = ContextVar("router_policy", default=None)
+
+
+def use_policy(policy: Any) -> None:
+    """The `models:` policy for jobs started from here on in this build (builders deep inside it read it)."""
+    CURRENT.set(policy)
+
+
+def edit_on_provider(images: list, instruction: str, seed: int, steps: int, out: Path, policy: Any = None,
+                     build: Optional[Path] = None, log=lambda m: None) -> bool:
+    """Run an image edit on a provider backend when the policy picks one, writing `out`. False means the local
+    ComfyUI path should run as before (its graph, steps and strength unchanged), including when nothing can run."""
+    policy = CURRENT.get() if policy is None else policy
+    try:
+        b = choose("edit", policy)
+    except NoBackend:
+        return False
+    if b.local:
+        return False
+    route(EditJob(tuple(str(i) for i in images), instruction, seed, steps), out, policy, build=build, log=log)
+    return True
 
 
 def record(build: Path, job: Job, result: Result) -> None:

@@ -241,6 +241,9 @@ def relight(world_png: Path, instruction: str, seed: int, steps: int, out: Path,
     import shutil
     from .backends import comfy
     from .project import BuildError
+    from .router import edit_on_provider
+    if edit_on_provider([world_png], instruction, seed, steps, out, log=log):
+        return out
     if not comfy.alive():
         raise BuildError(f"light: relighting needs ComfyUI (Qwen-Image-Edit), which is not running at {comfy.COMFY}.")
     comfy.free()

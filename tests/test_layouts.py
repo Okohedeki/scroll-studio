@@ -64,7 +64,7 @@ def test_placeholders_resolve_and_unknown_ones_drop():
 
 def test_a_text_backends_layouts_are_validated(tmp_path, monkeypatch):
     class Designer:
-        name, local, kinds = "designer", False, ("text",)
+        name, local, kinds = "designer", True, ("text",)
 
         def available(self):
             return True, ""

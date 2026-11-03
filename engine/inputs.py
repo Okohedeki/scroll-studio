@@ -240,12 +240,21 @@ def _models_policy(project: Project):
 
 
 def _edit(project: Project, ref: ImageInput, log=print) -> Path:
-    """An image made by editing others with Qwen-Image-Edit, cached by the sources' content and the instruction."""
+    """An image made by editing others, cached by the sources' content and the instruction: Qwen-Image-Edit locally, or
+    the edit backend the spec's `models:` picks (engine/router), whose result is cached apart from the local one."""
     from .backends import comfy
+    from .router import NoBackend, choose
     e = ref.edit
     srcs = [resolve_image(project, r, log) for r in [e.source, *e.refs[:2]]]
     out = edit_path(project, ref, srcs)
     digest = out.stem[len("edit_"):]
+    policy = _models_policy(project)
+    try:
+        backend = choose("edit", policy)
+    except NoBackend:
+        backend = None
+    if backend is not None and not backend.local:
+        out = out.with_name(f"{out.stem}-{backend.name}.png")
     if out.exists():
         return out
     from .fidelity import placeholder, preview, would_render
@@ -255,12 +264,18 @@ def _edit(project: Project, ref: ImageInput, log=print) -> Path:
         from PIL import Image
         return placeholder(project.build / "_storyboard" / "placeholders", f"Edit: {e.instruction}",
                            Image.open(srcs[0]).size)
-    if not comfy.alive():
+    provider = backend is not None and not backend.local
+    if not provider and not comfy.alive():
         raise BuildError(f"this image is edited locally with Qwen-Image-Edit, but ComfyUI is not running at {comfy.COMFY}.")
     out.parent.mkdir(parents=True, exist_ok=True)
 
     def qwen(first: Path) -> Path:
-        """Qwen-Image-Edit of `first` (the source, or a crop of it) with the edit's references; the result's path."""
+        """An edit of `first` (the source, or a crop of it) with the edit's references; the result's path."""
+        if provider:
+            from .router import edit_on_provider
+            res = out.parent / f"_edit_{digest}.png"
+            edit_on_provider([first, *srcs[1:]], e.instruction, e.seed, e.steps, res, policy, project.build, log)
+            return res
         comfy.free()
         names = [comfy.upload(str(s)) for s in [first, *srcs[1:]]]
         images = comfy.run(comfy.build_qwen_edit_graph(names, e.instruction, e.seed, e.steps, prefix=f"studio/edit_{digest}"), poll=2)
@@ -270,19 +285,22 @@ def _edit(project: Project, ref: ImageInput, log=print) -> Path:
         shutil.rmtree(tmp, ignore_errors=True)
         return res
 
+    editor = backend.name if provider else "Qwen-Image-Edit"
     if e.region is not None:
         from . import region
-        log(f"  editing image inside a region (Qwen-Image-Edit, seed {e.seed}): {e.instruction[:80]}")
+        log(f"  editing image inside a region ({editor}, seed {e.seed}): {e.instruction[:80]}")
         try:
             region.apply(project, srcs[0], e.region, out, qwen, log)
         finally:
             (out.parent / f"_edit_{digest}.png").unlink(missing_ok=True)
-            comfy.free()
+            if not provider:
+                comfy.free()
         return out
-    log(f"  editing image (Qwen-Image-Edit, seed {e.seed}): {e.instruction[:80]}")
+    log(f"  editing image ({editor}, seed {e.seed}): {e.instruction[:80]}")
     res = qwen(srcs[0])
     shutil.move(str(res), out)
-    comfy.free()
+    if not provider:
+        comfy.free()
     return out
 
 

@@ -9153,10 +9153,17 @@
    "description": "Which backend does each job (engine/router). Local models come first unless `prefer: provider`; a provider\nbackend (Anthropic, OpenAI, an OpenAI-style text server) is used only when its key or URL is set. `studio models`\nlists what is available here.",
    "properties": {
     "fallback": {
-     "default": true,
-     "description": "When the preferred kind (or the backend in `use`) can't run here, use another that can",
-     "title": "Fallback",
-     "type": "boolean"
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Unset: a provider falls back to local models, never the other way (no paid call you didn't ask for). true: either way. false: only the preferred kind",
+     "title": "Fallback"
     },
     "model": {
      "additionalProperties": {

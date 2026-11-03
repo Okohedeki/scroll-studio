@@ -71,10 +71,16 @@ def zimage_img2img(src: Path, dst: Path, prompt: str, seed: int, denoise: float,
 def qwen_detail(src: Path, dst: Path, instruction: str, seed: int, steps: int = 20, megapixels: float = 1.6,
                 log: Callable = print) -> Path:
     from PIL import Image
+    from ..router import edit_on_provider
     from . import comfy
+    w, h = Image.open(src).size
+    if edit_on_provider([src], instruction, seed, steps, dst, log=log):
+        im = Image.open(dst)
+        if im.size != (w, h):
+            im.convert("RGB").resize((w, h), Image.LANCZOS).save(dst)
+        return dst
     if not comfy.alive():
         raise BuildError(f"Deep zoom needs ComfyUI running at {comfy.COMFY} (docs/INSTALL.md) for its detail pass.")
-    w, h = Image.open(src).size
     comfy.free()
     name = comfy.upload(str(src))
     g = comfy.build_qwen_edit_graph([name], instruction, seed, steps, prefix=f"studio/zoom_{src.stem}"[:60], megapixels=megapixels)
