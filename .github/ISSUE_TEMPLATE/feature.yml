@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Scroll Studio grows by engine features, never one-off pages, and runs local models only (no API keys). See the
+        Scroll Studio grows by engine features, never one-off pages, and works with local models first (provider APIs are optional backends). See the
         [ground rules](https://github.com/Okohedeki/scroll-studio/blob/main/CONTRIBUTING.md#ground-rules) and the
         [milestones](https://github.com/Okohedeki/scroll-studio/milestones) for what is planned.
   - type: textarea
@@ -24,7 +24,7 @@ body:
     id: how
     attributes:
       label: How it could work
-      description: Builder, runtime, models (local only) and how it would be tested without a GPU.
+      description: Builder, runtime, models (local first; any provider backend optional) and how it would be tested without a GPU.
   - type: checkboxes
     id: rules
     attributes:
@@ -32,7 +32,7 @@ body:
       options:
         - label: It is an engine feature every site can use, not a page for one project.
           required: true
-        - label: It runs with local models only, without API keys.
+        - label: It works with local models and no API keys (a provider backend may be an option, never the only way).
           required: true
   - type: dropdown
     id: area

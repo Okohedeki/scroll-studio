@@ -558,7 +558,7 @@
   }
  },
  "get_spec": {
-  "description": "Read a project's site.yaml.",
+  "description": "Read a project's spec file as written: its project.yaml, or its site.yaml.",
   "input": {
    "properties": {
     "project": {
@@ -823,6 +823,111 @@
     "project"
    ],
    "title": "looksArguments",
+   "type": "object"
+  }
+ },
+ "make_ads": {
+  "description": "Placement-sized ads from the picked product stills (needs outputs.ads in project.yaml and `make_stills` run",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "make_adsArguments",
+   "type": "object"
+  }
+ },
+ "make_layouts": {
+  "description": "Generated page layouts (needs outputs.layouts in project.yaml; best after make_stills and write_listing):",
+  "input": {
+   "properties": {
+    "pick": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Pick"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "make_layoutsArguments",
+   "type": "object"
+  }
+ },
+ "make_stills": {
+  "description": "Product stills from one photo (background job; needs outputs.stills in project.yaml): art directions, candidates",
+  "input": {
+   "properties": {
+    "different": {
+     "default": false,
+     "title": "Different",
+     "type": "boolean"
+    },
+    "more": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "More"
+    },
+    "pick": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Pick"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "make_stillsArguments",
+   "type": "object"
+  }
+ },
+ "make_video": {
+  "description": "A short product video from the picked stills (background job; needs outputs.video in project.yaml and",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "make_videoArguments",
    "type": "object"
   }
  },
@@ -1160,7 +1265,7 @@
   }
  },
  "set_spec": {
-  "description": "Validate and write a project's site.yaml (the whole file). Returns validation errors instead of writing if invalid.",
+  "description": "Validate and write a project's spec (the whole file): a project.yaml, or a site.yaml document. Returns validation",
   "input": {
    "properties": {
     "project": {
@@ -1429,6 +1534,22 @@
     "project"
    ],
    "title": "world_checkArguments",
+   "type": "object"
+  }
+ },
+ "write_listing": {
+  "description": "Store listing copy (needs outputs.listing in project.yaml): title, bullets and description, from a text",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "write_listingArguments",
    "type": "object"
   }
  }

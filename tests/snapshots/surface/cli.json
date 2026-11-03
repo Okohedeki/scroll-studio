@@ -1,5 +1,20 @@
 {
  "commands": {
+  "ads": {
+   "help": "Placement-sized ads from the picked product stills (outputs.ads in project.yaml) -> <project>/ads/.",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    }
+   }
+  },
   "brand": {
    "help": "Set the theme's colours from a logo (contrast-checked) and use it as the nav logo, or (--from) write a brand's",
    "params": {
@@ -107,6 +122,16 @@
      "multiple": false,
      "opts": [
       "--plan"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "profile": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--profile"
      ],
      "required": false,
      "type": "boolean"
@@ -892,6 +917,31 @@
     }
    }
   },
+  "layouts": {
+   "help": "Generated page layouts (outputs.layouts in project.yaml): several pages from the brief, stills and listing, on",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "pick": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--pick"
+     ],
+     "required": false,
+     "type": "str"
+    }
+   }
+  },
   "light": {
    "help": "Light as the scroll (`type: light`): build the section, then write what it made to look at, in",
    "params": {
@@ -959,6 +1009,21 @@
     }
    }
   },
+  "listing": {
+   "help": "Store listing copy (outputs.listing in project.yaml): title, bullets, description -> <project>/listing/.",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    }
+   }
+  },
   "looks": {
    "help": "Build the site once in every style: dist/looks/<style>/ with a look switcher, and a gallery at dist/looks/.",
    "params": {
@@ -992,6 +1057,46 @@
      ],
      "required": false,
      "type": "boolean"
+    }
+   }
+  },
+  "migrate": {
+   "help": "Turn a project's site.yaml into a project.yaml: the brand, product and imagery move up to the project, the rest",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "write": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--write"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
+  },
+  "models": {
+   "help": "The model backends (engine/router): local workers and provider APIs, and whether each can run here.",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": false,
+     "type": "str"
     }
    }
   },
@@ -1479,8 +1584,19 @@
    }
   },
   "schema": {
-   "help": "Print the site.yaml JSON Schema.",
-   "params": {}
+   "help": "Print the site.yaml JSON Schema (or project.yaml's, with --project).",
+   "params": {
+    "project": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--project"
+     ],
+     "required": false,
+     "type": "boolean"
+    }
+   }
   },
   "setup-comfy": {
    "help": "Install the ComfyUI custom nodes that `reveal` (scroll-driven colour) and `faces: restore` use.",
@@ -1540,6 +1656,61 @@
      ],
      "required": false,
      "type": "int"
+    }
+   }
+  },
+  "stills": {
+   "help": "Product stills from one photo (outputs.stills in project.yaml): art directions, candidates, critics and a",
+   "params": {
+    "different": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--different"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "more": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--more"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "open_board": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--open"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "pick": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--pick"
+     ],
+     "required": false,
+     "type": "str"
     }
    }
   },
@@ -1719,6 +1890,21 @@
      ],
      "required": false,
      "type": "int"
+    }
+   }
+  },
+  "video": {
+   "help": "A short product video from the picked stills (outputs.video in project.yaml) -> <project>/video/.",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
     }
    }
   },

@@ -288,11 +288,25 @@ def paint_out(frozen: np.ndarray, instruction: str, seed: int, work: Path, log: 
         stamp = path.with_name(path.name + ".key")
         if path.exists() and stamp.exists() and stamp.read_text() == key:
             return np.asarray(Image.open(path).convert("RGB"))
-    if not comfy.alive():
-        return None
-    log("  layers: painting the background behind the subjects (Qwen-Image-Edit)")
+    from .router import edit_on_provider
     src = work / "_plate_in.png"
     Image.fromarray(frozen).save(src)
+    routed = work / "_plate_routed.png"
+    if edit_on_provider([src], instruction, seed, 20, routed, log=log):
+        edited = Image.open(routed).convert("RGB")
+        src.unlink(missing_ok=True)
+        routed.unlink(missing_ok=True)
+        if edited.size != (frozen.shape[1], frozen.shape[0]):
+            edited = edited.resize((frozen.shape[1], frozen.shape[0]), Image.LANCZOS)
+        out = np.asarray(edited)
+        if cache is not None:
+            Image.fromarray(out).save(cache[0])
+            cache[0].with_name(cache[0].name + ".key").write_text(cache[1])
+        return out
+    if not comfy.alive():
+        src.unlink(missing_ok=True)
+        return None
+    log("  layers: painting the background behind the subjects (Qwen-Image-Edit)")
     comfy.free()
     names = [comfy.upload(str(src))]
     images = comfy.run(comfy.build_qwen_edit_graph(names, instruction, seed, 20, prefix="studio/layers_plate"), poll=2)

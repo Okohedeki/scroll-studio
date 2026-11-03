@@ -18,7 +18,7 @@ from mcp.server.mcpserver import MCPServer
 from pydantic import ValidationError
 
 from .config import ROOT, settings
-from .project import BuildError, Project, child, safe_name
+from .project import BuildError, Project, child, has_spec, safe_name
 from .server.jobs import JobQueue, logger
 from .spec import SCENE_TYPES, Site, deprecations
 
@@ -82,8 +82,11 @@ def list_projects() -> list[dict]:
     out = []
     for base, kind in ((PROJECTS, "project"), (EXAMPLES, "example")):
         for d in sorted(base.iterdir()) if base.exists() else []:
-            if (d / "site.yaml").exists():
-                raw = yaml.safe_load((d / "site.yaml").read_text(encoding="utf-8")) or {}
+            if has_spec(d):
+                try:
+                    raw = Project(d).raw()
+                except Exception:      # an invalid spec still lists; building it reports the problem
+                    raw = {}
                 out.append({"name": d.name, "kind": kind, "title": raw.get("name"), "path": str(d),
                             "scenes": [s.get("type") for s in raw.get("sections", []) if s.get("type") in SCENE_TYPES],
                             "built": (d / "dist" / "index.html").exists()})
@@ -143,22 +146,24 @@ def spec_schema(part: Optional[str] = None) -> dict:
 
 @mcp.tool()
 def get_spec(project: str) -> str:
-    """Read a project's site.yaml."""
+    """Read a project's spec file as written: its project.yaml, or its site.yaml."""
     return _find(project).spec_path.read_text(encoding="utf-8")
 
 
 @mcp.tool()
 def set_spec(project: str, yaml_text: str) -> dict:
-    """Validate and write a project's site.yaml (the whole file). Returns validation errors instead of writing if invalid.
-    A spec that uses deprecated fields is written, with `deprecations` naming each one and what replaces it."""
+    """Validate and write a project's spec (the whole file): a project.yaml, or a site.yaml document. Returns validation
+    errors instead of writing if invalid. A spec that uses deprecated fields is written, with `deprecations` naming each
+    one and what replaces it."""
     p = _find(project)
     try:
-        site = Site.model_validate(yaml.safe_load(yaml_text))
+        site = p.put_text(yaml_text)
     except ValidationError as e:
         return {"ok": False, "errors": [f"{'.'.join(map(str, er['loc']))}: {er['msg']}" for er in e.errors()]}
     except yaml.YAMLError as e:
         return {"ok": False, "errors": [f"YAML: {e}"]}
-    p.spec_path.write_text(yaml_text, encoding="utf-8")
+    except BuildError as e:
+        return {"ok": False, "errors": [str(e)]}
     return {"ok": True, "deprecations": [d.as_dict() for d in deprecations(site)]}
 
 
@@ -545,6 +550,77 @@ def record(project: str, section: Optional[str] = None, seconds: float = 12.0) -
         out = p.root / "recordings" / f"{stem}-{int(time.time())}.mp4"
         return {"video": str(rec(p.dist, out, section=section, seconds=seconds, log=log, progress=progress))}
     return jobs.submit("record", p.name, "record", run).public(tail=5)
+
+
+@mcp.tool()
+def make_stills(project: str, more: Optional[str] = None, different: bool = False, pick: Optional[str] = None) -> dict:
+    """Product stills from one photo (background job; needs outputs.stills in project.yaml): art directions, candidates
+    per shot, critics and a varied shortlist, on <project>/stills/board.html with every record in stills.json.
+    more=<candidate id>: more seeds in its direction. different=True: new directions unlike the existing ones.
+    pick=<candidate id>: mark its shot's final (returns at once)."""
+    from .stills import run as stills_run
+    p = _find(project)
+    if pick:
+        try:
+            st = stills_run.make(p, pick=pick, log=lambda m: None)
+        except BuildError as e:
+            return {"ok": False, "error": str(e)}
+        return {"ok": True, "picked": st["picked"]}
+
+    def run(job):
+        log, _ = logger(job)
+        st = stills_run.make(p, more=more, different=different, log=log)
+        return {"shortlist": st["shortlist"], "board": str(stills_run.folder(p) / "board.html")}
+    return jobs.submit("stills", p.name, "product stills", run).public(tail=5)
+
+
+@mcp.tool()
+def make_ads(project: str) -> dict:
+    """Placement-sized ads from the picked product stills (needs outputs.ads in project.yaml and `make_stills` run
+    first): each shot's pick (else its best) reframed to every size with the headline and call to action set in.
+    Returns the files written to <project>/ads/."""
+    from .ads import make
+    try:
+        return {"ok": True, **make(_find(project), log=lambda m: None)}
+    except BuildError as e:
+        return {"ok": False, "error": str(e)}
+
+
+@mcp.tool()
+def write_listing(project: str) -> dict:
+    """Store listing copy (needs outputs.listing in project.yaml): title, bullets and description, from a text
+    backend when one can run, else a marked draft. Written to <project>/listing/; returned too."""
+    from .listing import make
+    try:
+        return {"ok": True, **make(_find(project), log=lambda m: None)}
+    except BuildError as e:
+        return {"ok": False, "error": str(e)}
+
+
+@mcp.tool()
+def make_video(project: str) -> dict:
+    """A short product video from the picked stills (background job; needs outputs.video in project.yaml and
+    `make_stills` run first): push-ins, dissolves, an end card with the ads' copy, and a voiceover where a speech
+    backend can run. Written to <project>/video/."""
+    from .video import make
+    p = _find(project)
+
+    def run(job):
+        log, _ = logger(job)
+        return make(p, log=log)
+    return jobs.submit("video", p.name, "product video", run).public(tail=5)
+
+
+@mcp.tool()
+def make_layouts(project: str, pick: Optional[str] = None) -> dict:
+    """Generated page layouts (needs outputs.layouts in project.yaml; best after make_stills and write_listing):
+    several pages arranged differently from the project's own material, on <project>/layouts/board.html.
+    pick=<id> (l1, l2, ...) writes that layout's sections into outputs.site; then build it."""
+    from .layouts import make
+    try:
+        return {"ok": True, **make(_find(project), pick=pick, log=lambda m: None)}
+    except BuildError as e:
+        return {"ok": False, "error": str(e)}
 
 
 @mcp.tool()

@@ -200,10 +200,10 @@ def _art_directed(project: Project, ref: ImageInput, raw: Path, log=print, regen
 
 
 def generate_image(project: Project, prompt: str, w: int, h: int, seed: int, log=print, free: bool = True) -> Path:
-    """A Z-Image Turbo still for exactly this prompt, cached by prompt, size and seed in .build/_generated. The prompt is
-    sent as given (an `imagery:` treatment is already in it); `studio directions` renders its boards through here too."""
+    """A still for exactly this prompt, cached by prompt, size and seed in .build/_generated: Z-Image Turbo locally, or
+    the image backend the spec's `models:` picks (engine/router). The prompt is sent as given (an `imagery:` treatment
+    is already in it); `studio directions` renders its boards through here too."""
     out = project.build / "_generated" / f"{generated_digest(prompt, w, h, seed)}.png"
-    digest = out.stem
     if out.exists():
         return out
     from .fidelity import placeholder, preview, would_render
@@ -212,27 +212,49 @@ def generate_image(project: Project, prompt: str, w: int, h: int, seed: int, log
     if pv is not None and not pv.comfy:   # a sketch storyboard: a card for the shot to come, outside the cache
         return placeholder(project.build / "_storyboard" / "placeholders", prompt, (w, h))
     from .backends import comfy
-    if not comfy.alive():
+    from .router import ImageJob, NoBackend, choose, route
+    policy = _models_policy(project)
+    try:
+        backend = choose("image", policy)
+    except NoBackend as e:
         raise BuildError("this image is generated locally, but ComfyUI is not running at "
-                         f"{comfy.COMFY}. Start it (docs/INSTALL.md) or replace `generate:` with a `file:`.")
-    log(f"  generating image ({w}x{h}, seed {seed}): {prompt[:80]}…")
-    if free:         # a batch of stills (storyboard boards) frees the other models once, then keeps Z-Image loaded
+                         f"{comfy.COMFY}. Start it (docs/INSTALL.md), set a provider key (docs/project-file.md), or "
+                         f"replace `generate:` with a `file:`. ({e})") from None
+    if not backend.local:     # a provider's image is its own file: the local cache key stays the local model's
+        out = out.with_name(f"{generated_digest(f'{prompt}|{backend.name}', w, h, seed)}.png")
+        if out.exists():
+            return out
+    log(f"  generating image ({w}x{h}, seed {seed}) on {backend.name}: {prompt[:80]}…")
+    if free and backend.name == "local:comfy":   # a batch of stills frees the other models once, then keeps Z-Image loaded
         comfy.free()
-    images = comfy.run(comfy.build_txt2img_graph(prompt, w, h, seed, prefix=f"studio/{digest}"), poll=2)
-    tmp = comfy.fetch(images, str(out.parent / f"_{digest}"))
-    out.parent.mkdir(parents=True, exist_ok=True)
-    shutil.move(str(Path(tmp) / "0001.png"), out)
-    shutil.rmtree(tmp, ignore_errors=True)
+    route(ImageJob(prompt, w, h, seed), out, policy, build=project.build, log=log)
     return out
 
 
+def _models_policy(project: Project):
+    """The spec's `models:` (engine/router), or None; an unreadable spec routes by the defaults."""
+    try:
+        return project.raw().get("models")
+    except Exception:
+        return None
+
+
 def _edit(project: Project, ref: ImageInput, log=print) -> Path:
-    """An image made by editing others with Qwen-Image-Edit, cached by the sources' content and the instruction."""
+    """An image made by editing others, cached by the sources' content and the instruction: Qwen-Image-Edit locally, or
+    the edit backend the spec's `models:` picks (engine/router), whose result is cached apart from the local one."""
     from .backends import comfy
+    from .router import NoBackend, choose
     e = ref.edit
     srcs = [resolve_image(project, r, log) for r in [e.source, *e.refs[:2]]]
     out = edit_path(project, ref, srcs)
     digest = out.stem[len("edit_"):]
+    policy = _models_policy(project)
+    try:
+        backend = choose("edit", policy)
+    except NoBackend:
+        backend = None
+    if backend is not None and not backend.local:
+        out = out.with_name(f"{out.stem}-{backend.name}.png")
     if out.exists():
         return out
     from .fidelity import placeholder, preview, would_render
@@ -242,12 +264,18 @@ def _edit(project: Project, ref: ImageInput, log=print) -> Path:
         from PIL import Image
         return placeholder(project.build / "_storyboard" / "placeholders", f"Edit: {e.instruction}",
                            Image.open(srcs[0]).size)
-    if not comfy.alive():
+    provider = backend is not None and not backend.local
+    if not provider and not comfy.alive():
         raise BuildError(f"this image is edited locally with Qwen-Image-Edit, but ComfyUI is not running at {comfy.COMFY}.")
     out.parent.mkdir(parents=True, exist_ok=True)
 
     def qwen(first: Path) -> Path:
-        """Qwen-Image-Edit of `first` (the source, or a crop of it) with the edit's references; the result's path."""
+        """An edit of `first` (the source, or a crop of it) with the edit's references; the result's path."""
+        if provider:
+            from .router import edit_on_provider
+            res = out.parent / f"_edit_{digest}.png"
+            edit_on_provider([first, *srcs[1:]], e.instruction, e.seed, e.steps, res, policy, project.build, log)
+            return res
         comfy.free()
         names = [comfy.upload(str(s)) for s in [first, *srcs[1:]]]
         images = comfy.run(comfy.build_qwen_edit_graph(names, e.instruction, e.seed, e.steps, prefix=f"studio/edit_{digest}"), poll=2)
@@ -257,19 +285,22 @@ def _edit(project: Project, ref: ImageInput, log=print) -> Path:
         shutil.rmtree(tmp, ignore_errors=True)
         return res
 
+    editor = backend.name if provider else "Qwen-Image-Edit"
     if e.region is not None:
         from . import region
-        log(f"  editing image inside a region (Qwen-Image-Edit, seed {e.seed}): {e.instruction[:80]}")
+        log(f"  editing image inside a region ({editor}, seed {e.seed}): {e.instruction[:80]}")
         try:
             region.apply(project, srcs[0], e.region, out, qwen, log)
         finally:
             (out.parent / f"_edit_{digest}.png").unlink(missing_ok=True)
-            comfy.free()
+            if not provider:
+                comfy.free()
         return out
-    log(f"  editing image (Qwen-Image-Edit, seed {e.seed}): {e.instruction[:80]}")
+    log(f"  editing image ({editor}, seed {e.seed}): {e.instruction[:80]}")
     res = qwen(srcs[0])
     shutil.move(str(res), out)
-    comfy.free()
+    if not provider:
+        comfy.free()
     return out
 
 

@@ -9148,6 +9148,69 @@
    "title": "Marker",
    "type": "object"
   },
+  "Models": {
+   "additionalProperties": false,
+   "description": "Which backend does each job (engine/router). Local models come first unless `prefer: provider`; a provider\nbackend (Anthropic, OpenAI, an OpenAI-style text server) is used only when its key or URL is set. `studio models`\nlists what is available here.",
+   "properties": {
+    "fallback": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Unset: a provider falls back to local models, never the other way (no paid call you didn't ask for). true: either way. false: only the preferred kind",
+     "title": "Fallback"
+    },
+    "model": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "description": "The model the backend in `use` runs for that kind, when not its default",
+     "propertyNames": {
+      "enum": [
+       "image",
+       "edit",
+       "text",
+       "speech"
+      ]
+     },
+     "title": "Model",
+     "type": "object"
+    },
+    "prefer": {
+     "default": "local",
+     "description": "local: this machine's models first. provider: a provider's API first, where a key is set",
+     "enum": [
+      "local",
+      "provider"
+     ],
+     "title": "Prefer",
+     "type": "string"
+    },
+    "use": {
+     "additionalProperties": {
+      "type": "string"
+     },
+     "description": "A backend per job kind, e.g. `{image: openai, text: anthropic}`",
+     "propertyNames": {
+      "enum": [
+       "image",
+       "edit",
+       "text",
+       "speech"
+      ]
+     },
+     "title": "Use",
+     "type": "object"
+    }
+   },
+   "title": "Models",
+   "type": "object"
+  },
   "MotionTokens": {
    "additionalProperties": false,
    "description": "How the page moves. Each value defaults to what the runtime has always used; `scroll.speed` still paces it.",
@@ -16293,6 +16356,18 @@
   },
   "loader": {
    "$ref": "#/$defs/Loader"
+  },
+  "models": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Models"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "description": "Which backend does each image, edit and text job: local models first by default; provider APIs where a key is set"
   },
   "name": {
    "title": "Name",

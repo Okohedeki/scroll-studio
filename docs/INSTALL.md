@@ -41,6 +41,12 @@ CPU. Its optional `--embed` drift check also needs `pip install -e .[embed]` (op
 weights (`laion/CLIP-ViT-H-14-laion2B-s32B-b79K`, 3.9 GB, MIT) already in the Hugging Face cache; it never downloads them
 (`huggingface-cli download laion/CLIP-ViT-H-14-laion2B-s32B-b79K open_clip_pytorch_model.bin` fetches them once).
 
+**Provider models (optional).** Every build works with local models only. To also let the model router
+(`engine/router`) use a provider, set its key: `ANTHROPIC_API_KEY` for text (`pip install -e .[providers]`),
+`OPENAI_API_KEY` for images and edits, `ELEVENLABS_API_KEY` for voiceovers, or `text_url` in studio.toml for an OpenAI-style text server (one on this machine
+counts as local). `studio models` lists what can run here, and a spec's `models:` picks
+([the project file](project-file.md)). Each provider's own terms apply to what it makes.
+
 `studio inspect --page` (the polish report of a built page) needs Playwright's Chromium, which `playwright` (a core
 dependency) downloads once with `playwright install chromium`; it runs headless, on the CPU, with no network.
 

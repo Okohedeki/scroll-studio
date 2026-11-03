@@ -493,13 +493,18 @@ def scene_still(project: Project, product: Optional[Product], view: str, size: t
     out8, info = comp8, {"harmonise": harmonise}
     # 5. a light harmonising edit, checked against the product's own edges
     if harmonise > 0:
-        log(f"  scene: Qwen-Image-Edit harmonising pass (strength {harmonise})")
-        g = comfy.build_qwen_edit_graph([comfy.upload(str(d / "composite.png"))], HARMONISE, seed, 30,
-                                        prefix=f"studio/harm_{d.name}", megapixels=round(w * h / 1e6, 2))
-        g["ks"]["inputs"]["denoise"] = float(harmonise)
-        images = comfy.run(g, poll=2)
-        tmp = comfy.fetch(images, str(d / "_q"))
-        ed = cv2.cvtColor(cv2.imread(str(Path(tmp, "0001.png"))), cv2.COLOR_BGR2RGB)
+        from .router import edit_on_provider
+        routed = d / "_q_routed.png"
+        if edit_on_provider([d / "composite.png"], HARMONISE, seed, 30, routed, build=project.build, log=log):
+            ed = cv2.cvtColor(cv2.imread(str(routed)), cv2.COLOR_BGR2RGB)      # strength is the local editor's only
+        else:
+            log(f"  scene: Qwen-Image-Edit harmonising pass (strength {harmonise})")
+            g = comfy.build_qwen_edit_graph([comfy.upload(str(d / "composite.png"))], HARMONISE, seed, 30,
+                                            prefix=f"studio/harm_{d.name}", megapixels=round(w * h / 1e6, 2))
+            g["ks"]["inputs"]["denoise"] = float(harmonise)
+            images = comfy.run(g, poll=2)
+            tmp = comfy.fetch(images, str(d / "_q"))
+            ed = cv2.cvtColor(cv2.imread(str(Path(tmp, "0001.png"))), cv2.COLOR_BGR2RGB)
         ed = cv2.resize(ed, (w, h), interpolation=cv2.INTER_LANCZOS4)
         cv2.imwrite(str(d / "harmonised.png"), cv2.cvtColor(ed, cv2.COLOR_RGB2BGR))
         score = _edges_kept(comp8, ed, m_alpha)

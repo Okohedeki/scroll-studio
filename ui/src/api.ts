@@ -29,6 +29,8 @@ export const api = {
   snapshot: (name: string, at: string[] = []) => req("POST", `/api/projects/${name}/snapshot`, { at }),
   record: (name: string, opts: { section?: string; seconds?: number }) => req("POST", `/api/projects/${name}/record`, opts),
   recordings: (name: string) => req("GET", `/api/projects/${name}/recordings`),
+  stills: (name: string) => req("GET", `/api/projects/${name}/stills`),
+  makeStills: (name: string, body: { more?: string; different?: boolean; pick?: string }) => req("POST", `/api/projects/${name}/stills`, body),
   jobs: (project?: string) => req("GET", `/api/jobs${project ? `?project=${project}` : ""}`),
   job: (id: string) => req("GET", `/api/jobs/${id}`),
 };

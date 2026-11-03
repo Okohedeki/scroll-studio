@@ -144,7 +144,7 @@ def _get(node, path):
 def import_deck(project: Project, text: str, dry_run: bool = False) -> list[tuple[str, Any, Any]]:
     """Apply a copy deck. Returns [(key, old, new)] for every field that changed."""
     y = _yaml()
-    original = project.spec_path.read_text(encoding="utf-8")
+    original = project.site_text()
     doc = y.load(original)
     known = {key(p): (p, v) for p, v in fields(doc)}
     edits = parse_deck(text)
@@ -174,7 +174,7 @@ def import_deck(project: Project, text: str, dry_run: bool = False) -> list[tupl
     import yaml as _pyyaml
     Site.model_validate(_pyyaml.safe_load(text_out))   # never write an invalid spec
     if changes and not dry_run:
-        project.spec_path.write_text(text_out, encoding="utf-8")
+        project.write_site_text(text_out)
     return changes
 
 
@@ -242,7 +242,7 @@ def apply_brand(project: Project, logo_rel: str, mode: str = "light", dry_run: b
     cols = brand_colors(logo, mode)
     palette = cols.pop("_palette")
     y = _yaml()
-    original = project.spec_path.read_text(encoding="utf-8")
+    original = project.site_text()
     doc = y.load(original)
     from ruamel.yaml.comments import CommentedMap
     theme = doc.get("theme")
@@ -259,7 +259,7 @@ def apply_brand(project: Project, logo_rel: str, mode: str = "light", dry_run: b
     import yaml as _pyyaml
     Site.model_validate(_pyyaml.safe_load(text_out))
     if not dry_run:
-        project.spec_path.write_text(text_out, encoding="utf-8")
+        project.write_site_text(text_out)
     return {"colors": cols, "palette": palette}
 
 
@@ -539,7 +539,7 @@ def write_brand(project: Project, ref: str, dry_run: bool = False, log=print) ->
 
     tokens = theme_tokens(brand_from(project, ref, refresh=True, log=log))
     y = _yaml()
-    original = project.spec_path.read_text(encoding="utf-8")
+    original = project.site_text()
     doc = y.load(original)
     theme = doc.get("theme")
     if theme is None:
@@ -549,5 +549,5 @@ def write_brand(project: Project, ref: str, dry_run: bool = False, log=print) ->
     import yaml as _pyyaml
     Site.model_validate(_pyyaml.safe_load(text_out))     # never write an invalid spec
     if not dry_run:
-        project.spec_path.write_text(text_out, encoding="utf-8")
+        project.write_site_text(text_out)
     return tokens

@@ -27,7 +27,7 @@ What a visitor sees and feels, on desktop and on a phone, and with reduced motio
 
 ### In the engine
 
-Spec models, builder stages and their cache keys, runtime changes, CLI and MCP changes, models (local only).
+Spec models, builder stages and their cache keys, runtime changes, CLI and MCP changes, models (local first; provider backends optional).
 
 ## Compatibility
 
