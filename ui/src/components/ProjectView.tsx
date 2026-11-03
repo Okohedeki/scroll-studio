@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import Stills from "./Stills";
 import { api, follow } from "../api";
 import type { Info } from "../App";
 import { Fields, Fieldset, type Ctx } from "./SchemaForm";
@@ -50,7 +51,8 @@ export function ProjectView({ project, info, schema, onChanged }: { project: any
   const [draft, setDraft] = useState(false);
   const [previewStamp, setPreviewStamp] = useState(Date.now());
 
-  const load = () => api.spec(name).then((s) => { setData(s.data); setYamlText(s.yaml); setModified(s.modified); setDirty(false); setErrors([]); });
+  const [fileName, setFileName] = useState("site.yaml");
+  const load = () => api.spec(name).then((s) => { setData(s.data); setYamlText(s.yaml); setFileName(s.file || "site.yaml"); setModified(s.modified); setDirty(false); setErrors([]); });
   useEffect(() => { load(); api.inputs(name).then(setInputs); }, [name]);
   // Pick up edits made outside the UI (Claude via MCP, a text editor) when there are no unsaved changes here.
   useEffect(() => {
@@ -82,6 +84,7 @@ export function ProjectView({ project, info, schema, onChanged }: { project: any
   }
 
   if (!data) return <div className="pad muted">Loading…</div>;
+  const hasStills = fileName === "project.yaml" && /^\s+stills:/m.test(yamlText);
   const sections: any[] = data.sections || [];
   const s = sel >= 0 ? sections[sel] : null;
   const scenes = sections.filter((x) => SCENES.includes(x.type));
@@ -108,7 +111,7 @@ export function ProjectView({ project, info, schema, onChanged }: { project: any
       <JobBar job={job} onClose={() => setJob(null)} />
 
       <nav className="tabs">
-        {[["edit", "Sections"], ["site", "Site & theme"], ["inputs", `Inputs (${inputs.length})`], ["yaml", "YAML"], ["preview", "Preview"], ["review", "Review"], ["export", "Export"]].map(([k, l]) =>
+        {[["edit", "Sections"], ["site", "Site & theme"], ["inputs", `Inputs (${inputs.length})`], ["yaml", "YAML"], ["preview", "Preview"], ["review", "Review"], ["export", "Export"], ...(hasStills ? [["stills", "Stills"]] : [])].map(([k, l]) =>
           <button key={k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{l}</button>)}
       </nav>
 
@@ -164,6 +167,7 @@ export function ProjectView({ project, info, schema, onChanged }: { project: any
       {tab === "preview" && <Preview name={name} built={project.built} scenes={scenes} stamp={previewStamp} />}
       {tab === "review" && <Review name={name} job={job} run={(at) => run("snapshot", { at })} />}
       {tab === "export" && <Export name={name} scenes={scenes} run={(opts) => run("record", opts)} />}
+      {tab === "stills" && <Stills name={name} onJob={setJob} />}
     </div>
   );
 }

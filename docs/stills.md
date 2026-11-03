@@ -38,7 +38,7 @@ A `site.yaml` project gets stills after `studio migrate my-shop --write` ([the p
 
 ## Reviewing
 
-Open `stills/board.html`. Each shot shows its best candidate large, the rest of its shortlist beside it, and every
+In the Studio app (`studio ui`), a project with `outputs.stills` has a **Stills** tab: the same view, with **More like this**, **Something different**, **Compare** (two side by side) and **Pick** on each lead still. Outside the app, open `stills/board.html`. Each shot shows its best candidate large, the rest of its shortlist beside it, and every
 other candidate below, best first. Click any candidate to look at it.
 
 | Command | What it does |
