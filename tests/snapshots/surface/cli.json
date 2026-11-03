@@ -917,6 +917,31 @@
     }
    }
   },
+  "layouts": {
+   "help": "Generated page layouts (outputs.layouts in project.yaml): several pages from the brief, stills and listing, on",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "pick": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--pick"
+     ],
+     "required": false,
+     "type": "str"
+    }
+   }
+  },
   "light": {
    "help": "Light as the scroll (`type: light`): build the section, then write what it made to look at, in",
    "params": {

@@ -612,6 +612,18 @@ def make_video(project: str) -> dict:
 
 
 @mcp.tool()
+def make_layouts(project: str, pick: Optional[str] = None) -> dict:
+    """Generated page layouts (needs outputs.layouts in project.yaml; best after make_stills and write_listing):
+    several pages arranged differently from the project's own material, on <project>/layouts/board.html.
+    pick=<id> (l1, l2, ...) writes that layout's sections into outputs.site; then build it."""
+    from .layouts import make
+    try:
+        return {"ok": True, **make(_find(project), pick=pick, log=lambda m: None)}
+    except BuildError as e:
+        return {"ok": False, "error": str(e)}
+
+
+@mcp.tool()
 def trailer(project: str, formats: Optional[list[str]] = None, force: bool = False, plan_only: bool = False) -> dict:
     """Cut the launch trailer from the site's own renders (background job): dist/trailer/trailer-16x9.mp4 and
     trailer-9x16.mp4 + posters, from the spec's `trailer:` (an empty `trailer: {}` derives the cut). formats: 16x9,
