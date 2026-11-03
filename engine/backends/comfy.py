@@ -67,11 +67,67 @@ def _req(path, data=None, headers=None):
         return r.read()
 
 
-def free():
-    """Unload every model from VRAM. Call before switching model families (Z-Image <-> LTX):
-    with ~19.5 GB usable, keeping one family resident while loading the other stalls ComfyUI."""
-    _req("/free", json.dumps({"unload_models": True, "free_memory": True}).encode(),
+MODEL_SUFFIXES = (".safetensors", ".gguf", ".ckpt", ".pt", ".pth", ".bin")
+
+# The model files on the GPU after our last job (None: none, or unknown before this process's first job), and every
+# job's timings for `build --profile`.
+_RESIDENT = None
+JOBS: list = []
+
+
+def free(deep=False):
+    """Release ComfyUI's VRAM. Call before switching model families (Z-Image <-> LTX) or handing the GPU to other
+    work (Blender, a depth model): with ~19.5 GB usable, keeping one family resident while loading the other stalls.
+
+    ComfyUI keeps its cache of loaded weights in system RAM, so the next job on the same models moves them back to
+    the GPU in seconds instead of reading them from disk again (issue #4). `deep=True` also drops that cache, for
+    when system RAM itself is short."""
+    global _RESIDENT
+    _req("/free", json.dumps({"unload_models": True, "free_memory": bool(deep)}).encode(),
          {"Content-Type": "application/json"})
+    _RESIDENT = None
+
+
+def models_of(graph):
+    """The model files a graph loads: every node input that names a weights file."""
+    names = set()
+    for node in graph.values():
+        for value in (node.get("inputs") or {}).values():
+            if isinstance(value, str) and value.lower().endswith(MODEL_SUFFIXES):
+                names.add(value.replace("\\", "/"))
+    return frozenset(names)
+
+
+def model_label(models):
+    """A short name for a graph's models in the profile: its main weights file (the largest by name), no folder."""
+    if not models:
+        return "no model"
+    small = ("vae", "encoder", "clip", "lora", "upscal", "umt5", "gemma", "qwen_2.5_vl", "qwen_3_4b", "ae.")
+    main = sorted(models, key=lambda m: (any(k in m.lower() for k in small), m))[0]
+    return os.path.splitext(main.rsplit("/", 1)[-1])[0]
+
+
+def _prepare(models):
+    """True when this job's models were not already on the GPU (it loads them, from RAM or from disk)."""
+    global _RESIDENT
+    loads = _RESIDENT is None or models != _RESIDENT
+    _RESIDENT = models
+    return loads
+
+
+def jobs_since(t0):
+    """The ComfyUI jobs this process ran since `t0` (time.time()), for `build --profile`."""
+    return [j for j in JOBS if j["at"] >= t0 - 1]
+
+
+def _timings(status, submitted):
+    """(seconds waiting in ComfyUI's queue, seconds running) from a finished prompt's status messages."""
+    stamps = {m[0]: m[1].get("timestamp") for m in status.get("messages", [])
+              if isinstance(m, (list, tuple)) and len(m) == 2 and isinstance(m[1], dict)}
+    start, end = stamps.get("execution_start"), stamps.get("execution_success")
+    if start is None or end is None:
+        return None, None
+    return round(max(0.0, start / 1000 - submitted), 2), round((end - start) / 1000, 2)
 
 
 def upload(path):
@@ -534,6 +590,9 @@ def run(graph, poll=5, timeout=45 * 60):
 def run_outputs(graph, poll=5, timeout=45 * 60):
     """`run`, returning every output node's record ({node id: {"images": [...], "text": [...]}}); for graphs whose
     answer is not an image (a text node, a mask batch saved as images under another node id)."""
+    models = models_of(graph)
+    loads = _prepare(models)
+    submitted = time.time()
     body = json.dumps({"prompt": graph, "client_id": uuid.uuid4().hex}).encode()
     try:
         res = json.loads(_req("/prompt", body, {"Content-Type": "application/json"}))
@@ -541,7 +600,7 @@ def run_outputs(graph, poll=5, timeout=45 * 60):
         raise SystemExit(f"ComfyUI rejected the graph: {e.read().decode(errors='replace')}")
     pid = res["prompt_id"]
     start = time.time()
-    run_start, told = None, 0.0
+    run_start, told = None, start          # the "still waiting" notice comes after 5 min, not at once
     while run_start is None or time.time() - run_start < timeout:
         hist = json.loads(_req(f"/history/{pid}"))
         if pid in hist:
@@ -551,6 +610,9 @@ def run_outputs(graph, poll=5, timeout=45 * 60):
                 raise SystemExit(f"ComfyUI error: {json.dumps(msgs, indent=1)[:3000]}")
             if status.get("completed"):
                 print(f"  done in {int(time.time() - start)}s", flush=True)
+                queued, ran = _timings(status, submitted)
+                JOBS.append({"at": round(submitted, 1), "model": model_label(models), "loads": loads,
+                             "seconds": round(time.time() - submitted, 2), "queued": queued, "ran": ran})
                 return hist[pid]["outputs"]
         if run_start is None:
             state, ahead = _queue_state(pid)

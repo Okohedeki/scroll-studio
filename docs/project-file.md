@@ -62,3 +62,9 @@ A provider's image is cached apart from the local model's, so switching back nev
 
 `studio build my-site --profile` times every stage and backend, prints the slowest and writes
 `.build/profile.json`. Measure before speeding anything up.
+
+Local ComfyUI jobs are listed per model: how many ran, how many had to load the model onto the GPU, and the seconds
+spent waiting in ComfyUI's queue and running. Between jobs the engine releases ComfyUI's VRAM (other GPU work, such
+as a Blender render, may need it) but keeps the loaded weights in system RAM, so going back to a model takes seconds
+rather than a read from disk. Product stills paint every scene before any blending pass, so the image and edit models
+each load once per run.

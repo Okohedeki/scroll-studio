@@ -113,6 +113,14 @@ def make(project: Project, more: Optional[str] = None, different: bool = False, 
     work = folder(project) / "candidates"
     todo = [(shot, d, s) for shot, d, s in jobs if candidate_id(shot, d, s) not in by_id]
     log(f"stills: {len(todo)} candidates to make ({len(existing)} directions, shots: {', '.join(st.shots)})")
+    scenes = [(shot, d, s) for shot, d, s in todo if shot != "packshot"]
+    if scenes and st.harmonise:
+        # Every scene first, then every blending pass: the image and edit models each load once, instead of swapping
+        # on the GPU for every candidate (issue #4). backdrop() caches each scene, so make() below reuses it.
+        log(f"  scenes first ({len(scenes)}), then blending, so each model loads once")
+        (work / "scenes").mkdir(parents=True, exist_ok=True)
+        for shot, d, s in scenes:
+            compose.backdrop(shot, d, tuple(st.size), s, describe, work, policy, project.build, log)
     for i, (shot, d, s) in enumerate(todo, 1):
         cid = candidate_id(shot, d, s)
         log(f"  [{i}/{len(todo)}] {cid}: {d.name}")
