@@ -25,7 +25,7 @@ needs no change to how things work, only names in [MAINTAINERS.md](MAINTAINERS.m
   the issue `status: design-approved`.
 - **Disagreements** are settled by the area maintainer, and, if still unresolved, by the maintainer, who explains the
   decision on the issue. "No" always comes with a reason.
-- **The ground rules** in [CONTRIBUTING.md](CONTRIBUTING.md#ground-rules) (engine features, local models only, the spec
+- **The ground rules** in [CONTRIBUTING.md](CONTRIBUTING.md#ground-rules) (engine features, local-first with hosted models optional, the spec
   as the source of truth, old sites keep building, nothing from one machine, accessible by default) are what make
   Scroll Studio what it is. Changing one needs an RFC and the maintainer's approval.
 - **The roadmap** lives in the [milestones](https://github.com/Okohedeki/scroll-studio/milestones) and

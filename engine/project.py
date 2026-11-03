@@ -1,4 +1,4 @@
-"""A project is a folder: site.yaml + inputs/ + .build/ (cache) + dist/ (the finished static site).
+"""A project is a folder: project.yaml (or the older site.yaml) + inputs/ + .build/ (cache) + dist/ (the finished site).
 
 Builders run as named stages. A stage is skipped when its key (inputs + params) is unchanged and its
 outputs exist, so editing one section's copy never re-renders another section's film.
@@ -19,6 +19,9 @@ from typing import Any, Callable, Optional
 import yaml
 
 from .config import settings
+from .project_spec import (PROJECT_FILE, SITE_FILE, ProjectFileError, ProjectSpec, is_site_shaped, project_dict,
+                           site_dict)
+from .project_spec import validate as validate_project
 from .spec import Site
 
 
@@ -71,10 +74,14 @@ def _hash(obj: Any) -> str:
     return hashlib.sha1(json.dumps(obj, sort_keys=True, default=str).encode()).hexdigest()[:16]
 
 
+def has_spec(folder: str | Path) -> bool:
+    """A project folder: it holds a project.yaml or a site.yaml."""
+    return (Path(folder) / PROJECT_FILE).exists() or (Path(folder) / SITE_FILE).exists()
+
+
 class Project:
     def __init__(self, root: str | Path):
         self.root = Path(root).resolve()
-        self.spec_path = self.root / "site.yaml"
         self.inputs = self.root / "inputs"
         self.build = self.root / ".build"
         self.dist = self.root / "dist"
@@ -83,27 +90,93 @@ class Project:
     def name(self) -> str:
         return self.root.name
 
+    @property
+    def spec_path(self) -> Path:
+        """project.yaml when there is one, else site.yaml (engine/project_spec.py)."""
+        p = self.root / PROJECT_FILE
+        return p if p.exists() else self.root / SITE_FILE
+
+    @property
+    def is_project_file(self) -> bool:
+        return self.spec_path.name == PROJECT_FILE
+
     def exists(self) -> bool:
         return self.spec_path.exists()
 
-    def raw(self) -> dict:
+    def _file(self) -> dict:
         with open(self.spec_path, encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
 
+    def raw(self) -> dict:
+        """The site the project builds, as a site.yaml document (a project file's shared fields folded in)."""
+        data = self._file()
+        if not self.is_project_file:
+            return data
+        try:
+            return site_dict(data)
+        except ProjectFileError as e:
+            raise BuildError(str(e)) from None
+
     def load(self) -> Site:
+        if self.is_project_file:
+            ProjectSpec.model_validate(self._file())     # what only a project has (its brief) is checked too
         site = Site.model_validate(self.raw())
         if isinstance(site.theme.from_, str):      # a brand source: its tokens, read once and kept in .build/brand/
             from .brand import brand_from
             site.theme._brand = brand_from(self, site.theme.from_)
         return site
 
+    def load_project(self) -> ProjectSpec:
+        """The whole project: a site.yaml is read as a project whose one output is that site."""
+        return validate_project(self._file())
+
     def save(self, data: dict | Site) -> None:
         if isinstance(data, Site):
             data = data.model_dump(mode="json", exclude_defaults=True)
         Site.model_validate(data)      # never write an invalid spec
         self.root.mkdir(parents=True, exist_ok=True)
+        if self.is_project_file:
+            data = project_dict(data, keep=self._file())
         with open(self.spec_path, "w", encoding="utf-8") as f:
             yaml.safe_dump(data, f, sort_keys=False, allow_unicode=True, width=110)
+
+    def site_text(self) -> str:
+        """The site as site.yaml text, for the tools that edit it as text. A site.yaml is returned as written; a
+        project file's site is laid out afresh (its comments are not kept)."""
+        if not self.is_project_file:
+            return self.spec_path.read_text(encoding="utf-8")
+        return yaml.safe_dump(self.raw(), sort_keys=False, allow_unicode=True, width=110)
+
+    def put_text(self, text: str) -> Site:
+        """Validate and write a whole spec given as text: a project file, or a site.yaml document. A site.yaml folder
+        that receives a project file becomes a project (its site.yaml is kept as site.yaml.bak). Returns the site;
+        raises yaml.YAMLError, pydantic's ValidationError or BuildError."""
+        data = yaml.safe_load(text) or {}
+        if is_site_shaped(data):
+            site = Site.model_validate(data)
+            self.write_site_text(text)
+            return site
+        try:
+            validate_project(data)
+            site = Site.model_validate(site_dict(data))
+        except ProjectFileError as e:
+            raise BuildError(str(e)) from None
+        old, new = within(self.root, SITE_FILE), within(self.root, PROJECT_FILE)
+        new.write_text(text, encoding="utf-8")
+        if old.exists():
+            os.replace(old, within(self.root, SITE_FILE + ".bak"))
+        return site
+
+    def write_site_text(self, text: str) -> None:
+        """Write site.yaml text back: as is to a site.yaml, or split into the project file (what only the project
+        has is kept). The caller has validated it."""
+        if not self.is_project_file:
+            self.spec_path.write_text(text, encoding="utf-8")
+            return
+        data = project_dict(yaml.safe_load(text) or {}, keep=self._file())
+        tmp, dst = within(self.root, PROJECT_FILE + ".tmp"), within(self.root, PROJECT_FILE)
+        tmp.write_text(yaml.safe_dump(data, sort_keys=False, allow_unicode=True, width=110), encoding="utf-8")
+        os.replace(tmp, dst)
 
     def path(self, rel: str) -> Path:
         """A path named in the spec, resolved (links followed) and required to stay inside the project folder. An
@@ -191,7 +264,8 @@ class BuildContext:
         rewritten with the new key), so changing how a key is computed never re-renders finished work.
         locked: keep existing outputs even when the key changed (default: the context's `locked`, set from the
         section's or take's `locked: true`). With options["plan"] (engine/plan.py) nothing runs: a stage that would
-        run is recorded instead."""
+        run is recorded instead. With options["profile"] (a list, engine/profile.py) each stage appends what it did
+        and how long it took."""
         stamp = self.work / "stamps" / f"{name}.json"
         digest = _hash(key)
         plan = self.options.get("plan")
@@ -199,6 +273,9 @@ class BuildContext:
         prior = json.loads(stamp.read_text()) if stamp.exists() else {}
         if plan is not None:
             plan.record(self.section_id, name, state, prior.get("seconds"), outputs)
+        prof = self.options.get("profile")
+        if prof is not None and (plan is not None or state != "stale"):
+            prof.append({"section": self.section_id, "stage": name, "state": state, "seconds": 0.0})
         if state == "fresh":
             self.log(f"  {name}: up to date")
             return False
@@ -220,7 +297,10 @@ class BuildContext:
         if missing:
             raise BuildError(f"stage {name} did not produce {missing}")
         stamp.parent.mkdir(exist_ok=True)
-        stamp.write_text(json.dumps({"key": digest, "seconds": round(time.time() - t0, 1)}))
+        seconds = round(time.time() - t0, 1)
+        stamp.write_text(json.dumps({"key": digest, "seconds": seconds}))
+        if prof is not None:
+            prof.append({"section": self.section_id, "stage": name, "state": "ran", "seconds": seconds})
         self.log(f"  {name}: done in {time.time() - t0:.1f}s")
         return True
 

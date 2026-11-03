@@ -98,6 +98,7 @@ nav:
       - Quick start: quickstart.md
   - Guides:
       - Make a site: guide.md
+      - The project file: project-file.md
       - Examples: examples.md
   - Scenes:
       - Scenes: scenes.md

@@ -17,7 +17,6 @@ from __future__ import annotations
 import re
 from typing import Optional
 
-import yaml
 
 from .spec import Imagery
 
@@ -25,7 +24,7 @@ _CACHE: dict[str, tuple] = {}
 
 
 def of(project) -> Optional[Imagery]:
-    """The site's `imagery:` (read from site.yaml, re-read when the file changes), or None."""
+    """The site's `imagery:` (read from the spec file, re-read when the file changes), or None."""
     path = project.spec_path
     try:
         st = path.stat()
@@ -37,8 +36,7 @@ def of(project) -> Optional[Imagery]:
         return hit[1]
     im = None
     try:
-        with open(path, encoding="utf-8") as f:
-            raw = (yaml.safe_load(f) or {}).get("imagery")
+        raw = project.raw().get("imagery")
         if raw:
             im = Imagery.model_validate(raw)
     except Exception:       # an invalid spec is reported by the build itself

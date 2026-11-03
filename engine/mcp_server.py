@@ -18,7 +18,7 @@ from mcp.server.mcpserver import MCPServer
 from pydantic import ValidationError
 
 from .config import ROOT, settings
-from .project import BuildError, Project, child, safe_name
+from .project import BuildError, Project, child, has_spec, safe_name
 from .server.jobs import JobQueue, logger
 from .spec import SCENE_TYPES, Site, deprecations
 
@@ -82,8 +82,11 @@ def list_projects() -> list[dict]:
     out = []
     for base, kind in ((PROJECTS, "project"), (EXAMPLES, "example")):
         for d in sorted(base.iterdir()) if base.exists() else []:
-            if (d / "site.yaml").exists():
-                raw = yaml.safe_load((d / "site.yaml").read_text(encoding="utf-8")) or {}
+            if has_spec(d):
+                try:
+                    raw = Project(d).raw()
+                except Exception:      # an invalid spec still lists; building it reports the problem
+                    raw = {}
                 out.append({"name": d.name, "kind": kind, "title": raw.get("name"), "path": str(d),
                             "scenes": [s.get("type") for s in raw.get("sections", []) if s.get("type") in SCENE_TYPES],
                             "built": (d / "dist" / "index.html").exists()})
@@ -143,22 +146,24 @@ def spec_schema(part: Optional[str] = None) -> dict:
 
 @mcp.tool()
 def get_spec(project: str) -> str:
-    """Read a project's site.yaml."""
+    """Read a project's spec file as written: its project.yaml, or its site.yaml."""
     return _find(project).spec_path.read_text(encoding="utf-8")
 
 
 @mcp.tool()
 def set_spec(project: str, yaml_text: str) -> dict:
-    """Validate and write a project's site.yaml (the whole file). Returns validation errors instead of writing if invalid.
-    A spec that uses deprecated fields is written, with `deprecations` naming each one and what replaces it."""
+    """Validate and write a project's spec (the whole file): a project.yaml, or a site.yaml document. Returns validation
+    errors instead of writing if invalid. A spec that uses deprecated fields is written, with `deprecations` naming each
+    one and what replaces it."""
     p = _find(project)
     try:
-        site = Site.model_validate(yaml.safe_load(yaml_text))
+        site = p.put_text(yaml_text)
     except ValidationError as e:
         return {"ok": False, "errors": [f"{'.'.join(map(str, er['loc']))}: {er['msg']}" for er in e.errors()]}
     except yaml.YAMLError as e:
         return {"ok": False, "errors": [f"YAML: {e}"]}
-    p.spec_path.write_text(yaml_text, encoding="utf-8")
+    except BuildError as e:
+        return {"ok": False, "errors": [str(e)]}
     return {"ok": True, "deprecations": [d.as_dict() for d in deprecations(site)]}
 
 

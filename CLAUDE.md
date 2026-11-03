@@ -43,7 +43,9 @@ notice comment.
 - This repo is public: never commit machine-specific paths, folder layouts, usernames or machine sizing (use
   placeholders like `/path/to/models`; configure machines in studio.toml or env vars). `tests/test_no_local_paths.py` enforces it.
 - Declare every dependency up front (pyproject.toml extras, runtime/package.json, engine/models.yaml) and in docs/INSTALL.md.
-- Local models only; no API keys. Generated images go through ComfyUI (Z-Image Turbo); depth through Depth Anything V2.
+- Local-first: every build works with local models and no API keys. Provider APIs are optional backends of the model
+  router (`engine/router`), used only when their key is set. Generated images go through the router (ComfyUI's Z-Image
+  Turbo by default); depth through Depth Anything V2.
 - After changing `runtime/src`, run `npm run build:runtime` and commit the bundle in engine/compile/static (CI rebuilds
   it and fails on any difference).
 - Run `ruff check .` before committing. Coverage floors in `tests/coverage_floors.json` never go down; raise one when a

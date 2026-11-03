@@ -558,7 +558,7 @@
   }
  },
  "get_spec": {
-  "description": "Read a project's site.yaml.",
+  "description": "Read a project's spec file as written: its project.yaml, or its site.yaml.",
   "input": {
    "properties": {
     "project": {
@@ -1160,7 +1160,7 @@
   }
  },
  "set_spec": {
-  "description": "Validate and write a project's site.yaml (the whole file). Returns validation errors instead of writing if invalid.",
+  "description": "Validate and write a project's spec (the whole file): a project.yaml, or a site.yaml document. Returns validation",
   "input": {
    "properties": {
     "project": {
