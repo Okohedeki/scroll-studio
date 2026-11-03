@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../src/lib/util", async (orig) => ({ ...(await orig<typeof import("../src/lib/util")>()), fetchBlobURL: vi.fn() }));
 import { fetchBlobURL } from "../src/lib/util";
-import { loadVideo, makeVideo, PairedSeeker } from "../src/lib/film";
+import { beatFocusAt, beatIndexAt, focusCss, loadVideo, makeVideo, PairedSeeker, type FilmBeat } from "../src/lib/film";
 
 /** A video that records the times it was told to seek to, and lands only when the test says so. */
 class FakeVideo extends EventTarget {
@@ -118,5 +118,44 @@ describe("loadVideo", () => {
     const v = video();
     Object.defineProperty(v, "readyState", { value: 4 });
     await loadVideo(v, "/a.mp4", () => {});
+  });
+});
+
+describe("beats of a story film", () => {
+  const b = (id: string, p0: number, p1: number, focus: [number, number] | null): FilmBeat => ({ id, p0, p1, focus, still: id + ".jpg" });
+
+  it("no beat with a focus: no crop point at all, so the film stays as it was", () => {
+    expect(beatFocusAt([b("a", 0, 0.5, null), b("b", 0.5, 1, null)], 0.3)).toBeNull();
+    expect(beatFocusAt([], 0.3)).toBeNull();
+  });
+
+  it("a beat without its own focus looks at the centre", () => {
+    expect(beatFocusAt([b("a", 0, 0.5, [0.9, 0.1]), b("b", 0.5, 1, null)], 0.7)).toEqual([0.5, 0.5]);
+  });
+
+  it("a hard cut jumps from one point to the next", () => {
+    const beats = [b("a", 0, 0.5, [0.9, 0.5]), b("b", 0.5, 1, [0.1, 0.5])];
+    expect(beatFocusAt(beats, 0.4999)).toEqual([0.9, 0.5]);
+    expect(beatFocusAt(beats, 0.5)).toEqual([0.1, 0.5]);
+  });
+
+  it("through a dissolve the point eases from one beat's to the next", () => {
+    const beats = [b("a", 0, 0.6, [1, 0]), b("b", 0.4, 1, [0, 1])];
+    expect(beatFocusAt(beats, 0.4)).toEqual([1, 0]);
+    const mid = beatFocusAt(beats, 0.5)!;
+    expect(mid[0]).toBeCloseTo(0.5, 9);
+    expect(mid[1]).toBeCloseTo(0.5, 9);
+    expect(beatFocusAt(beats, 0.6)).toEqual([0, 1]);
+    const early = beatFocusAt(beats, 0.42)![0];
+    expect(early).toBeGreaterThan(0.95);               // eased: it leaves slowly
+  });
+
+  it("the still on screen is the last beat that has begun", () => {
+    const beats = [b("a", 0, 0.4, null), b("b", 0.35, 0.7, null), b("c", 0.7, 1, null)];
+    expect([0, 0.34, 0.35, 0.69, 0.7, 1].map((p) => beatIndexAt(beats, p))).toEqual([0, 0, 1, 1, 2, 2]);
+  });
+
+  it("a point as CSS object-position", () => {
+    expect(focusCss([0.25, 0.755])).toBe("25.0% 75.5%");
   });
 });

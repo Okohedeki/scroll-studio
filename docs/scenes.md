@@ -224,6 +224,21 @@ Each join is a crossfade of the film's `beat_fade`; a beat's own `fade:` sets th
 value a slower dissolve. Every timing that reads the film (steps pinned to a beat, `reveal` regions, `studio inspect`,
 the trailer) follows it; the storyboard's stand-in film still dissolves every shot with `beat_fade`.
 
+**Phones and reduced motion.** A portrait phone shows a narrow crop of the wide film; a beat's `focus: [x, y]` (0-1 of
+the frame) is the point that crop keeps in view, so a shot whose subject sits on one side (the copy's calm side on the
+other) is still framed on a phone. The crop travels from one beat's point to the next through their dissolve and jumps at a
+hard cut; beats without a `focus` look at the centre, and a film where none sets one is cropped as it always was. With
+reduced motion the film is not downloaded: each beat shows as one still (a frame of the finished film from the middle of
+the beat, clear of the dissolves either side), switched as the scroll reaches the beat, with its steps over it. The
+crop and the stills are drawn by the plain film player; a film with `reveal` or `pointer` keeps its own behaviour.
+
+```yaml
+      - id: press
+        prompt: A hydraulic press on the right half of the frame, the left half a calm grey wall
+        motion: the press comes down slowly, the camera pushes in
+        focus: [0.72, 0.5]          # a phone keeps the press in view
+```
+
 `beat_res` sets the render size (default 1920x1088; about seven minutes a five-second beat on an RTX 4090). LTX animates
 slow, camera-led motion best; for an action shot that holds its first frame, lower `strength` (0.7-0.85), re-roll the
 motion alone with `motion_seed`, and cut the hold with `trim` (seconds, re-uses the render).

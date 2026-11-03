@@ -1,0 +1,1 @@
+`shade: strong` on an overlay scene now draws a stronger shade behind the words (it used to look the same as `auto`); on a phone it holds the top half, where the words run full width, nearly at the page colour.
