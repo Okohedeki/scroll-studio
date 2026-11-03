@@ -321,4 +321,47 @@ describe("film (video player)", () => {
     expect(video).toBeTruthy();
     expect(warn).toHaveBeenCalled();
   });
+
+  // a story in shots: each beat's span (0-1 of the film), the point a phone keeps in view, a still for reduced motion
+  const beats = [
+    { id: "a", p0: 0, p1: 0.55, focus: [0.8, 0.4], still: "a.jpg" },
+    { id: "b", p0: 0.45, p1: 1, focus: [0.2, 0.6], still: "b.jpg" },
+  ];
+
+  it("on a phone the crop keeps each beat's focus in view and travels between them through the dissolve", async () => {
+    const { player, video } = await mount({ video: "/f.mp4", beats }, { mobile: true });
+    player.update(frameState(0.2));
+    expect(video.style.objectPosition).toBe("80.0% 40.0%");
+    player.update(frameState(0.8));
+    expect(video.style.objectPosition).toBe("20.0% 60.0%");
+    player.update(frameState(0.5));                    // half way through the dissolve: half way between the two
+    expect(video.style.objectPosition).toBe("50.0% 50.0%");
+  });
+
+  it("on a wide screen, or with no beat setting a focus, the film stays centred", async () => {
+    const wide = await mount({ video: "/f.mp4", beats });
+    wide.player.update(frameState(0.2));
+    expect(wide.video.style.objectPosition).toBe("");
+    const plain = beats.map((b) => ({ ...b, focus: null }));
+    const phone = await mount({ video: "/f.mp4", beats: plain }, { mobile: true });
+    phone.player.update(frameState(0.2));
+    expect(phone.video.style.objectPosition).toBe("");
+  });
+
+  it("with reduced motion a story film is its beats as stills: no film is fetched, one still at a time", async () => {
+    const fetchBlobURL = vi.fn();
+    mockUtil({ fetchBlobURL });
+    const { default: factory } = await atPage(() => import("../src/players/video"), { reduced: true, mobile: true });
+    const ctx = playerCtx();
+    const player = await factory({ video: "/f.mp4", beats }, ctx);
+    expect(fetchBlobURL).not.toHaveBeenCalled();
+    expect(ctx.visual.querySelector("video")).toBeNull();
+    const imgs = [...ctx.visual.querySelectorAll("img")];
+    expect(imgs.map((i) => i.getAttribute("src"))).toEqual(["a.jpg", "b.jpg"]);
+    expect(imgs[0].style.objectPosition).toBe("80.0% 40.0%");
+    player.update(frameState(0.3));
+    expect(imgs.map((i) => i.style.display)).toEqual(["", "none"]);
+    player.update(frameState(0.5));                    // the next beat has begun: its still replaces the last, no blend
+    expect(imgs.map((i) => i.style.display)).toEqual(["none", ""]);
+  });
 });
