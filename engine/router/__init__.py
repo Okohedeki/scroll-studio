@@ -10,8 +10,8 @@ and seed, so a candidate can be made again (docs/design/generation-engine.md).
 """
 from __future__ import annotations
 
-from .core import (Backend, EditJob, ImageJob, Job, NoBackend, Result, TextJob, available, backends, choose, record,
+from .core import (Backend, EditJob, ImageJob, Job, NoBackend, Result, SpeechJob, TextJob, available, backends, choose, record,
                    register, route)
 
-__all__ = ["Backend", "EditJob", "ImageJob", "Job", "NoBackend", "Result", "TextJob", "available", "backends", "choose",
+__all__ = ["Backend", "EditJob", "ImageJob", "Job", "NoBackend", "Result", "SpeechJob", "TextJob", "available", "backends", "choose",
            "record", "register", "route"]

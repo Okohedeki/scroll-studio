@@ -7,7 +7,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Literal, Optional, Protocol, Union
 
-Kind = Literal["image", "edit", "text"]
+Kind = Literal["image", "edit", "text", "speech"]
 
 
 @dataclass(frozen=True)
@@ -36,7 +36,14 @@ class TextJob:
     kind: Kind = "text"
 
 
-Job = Union[ImageJob, EditJob, TextJob]
+@dataclass(frozen=True)
+class SpeechJob:
+    text: str
+    voice: str = ""                  # the backend's voice id; empty: its default
+    kind: Kind = "speech"
+
+
+Job = Union[ImageJob, EditJob, TextJob, SpeechJob]
 
 
 @dataclass

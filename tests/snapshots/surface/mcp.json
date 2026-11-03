@@ -887,6 +887,22 @@
    "type": "object"
   }
  },
+ "make_video": {
+  "description": "A short product video from the picked stills (background job; needs outputs.video in project.yaml and",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "make_videoArguments",
+   "type": "object"
+  }
+ },
  "pick_shot_variant": {
   "description": "Make a kept variant of a shot's image the one in use: its seed (and text) are written into site.yaml, and the",
   "input": {

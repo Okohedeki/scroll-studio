@@ -70,4 +70,6 @@ def settings() -> dict:
         "text_model": get("STUDIO_TEXT_MODEL", "text_model", None),
         "anthropic_model": get("STUDIO_ANTHROPIC_MODEL", "anthropic_model", None),
         "openai_image_model": get("STUDIO_OPENAI_IMAGE_MODEL", "openai_image_model", None),
+        "elevenlabs_voice": get("STUDIO_ELEVENLABS_VOICE", "elevenlabs_voice", None),
+        "elevenlabs_model": get("STUDIO_ELEVENLABS_MODEL", "elevenlabs_model", None),
     }

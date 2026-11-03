@@ -83,6 +83,21 @@ class Listing(Model):
     max_title: int = Field(80, ge=20, le=200, description="Longest title, characters")
 
 
+class Video(Model):
+    """A short product video from the picked stills (engine/video.py, `studio video`): a slow push-in on each, cross
+    dissolves, an end card with the ads' headline and call to action, and a voiceover where a speech backend can run."""
+    seconds: float = Field(15, ge=4, le=60, description="Length of the video")
+    aspect: AdSize = Field("9x16", description="Aspect ratio")
+    width: int = Field(1080, ge=320, le=2160, description="Width in pixels; the height follows the ratio")
+    shots: list[StillShot] = Field(default_factory=lambda: ["lifestyle", "detail", "packshot"],
+                                   description="Which shots' stills to show, in order (each shot's pick and shortlist)")
+    per_shot: int = Field(2, ge=1, le=6, description="Most stills taken from each shot")
+    voiceover: str = Field("", description="What the voice says. 'listing': the listing's description. Empty: no voice")
+    voice: str = Field("", description="The speech backend's voice id; empty: its default")
+    music: Optional[str] = Field(None, description="A music file inside the project, laid under the voice "
+                                                   "(you need the right to use it)")
+
+
 class Outputs(Model):
     site: Optional[SiteOutput] = Field(None, description="A scroll-driven site, written as a site.yaml would be "
                                                          "(without the fields the project sets once)")
@@ -91,6 +106,8 @@ class Outputs(Model):
     ads: Optional[Ads] = Field(None, description="Placement-sized ads made from the picked stills (`studio ads`)")
     listing: Optional[Listing] = Field(None, description="Store listing copy: title, bullets, description "
                                                          "(`studio listing`)")
+    video: Optional[Video] = Field(None, description="A short product video from the picked stills, with a voiceover "
+                                                     "where a speech backend can run (`studio video`)")
 
 
 class ProjectSpec(Model):

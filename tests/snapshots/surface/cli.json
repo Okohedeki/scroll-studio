@@ -1868,6 +1868,21 @@
     }
    }
   },
+  "video": {
+   "help": "A short product video from the picked stills (outputs.video in project.yaml) -> <project>/video/.",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    }
+   }
+  },
   "world": {
    "help": "Check the in-world type of a built film (steps with `place: {kind: behind | surface | sky}`): draws each title's box",
    "params": {

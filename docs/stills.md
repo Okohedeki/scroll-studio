@@ -85,3 +85,22 @@ outputs:
 ```
 
 The MCP tool is `write_listing`.
+
+## Video
+
+`studio video my-shop` makes a short product video from the stills: each shot's pick and shortlist, a slow push-in
+on each, cross dissolves, and an end card with the ads' headline and call to action. A speech backend reads the
+voiceover (ElevenLabs, with `ELEVENLABS_API_KEY` set); with none, the video is silent. A music file can sit under it.
+
+```yaml
+# docs: no-validate (a project file)
+outputs:
+  video:
+    seconds: 15
+    aspect: 9x16
+    shots: [lifestyle, detail, packshot]
+    voiceover: listing        # the listing's description; or the words themselves; empty for none
+    music: inputs/bed.mp3     # optional; you need the right to use it
+```
+
+Written to `video/video-<aspect>.mp4` with `video/video.json`. The MCP tool is `make_video`.
