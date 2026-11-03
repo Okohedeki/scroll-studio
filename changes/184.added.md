@@ -1,0 +1,1 @@
+A story film's beat can set `focus: [x, y]`, the point a portrait phone keeps in view when the wide film is cropped; the crop travels between beats through their dissolves. With reduced motion a story film is no longer scrubbed: each beat shows as one still taken from the finished film, and the film is not downloaded.
