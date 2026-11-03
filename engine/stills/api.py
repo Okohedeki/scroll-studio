@@ -18,6 +18,7 @@ from . import run
 
 
 NO_STILLS = "this project has no outputs.stills in a project.yaml (docs/stills.md)"
+MIGRATE_FIRST = "this project is a site.yaml: run `studio migrate <project> --write`, then add outputs.stills (docs/stills.md)"
 
 
 class StillsReq(BaseModel):
@@ -32,8 +33,10 @@ def view(project: Project, state: Optional[dict]) -> dict:
         _, st = run.spec_of(project)
         enabled, why = True, ""
         shots = list(st.shots)
-    except BuildError as e:
-        enabled, why, shots = False, str(e), []
+    except BuildError:
+        # fixed messages: exception text never reaches the client
+        enabled, shots = False, []
+        why = NO_STILLS if project.is_project_file else MIGRATE_FIRST
     state = state or {"directions": [], "candidates": [], "shortlist": {}, "picked": {}}
     base = f"/api/projects/{project.name}/stills/files/"
     cands = [{**c, "url": base + c["image"]} for c in state["candidates"]]
