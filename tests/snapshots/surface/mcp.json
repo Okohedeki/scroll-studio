@@ -826,6 +826,51 @@
    "type": "object"
   }
  },
+ "make_stills": {
+  "description": "Product stills from one photo (background job; needs outputs.stills in project.yaml): art directions, candidates",
+  "input": {
+   "properties": {
+    "different": {
+     "default": false,
+     "title": "Different",
+     "type": "boolean"
+    },
+    "more": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "More"
+    },
+    "pick": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Pick"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "make_stillsArguments",
+   "type": "object"
+  }
+ },
  "pick_shot_variant": {
   "description": "Make a kept variant of a shot's image the one in use: its seed (and text) are written into site.yaml, and the",
   "input": {

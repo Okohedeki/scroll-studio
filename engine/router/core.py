@@ -82,8 +82,22 @@ def backends() -> list[Backend]:
     return list(_REGISTRY.values())
 
 
+_SEEN: dict[int, tuple[float, tuple[bool, str]]] = {}
+AVAILABLE_TTL = 15.0      # seconds a backend's answer is trusted: a stopped ComfyUI costs seconds to ask, every job
+
+
+def check(b: Backend) -> tuple[bool, str]:
+    """b.available(), remembered for AVAILABLE_TTL seconds."""
+    hit = _SEEN.get(id(b))
+    if hit and time.time() - hit[0] < AVAILABLE_TTL:
+        return hit[1]
+    res = b.available()
+    _SEEN[id(b)] = (time.time(), res)
+    return res
+
+
 def available(kind: Kind) -> list[Backend]:
-    return [b for b in backends() if kind in b.kinds and b.available()[0]]
+    return [b for b in backends() if kind in b.kinds and check(b)[0]]
 
 
 def _policy(policy: Any) -> dict:
@@ -105,7 +119,7 @@ def choose(kind: Kind, policy: Any = None) -> Backend:
         if b is None:
             raise NoBackend(f"models.use.{kind} names {name!r}, which is not a {kind} backend: "
                             f"use one of {', '.join(c.name for c in candidates) or 'none'}")
-        ok, why = b.available()
+        ok, why = check(b)
         if ok:
             return b
         if not p.get("fallback", True):
@@ -116,7 +130,7 @@ def choose(kind: Kind, policy: Any = None) -> Backend:
         ordered = [b for b in ordered if b.local == prefer_local]
     reasons = []
     for b in ordered:
-        ok, why = b.available()
+        ok, why = check(b)
         if ok:
             return b
         reasons.append(f"{b.name}: {why}")

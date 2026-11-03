@@ -43,6 +43,7 @@ def fakes(monkeypatch):
     reg: dict = {}
     monkeypatch.setattr(core, "_REGISTRY", reg)
     monkeypatch.setattr(core, "backends", lambda: list(reg.values()))
+    monkeypatch.setattr(core, "AVAILABLE_TTL", 0.0)
     local, provider = Fake("local:fake", True), Fake("cloud", False)
     for b in (local, provider):
         core.register(b)
@@ -98,6 +99,17 @@ def test_route_passes_the_pinned_model_and_records(fakes, tmp_path):
     assert r.backend == "cloud" and r.model == "big" and provider.calls[0][1] == "big"
     entry = json.loads((tmp_path / "_router" / "records.jsonl").read_text().splitlines()[-1])
     assert entry["backend"] == "cloud" and entry["job"]["seed"] == 3 and entry["model"] == "big"
+
+
+def test_availability_is_remembered_briefly(fakes, monkeypatch):
+    local, provider = fakes
+    monkeypatch.setattr(core, "AVAILABLE_TTL", 60.0)
+    core._SEEN.clear()
+    assert router.choose("image") is local
+    local.ok = False
+    assert router.choose("image") is local          # still trusted within the TTL
+    core._SEEN.clear()
+    assert router.choose("image") is provider
 
 
 def test_a_spec_models_block_works_as_a_policy(fakes):
