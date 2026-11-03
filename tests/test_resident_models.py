@@ -3,7 +3,6 @@ timings reach `build --profile`, and stills make every scene before any blending
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
 import pytest
 import yaml
