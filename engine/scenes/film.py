@@ -351,9 +351,42 @@ def encode(src: Path, ctx: BuildContext, gop: int) -> dict:
     return {"video": ctx.url(outs[0]), "videoMobile": ctx.url(outs[1]), "poster": ctx.url(outs[2]), "end": ctx.url(outs[3])}
 
 
-def beats_film(sec: FilmScene, ctx: BuildContext) -> Path:
+def beat_moments(spans: dict[str, tuple[float, float]]) -> dict[str, float]:
+    """The moment of each beat that stands for it when the film does not play (reduced motion), as 0-1 of the film: the
+    middle of the part of its span no neighbour dissolves over, so the still is never a double image."""
+    ids = list(spans)
+    out = {}
+    for i, b in enumerate(ids):
+        a, z = spans[b]
+        if i > 0:
+            a = max(a, spans[ids[i - 1]][1])
+        if i + 1 < len(ids):
+            z = min(z, spans[ids[i + 1]][0])
+        out[b] = (a + z) / 2 if z > a else sum(spans[b]) / 2
+    return out
+
+
+def beat_stills(sec: FilmScene, ctx: BuildContext, src: Path, spans: dict[str, tuple[float, float]]) -> list[dict]:
+    """For the page: each beat's span over the film (0-1), the point a portrait phone keeps in view (`focus`), and a still
+    of the beat (a frame of the finished film, at `beat_moments`) that reduced motion shows instead of the film."""
+    moments = beat_moments(spans)
+    dur = float(probe(src).get("duration") or 0)
+    outs = [ctx.web / f"beat-{i:02d}.jpg" for i in range(len(sec.beats))]
+
+    def run():
+        for b, out in zip(sec.beats, outs):
+            t = max(0.0, min(dur - 0.05, moments[b.id] * dur))
+            ffmpeg("-ss", f"{t:.3f}", "-i", src, "-vf", "crop='min(iw,ih*16/9)':'min(ih,iw*9/16)'", "-frames:v", "1",
+                   "-q:v", "3", "-update", "1", out, log=ctx.log)
+    ctx.stage("beat_stills", {"src": file_key(src), "at": [round(moments[b.id], 4) for b in sec.beats]}, outs, run)
+    return [{"id": b.id, "p0": round(spans[b.id][0], 5), "p1": round(spans[b.id][1], 5),
+             "focus": list(b.focus) if b.focus else None, "still": ctx.url(out)} for b, out in zip(sec.beats, outs)]
+
+
+def beats_film(sec: FilmScene, ctx: BuildContext) -> tuple[Path, dict[str, tuple[float, float]]]:
     """A story in shots: each beat's still (generated, or a file) animated by the video model (LTX-2.3 or Wan 2.2,
-    `video_model`), cached per beat, then joined with crossfades. Steps pinned with state: {beat: <id>} are timed to their beat."""
+    `video_model`), cached per beat, then joined with crossfades. Steps pinned with state: {beat: <id>} are timed to their beat.
+    Returns the joined film and each beat's span over it (`beat_spans`)."""
     import shutil
     from PIL import Image, ImageOps
     from ..animate import FPS, animate, video_model, wan_settings
@@ -499,7 +532,7 @@ def beats_film(sec: FilmScene, ctx: BuildContext) -> Path:
 
     set_lenient(False)
     pin_steps(sec, durs, fades)
-    return out
+    return out, beat_spans(sec, durs, fades)
 
 
 def restore_beat(ctx: BuildContext, b, clip: Path, bdir: Path, size: tuple[int, int]) -> Path:
@@ -635,7 +668,13 @@ def build(sec: FilmScene, ctx: BuildContext, theme: dict) -> dict:
                 "titles stay ordinary captions on this film")
     if in_world:           # type in the world: fail now, before a film renders, if a placement can't work
         typeworld.preflight(sec, ctx)
-    src = ctx.project.path(sec.video) if sec.video else beats_film(sec, ctx) if sec.beats else generate(sec, ctx)
+    spans = None
+    if sec.video:
+        src = ctx.project.path(sec.video)
+    elif sec.beats:
+        src, spans = beats_film(sec, ctx)
+    else:
+        src = generate(sec, ctx)
     if not src.exists():
         raise BuildError(f"film source not found: {src}")
     # ---- faces (engine/faces.py): repair the faces of the whole film before it is encoded
@@ -648,6 +687,8 @@ def build(sec: FilmScene, ctx: BuildContext, theme: dict) -> dict:
         from .. import finish
         src = finish.run(sec, ctx, src)
     cfg = encode(src, ctx, sec.gop)
+    if spans:          # a story in shots: where a phone looks in each beat, and one still per beat for reduced motion
+        cfg["beats"] = beat_stills(sec, ctx, src, spans)
     # ---- reveal (engine/reveal.py): tracked masks and the scroll-driven colour config, from the same film file
     if sec.reveal:
         from .. import reveal
