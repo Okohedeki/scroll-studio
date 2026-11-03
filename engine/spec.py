@@ -1797,6 +1797,10 @@ class Beat(Model):
                                   "crossfade: 0 is a hard cut (a change of angle, a jump to a new moment), more is a longer "
                                   "dissolve. Default: the film's `beat_fade`. Not used on the first beat, or on a camera "
                                   "beat that `continues` the one before (that join is always frame-exact)")
+    focus: Optional[tuple[float, float]] = Field(None, description="Where a narrow screen (a phone, in portrait) looks in "
+                                                 "this shot: the point of the frame, 0-1 across and down, kept in view when "
+                                                 "the wide film is cropped. The crop travels from one beat's point to the "
+                                                 "next through their join (a hard cut jumps). Default: the centre")
     video_model: Optional[VideoModel] = Field(None, description=VIDEO_MODEL_DOC + ". `strength` applies to ltx only")
     locked: bool = Field(False, description="Keep this beat's clip (and its storyboard still) as rendered, even when "
                                             "its prompt or motion changes; the rest of the film still builds around it")
@@ -1813,6 +1817,13 @@ class Beat(Model):
     @classmethod
     def _camera_named(cls, v):
         return _camera_in(v)
+
+    @field_validator("focus")
+    @classmethod
+    def _focus_in_frame(cls, v):
+        if v is not None and not all(0 <= c <= 1 for c in v):
+            raise ValueError("focus is a point of the frame: x and y between 0 and 1")
+        return v
 
     @model_validator(mode="after")
     def _generated_or_frozen(self):

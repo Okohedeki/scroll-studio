@@ -611,6 +611,29 @@
      "description": "The join into this beat from the one before, in seconds of crossfade: 0 is a hard cut (a change of angle, a jump to a new moment), more is a longer dissolve. Default: the film's `beat_fade`. Not used on the first beat, or on a camera beat that `continues` the one before (that join is always frame-exact)",
      "title": "Fade"
     },
+    "focus": {
+     "anyOf": [
+      {
+       "maxItems": 2,
+       "minItems": 2,
+       "prefixItems": [
+        {
+         "type": "number"
+        },
+        {
+         "type": "number"
+        }
+       ],
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Where a narrow screen (a phone, in portrait) looks in this shot: the point of the frame, 0-1 across and down, kept in view when the wide film is cropped. The crop travels from one beat's point to the next through their join (a hard cut jumps). Default: the centre",
+     "title": "Focus"
+    },
     "freeze": {
      "anyOf": [
       {
