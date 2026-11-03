@@ -50,3 +50,38 @@ other candidate below, best first. Click any candidate to look at it.
 
 Every candidate's record (direction, backend, model, prompt, seed and scores) is kept in `stills/stills.json`, so any
 one can be made again. The MCP tool `make_stills` does the same as the command.
+
+## Ads
+
+`studio ads my-shop` makes placement-sized ads from the stills: each shot's pick, or its best if none is picked. The
+product is kept whole in every size; where a size needs more backdrop than the still has, its edges are carried
+outward and softened. The headline and call to action sit on a band in the brand's accent colour.
+
+```yaml
+# docs: no-validate (a project file)
+outputs:
+  ads:
+    sizes: [1x1, 4x5, 9x16]          # also 16x9 and 1.91x1
+    headline: Made for slow mornings
+    cta: Shop the range
+    shots: [lifestyle, packshot]
+    width: 1080
+```
+
+Files land in `ads/`, listed in `ads/ads.json`. The MCP tool is `make_ads`.
+
+## Listing copy
+
+`studio listing my-shop` writes a title, bullet points and a description to `listing/listing.md` (and `.json`).
+A text backend writes it from the brief and `describe`, told never to invent specifications or claims. With no text
+backend, a draft is filled from what the project says, with places marked for the rest.
+
+```yaml
+# docs: no-validate (a project file)
+outputs:
+  listing:
+    bullets: 5
+    tone: warm, plain
+```
+
+The MCP tool is `write_listing`.

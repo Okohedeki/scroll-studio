@@ -826,6 +826,22 @@
    "type": "object"
   }
  },
+ "make_ads": {
+  "description": "Placement-sized ads from the picked product stills (needs outputs.ads in project.yaml and `make_stills` run",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "make_adsArguments",
+   "type": "object"
+  }
+ },
  "make_stills": {
   "description": "Product stills from one photo (background job; needs outputs.stills in project.yaml): art directions, candidates",
   "input": {
@@ -1474,6 +1490,22 @@
     "project"
    ],
    "title": "world_checkArguments",
+   "type": "object"
+  }
+ },
+ "write_listing": {
+  "description": "Store listing copy (needs outputs.listing in project.yaml): title, bullets and description, from a text",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "write_listingArguments",
    "type": "object"
   }
  }

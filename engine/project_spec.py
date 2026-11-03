@@ -63,11 +63,34 @@ class Stills(Model):
         return v
 
 
+AdSize = Literal["1x1", "4x5", "9x16", "16x9", "1.91x1"]
+
+
+class Ads(Model):
+    """Placement-sized ads from the picked product stills (engine/ads.py, `studio ads`)."""
+    sizes: list[AdSize] = Field(default_factory=lambda: ["1x1", "4x5", "9x16"], description="Aspect ratios to make")
+    headline: str = Field("", description="The line set on each ad; empty: none")
+    cta: str = Field("", description="The call to action set under it, e.g. 'Shop the range'")
+    shots: list[StillShot] = Field(default_factory=lambda: ["lifestyle", "packshot"],
+                                   description="Which shots' stills to use (each shot's pick, else its best)")
+    width: int = Field(1080, ge=320, le=4096, description="Width of every ad, pixels; the height follows the ratio")
+
+
+class Listing(Model):
+    """Store listing copy for the product (engine/listing.py, `studio listing`)."""
+    bullets: int = Field(5, ge=0, le=10, description="How many bullet points")
+    tone: str = Field("warm, plain", description="How it reads, in a few words")
+    max_title: int = Field(80, ge=20, le=200, description="Longest title, characters")
+
+
 class Outputs(Model):
     site: Optional[SiteOutput] = Field(None, description="A scroll-driven site, written as a site.yaml would be "
                                                          "(without the fields the project sets once)")
     stills: Optional[Stills] = Field(None, description="Product stills from one photo: pack shots, lifestyle scenes "
                                                        "and details, shortlisted (`studio stills`)")
+    ads: Optional[Ads] = Field(None, description="Placement-sized ads made from the picked stills (`studio ads`)")
+    listing: Optional[Listing] = Field(None, description="Store listing copy: title, bullets, description "
+                                                         "(`studio listing`)")
 
 
 class ProjectSpec(Model):
