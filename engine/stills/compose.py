@@ -8,6 +8,7 @@ works on a laptop. A detail is the product close and cropped over a softened ver
 from __future__ import annotations
 
 import hashlib
+import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Optional
@@ -94,11 +95,17 @@ def backdrop(shot: str, d: Direction, size: tuple[int, int], seed: int, describe
         return drawn_scene(size, d, seed), "local", "drawn", prompt
     digest = hashlib.sha1(f"{prompt}|{size}|{seed}".encode()).hexdigest()[:16]
     out = work / "scenes" / f"{digest}.png"
+    made_by = out.with_suffix(".json")          # who painted a cached scene, so a candidate's record still names it
     if not out.exists():
         r = route(ImageJob(prompt, size[0], size[1], seed), out, policy, build=build, log=log)
         backend, model = r.backend, r.model
+        made_by.write_text(json.dumps({"backend": backend, "model": model}), encoding="utf-8")
     else:
-        backend, model = "cache", "cache"
+        try:
+            rec = json.loads(made_by.read_text(encoding="utf-8"))
+            backend, model = rec["backend"], rec["model"]
+        except (OSError, ValueError, KeyError):
+            backend, model = "cache", "cache"
     return Image.open(out).convert("RGB").resize(size, Image.LANCZOS), backend, model, prompt
 
 
