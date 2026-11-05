@@ -4,184 +4,184 @@
 
 # What kind of work it is
 - name: "type: bug"
-  color: d73a4a
+  color: "d73a4a"
   description: Something the engine, runtime or docs do wrong
   aliases: [bug]
 - name: "type: feature"
-  color: a2eeef
+  color: "a2eeef"
   description: A new engine capability, scene, spec field or command
   aliases: [enhancement]
 - name: "type: style"
-  color: c5def5
+  color: "c5def5"
   description: A new style (an experience) or a change to one
   aliases: [style]
 - name: "type: docs"
-  color: 0075ca
+  color: "0075ca"
   description: Documentation only
   aliases: [documentation]
 - name: "type: test"
-  color: bfd4f2
+  color: "bfd4f2"
   description: Tests and test infrastructure
 - name: "type: security"
-  color: b60205
+  color: "b60205"
   description: Security hardening (report vulnerabilities privately, see SECURITY.md)
 - name: "type: perf"
-  color: fef2c0
+  color: "fef2c0"
   description: Speed, memory or page weight
 - name: "type: chore"
-  color: ededed
+  color: "ededed"
   description: Maintenance, tooling, CI, dependencies
 - name: "type: rfc"
-  color: 5319e7
+  color: "5319e7"
   description: A design proposal for a core change (docs/rfcs)
 - name: "type: question"
-  color: d876e3
+  color: "d876e3"
   description: A question (better asked in Discussions)
   aliases: [question]
 
 # Where in the engine (pull requests get these automatically from the files they change)
 - name: "area: runtime"
-  color: 1d76db
+  color: "1d76db"
   description: The browser runtime that ships in every site (runtime/, engine/compile/static/runtime/)
 - name: "area: spec"
-  color: 1d76db
+  color: "1d76db"
   description: The site.yaml contract (engine/spec.py) and the JSON Schema
 - name: "area: compiler"
-  color: 1d76db
+  color: "1d76db"
   description: Page compiler and templates (engine/compile/)
 - name: "area: scenes"
-  color: 1d76db
+  color: "1d76db"
   description: Scene builders and planners (engine/scenes/, engine/*.py)
 - name: "area: styles"
-  color: 1d76db
+  color: "1d76db"
   description: Styles (engine/styles/, runtime/src/styles/, docs/styles/)
 - name: "area: themes"
-  color: 1d76db
+  color: "1d76db"
   description: Theme presets and tokens (engine/themes.yaml, engine/compile/themes.py)
 - name: "area: models"
-  color: 1d76db
+  color: "1d76db"
   description: Model backends, ComfyUI graphs, Blender scripts, engine/models.yaml
 - name: "area: cli"
-  color: 1d76db
+  color: "1d76db"
   description: The studio command line (engine/cli.py)
 - name: "area: mcp"
-  color: 1d76db
+  color: "1d76db"
   description: The MCP server and its tools (engine/mcp_server.py)
 - name: "area: ui"
-  color: 1d76db
+  color: "1d76db"
   description: The Studio app (ui/)
 - name: "area: ci"
-  color: 1d76db
+  color: "1d76db"
   description: Workflows, repository automation and settings (.github/)
 - name: "area: docs"
-  color: 1d76db
+  color: "1d76db"
   description: The docs site and docs/
 - name: "area: examples"
-  color: 1d76db
+  color: "1d76db"
   description: Example sites (examples/)
 - name: "area: tests"
-  color: 1d76db
+  color: "1d76db"
   description: The test suite (tests/)
 - name: "area: packaging"
-  color: 1d76db
+  color: "1d76db"
   description: pyproject.toml, package.json, installs and releases
 - name: "area: legal"
-  color: 1d76db
+  color: "1d76db"
   description: LICENSE, NOTICE.md, CLA.md, AGENTS.md and the runtime notice
 
 # How risky the change is (pull requests, from the files they change; CONTRIBUTING.md#rules-per-area)
 - name: "tier: core"
-  color: b60205
+  color: "b60205"
   description: Touches a core area; needs a design-approved issue and the area's extra checks
 
 # Where an issue stands
 - name: "status: needs-triage"
-  color: fbca04
+  color: "fbca04"
   description: New; a maintainer has not looked yet
 - name: "status: needs-info"
-  color: fbca04
+  color: "fbca04"
   description: Waiting on the reporter; closed after 21 days without a reply
 - name: "status: accepted"
-  color: 0e8a16
+  color: "0e8a16"
   description: Agreed; a pull request for it can be merged
 - name: "status: design-approved"
-  color: 0e8a16
+  color: "0e8a16"
   description: The design of a core change is agreed (an RFC or the issue's design section)
 - name: "status: in-progress"
-  color: c2e0c6
+  color: "c2e0c6"
   description: Someone is working on it (say so in a comment first)
 - name: "status: blocked"
-  color: e4e669
+  color: "e4e669"
   description: Waiting on another issue or an outside change
 - name: "status: stale"
-  color: eeeeee
+  color: "eeeeee"
   description: No activity; will close unless someone replies
 
 # How urgent
 - name: "priority: p0"
-  color: b60205
+  color: "b60205"
   description: Broken for everyone, or a security fix; drop everything
 - name: "priority: p1"
-  color: d93f0b
+  color: "d93f0b"
   description: Next release
 - name: "priority: p2"
-  color: fbca04
+  color: "fbca04"
   description: Planned
 - name: "priority: p3"
-  color: c2e0c6
+  color: "c2e0c6"
   description: Nice to have
 
 # Pull request flags
 - name: "needs-issue"
-  color: d93f0b
+  color: "d93f0b"
   description: The pull request does not link an accepted issue yet
 - name: "breaking-change"
-  color: b60205
+  color: "b60205"
   description: Changes what an existing spec, command or tool does; needs a migration note
 - name: "skip-changelog"
-  color: ededed
+  color: "ededed"
   description: Nothing a user would notice; no changes/ fragment needed
 - name: "snapshots-updated"
-  color: fef2c0
+  color: "fef2c0"
   description: Layout or other snapshots re-recorded on purpose; review the diff
 - name: "dependencies"
-  color: 0366d6
+  color: "0366d6"
   description: Dependency updates
 - name: "release"
-  color: 5319e7
+  color: "5319e7"
   description: A release pull request
 - name: "size: xs"
-  color: ededed
+  color: "ededed"
   description: Under 10 lines changed
 - name: "size: s"
-  color: ededed
+  color: "ededed"
   description: Under 100 lines changed
 - name: "size: m"
-  color: ededed
+  color: "ededed"
   description: Under 400 lines changed
 - name: "size: l"
-  color: fbca04
+  color: "fbca04"
   description: Under 1000 lines changed
 - name: "size: xl"
-  color: d93f0b
+  color: "d93f0b"
   description: 1000 lines or more; consider splitting it
 
 # Community
 - name: "good first issue"
-  color: 7057ff
+  color: "7057ff"
   description: Small, well described, a good way in
 - name: "help wanted"
-  color: 008672
+  color: "008672"
   description: The maintainer would welcome a pull request
 - name: "accessibility"
-  color: 0e8a16
+  color: "0e8a16"
   description: Readable, navigable and safe for everyone
 - name: "duplicate"
-  color: cfd3d7
+  color: "cfd3d7"
   description: Already reported
 - name: "wontfix"
-  color: ffffff
+  color: "ffffff"
   description: Not going to change, with the reason in a comment
 - name: "invalid"
-  color: e4e669
+  color: "e4e669"
   description: Not a problem with Scroll Studio
