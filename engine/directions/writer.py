@@ -238,7 +238,11 @@ def fit_of(school: vocab.School, brief: Brief, rules: Rules, seed) -> tuple[floa
         mood = 0.35
     jitter = rng(seed, school.key, "fit").random()
     w_dom, w_mood = (0.55, 0.45) if mood_total else (0.8, 0.2)
-    return 3 * (w_dom * dom + w_mood * mood) + 0.9 * jitter, why
+    fit = 3 * (w_dom * dom + w_mood * mood) + 0.9 * jitter
+    if school.objects_only and brief.places:      # a seamless backdrop cannot hold a river, a street or a room
+        fit *= 0.5
+        why.append("its backdrop cannot hold the page's places")
+    return fit, why
 
 
 def _school_distance(a: Direction, b: Direction, fixed) -> float:

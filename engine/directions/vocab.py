@@ -69,6 +69,7 @@ class School:
     radius: str = ""
     board: str = "overlay"      # how the board sets a still: overlay | split | poster | plate | grid | terminal
     unit: str = "Plate"         # what a still is called under the plate layout: Plate, Spread, Layer, Sheet
+    objects_only: bool = False  # its pictures are an object on a backdrop: it cannot hold a landscape or a room
 
 
 def P(name, mode, bg, bg2, ink, accent, accent2, accent_ink=""):
@@ -500,6 +501,7 @@ SCHOOLS: tuple[School, ...] = (
 
     School(
         key="quiet-studio", name="Quiet Studio", kind="photo",
+        objects_only=True,
         about="Clean product photography on seamless paper: plenty of space, soft shadow, one muted accent.",
         moods=frozenset({"minimal", "calm", "precise", "luxurious", "quiet", "fresh", "editorial"}),
         domains={"retail": 3, "tech": 3, "wellness": 3, "health": 3, "luxury": 2, "fashion": 2, "food": 1, "architecture": 1},

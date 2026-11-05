@@ -180,7 +180,7 @@ def plan_problems(project) -> dict[str, list[str]]:
 
 PATH_KEYS = {"path", "file"}
 WORDS_KEYS = set(COPY_KEYS) | {"nav_label", "prompt", "todo", "logo", "model", "name", "role", "value", "unit", "quote",
-                               "subtitle", "headline"}
+                               "subtitle", "headline", "cue"}
 
 
 def skeleton(node: Any, key: str = "", parent: str = "") -> Any:
@@ -493,6 +493,9 @@ image or film prompt for this brief. Make every picture with {{"generate": "<pro
             if pruned is not None:
                 sec, schema = pruned, []
         craft = craft_problems(sec, pattern)
+        lost = [k for k in ("steps", "items", "beats") if (pattern or {}).get(k) and not sec.get(k)]
+        if lost:
+            schema = schema + [f"it has no {k}; write them as the pattern does" for k in lost]
         figures = invented_figures(sec, brief)
         if figures:                              # a hard rule, unlike the craft notes: never ship an invented figure
             schema = schema + [f"it gives figures the brief does not ({', '.join(figures[:4])}); use only the brief's "

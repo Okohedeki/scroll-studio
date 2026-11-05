@@ -151,3 +151,14 @@ def test_a_chained_film_drops_generated_end_frames():
                                                  {"id": "b", "end_image": {"beat_frame": {"beat": "a"}}}]}
     beats = write.chain_film(film)["beats"]
     assert "end_image" not in beats[0] and beats[1]["end_image"] == {"beat_frame": {"beat": "a"}}
+
+
+def test_a_backdrop_look_loses_fit_on_a_page_of_places():
+    from engine.directions import vocab, writer
+    from engine.directions.brief import Brief
+    studio = next(s for s in vocab.SCHOOLS if s.objects_only)
+    base = Brief("X", "", domains={"tech": 1.0}, moods={"calm": 1.0})
+    places = Brief("X", "", domains={"tech": 1.0}, moods={"calm": 1.0}, places=True)
+    plain_fit, _ = writer.fit_of(studio, base, None, 1)
+    place_fit, why = writer.fit_of(studio, places, None, 1)
+    assert place_fit == pytest.approx(plain_fit / 2) and any("backdrop" in w for w in why)
