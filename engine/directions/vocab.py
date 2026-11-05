@@ -668,7 +668,7 @@ STYLE_CLUSTER = {
 # domain -> words that put a site in it (lower case, matched on word starts)
 DOMAIN_WORDS = {
     "hospitality": "hotel resort inn stay rooms suite villa lodge guest booking reserve retreat hostel airbnb getaway cliff coast beach ocean sea island",
-    "tech": "software app platform api developer cloud saas data ai machine code startup product digital dashboard automation analytics tool engineer",
+    "tech": "software app platform api developer cloud saas data ai machine code startup product digital dashboard automation analytics tool engineer backend frontend server queue deploy repo repository database infrastructure devops framework library sdk cli terminal open-source",
     "science": "research lab laboratory biotech bio cell molecule dna genome institute scientific experiment study physics chemistry observatory",
     "art": "art gallery museum painting artist exhibition sculpture drawing studio atelier collection curator design illustration pottery ceramic ceramics clay kiln glaze craft maker workshop print printmaking",
     "luxury": "luxury bespoke handmade crafted jewel watch heritage atelier couture premium fine artisan commission walnut crystal",

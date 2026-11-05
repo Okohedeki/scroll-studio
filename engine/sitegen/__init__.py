@@ -57,6 +57,8 @@ def generate(root: Path, brief: str, want: tuple[str, ...] = DEFAULT_WANT, count
     build = project.build
     bank = bank_mod.load()
     entries = catalog.entries(bank)
+    if not write.NUMBER.search(brief):           # no figures in the brief: a stats block could only invent them
+        entries = [e for e in entries if e["type"] != "stats"]
     unknown = [k for k in want if k not in catalog.INTERACTIVE]
     if unknown:
         raise BuildError(f"unknown interactive kind {', '.join(unknown)}: use {', '.join(catalog.INTERACTIVE)}")

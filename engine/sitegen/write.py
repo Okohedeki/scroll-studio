@@ -98,6 +98,31 @@ def prompts_in(node: Any) -> list[str]:
     return out
 
 
+FIGURE_KEYS = ("value", "unit", "when")
+NUMBER = re.compile(r"\d+(?:[.,]\d+)*")
+
+
+def invented_figures(section: dict, brief: str) -> list[str]:
+    """Figures in the copy that the brief never gave: invented uptime, customer counts and dates read as lies."""
+    if section.get("type") == "code":            # code and its output are the product's own, not claims
+        return []
+    texts = copy_strings(section)
+
+    def walk(node):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if k in FIGURE_KEYS and isinstance(v, (str, int, float)) and not isinstance(v, bool):
+                    texts.append(str(v))
+                elif isinstance(v, (dict, list)):
+                    walk(v)
+        elif isinstance(node, list):
+            for v in node:
+                walk(v)
+    walk(section)
+    given = set(NUMBER.findall(brief or ""))
+    return sorted({n for t in texts for n in NUMBER.findall(re.sub(r"<[^>]+>", "", t))} - given)
+
+
 def craft_problems(section: dict, pattern: Optional[dict]) -> list[str]:
     """What a section breaks besides the schema: files it cannot have, stock phrases, copy lifted from its pattern,
     and picture prompts that ask for writing or set their own style over the page's art direction."""
@@ -158,15 +183,17 @@ WORDS_KEYS = set(COPY_KEYS) | {"nav_label", "prompt", "todo", "logo", "model", "
                                "subtitle", "headline"}
 
 
-def skeleton(node: Any, key: str = "") -> Any:
+def skeleton(node: Any, key: str = "", parent: str = "") -> Any:
     """A pattern with its words taken out: the structure, field names and settings stay, every piece of copy, picture
     prompt, path and code becomes a placeholder, so the model learns the shape and writes the content new."""
     if isinstance(node, dict):
-        return {k: skeleton(v, k) for k, v in node.items()}
+        return {k: skeleton(v, k, key) for k, v in node.items()}
     if isinstance(node, list):
-        return [skeleton(v, key) for v in node]
+        return [skeleton(v, key, parent) for v in node]
     if not isinstance(node, str):
         return node
+    if key == "prompt" and parent == "terminal":
+        return "<the task, as a developer would type it>"
     if key in PROMPT_KEYS:
         return "<describe one picture: subject, setting, composition, light>"
     if key == "code":
@@ -192,6 +219,9 @@ def chain_film(section: dict) -> dict:
         if isinstance(image, dict) and "beat_frame" in image:
             continue
         beat["image"] = {"beat_frame": {"beat": prev["id"], "at": "last"}}
+    for beat in beats:                           # a separately generated end frame would morph into the next start
+        if isinstance(beat, dict) and isinstance(beat.get("end_image"), dict) and "beat_frame" not in beat["end_image"]:
+            beat.pop("end_image")
     return section
 
 
@@ -378,6 +408,8 @@ def id_problems(secs: list[dict]) -> list[str]:
             out.append(f"id {sid!r} must be lowercase-kebab-case")
         elif re.fullmatch(rf"({re.escape(kind)}|section)-?\d+", sid):
             out.append(f"id {sid!r} only repeats the type; name what the section shows (e.g. the-wheel, lanes)")
+        elif kind != "cta" and sid.startswith(kind + "-"):
+            out.append(f"id {sid!r} starts with its type; name only what the section shows (e.g. {sid[len(kind) + 1:]})")
         if sid in seen:
             out.append(f"id {sid!r} is used twice")
         seen.add(sid)
@@ -449,6 +481,10 @@ image or film prompt for this brief. Make every picture with {{"generate": "<pro
             if pruned is not None:
                 sec, schema = pruned, []
         craft = craft_problems(sec, pattern)
+        figures = invented_figures(sec, brief)
+        if figures:                              # a hard rule, unlike the craft notes: never ship an invented figure
+            schema = schema + [f"it gives figures the brief does not ({', '.join(figures[:4])}); use only the brief's "
+                               "facts, in words, or leave the figure out"]
         if not schema and (not craft or attempt == tries - 1):
             if craft:
                 log(f"  {item.get('id')}: kept with notes: " + "; ".join(craft[:2]))

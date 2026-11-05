@@ -128,3 +128,23 @@ def test_film_beats_chain_into_one_take():
     assert beats[0]["image"] == {"generate": "x"}
     assert beats[1]["image"] == {"beat_frame": {"beat": "a", "at": "last"}}
     assert beats[2]["image"] == {"beat_frame": {"beat": "a", "at": "first"}}
+
+
+def test_a_terminal_task_is_not_mistaken_for_a_picture_prompt():
+    shape = write.skeleton({"terminal": {"prompt": "make it durable"}, "image": {"prompt": "a wheel"}})
+    assert "developer" in shape["terminal"]["prompt"] and "picture" in shape["image"]["prompt"]
+
+
+def test_figures_the_brief_never_gave_are_caught():
+    brief = "A queue that retries every job 5 times."
+    sec = {"type": "stats", "id": "s", "items": [{"value": "99.9%", "label": "uptime"}, {"value": "5", "label": "retries"}],
+           "title": "Since 2024"}
+    assert write.invented_figures(sec, brief) == ["2024", "99.9"]
+    assert write.invented_figures({"type": "code", "id": "c", "title": "Runs 1,204 jobs"}, brief) == []
+
+
+def test_a_chained_film_drops_generated_end_frames():
+    film = {"type": "film", "id": "f", "beats": [{"id": "a", "end_image": {"generate": "x"}},
+                                                 {"id": "b", "end_image": {"beat_frame": {"beat": "a"}}}]}
+    beats = write.chain_film(film)["beats"]
+    assert "end_image" not in beats[0] and beats[1]["end_image"] == {"beat_frame": {"beat": "a"}}
