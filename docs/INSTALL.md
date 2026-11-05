@@ -120,7 +120,7 @@ A real model (`model:`) always looks better than a reconstruction; use the photo
 
 ## 6. Claude
 
-- **Claude Code**: open the repo; `.mcp.json` registers the `scroll-studio` MCP server and the `scroll-site` skill
-  teaches the workflow. Ask for a site in plain language.
+- **Claude Code**: open the repo; `.mcp.json` registers the `scroll-studio` MCP server, and the skills in
+  `.agents/skills/` (mirrored in `.claude/skills/`) teach the workflow. Ask for a site in plain language.
 - **Claude Desktop / other MCP clients**: add a server that runs `python -m engine.mcp_server` with the repo as the
   working directory.

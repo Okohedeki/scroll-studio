@@ -29,7 +29,8 @@ or a script tied to one image or one shot. If a site needs something the engine 
 - `examples/`: example projects; each must keep building with `studio build examples/<name>`.
 
 ## Workflow for a new site
-Use the `scroll-site` skill (`.claude/skills/scroll-site/SKILL.md`). In short: spec -> `studio storyboard` and read
+Use the skills in `.agents/skills/` (start with `scroll-studio`; design with `scroll-site-design`): every site is
+designed from its brief, never copied from an example. In short: spec -> `studio storyboard` and read
 storyboard/sheet.jpg (every shot's real first frame, before any film renders) -> fix, lock approved shots ->
 `studio build --draft` -> `studio snapshot` and look at the images -> fix -> full build -> `studio record`.
 
