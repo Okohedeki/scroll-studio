@@ -153,6 +153,48 @@ def plan_problems(project) -> dict[str, list[str]]:
     return {sid: [re.sub(r"^\w+Error: (\[[^\]]+\] )?", "", msg)] for sid, msg in plan.errors.items()}
 
 
+PATH_KEYS = {"path", "file"}
+WORDS_KEYS = set(COPY_KEYS) | {"nav_label", "prompt", "todo", "logo", "model", "name", "role", "value", "unit", "quote",
+                               "subtitle", "headline"}
+
+
+def skeleton(node: Any, key: str = "") -> Any:
+    """A pattern with its words taken out: the structure, field names and settings stay, every piece of copy, picture
+    prompt, path and code becomes a placeholder, so the model learns the shape and writes the content new."""
+    if isinstance(node, dict):
+        return {k: skeleton(v, k) for k, v in node.items()}
+    if isinstance(node, list):
+        return [skeleton(v, key) for v in node]
+    if not isinstance(node, str):
+        return node
+    if key in PROMPT_KEYS:
+        return "<describe one picture: subject, setting, composition, light>"
+    if key == "code":
+        return f"<about {max(1, node.count(chr(10)))} lines of real code or output for this product>"
+    if key in PATH_KEYS:
+        return "<a path or command>"
+    if key in WORDS_KEYS:
+        n = len(re.sub(r"<[^>]+>", "", node).split())
+        return f"<new words, about {n}>" if n > 1 else "<a word>"
+    return node
+
+
+def chain_film(section: dict) -> dict:
+    """A film is one place: every beat after the first starts on the last frame of the beat before it, so the cuts
+    between beats never jump (a beat that already names its own start image is left alone only if it chains)."""
+    beats = section.get("beats") if section.get("type") == "film" else None
+    if not isinstance(beats, list):
+        return section
+    for prev, beat in zip(beats, beats[1:]):
+        if not (isinstance(prev, dict) and isinstance(beat, dict) and prev.get("id")):
+            continue
+        image = beat.get("image")
+        if isinstance(image, dict) and "beat_frame" in image:
+            continue
+        beat["image"] = {"beat_frame": {"beat": prev["id"], "at": "last"}}
+    return section
+
+
 IMAGE_KEYS = {"file", "generate", "gradient", "product", "scene", "size", "seed", "crop", "edit", "beat_frame", "match",
               "credit", "cinemagraph"}
 
@@ -253,6 +295,9 @@ def _ask(prompt: str, seed: int, policy, build, log: Log, temperature: float = 0
 def outline(brief: str, entries: list[dict], want: tuple[str, ...], count: int, seed: int, policy=None, build=None,
             log: Log = print, tries: int = 3) -> dict:
     """{name, description, audience, promise, voice, sections: [{id, type, purpose, headline, interactive}]}."""
+    import random
+    entries = list(entries)
+    random.Random(seed).shuffle(entries)          # the list's order is not a page order; never let it become one
     menu = "\n".join(f"- {e['type']}{' (scene)' if e['scene'] else ''}"
                      f"{' [interactive: ' + ', '.join(e['interactive']) + ']' if e['interactive'] else ''}: {e['about']}"
                      for e in entries)
@@ -261,7 +306,10 @@ def outline(brief: str, entries: list[dict], want: tuple[str, ...], count: int, 
     ask = f"""Brief:
 {brief}
 
-Plan a landing page of {count} sections for it. Section types you can use:
+First find the story: who the page is for, the one thing it must prove, and one concrete picture or metaphor that
+belongs to this subject and no other (if it would fit any company, it is not the picture). Every scene on the page is
+set in that picture's world. Then plan a landing page of {count} sections that tells the story as an arc, each section
+with one job (show, prove, explain, reassure, ask). Section types you can use, in no particular order:
 {menu}
 
 Rules:
@@ -269,10 +317,12 @@ Rules:
 - Include a section for each of these interactive kinds ({must}).
 - Prefer scenes for the story and blocks for facts; never two blocks of the same type in a row.
 - Use each type at most twice.
+- Order the sections as the story needs; the list above is not an order.
 
 Return:
 {{"name": "the brand name", "description": "one sentence for search results",
   "audience": "who it is for", "promise": "the one thing the page must prove", "voice": "how it sounds, in five words",
+  "image": "the one concrete picture every scene is set in, in a sentence",
   "sections": [{{"id": "a-kebab-id-naming-what-it-shows", "type": "<type>", "purpose": "what this section does for the story",
                 "headline": "its headline", "interactive": null}}]}}"""
     types = {e["type"] for e in entries}
@@ -286,6 +336,8 @@ Return:
             continue
         secs = plan.get("sections") or []
         problems = id_problems(secs)
+        if len(str(plan.get("image") or "").split()) < 5:
+            problems.append("give the page its image: one concrete picture from this subject, in a sentence")
         for s in secs:
             if s.get("type") not in types:
                 problems.append(f"{s.get('type')!r} is not one of the section types listed")
@@ -372,8 +424,11 @@ Sections, in order:
 Write the section "{item.get('id')}" ({item.get('type')}): {item.get('purpose')}. Headline idea: {item.get('headline')}.
 {hint}
 
-Here is a real {item.get('type')} section from another site, as a pattern for its field names and structure:
-{json.dumps(pattern, ensure_ascii=False)}
+The page's image, which every picture and film on it belongs to: {plan.get('image')}
+
+Here is the shape of a real {item.get('type')} section, with its words taken out, as a pattern for field names and
+structure (fill every <placeholder> with new content for this brief):
+{json.dumps(skeleton(pattern), ensure_ascii=False)}
 
 Return one JSON object for the new section, with "type": "{item.get('type')}" and "id": "{item.get('id')}". Keep the
 pattern's structure and settings (lengths, modes, strengths) where they suit; rewrite every piece of copy and every
@@ -386,7 +441,7 @@ image or film prompt for this brief. Make every picture with {{"generate": "<pro
         except WriteError as e:
             problems = [str(e)]
             continue
-        sec = repair(sec)
+        sec = chain_film(repair(sec))
         sec["type"], sec["id"] = item.get("type"), item.get("id")
         schema = schema_problems(sec)
         if schema:

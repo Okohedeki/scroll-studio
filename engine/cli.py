@@ -148,8 +148,8 @@ def new(name: str, example: Optional[str] = typer.Option(None, help="Copy an exa
                                                                             "visitors play with: pointer, 3d, code, film"),
         sections: int = typer.Option(8, "--sections", help="With --brief: about how many sections"),
         seed: int = typer.Option(1, "--seed", help="With --brief: another seed, another site"),
-        direction: str = typer.Option("a", "--direction", help="With --brief: which art direction to write in "
-                                                               "(a letter; 'none' keeps the default look)")):
+        direction: str = typer.Option("best", "--direction", help="With --brief: which art direction to write in "
+                                                               "(best: the one that fits the brief; a letter; 'none' keeps the default look)")):
     """Create a project."""
     dst = Path(settings()["projects"]) / name
     if dst.exists():
@@ -212,7 +212,7 @@ def generate_cmd(name: str, only: Optional[str] = typer.Option(None, "--only", h
                  interactive: Optional[str] = typer.Option(None, "--interactive", help="pointer, 3d, code, film"),
                  sections: Optional[int] = typer.Option(None, "--sections", help="About how many sections"),
                  seed: int = typer.Option(2, "--seed", help="Another seed, another site"),
-                 direction: str = typer.Option("a", "--direction", help="Which art direction ('none' keeps the look)")):
+                 direction: str = typer.Option("best", "--direction", help="Which art direction (best: the one that fits the brief; a letter; 'none' keeps the look)")):
     """Write a generated project's site again from its brief (generate.json), or one section of it with --only."""
     dst = resolve(name)
     record = json.loads((dst / "generate.json").read_text(encoding="utf-8")) if (dst / "generate.json").exists() else {}

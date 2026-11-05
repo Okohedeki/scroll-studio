@@ -2115,14 +2115,16 @@
   },
   "CodeTerminal": {
    "additionalProperties": false,
-   "description": "The agent's prompt box the scene opens on; the camera dives through it into the code.",
+   "description": "The window the scene opens on, where the task types itself; the camera dives through it into the code.",
    "properties": {
     "agent": {
-     "default": "Build",
+     "default": "",
+     "description": "Optional label in the title bar's right side, before the model",
      "title": "Agent",
      "type": "string"
     },
     "hints": {
+     "description": "Optional quiet hints under the window",
      "items": {
       "type": "string"
      },
@@ -2131,16 +2133,18 @@
     },
     "logo": {
      "default": "",
-     "description": "Wordmark over the prompt, e.g. 'opencode'; split as dim|bright with '|', e.g. 'open|code'",
+     "description": "Name in the window's title bar, e.g. the project or product name",
      "title": "Logo",
      "type": "string"
     },
     "model": {
      "default": "",
+     "description": "Optional model or tool name in the title bar's right side",
      "title": "Model",
      "type": "string"
     },
     "prompt": {
+     "description": "The task, typed into the prompt line",
      "title": "Prompt",
      "type": "string"
     },
@@ -2158,6 +2162,7 @@
   },
   "CtaBlock": {
    "additionalProperties": false,
+   "description": "The call to action: a heading and one button, usually the page's last section.",
    "properties": {
     "backdrop": {
      "anyOf": [
@@ -3993,6 +3998,7 @@
   },
   "FeaturesBlock": {
    "additionalProperties": false,
+   "description": "A grid of feature cards, each a short title and a line or two, with an optional picture.",
    "properties": {
     "backdrop": {
      "anyOf": [
@@ -6908,6 +6914,7 @@
   },
   "IntroBlock": {
    "additionalProperties": false,
+   "description": "A section opening: a kicker, a heading and a paragraph or two, with an optional button.",
    "properties": {
     "backdrop": {
      "anyOf": [
@@ -7817,7 +7824,20 @@
      "type": "object"
     },
     "preset": {
-     "description": "Level generator, see engine/scenes/scene3d.py PRESETS",
+     "description": "Level generator: a cell field, cell, nucleus, helix, galaxy, star system, planet, network, lattice, particles, or a glTF model (gltf)",
+     "enum": [
+      "cell-field",
+      "cell",
+      "nucleus",
+      "helix",
+      "galaxy",
+      "star-system",
+      "planet",
+      "network",
+      "lattice",
+      "particles",
+      "gltf"
+     ],
      "title": "Preset",
      "type": "string"
     }
@@ -10897,6 +10917,7 @@
   },
   "QuoteBlock": {
    "additionalProperties": false,
+   "description": "One quotation, large, with who said it.",
    "properties": {
     "backdrop": {
      "anyOf": [
@@ -13313,6 +13334,7 @@
   },
   "StatsBlock": {
    "additionalProperties": false,
+   "description": "A row of figures, each a large value with a short label.",
    "properties": {
     "backdrop": {
      "anyOf": [
@@ -14416,6 +14438,7 @@
   },
   "TimelineBlock": {
    "additionalProperties": false,
+   "description": "Dated steps in order: a history, a roadmap or how something happens.",
    "properties": {
     "backdrop": {
      "anyOf": [

@@ -81,14 +81,14 @@ def test_a_whole_run_writes_a_valid_project(tmp_path, monkeypatch):
     scene = next(k for k in ("type", "scene3d", "diorama", "code") if k in bank)
     block = next(k for k in ("features", "intro", "stats") if k in bank)
     plan = {"name": "Testbrand", "description": "A test brand.", "audience": "testers", "promise": "it works",
-            "voice": "plain", "sections": [{"id": "opening", "type": scene, "purpose": "open", "headline": "Hello"},
+            "voice": "plain", "image": "a mill race feeding a wheel at the speed it turns", "sections": [{"id": "opening", "type": scene, "purpose": "open", "headline": "Hello"},
                                            {"id": "what-it-does", "type": block, "purpose": "facts", "headline": "Facts"},
                                            {"id": "ask", "type": "cta", "purpose": "ask", "headline": "Try it"}]}
     asked = []
 
     def fake_ask(prompt, seed, policy, build, log, **kw):
         asked.append(prompt)
-        if prompt.startswith("Brief:") and "Plan a landing page" in prompt:
+        if "First find the story" in prompt:
             return json.dumps(plan)
         kind = prompt.split('"type": "', 1)[1].split('"', 1)[0]
         return json.dumps(bank_mod.pattern(kind, bank))       # valid by construction; its copy is reused, so the last
@@ -104,3 +104,27 @@ def test_a_whole_run_writes_a_valid_project(tmp_path, monkeypatch):
     assert record["model"] == "stand-in-model"
     saved = json.loads((tmp_path / "testbrand" / "generate.json").read_text(encoding="utf-8"))
     assert saved["outline"]["sections"][0]["id"] == "opening"
+
+
+def test_patterns_reach_the_model_without_their_words():
+    pattern = {"type": "code", "id": "wire", "length": 9, "surface": "dark",
+               "files": [{"path": "app/jobs.py", "kind": "edit", "code": "a\nb\nc\n"}],
+               "steps": [{"title": "Five lines <em>to a durable job.</em>", "state": {"file": "app/jobs.py"},
+                          "enter": "type-on", "image": {"generate": "a mill wheel at dawn"}}]}
+    shape = write.skeleton(pattern)
+    text = json.dumps(shape)
+    for leaked in ("app/jobs.py", "durable", "mill wheel"):
+        assert leaked not in text
+    assert shape["length"] == 9 and shape["surface"] == "dark" and shape["steps"][0]["enter"] == "type-on"
+    assert shape["files"][0]["kind"] == "edit"
+
+
+def test_film_beats_chain_into_one_take():
+    film = {"type": "film", "id": "f", "beats": [
+        {"id": "a", "prompt": "x", "image": {"generate": "x"}},
+        {"id": "b", "prompt": "y", "image": {"generate": "y"}},
+        {"id": "c", "prompt": "z", "image": {"beat_frame": {"beat": "a", "at": "first"}}}]}
+    beats = write.chain_film(film)["beats"]
+    assert beats[0]["image"] == {"generate": "x"}
+    assert beats[1]["image"] == {"beat_frame": {"beat": "a", "at": "last"}}
+    assert beats[2]["image"] == {"beat_frame": {"beat": "a", "at": "first"}}

@@ -44,7 +44,7 @@ def _make_room(log: Log) -> None:
 
 
 def generate(root: Path, brief: str, want: tuple[str, ...] = DEFAULT_WANT, count: int = 8, seed: int = 1,
-             direction: Optional[str] = "a", looks: bool = True, images: bool = False, policy=None,
+             direction: Optional[str] = "best", looks: bool = True, images: bool = False, policy=None,
              log: Log = print, only: Optional[str] = None) -> dict:
     """Write <root>/project.yaml from `brief` (or, with `only`, rewrite that one section of an existing one)."""
     from ..project import BuildError, Project
@@ -154,7 +154,9 @@ def generate(root: Path, brief: str, want: tuple[str, ...] = DEFAULT_WANT, count
     if looks and direction:
         from ..directions import run as directions
         log("  look: art directions")
-        directions.make(project, images=images, sheet=False, log=lambda m: log("    " + m))
+        state = directions.make(project, brief=brief, images=images, sheet=False, log=lambda m: log("    " + m))
+        if direction == "best":                  # the direction that fits the brief best, not whichever came first
+            direction = max(state["directions"], key=lambda d: d.get("fit") or 0)["id"]
         picked = directions.pick(project, direction, log=lambda m: log("    " + m))["direction"]["name"]
         log(f"  look: picked {picked}")
     record = {"brief": brief, "seed": seed, "want": list(want), "count": count, "backend": backend.name,

@@ -722,6 +722,81 @@
     }
    }
   },
+  "generate": {
+   "help": "Write a generated project's site again from its brief (generate.json), or one section of it with --only.",
+   "params": {
+    "brief": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--brief"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "direction": {
+     "default": "best",
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--direction"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "interactive": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--interactive"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "only": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--only"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "sections": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--sections"
+     ],
+     "required": false,
+     "type": "int"
+    },
+    "seed": {
+     "default": 2,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--seed"
+     ],
+     "required": false,
+     "type": "int"
+    }
+   }
+  },
   "inside": {
    "help": "The product as the set: print the route (which parts each stop found, how the camera comes in, where the copy",
    "params": {
@@ -1103,6 +1178,26 @@
   "new": {
    "help": "Create a project.",
    "params": {
+    "brief": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--brief"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "direction": {
+     "default": "best",
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--direction"
+     ],
+     "required": false,
+     "type": "str"
+    },
     "example": {
      "default": null,
      "kind": "option",
@@ -1123,6 +1218,16 @@
      "required": false,
      "type": "path"
     },
+    "interactive": {
+     "default": "pointer,3d",
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--interactive"
+     ],
+     "required": false,
+     "type": "str"
+    },
     "laptop": {
      "default": false,
      "kind": "option",
@@ -1142,6 +1247,26 @@
      ],
      "required": true,
      "type": "str"
+    },
+    "sections": {
+     "default": 8,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--sections"
+     ],
+     "required": false,
+     "type": "int"
+    },
+    "seed": {
+     "default": 1,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--seed"
+     ],
+     "required": false,
+     "type": "int"
     }
    }
   },
