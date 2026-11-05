@@ -143,6 +143,21 @@ class OpenAICompatibleText:
         data = r.json()
         return Result(self.name, data.get("model") or model, 0.0, text=data["choices"][0]["message"]["content"])
 
+    def release(self, model: Optional[str] = None) -> bool:
+        """Free the GPU memory the text model holds, so ComfyUI can render next. Servers that hold a model until told
+        otherwise (Ollama) are told; any other server is left as it is. True when a model was unloaded."""
+        import httpx
+        if not (self.url and self.local):
+            return False
+        base = self.url.rstrip("/").removesuffix("/v1")
+        try:
+            if httpx.get(base + "/api/version", timeout=3).status_code != 200:      # not an Ollama server
+                return False
+            r = httpx.post(base + "/api/generate", timeout=30, json={"model": model or self.model("text"), "keep_alive": 0})
+            return r.status_code == 200
+        except httpx.HTTPError:
+            return False
+
 
 class OpenAIImages:
     """Images and edits through OpenAI's Images API. Key: OPENAI_API_KEY. The image is scaled and cropped to the size

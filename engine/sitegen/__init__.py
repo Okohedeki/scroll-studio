@@ -43,6 +43,17 @@ def _make_room(log: Log) -> None:
         pass
 
 
+def _release(backend, log: Log) -> None:
+    """A local text model keeps its weights on the GPU after the last answer; unload it so ComfyUI has the room."""
+    release = getattr(backend, "release", None)
+    if backend.local and release is not None:
+        try:
+            if release():
+                log("  unloaded the text model from the GPU")
+        except Exception:
+            pass
+
+
 def generate(root: Path, brief: str, want: tuple[str, ...] = DEFAULT_WANT, count: int = 8, seed: int = 1,
              direction: Optional[str] = "best", looks: bool = True, images: bool = False, policy=None,
              log: Log = print, only: Optional[str] = None) -> dict:
@@ -84,6 +95,7 @@ def generate(root: Path, brief: str, want: tuple[str, ...] = DEFAULT_WANT, count
         data["outputs"]["site"]["sections"] = [sec if s.get("id") == only else s for s in secs]
         validate(data)
         project.put_text(write.dump(data))
+        _release(backend, log)
         log(f"generate: rewrote {only}")
         return {"only": only}
 
@@ -152,6 +164,7 @@ def generate(root: Path, brief: str, want: tuple[str, ...] = DEFAULT_WANT, count
     shown = {item.get("interactive") for item in plan["sections"] if item.get("id") in kept}
     missing = [k for k in want if k not in shown]
 
+    _release(backend, log)                       # the writing is done: give the GPU back before any picture is drawn
     picked = None
     if looks and direction:
         from ..directions import run as directions

@@ -162,3 +162,38 @@ def test_a_backdrop_look_loses_fit_on_a_page_of_places():
     plain_fit, _ = writer.fit_of(studio, base, None, 1)
     place_fit, why = writer.fit_of(studio, places, None, 1)
     assert place_fit == pytest.approx(plain_fit / 2) and any("backdrop" in w for w in why)
+
+
+def test_prune_strips_every_wrong_field_however_many():
+    pattern = bank_mod.pattern("diorama", bank_mod.load())
+    if pattern is None:
+        pytest.skip("no diorama example")
+    sec = json.loads(json.dumps(pattern))
+    sec["places"] = [dict(sec["places"][0], name=f"p{i}", image={"generate": "x"}) for i in range(12)]
+    assert write.schema_problems(sec)
+    fixed = write.prune(sec)
+    assert fixed is not None and all("image" not in p for p in fixed["places"])
+
+
+def test_the_text_model_is_unloaded_from_an_ollama_server(monkeypatch):
+    import httpx
+
+    from engine.router.builtin import OpenAICompatibleText
+    calls = []
+
+    class R:
+        def __init__(self, code):
+            self.status_code = code
+
+    monkeypatch.setenv("STUDIO_TEXT_URL", "http://127.0.0.1:11434/v1")
+    monkeypatch.setenv("STUDIO_TEXT_MODEL", "some-model")
+    monkeypatch.setattr(httpx, "get", lambda url, **kw: calls.append(("get", url)) or R(200))
+    monkeypatch.setattr(httpx, "post", lambda url, **kw: calls.append(("post", url, kw["json"])) or R(200))
+    assert OpenAICompatibleText().release() is True
+    assert calls == [("get", "http://127.0.0.1:11434/api/version"),
+                     ("post", "http://127.0.0.1:11434/api/generate", {"model": "some-model", "keep_alive": 0})]
+    calls.clear()
+    monkeypatch.setattr(httpx, "get", lambda url, **kw: R(404))              # another kind of server: left alone
+    assert OpenAICompatibleText().release() is False and calls == []
+    monkeypatch.setenv("STUDIO_TEXT_URL", "https://api.example.com/v1")       # never a remote server
+    assert OpenAICompatibleText().release() is False

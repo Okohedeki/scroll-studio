@@ -255,7 +255,7 @@ def prune(section: dict) -> Optional[dict]:
     from ..spec import Section
     check = TypeAdapter(Section)
     sec = copy.deepcopy(section)
-    for _ in range(6):
+    for _ in range(40):                                          # one wrong field per pass
         try:
             check.validate_python(sec)
             return sec

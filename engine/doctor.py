@@ -36,7 +36,17 @@ def checks() -> list[dict]:
         add("PyTorch + CUDA", gpu, detail, "parallax (depth), film")
     except Exception:
         add("PyTorch + CUDA", False, "torch not installed", "parallax (depth), film")
-    for mod, need in (("transformers", "parallax (depth)"), ("cv2", "artwork"), ("websocket", "recordings"), ("playwright", "recordings, URL capture"),
+    if importlib.util.find_spec("transformers"):          # installed is not enough: a broken dependency fails the import
+        try:
+            from transformers import AutoModelForDepthEstimation  # noqa: F401
+            add("transformers", True, "installed", "parallax (depth)")
+        except Exception as e:
+            cause = e.__cause__ or e.__context__ or e
+            add("transformers", False, f"installed but fails to import: {type(cause).__name__}: {str(cause)[:120]}",
+                "parallax (depth)")
+    else:
+        add("transformers", None, None, "parallax (depth)")
+    for mod, need in (("cv2", "artwork"), ("websocket", "recordings"), ("playwright", "recordings, URL capture"),
                       ("cascadio", "product models in STEP/STP (OpenCascade)"), ("trimesh", "product models in 3MF"),
                       ("lxml", "product models in 3MF")):
         add(mod, importlib.util.find_spec(mod), "installed" if importlib.util.find_spec(mod) else None, need)
