@@ -273,7 +273,7 @@ Rules:
 Return:
 {{"name": "the brand name", "description": "one sentence for search results",
   "audience": "who it is for", "promise": "the one thing the page must prove", "voice": "how it sounds, in five words",
-  "sections": [{{"id": "short-kebab-id", "type": "<type>", "purpose": "what this section does for the story",
+  "sections": [{{"id": "a-kebab-id-naming-what-it-shows", "type": "<type>", "purpose": "what this section does for the story",
                 "headline": "its headline", "interactive": null}}]}}"""
     types = {e["type"] for e in entries}
     problems: list[str] = []
@@ -285,7 +285,7 @@ Return:
             problems = [str(e)]
             continue
         secs = plan.get("sections") or []
-        problems = []
+        problems = id_problems(secs)
         for s in secs:
             if s.get("type") not in types:
                 problems.append(f"{s.get('type')!r} is not one of the section types listed")
@@ -313,6 +313,24 @@ TYPE_HINT = {
     "scene3d": "Levels use only the presets the pattern shows or these: cell-field, cell, nucleus, helix, galaxy, "
                "star-system, planet, network, lattice, particles.",
 }
+
+ID_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
+
+
+def id_problems(secs: list[dict]) -> list[str]:
+    """Section ids become page anchors and storyboard names: they name what the section shows, once each."""
+    out, seen = [], set()
+    for s in secs:
+        sid, kind = str(s.get("id") or ""), str(s.get("type") or "")
+        if not ID_RE.match(sid):
+            out.append(f"id {sid!r} must be lowercase-kebab-case")
+        elif re.fullmatch(rf"({re.escape(kind)}|section)-?\d+", sid):
+            out.append(f"id {sid!r} only repeats the type; name what the section shows (e.g. the-wheel, lanes)")
+        if sid in seen:
+            out.append(f"id {sid!r} is used twice")
+        seen.add(sid)
+    return out
+
 
 def assign_interactive(secs: list[dict], offer: dict[str, list[str]]) -> None:
     """Mark which section shows each interactive kind: the model's own marks where they fit, else the first free

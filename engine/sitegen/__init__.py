@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Callable, Optional
 
 from . import bank as bank_mod, catalog, write
-from .write import WriteError
+from .write import WriteError as WriteError
 
 Log = Callable[[str], None]
 DEFAULT_WANT = ("pointer", "3d")
