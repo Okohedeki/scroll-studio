@@ -2039,8 +2039,14 @@ class ArtworkScene(SceneBase):
     caption: Optional[str] = Field(None, description="Label under the canvas")
 
 
+# The live 3D level generators (runtime/src/players/scene3d/presets.ts, PRESETS); a test keeps the two lists equal.
+Scene3DPreset = Literal["cell-field", "cell", "nucleus", "helix", "galaxy", "star-system", "planet", "network", "lattice",
+                        "particles", "gltf"]
+
+
 class Level(Model):
-    preset: str = Field(..., description="Level generator, see engine/scenes/scene3d.py PRESETS")
+    preset: Scene3DPreset = Field(..., description="Level generator: a cell field, cell, nucleus, helix, galaxy, star "
+                                                   "system, planet, network, lattice, particles, or a glTF model (gltf)")
     params: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -2365,13 +2371,13 @@ class CodeFile(Model):
 
 
 class CodeTerminal(Model):
-    """The agent's prompt box the scene opens on; the camera dives through it into the code."""
-    logo: str = Field("", description="Wordmark over the prompt, e.g. 'opencode'; split as dim|bright with '|', e.g. 'open|code'")
-    prompt: str
-    agent: str = "Build"
-    model: str = ""
+    """The window the scene opens on, where the task types itself; the camera dives through it into the code."""
+    logo: str = Field("", description="Name in the window's title bar, e.g. the project or product name")
+    prompt: str = Field(..., description="The task, typed into the prompt line")
+    agent: str = Field("", description="Optional label in the title bar's right side, before the model")
+    model: str = Field("", description="Optional model or tool name in the title bar's right side")
     provider: str = ""
-    hints: list[str] = Field(default_factory=lambda: ["tab switch agent", "ctrl+p commands"])
+    hints: list[str] = Field(default_factory=list, description="Optional quiet hints under the window")
 
 
 class CodeScene(SceneBase):
@@ -2925,6 +2931,7 @@ class BlockBase(Model):
 
 
 class IntroBlock(BlockBase):
+    """A section opening: a kicker, a heading and a paragraph or two, with an optional button."""
     type: Literal["intro"] = "intro"
     kicker: Optional[str] = None
     title: str
@@ -2951,6 +2958,7 @@ class Feature(Model):
 
 
 class FeaturesBlock(BlockBase):
+    """A grid of feature cards, each a short title and a line or two, with an optional picture."""
     type: Literal["features"] = "features"
     kicker: Optional[str] = None
     title: Optional[str] = None
@@ -2974,6 +2982,7 @@ class Stat(Model):
 
 
 class StatsBlock(BlockBase):
+    """A row of figures, each a large value with a short label."""
     type: Literal["stats"] = "stats"
     items: list[Stat]
     look: Literal["plain", "divided"] = Field("plain", description="plain: big figures; divided: a quieter row of "
@@ -2994,6 +3003,7 @@ class TimelineItem(Model):
 
 
 class TimelineBlock(BlockBase):
+    """Dated steps in order: a history, a roadmap or how something happens."""
     type: Literal["timeline"] = "timeline"
     kicker: Optional[str] = None
     title: Optional[str] = None
@@ -3001,12 +3011,14 @@ class TimelineBlock(BlockBase):
 
 
 class QuoteBlock(BlockBase):
+    """One quotation, large, with who said it."""
     type: Literal["quote"] = "quote"
     text: str
     who: Optional[str] = None
 
 
 class CtaBlock(BlockBase):
+    """The call to action: a heading and one button, usually the page's last section."""
     type: Literal["cta"] = "cta"
     kicker: Optional[str] = None
     title: str

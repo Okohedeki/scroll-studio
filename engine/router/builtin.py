@@ -91,6 +91,8 @@ class AnthropicBackend:
         model = model or self.model("text")
         client = anthropic.Anthropic()
         kwargs = {"system": job.system} if job.system else {}
+        if job.temperature is not None:
+            kwargs["temperature"] = job.temperature
         # a declined request is re-run on a fallback model the API picks ("default" routing)
         response = client.beta.messages.create(
             model=model, max_tokens=job.max_tokens, messages=[{"role": "user", "content": job.prompt}],
@@ -128,9 +130,15 @@ class OpenAICompatibleText:
         messages = [{"role": "system", "content": job.system}] if job.system else []
         messages.append({"role": "user", "content": job.prompt})
         key = _key("STUDIO_TEXT_KEY")
+        body = {"model": model, "messages": messages, "max_tokens": job.max_tokens}
+        if job.temperature is not None:
+            body["temperature"] = job.temperature
+        if job.seed is not None:
+            body["seed"] = job.seed
+        if job.json:
+            body["response_format"] = {"type": "json_object"}
         r = httpx.post(self.url.rstrip("/") + "/v1/chat/completions", timeout=600,
-                       headers={"Authorization": f"Bearer {key}"} if key else {},
-                       json={"model": model, "messages": messages, "max_tokens": job.max_tokens})
+                       headers={"Authorization": f"Bearer {key}"} if key else {}, json=body)
         r.raise_for_status()
         data = r.json()
         return Result(self.name, data.get("model") or model, 0.0, text=data["choices"][0]["message"]["content"])
