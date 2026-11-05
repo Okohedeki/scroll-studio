@@ -1,0 +1,1 @@
+scene3d `chain` preset: a planner at the centre hands work to a ring of model stations (sequence, fold, complex, relax, route), each drawn from its model's output, and the scroll glides from one station to the next.

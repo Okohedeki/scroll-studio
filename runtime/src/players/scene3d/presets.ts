@@ -5,10 +5,12 @@
  * biology: cell-field, cell, nucleus, helix (final: dock)
  * space:   galaxy, star-system, planet
  * generic: network, lattice, particles, gltf
+ * pipelines: chain (a planner handing work to model stations; see chain.ts)
  */
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { smooth } from "../../lib/util";
+import { chain } from "./chain";
 
 export interface LevelObj {
   group: THREE.Group;
@@ -433,4 +435,5 @@ export const PRESETS: Record<string, Preset> = {
   "cell-field": cellField, cell, nucleus, helix,
   galaxy, "star-system": starSystem, planet,
   network, lattice, particles, gltf,
+  chain,
 };

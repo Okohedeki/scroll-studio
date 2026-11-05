@@ -47,7 +47,7 @@ SCENE_INFO = {
     "light": "One place relit from dawn to night as you scroll: each step a time of day, windows and lamps coming on.",
 }
 BLOCK_TYPES = ["intro", "features", "stats", "timeline", "quote", "cta", "gallery"]
-PRESETS_3D = ["cell-field", "cell", "nucleus", "helix", "galaxy", "star-system", "planet", "network", "lattice", "particles", "gltf"]
+PRESETS_3D = ["cell-field", "cell", "nucleus", "helix", "galaxy", "star-system", "planet", "network", "lattice", "particles", "gltf", "chain"]
 
 
 MAX_UPLOAD = 4 * 2**30       # bytes per file: a long film or a big scan fits, a runaway upload does not
