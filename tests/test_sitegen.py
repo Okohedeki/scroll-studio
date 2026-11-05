@@ -37,14 +37,17 @@ def test_craft_passes_a_plain_description_and_flags_copy_lifted_from_the_pattern
     assert any("repeats the pattern" in p for p in write.craft_problems(lifted, pattern))
 
 
-def test_section_ids_name_what_the_section_shows():
-    secs = [{"id": "film-0", "type": "film"}, {"id": "the-wheel", "type": "film"}, {"id": "Lanes", "type": "features"},
-            {"id": "the-wheel", "type": "stats"}, {"id": "cta", "type": "cta"}]
-    found = write.id_problems(secs)
-    assert any("'film-0' only repeats the type" in p for p in found)
-    assert any("'Lanes' must be lowercase" in p for p in found)
-    assert any("'the-wheel' is used twice" in p for p in found)
-    assert not any("'cta'" in p for p in found)
+def test_the_engine_tidies_section_ids():
+    secs = [{"id": "film-0", "type": "film", "headline": "The <em>wheel</em> turns"}, {"id": "Features-Lanes", "type": "features"},
+            {"id": "lanes", "type": "stats"}, {"id": "cta", "type": "cta"}]
+    write.tidy_ids(secs)
+    assert [s["id"] for s in secs] == ["the-wheel-turns", "lanes", "lanes-2", "cta"]
+
+
+def test_a_page_that_opens_on_a_block_opens_on_its_first_scene():
+    secs = [{"id": "a", "type": "hero"}, {"id": "b", "type": "features"}, {"id": "c", "type": "film"}, {"id": "d", "type": "cta"}]
+    write.open_on_a_scene(secs, {"film", "parallax"})
+    assert [s["id"] for s in secs] == ["c", "a", "b", "d"]
 
 
 def test_interactive_kinds_go_to_sections_that_can_show_them():

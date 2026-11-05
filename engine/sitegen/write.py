@@ -353,7 +353,7 @@ Return:
 {{"name": "the brand name", "description": "one sentence for search results",
   "audience": "who it is for", "promise": "the one thing the page must prove", "voice": "how it sounds, in five words",
   "image": "the one concrete picture every scene is set in, in a sentence",
-  "sections": [{{"id": "a-kebab-id-naming-what-it-shows", "type": "<type>", "purpose": "what this section does for the story",
+  "sections": [{{"id": "a-short-id-naming-what-it-shows", "type": "<type>", "purpose": "what this section does for the story",
                 "headline": "its headline", "interactive": null}}]}}"""
     types = {e["type"] for e in entries}
     problems: list[str] = []
@@ -365,7 +365,10 @@ Return:
             problems = [str(e)]
             continue
         secs = plan.get("sections") or []
-        problems = id_problems(secs)
+        scenes = {e["type"] for e in entries if e["scene"]}
+        tidy_ids(secs)
+        open_on_a_scene(secs, scenes)
+        problems = []
         if len(str(plan.get("image") or "").split()) < 5:
             problems.append("give the page its image: one concrete picture from this subject, in a sentence")
         for s in secs:
@@ -373,7 +376,7 @@ Return:
                 problems.append(f"{s.get('type')!r} is not one of the section types listed")
         if secs and secs[-1].get("type") != "cta":
             problems.append("the last section must be a cta")
-        if secs and secs[0].get("type") not in {e["type"] for e in entries if e["scene"]}:
+        if secs and secs[0].get("type") not in scenes:
             problems.append("the first section must be a scene")
         assign_interactive(secs, offer)
         for k, allowed in offer.items():
@@ -396,24 +399,33 @@ TYPE_HINT = {
                "star-system, planet, network, lattice, particles.",
 }
 
-ID_RE = re.compile(r"^[a-z][a-z0-9]*(-[a-z0-9]+)*$")
 
 
-def id_problems(secs: list[dict]) -> list[str]:
-    """Section ids become page anchors and storyboard names: they name what the section shows, once each."""
-    out, seen = [], set()
-    for s in secs:
-        sid, kind = str(s.get("id") or ""), str(s.get("type") or "")
-        if not ID_RE.match(sid):
-            out.append(f"id {sid!r} must be lowercase-kebab-case")
-        elif re.fullmatch(rf"({re.escape(kind)}|section)-?\d+", sid):
-            out.append(f"id {sid!r} only repeats the type; name what the section shows (e.g. the-wheel, lanes)")
-        elif kind != "cta" and sid.startswith(kind + "-"):
-            out.append(f"id {sid!r} starts with its type; name only what the section shows (e.g. {sid[len(kind) + 1:]})")
-        if sid in seen:
-            out.append(f"id {sid!r} is used twice")
+def tidy_ids(secs: list[dict]) -> None:
+    """Section ids become page anchors and storyboard names. The engine keeps them tidy itself (a model asked to keeps
+    slipping): lowercase kebab case, without the type in front, never just a type and a number, each used once."""
+    seen: set[str] = set()
+    for i, s in enumerate(secs):
+        kind = str(s.get("type") or "section")
+        sid = re.sub(r"[^a-z0-9]+", "-", str(s.get("id") or "").lower()).strip("-")
+        if kind != "cta" and sid.startswith(kind + "-"):
+            sid = sid[len(kind) + 1:]
+        if not sid or not sid[0].isalpha() or re.fullmatch(rf"({re.escape(kind)}|section)-?\d+", sid):
+            words = re.findall(r"[a-z]+", re.sub(r"<[^>]+>", "", str(s.get("headline") or "")).lower())
+            sid = "-".join(w for w in words if len(w) > 2)[:32].strip("-") or kind
+        base, n = sid, 2
+        while sid in seen:
+            sid, n = f"{base}-{n}", n + 1
         seen.add(sid)
-    return out
+        s["id"] = sid
+
+
+def open_on_a_scene(secs: list[dict], scenes: set[str]) -> None:
+    """A page opens on a scene: when the model put a block first, the first scene moves up to open it."""
+    if secs and secs[0].get("type") not in scenes:
+        first = next((i for i, s in enumerate(secs) if s.get("type") in scenes), None)
+        if first is not None:
+            secs.insert(0, secs.pop(first))
 
 
 def assign_interactive(secs: list[dict], offer: dict[str, list[str]]) -> None:
