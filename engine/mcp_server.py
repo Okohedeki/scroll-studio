@@ -22,7 +22,21 @@ from .project import BuildError, Project, child, has_spec, safe_name
 from .server.jobs import JobQueue, logger
 from .spec import SCENE_TYPES, Site, deprecations
 
-mcp = MCPServer("scroll-studio")
+INSTRUCTIONS = """Scroll Studio builds scroll-driven sites and commerce creative from a project spec; these tools drive it.
+
+Design every site new from its brief: who it is for, the one promise, an image that belongs to this subject alone, five
+to nine moments, and at least one thing the visitor plays with (the pointer, live 3D, a film scrubbed by the scroll).
+Choose a scene for what each moment must do (spec_schema lists every field). The bundled examples show what the engine
+can do and how fields are written; never start a new site by copying one and changing the words, and never copy an
+example's section order, copy or prompts. Set the look with directions and direction_pick, or brand_from and
+brand_from_logo, rather than a default preset. Picture prompts describe what is in the picture; the spec's imagery sets
+the style, and pictures hold no text.
+
+Then storyboard before any render, build in draft, and judge the snapshots, not the log. If the engine cannot do
+something a site needs, change the engine rather than working around it. The full guide is in the repository's
+.agents/skills/ (start with scroll-studio)."""
+
+mcp = MCPServer("scroll-studio", instructions=INSTRUCTIONS)
 
 
 class _Jobs(JobQueue):
@@ -78,7 +92,8 @@ def _readable_source(path: str, suffixes: frozenset[str], what: str) -> Path:
 
 @mcp.tool()
 def list_projects() -> list[dict]:
-    """List user projects and bundled examples (good starting points: copy one with create_project)."""
+    """List user projects and bundled examples. Examples show what the engine can do and how each field is written;
+    they are not templates. Design a new site from its brief (.agents/skills/scroll-site-design) instead of copying one."""
     out = []
     for base, kind in ((PROJECTS, "project"), (EXAMPLES, "example")):
         for d in sorted(base.iterdir()) if base.exists() else []:
@@ -95,7 +110,8 @@ def list_projects() -> list[dict]:
 
 @mcp.tool()
 def create_project(name: str, example: Optional[str] = None) -> dict:
-    """Create a project in the projects folder, empty or copied from an example. Returns its path."""
+    """Create a project in the projects folder: empty, for a new design (the usual case). `example` copies an example
+    as it is, for studying or rebuilding that example; never start a new site from a copy. Returns its path."""
     from .cli import STARTER
     dst = child(PROJECTS, name, "project name")
     src = child(EXAMPLES, example, "example name") if example else None

@@ -4,6 +4,12 @@ This file is for AI agents and coding assistants (Claude Code, Codex, Cursor, Co
 work in, or are pointed at this repository. Project instructions for working *on* Scroll Studio are in
 [CLAUDE.md](CLAUDE.md).
 
+## Using Scroll Studio
+
+Read the skills in [`.agents/skills/`](.agents/skills/) before making a site, starting with `scroll-studio`. The most
+important rule: design every site from its brief. The examples show what the engine can do and how fields are written;
+they are not templates, and a site made by copying one and changing the words is not finished work.
+
 ## Licence: what you must do
 
 Scroll Studio is licensed under the **GNU AGPL-3.0 with additional terms** ([LICENSE](LICENSE), [NOTICE.md](NOTICE.md)).
