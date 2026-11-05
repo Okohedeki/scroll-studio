@@ -308,7 +308,7 @@
   }
  },
  "create_project": {
-  "description": "Create a project in the projects folder, empty or copied from an example. Returns its path.",
+  "description": "Create a project in the projects folder: empty, for a new design (the usual case). `example` copies an example",
   "input": {
    "properties": {
     "example": {
@@ -780,7 +780,7 @@
   }
  },
  "list_projects": {
-  "description": "List user projects and bundled examples (good starting points: copy one with create_project).",
+  "description": "List user projects and bundled examples. Examples show what the engine can do and how each field is written;",
   "input": {
    "properties": {},
    "title": "list_projectsArguments",

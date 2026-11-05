@@ -104,7 +104,7 @@ Full setup (GPU, Blender, ComfyUI and the models) is in [docs/INSTALL.md](docs/I
 ### Build with Claude
 
 Open the repo in Claude Code and ask for a site. The `scroll-studio` MCP server (`.mcp.json`) gives Claude every
-engine tool, and the `scroll-site` skill gives it the workflow. Or paste this into any coding agent:
+engine tool, and the skills in `.agents/skills/` give any coding agent the workflow. Or paste this into any coding agent:
 
 ```text
 Install Scroll Studio on this machine and build one of its examples, following

@@ -630,8 +630,8 @@ text touches.
 ## With Claude
 
 Open the repo in Claude Code and ask for a site. The `scroll-studio` MCP server (`.mcp.json`) gives Claude tools
-to create projects, edit specs, build, take snapshots and look at them, record videos and cut launch trailers; the `scroll-site` skill
-gives it the workflow. Any MCP client can use `python -m engine.mcp_server`.
+to create projects, edit specs, build, take snapshots and look at them, record videos and cut launch trailers; the skills in
+`.agents/skills/` give any coding agent the workflow, starting with `scroll-studio`. Any MCP client can use `python -m engine.mcp_server`.
 
 ## How it's built
 

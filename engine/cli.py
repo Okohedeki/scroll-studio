@@ -343,7 +343,7 @@ def storyboard(name: str, level: str = typer.Option("stills", help="sketch (no C
                 typer.echo(f"    shot {b['id']} ({b['kind']}, {b['seconds'] or '-'} s): {b['caption'] or b['title']}")
         if data["notes"]:
             typer.echo("\nact with the MCP tools (set_shot_field, regenerate_shot_image, resolve_note) or edit site.yaml; "
-                       "see the scroll-site skill")
+                       "see .agents/skills/scroll-site-build")
         return
     if edit:
         from .storyboard.edit.api import serve
