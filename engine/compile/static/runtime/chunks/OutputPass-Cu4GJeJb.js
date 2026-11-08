@@ -1,4 +1,4 @@
-import{M as R,a6 as A,y as E,F as _,c as f,U as v,e as n,a7 as m,a8 as g,a9 as B,aa as F,w as T,V as d,A as U,m as D,ab as y,ac as N,ad as z,ae as O,af as I,ag as L,a3 as Q,ah as V,ai as G}from"./three.module-B6xmsuUg.js";/*! Scroll Studio runtime by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. GNU AGPL-3.0 with the Scroll Studio Output Exception (see NOTICE.md); keep this notice. */const w={name:"CopyShader",uniforms:{tDiffuse:{value:null},opacity:{value:1}},vertexShader:`
+import{M as R,a6 as A,y as E,F as _,c as f,U as v,e as n,a7 as m,a8 as g,a9 as B,aa as F,w as T,V as d,A as U,m as D,ab as y,ac as N,ad as z,ae as O,af as I,ag as L,a3 as Q,ah as V,ai as G}from"./three.module-BE5pj0Ut.js";/*! Scroll Studio runtime by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. GNU AGPL-3.0 with the Scroll Studio Output Exception (see NOTICE.md); keep this notice. */const w={name:"CopyShader",uniforms:{tDiffuse:{value:null},opacity:{value:1}},vertexShader:`
 
 		varying vec2 vUv;
 

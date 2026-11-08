@@ -117,57 +117,90 @@ function foldStation(s: any, k: Kit): Station {
   return { group: g, anchor: new THREE.Vector3(), update(t) { g.rotation.set(0.3, t * 0.18, 0); } };
 }
 
+function standInGlobule(k: Kit, n = 130): V3[] {
+  // a compact chain: a random walk kept inside a sphere, the shape a folded protein has from far away
+  const out: V3[] = []; const p = new THREE.Vector3(), dir = new THREE.Vector3(1, 0, 0);
+  for (let i = 0; i < n; i++) {
+    dir.add(new THREE.Vector3(k.rnd(-1, 1), k.rnd(-1, 1), k.rnd(-1, 1)).multiplyScalar(0.9)).normalize();
+    if (p.length() > 2.4) dir.add(p.clone().normalize().multiplyScalar(-1.2)).normalize();
+    p.add(dir.clone().multiplyScalar(0.75)); out.push([p.x, p.y, p.z]);
+  }
+  return out;
+}
+
+function ballAndStick(k: Kit, atoms: THREE.Vector3[], bonds: [number, number][], color: number | string, r: number) {
+  const g = new THREE.Group(), m = new THREE.Matrix4(), q = new THREE.Quaternion(), one = new THREE.Vector3(1, 1, 1);
+  const balls = new THREE.InstancedMesh(new THREE.SphereGeometry(r, 18, 12), k.glow(color, { power: 1.0, base: 0.5, intensity: 1.1 }), atoms.length);
+  atoms.forEach((a, i) => balls.setMatrixAt(i, m.compose(a, q, one))); g.add(balls);
+  bonds.forEach(([i, j]) => { if (!atoms[i] || !atoms[j]) return;
+    const d = atoms[j].clone().sub(atoms[i]), c = new THREE.Mesh(new THREE.CylinderGeometry(r * 0.32, r * 0.32, d.length(), 8), k.glow(color, { power: 0.8, base: 0.4, intensity: 0.6 }));
+    c.position.copy(atoms[i].clone().add(atoms[j]).multiplyScalar(0.5)); c.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); g.add(c); });
+  return g;
+}
+
 function complexStation(s: any, k: Kit): Station {
   const g = new THREE.Group(), body = new THREE.Group(); g.add(body);
-  const all = [...(s.ca?.length ? s.ca : standInBackbone(k, 110)), ...(s.ligand ?? [])] as V3[];
-  const fitted = fit(all, 2.7), nCa = all.length - (s.ligand?.length ?? 0);
+  const all = [...(s.ca?.length ? s.ca : standInGlobule(k)), ...(s.ligand ?? [])] as V3[];
+  const fitted = fit(all, 2.6), nCa = all.length - (s.ligand?.length ?? 0);
   const ca = fitted.slice(0, nCa);
-  body.add(colourTube(ca, ca.map(() => new THREE.Color("#5d7bb0")), 0.06, 0.6));
-  let lig = fitted.slice(nCa);
-  if (!lig.length) { const c = ca[Math.floor(ca.length / 2)]; lig = Array.from({ length: 9 }, (_, i) => c.clone().add(new THREE.Vector3(Math.cos(i) * 0.5, Math.sin(i * 1.7) * 0.4, Math.sin(i) * 0.5))); }
+  body.add(colourTube(ca, ca.map((_, i) => new THREE.Color("#5d7bb0").lerp(new THREE.Color("#9fc2ff"), (i % 17) / 34)), 0.1, 0.75));
+  body.add(k.sprite(0x5b8cff, 7.5, 0.12));                      // a faint envelope, the protein's surface from afar
+  let lig = fitted.slice(nCa), bonds: [number, number][] = s.bonds ?? [];
+  if (!lig.length) {
+    // stand-in ligand: a six-ring with two substituents, seated in a pocket on the surface
+    const out = ca.reduce((a, b) => (b.length() > a.length() ? b : a)).clone().multiplyScalar(0.72);
+    lig = Array.from({ length: 6 }, (_, i) => new THREE.Vector3(Math.cos(i * Math.PI / 3) * 0.5, Math.sin(i * Math.PI / 3) * 0.5, 0));
+    lig.push(new THREE.Vector3(1.0, 0, 0.1), new THREE.Vector3(-1.0, 0, -0.1), new THREE.Vector3(1.5, 0.4, 0.2));
+    lig = lig.map((a) => a.add(out));
+    bonds = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 0], [0, 6], [3, 7], [6, 8]];
+  } else if (!bonds.length) bonds = lig.map((_, i) => [i, i + 1] as [number, number]).slice(0, -1);
   const ligC = lig.reduce((a, b) => a.clone().add(b), new THREE.Vector3()).multiplyScalar(1 / lig.length);
-  const ligand = new THREE.Group(); body.add(ligand);
-  const mint = new THREE.Color("#45f0a0");
-  ligand.add(k.points(lig.length, (i) => lig[i].clone().sub(ligC), 0, 0.42, 1, () => mint));
-  const bonds: [number, number][] = s.bonds?.length ? s.bonds : lig.map((_, i) => [i, i + 1] as [number, number]).slice(0, -1);
-  const bp: number[] = []; bonds.forEach(([i, j]) => { if (lig[i] && lig[j]) { const a = lig[i].clone().sub(ligC), b = lig[j].clone().sub(ligC); bp.push(a.x, a.y, a.z, b.x, b.y, b.z); } });
-  const bg = new THREE.BufferGeometry(); bg.setAttribute("position", new THREE.Float32BufferAttribute(bp, 3));
-  ligand.add(new THREE.LineSegments(bg, new THREE.LineBasicMaterial({ color: mint, opacity: 0.9, ...additive })));
-  const pocket = k.sprite(0x45f0a0, 2.2, 0); pocket.position.copy(ligC); body.add(pocket);
-  const start = ligC.clone().add(new THREE.Vector3(3.2, 2.2, 1.5));
+  const ligand = ballAndStick(k, lig.map((a) => a.clone().sub(ligC)), bonds, "#45f0a0", 0.2); body.add(ligand);
+  const pocket = k.sprite(0x45f0a0, 2.4, 0); pocket.position.copy(ligC); body.add(pocket);
+  const start = ligC.clone().add(ligC.clone().normalize().multiplyScalar(3.2)).add(new THREE.Vector3(0, 1.2, 0));
   return { group: g, anchor: new THREE.Vector3(), update(t, w) {
-    body.rotation.set(0.2, t * 0.12, 0);
-    const dock = smooth(0.35, 0.95, w);
+    body.rotation.set(0.25, t * 0.1, 0);
+    const dock = smooth(0.3, 0.9, w);
     ligand.position.lerpVectors(start, ligC, dock);
-    ligand.rotation.set(t * 0.7 * (1 - dock), t * 0.5 * (1 - dock), 0);
-    (pocket.material as THREE.SpriteMaterial).opacity = smooth(0.85, 1, dock) * (0.35 + 0.15 * Math.sin(t * 3));
+    ligand.rotation.set(t * 0.8 * (1 - dock), t * 0.6 * (1 - dock), 0);
+    (pocket.material as THREE.SpriteMaterial).opacity = smooth(0.8, 1, dock) * (0.45 + 0.2 * Math.sin(t * 3));
   } };
 }
 
 function relaxStation(s: any, k: Kit): Station {
   const g = new THREE.Group(), crystal = new THREE.Group(); g.add(crystal);
   let atoms: THREE.Vector3[];
-  if (s.atoms?.length) atoms = fit(s.atoms, 2.1);
-  else { atoms = []; for (let x = -1; x <= 1; x++) for (let y = -1; y <= 1; y++) for (let z = -1; z <= 1; z++) atoms.push(new THREE.Vector3(x, y, z).multiplyScalar(1.1)); }
-  const E: number[] = s.energies?.length ? s.energies : Array.from({ length: 40 }, (_, i) => -3 - 1.6 * (1 - Math.exp(-i / 7)));
-  const geo = new THREE.BufferGeometry(), pos = new Float32Array(atoms.length * 3); geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-  crystal.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x9fc2ff, size: 0.95, map: k.DOT, ...additive })));
-  const jitter = atoms.map(() => new THREE.Vector3(k.rnd(-1, 1), k.rnd(-1, 1), k.rnd(-1, 1)));
-  crystal.position.x = -1.3;
-  // energy trace beside the crystal: drawn as the relaxation runs
-  const lo = Math.min(...E), hi = Math.max(...E), W = 2.6, H = 2.2;
-  const trace = E.map((e, i) => new THREE.Vector3(1.0 + (i / Math.max(1, E.length - 1)) * W, ((e - lo) / Math.max(1e-6, hi - lo) - 0.5) * H, 0));
+  if (s.atoms?.length) atoms = fit(s.atoms, 1.9);
+  else { atoms = []; for (let x = -1; x <= 1; x++) for (let y = -1; y <= 1; y++) for (let z = -1; z <= 1; z++) atoms.push(new THREE.Vector3(x, y, z).multiplyScalar(1.05)); }
+  const E: number[] = s.energies?.length ? s.energies : Array.from({ length: 40 }, (_, i) => -3 - 1.6 * (1 - Math.exp(-i / 7)) + 0.06 * Math.sin(i * 1.3) * Math.exp(-i / 10));
+  // atoms start strained and settle onto their relaxed positions as the station is read
+  const strain = atoms.map(() => new THREE.Vector3(k.rnd(-1, 1), k.rnd(-1, 1), k.rnd(-1, 1)).multiplyScalar(0.42));
+  const balls = new THREE.InstancedMesh(new THREE.SphereGeometry(0.19, 18, 12), k.glow("#9fc2ff", { power: 1.1, base: 0.4, intensity: 1.0 }), atoms.length);
+  crystal.add(balls);
+  const pairs: [number, number][] = [];
+  const step = Math.min(...atoms.flatMap((a, i) => atoms.slice(i + 1).map((b) => a.distanceTo(b)))) * 1.15;
+  atoms.forEach((a, i) => atoms.forEach((b, j) => { if (i < j && a.distanceTo(b) < step) pairs.push([i, j]); }));
+  const bpos = new Float32Array(pairs.length * 6), bgeo = new THREE.BufferGeometry(); bgeo.setAttribute("position", new THREE.BufferAttribute(bpos, 3));
+  crystal.add(new THREE.LineSegments(bgeo, new THREE.LineBasicMaterial({ color: 0x5b8cff, opacity: 0.7, ...additive })));
+  crystal.position.x = -2.1;
+  // the energy falling as it relaxes, drawn beside the crystal
+  const lo = Math.min(...E), hi = Math.max(...E), W = 2.6, H = 2.2, x0 = 0.2;
+  const trace = E.map((e, i) => new THREE.Vector3(x0 + (i / Math.max(1, E.length - 1)) * W, ((e - lo) / Math.max(1e-6, hi - lo) - 0.5) * H, 0));
+  const dots = k.points(trace.length, (i) => trace[i], 0x45f0a0, 0.22, 1); g.add(dots);
   const tg = new THREE.BufferGeometry().setFromPoints(trace);
-  const line = new THREE.Line(tg, new THREE.LineBasicMaterial({ color: 0x45f0a0, opacity: 0.95, ...additive })); g.add(line);
-  const axis = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(1.0, -H / 2 - 0.2, 0), new THREE.Vector3(1.0 + W, -H / 2 - 0.2, 0)]);
-  g.add(new THREE.Line(axis, new THREE.LineBasicMaterial({ color: 0x3a4a63, opacity: 0.8, ...additive })));
-  const head = k.sprite(0x45f0a0, 0.6, 1); g.add(head);
+  g.add(new THREE.Line(tg, new THREE.LineBasicMaterial({ color: 0x45f0a0, opacity: 0.9, ...additive })));
+  const axis = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x0, H / 2 + 0.2, 0), new THREE.Vector3(x0, -H / 2 - 0.25, 0), new THREE.Vector3(x0 + W, -H / 2 - 0.25, 0)]);
+  g.add(new THREE.Line(axis, new THREE.LineBasicMaterial({ color: 0x4a5d7c, opacity: 0.9, ...additive })));
+  const head = k.sprite(0x45f0a0, 1.0, 1); g.add(head);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), one = new THREE.Vector3(1, 1, 1), cur = atoms.map((a) => a.clone());
   return { group: g, anchor: new THREE.Vector3(), update(t, w) {
-    const prog = smooth(0.1, 0.95, w), shake = 0.32 * (1 - prog) + 0.02;
-    atoms.forEach((a, i) => { const j = jitter[i]; pos.set([a.x + Math.sin(t * 7 + j.x * 9) * shake * j.x, a.y + Math.sin(t * 6 + j.y * 9) * shake * j.y, a.z + Math.sin(t * 8 + j.z * 9) * shake * j.z], i * 3); });
-    geo.attributes.position.needsUpdate = true;
-    crystal.rotation.set(0.5, t * 0.15, 0);
-    const shown = Math.max(2, Math.round(prog * E.length)); tg.setDrawRange(0, shown);
+    const prog = smooth(0.15, 0.95, w), left = (1 - prog) ** 1.5;
+    atoms.forEach((a, i) => { cur[i].copy(a).addScaledVector(strain[i], left).addScalar(Math.sin(t * 5 + i) * 0.015); balls.setMatrixAt(i, m.compose(cur[i], q, one)); });
+    balls.instanceMatrix.needsUpdate = true;
+    pairs.forEach(([i, j], n) => bpos.set([cur[i].x, cur[i].y, cur[i].z, cur[j].x, cur[j].y, cur[j].z], n * 6));
+    bgeo.attributes.position.needsUpdate = true;
+    crystal.rotation.set(0.45, 0.6 + t * 0.12, 0);
+    const shown = Math.max(2, Math.round(prog * E.length)); tg.setDrawRange(0, shown); dots.geometry.setDrawRange(0, shown);
     head.position.copy(trace[Math.min(shown, trace.length) - 1]);
   } };
 }
@@ -263,8 +296,13 @@ export async function chain(p: any, k: Kit): Promise<LevelObj> {
   return {
     group: root,
     update(t, _fin, d) {
-      const dd = Math.max(0, Math.min(n, d));
-      const w = stations.map((_, i) => Math.max(0, 1 - Math.abs(dd - (i + 1))));
+      // d counts the steps scrolled; a step's progress is how far the middle of the screen is through its card, so
+      // station i is centred at d = i + 0.5. Hold on it while its card is read and glide only as the next card's
+      // edge crosses the middle (`glide`, as a fraction of a step); the first station glides in from the overview.
+      const e = Math.min(n - 1, d - 0.5), gl = Math.min(0.5, Math.max(0.05, p.glide ?? 0.2));
+      const base = Math.round(e), fr = e - base;
+      const x = base + (fr > 0.5 - gl ? smooth(0.5 - gl, 0.5, fr) * 0.5 : fr < gl - 0.5 ? -smooth(gl - 0.5, -0.5, fr) * 0.5 : 0);
+      const w = stations.map((_, i) => (e < 0 ? (i === 0 ? smooth(-0.5, -0.5 + 2 * gl, e) : 0) : Math.max(0, 1 - Math.abs(x - i))));
       const wsum = w.reduce((a, b) => a + b, 0);
       // glide: the camera's subject moves to the weighted active station and comes closer
       focus.set(0, 0, 0); stations.forEach((s, i) => focus.add(tmp.copy(s.anchor).multiplyScalar(w[i])));
