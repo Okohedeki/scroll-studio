@@ -1298,3 +1298,35 @@ ordinary cached images (an edit of an unchanged frame is never redone).
 each match found, and with `--strip` writes a frame strip around every cut (`.build/cuts/cut_<n>.jpg`: the page before,
 through the stretch of scroll, after; headless Chrome) to look at. The MCP tool `cuts` does the same. The showcase spec is
 `examples/film-cuts`.
+
+### A pipeline of models (`scene3d` preset `chain`)
+
+For a product that strings models together, the `chain` preset draws a planner at the centre (a language model, an
+agent, a scheduler) and a ring of stations around it, one per step of the pipeline. Results flow from each station to
+the next. Use it as the only level of a `scene3d` section: each step after the intro moves the camera to the next
+station, holds there while its card is read, and glides on as the next card arrives. It needs no GPU at build time.
+
+```yaml
+# docs: no-validate (a fragment)
+- type: scene3d
+  layout: cards
+  levels:
+    - preset: chain
+      params:
+        planner: { label: planner }
+        stations:                     # in pipeline order, one step each
+          - { kind: sequence, label: reads/score }       # per-base scores along a double strand
+          - { kind: fold, label: protein/fold }          # a backbone coloured by per-residue confidence
+          - { kind: complex, label: protein/dock }       # a protein with a ligand docking into a pocket
+          - { kind: relax, label: atoms/relax }          # a lattice settling while its energy curve draws
+          - { kind: route, label: chem/route }           # a tree from the target down to buyable parts
+  steps:
+    - { intro: true, title: One request, five models }
+    - { title: Score the sequence }
+    # one step per station
+```
+
+Each station draws a stand-in of the right shape until you give it data: `scores` (sequence), `ca` and `confidence` 0-1
+(fold), `ca`, `ligand` and `bonds` (complex), `atoms` and `energies` (relax), `tree` with `name`, `stock` and
+`children` (route). `params.data` can name a JSON file next to the page that holds the same fields. `glide` (0.05-0.5,
+default 0.2) is how much of a step the camera spends moving between stations.
