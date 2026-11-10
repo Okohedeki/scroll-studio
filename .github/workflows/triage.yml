@@ -34,15 +34,15 @@ jobs:
         with:
           issue_message: |
             Thank you for opening your first issue in DesignAI. A maintainer will triage it within a few days
-            ([how issues are handled](https://github.com/Okohedeki/scroll-studio/blob/main/docs/maintainers/triage.md)).
-            If it's a question, [Discussions](https://github.com/Okohedeki/scroll-studio/discussions) may get you an
+            ([how issues are handled](https://github.com/Okohedeki/designai/blob/main/docs/maintainers/triage.md)).
+            If it's a question, [Discussions](https://github.com/Okohedeki/designai/discussions) may get you an
             answer sooner.
           pr_message: |
             Thank you for your first pull request to DesignAI. Two things before it can be merged:
             - it needs a linked issue a maintainer has accepted (the `pr-policy` check says what is missing), and
             - the CLA bot will ask you to sign the Contributor Licence Agreement, once.
 
-            The rules are in [CONTRIBUTING.md](https://github.com/Okohedeki/scroll-studio/blob/main/CONTRIBUTING.md).
+            The rules are in [CONTRIBUTING.md](https://github.com/Okohedeki/designai/blob/main/CONTRIBUTING.md).
 
   answered:
     if: >-

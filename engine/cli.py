@@ -43,7 +43,7 @@ import typer
 
 from .config import ROOT, settings
 
-app = typer.Typer(add_completion=False, help="DesignAI: product stills, ads, listings, product video and scroll-driven sites, from one photo or a short brief.\n\nDesignAI by Edeki Okoh: https://github.com/Okohedeki/scroll-studio (GNU AGPL-3.0, see NOTICE.md). Sites you build are yours under the DesignAI Output Exception.")
+app = typer.Typer(add_completion=False, help="DesignAI: product stills, ads, listings, product video and scroll-driven sites, from one photo or a short brief.\n\nDesignAI by Edeki Okoh: https://github.com/Okohedeki/designai (GNU AGPL-3.0, see NOTICE.md). Sites you build are yours under the DesignAI Output Exception.")
 
 STARTER = """name: My Site
 description: A scroll-driven site built with DesignAI.
@@ -499,7 +499,7 @@ def looks(name: str, styles: Optional[str] = typer.Option(None, help="Comma-sepa
 <main class="grid">
 {cards}
 </main>
-<footer><a href="../">Back to {_html.escape(site.name)}</a> · Made with <a href="https://github.com/Okohedeki/scroll-studio">DesignAI</a></footer>
+<footer><a href="../">Back to {_html.escape(site.name)}</a> · Made with <a href="https://github.com/Okohedeki/designai">DesignAI</a></footer>
 </body></html>
 """, encoding="utf-8")
     typer.echo(f"looks -> {root / 'index.html'}")

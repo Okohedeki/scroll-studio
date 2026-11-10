@@ -1,4 +1,4 @@
-"""DesignAI's ComfyUI nodes (AGPL-3.0, part of DesignAI: https://github.com/Okohedeki/scroll-studio).
+"""DesignAI's ComfyUI nodes (AGPL-3.0, part of DesignAI: https://github.com/Okohedeki/designai).
 
 Installed by `studio setup-comfy` (copies this folder into ComfyUI/custom_nodes/) and used by the engine's `reveal`
 (region masks for scroll-driven colour) and `faces` (face repair) stages. They are thin glue over models that are

@@ -1,6 +1,6 @@
 # DesignAI · From landing pages to a generation engine
 
-Status: design, phase 0 approved ([#172](https://github.com/Okohedeki/scroll-studio/issues/172)).
+Status: design, phase 0 approved ([#172](https://github.com/Okohedeki/designai/issues/172)).
 
 ## Why
 
@@ -120,7 +120,7 @@ A wired node canvas stays out of scope. If it comes later, it will be another vi
 
 | Phase | Scope | Gate |
 | --- | --- | --- |
-| 0 · Foundations ([#172](https://github.com/Okohedeki/scroll-studio/issues/172)) | `project.yaml` root and compatibility loader, model router, build profile, rename | Every example builds the same way through both roots |
+| 0 · Foundations ([#172](https://github.com/Okohedeki/designai/issues/172)) | `project.yaml` root and compatibility loader, model router, build profile, rename | Every example builds the same way through both roots |
 | 1 · Product imagery | Directions, candidates, critics and shortlist for stills | A product photo becomes a reviewed set of shots |
 | 2 · The board | Previews, compare, redo, lock and write-back in the Studio app | Every asset can be reviewed and redone from one screen |
 | 3 · More outputs | Short video with voiceover, ad sizes, generated page layouts, listing copy | Each output reuses the shared assets |

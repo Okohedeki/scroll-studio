@@ -27,8 +27,8 @@ No GPU: [Try it on a laptop](laptop.md).
 - **Chrome** (or `playwright install chromium`) for snapshots and recordings.
 
 ```bash
-git clone https://github.com/Okohedeki/scroll-studio
-cd scroll-studio
+git clone https://github.com/Okohedeki/designai
+cd designai
 pip install -e .            # engine, CLI, server, MCP server
 npm install && npm run build  # browser runtime + Studio UI
 studio doctor

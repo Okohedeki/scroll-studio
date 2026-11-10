@@ -45,7 +45,7 @@ export default function App() {
           {projects.filter((p) => p.kind === "example").map((p) => <a key={p.name} className={arg === p.name ? "on" : ""} href={`#p/${p.name}`}>{p.title}</a>)}
         </div>
         <div className="side-legal muted small">
-          DesignAI by Edeki Okoh · <a href="https://github.com/Okohedeki/scroll-studio" target="_blank" rel="noreferrer">source</a> · GNU AGPL-3.0
+          DesignAI by Edeki Okoh · <a href="https://github.com/Okohedeki/designai" target="_blank" rel="noreferrer">source</a> · GNU AGPL-3.0
         </div>
       </aside>
       <main className="main">

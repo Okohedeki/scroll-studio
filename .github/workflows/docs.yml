@@ -1,4 +1,4 @@
-# The docs site (https://okohedeki.github.io/scroll-studio/). Every pull request that touches the docs, the spec, the CLI
+# The docs site (https://okohedeki.github.io/designai/). Every pull request that touches the docs, the spec, the CLI
 # or the MCP server builds it in strict mode, so a broken link or a bad reference fails the check. Pushes to main build it
 # again and publish it to GitHub Pages. Once a week the external links are checked; that run is the only thing it does and
 # nothing blocks on it. How to build locally: docs/contributing/building-the-docs.md.

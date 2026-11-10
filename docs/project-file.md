@@ -2,7 +2,7 @@
 
 A project can be written as `project.yaml` instead of `site.yaml`. The project file sets what every output shares
 once, at the top, and puts each output under `outputs:`. A site is the first output; more follow
-([design](https://github.com/Okohedeki/scroll-studio/issues/172)).
+([design](https://github.com/Okohedeki/designai/issues/172)).
 
 ```yaml
 # docs: no-validate (a project file, not a site.yaml)

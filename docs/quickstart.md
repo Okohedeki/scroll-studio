@@ -7,7 +7,7 @@ for what each scene type needs). No GPU? [Try it on a laptop](laptop.md) is this
 ## Install and look around
 
 ```bash
-git clone https://github.com/Okohedeki/scroll-studio && cd scroll-studio
+git clone https://github.com/Okohedeki/designai && cd scroll-studio
 pip install -e .
 studio doctor                         # what this machine can build
 ```

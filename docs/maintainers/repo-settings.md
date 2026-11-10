@@ -24,7 +24,7 @@ page in the same pull request (or right after, for settings that only exist in t
 ## Security
 
 - Private vulnerability reporting: on.
-- Dependabot alerts and Dependabot security updates: on. Version updates: [.github/dependabot.yml](https://github.com/Okohedeki/scroll-studio/blob/main/.github/dependabot.yml).
+- Dependabot alerts and Dependabot security updates: on. Version updates: [.github/dependabot.yml](https://github.com/Okohedeki/designai/blob/main/.github/dependabot.yml).
 - Secret scanning and push protection: on.
 - Code scanning: CodeQL default setup (Python, JavaScript/TypeScript, GitHub Actions; extended query suite), plus
   OpenSSF Scorecard results.

@@ -18,7 +18,7 @@ DesignAI follows [semantic versioning](https://semver.org): `MAJOR.MINOR.PATCH`.
 | **The built page** (the runtime in `engine/compile/static/runtime/`) | A built site keeps working as a static folder with no server. Its scroll behaviour, timing and accessibility do not change without a spec field asking for it. |
 | **The CLI** (`studio ...`) | Commands, options and exit codes keep working. Output meant for people (tables, progress) may change; anything documented as machine-readable (`--json`) does not. |
 | **The MCP tools** | Tool names and their inputs keep working; new inputs are optional. |
-| **The style contract** ([engine/styles/README.md](https://github.com/Okohedeki/scroll-studio/blob/main/engine/styles/README.md)) | A project style written to the contract keeps rendering. |
+| **The style contract** ([engine/styles/README.md](https://github.com/Okohedeki/designai/blob/main/engine/styles/README.md)) | A project style written to the contract keeps rendering. |
 | **Theme presets and styles** | Keep their names and character. Colours may be adjusted to meet the contrast rules. |
 
 Not covered: internal Python modules and functions (anything not reached through the spec, CLI or MCP), the cache

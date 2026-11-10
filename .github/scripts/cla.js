@@ -8,7 +8,7 @@ const BRANCH = "cla-signatures";
 const FILE = "signatures/cla.json";
 const ALLOWLIST = ["Okohedeki"];
 const MARKER = "<!-- scroll-studio-cla -->";
-const CLA_URL = "https://github.com/Okohedeki/scroll-studio/blob/main/CLA.md";
+const CLA_URL = "https://github.com/Okohedeki/designai/blob/main/CLA.md";
 
 const isBot = (login) => /\[bot\]$/.test(login);
 const isSigning = (body) => (body || "").trim().replace(/\s+/g, " ").replace(/\.$/, "") === SENTENCE;

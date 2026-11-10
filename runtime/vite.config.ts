@@ -17,7 +17,7 @@ export default defineConfig({
       output: {
         format: "es",
         // NOTICE.md: this comment must stay in every copy of the runtime (the Output Exception depends on it)
-        banner: "/*! DesignAI runtime by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. GNU AGPL-3.0 with the DesignAI Output Exception (see NOTICE.md); keep this notice. */",
+        banner: "/*! DesignAI runtime by Edeki Okoh: https://github.com/Okohedeki/designai. GNU AGPL-3.0 with the DesignAI Output Exception (see NOTICE.md); keep this notice. */",
         entryFileNames: "index.js",
         chunkFileNames: "chunks/[name]-[hash].js",
         assetFileNames: (a) => (a.names?.[0]?.endsWith(".css") ? "studio.css" : "assets/[name]-[hash][extname]"),

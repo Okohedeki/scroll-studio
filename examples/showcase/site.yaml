@@ -13,7 +13,7 @@ nav:
     - { label: In 1.4, href: "#v1-4" }
     - { label: Every scene, href: "#examples" }
     - { label: Concepts, href: ../concepts/dist/index.html }
-  cta: { label: GitHub, href: "https://github.com/Okohedeki/scroll-studio" }
+  cta: { label: GitHub, href: "https://github.com/Okohedeki/designai" }
 sections:
   - id: hello
     type: type
@@ -88,5 +88,5 @@ sections:
   - type: cta
     kicker: Open source (AGPL-3.0) · local models only, no API keys
     title: Build one <em>tonight.</em>
-    button: { label: Get DesignAI, href: "https://github.com/Okohedeki/scroll-studio" }
+    button: { label: Get DesignAI, href: "https://github.com/Okohedeki/designai" }
 footer: { left: "DesignAI · AGPL-3.0", right: "Every example on this page is a concept site." }

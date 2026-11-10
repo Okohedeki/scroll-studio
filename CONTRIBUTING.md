@@ -22,9 +22,9 @@ every change keeps, so the engine stays consistent as more people work on it.
 **Every pull request starts with an issue**, for everyone, maintainers included. A check on every pull request fails
 until it links an issue that a maintainer has accepted, so nobody spends time on work that won't be merged:
 
-1. **Find or open the issue.** Search the [issues](https://github.com/Okohedeki/scroll-studio/issues) and the
-   [milestones](https://github.com/Okohedeki/scroll-studio/milestones) first. Questions belong in
-   [Discussions](https://github.com/Okohedeki/scroll-studio/discussions) ([SUPPORT.md](SUPPORT.md)).
+1. **Find or open the issue.** Search the [issues](https://github.com/Okohedeki/designai/issues) and the
+   [milestones](https://github.com/Okohedeki/designai/milestones) first. Questions belong in
+   [Discussions](https://github.com/Okohedeki/designai/discussions) ([SUPPORT.md](SUPPORT.md)).
 2. **Wait for `status: accepted`.** A maintainer triages new issues within a few days
    ([docs/maintainers/triage.md](docs/maintainers/triage.md)). Small fixes (a typo, a broken link, a clear bug) are
    accepted quickly.
@@ -127,7 +127,7 @@ same day.
 ## Set up
 
 ```bash
-git clone https://github.com/<you>/scroll-studio && cd scroll-studio
+git clone https://github.com/<you>/designai && cd designai
 pip install -e ".[dev]"            # add extras you need: .[ml,mesh,cad,...] (see pyproject.toml)
 npm ci                             # the runtime and the Studio UI
 python -m pytest -q                # the whole suite, no GPU needed (about 10 minutes)
@@ -137,7 +137,7 @@ studio doctor                      # what your machine can build
 GPU stages need ComfyUI, Blender and the models: [docs/INSTALL.md](docs/INSTALL.md). You do not need them to work on
 the spec, the compiler, the runtime, styles or docs.
 
-The docs site (https://okohedeki.github.io/scroll-studio/) builds from `docs/` with
+The docs site (https://okohedeki.github.io/designai/) builds from `docs/` with
 `pip install -e ".[docs]"`, `python -m engine.docsgen docs/reference` and `mkdocs serve`
 ([building the docs](docs/contributing/building-the-docs.md)).
 
@@ -337,5 +337,5 @@ for the contribution and signs the CLA.
 
 ## Reporting bugs and security issues
 
-- **Bugs and ideas:** [open an issue](https://github.com/Okohedeki/scroll-studio/issues/new/choose) with the template.
+- **Bugs and ideas:** [open an issue](https://github.com/Okohedeki/designai/issues/new/choose) with the template.
 - **Security problems:** do not open a public issue; follow [SECURITY.md](SECURITY.md).

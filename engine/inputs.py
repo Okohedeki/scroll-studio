@@ -22,7 +22,7 @@ def resolve_path(project: Project, ref: str, log=print) -> Path:
             would_render("download", ref)
             out.parent.mkdir(parents=True, exist_ok=True)
             log(f"  downloading {ref}")
-            ua = {"User-Agent": "DesignAI/0.1 (+https://github.com/Okohedeki/scroll-studio)"}
+            ua = {"User-Agent": "DesignAI/0.1 (+https://github.com/Okohedeki/designai)"}
             with requests.get(ref, stream=True, timeout=60, headers=ua) as r:
                 r.raise_for_status()
                 tmp = out.with_suffix(out.suffix + ".part")

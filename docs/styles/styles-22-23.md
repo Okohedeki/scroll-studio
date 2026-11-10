@@ -1,4 +1,4 @@
-> Style research from DesignAI by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
+> Style research from DesignAI by Edeki Okoh: https://github.com/Okohedeki/designai. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
 
 # DesignAI style research: styles 22 and 23
 

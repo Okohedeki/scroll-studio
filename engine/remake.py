@@ -37,7 +37,7 @@ from urllib.parse import urljoin, urlparse
 from .project import BuildError, Project, child
 
 AGENT = "DesignAI"                      # the token robots.txt rules are matched against
-UA = {"User-Agent": "DesignAI-remake (+https://github.com/Okohedeki/scroll-studio)"}
+UA = {"User-Agent": "DesignAI-remake (+https://github.com/Okohedeki/designai)"}
 MAX_PAGE = 8_000_000                        # bytes of markup read
 MAX_IMAGES = 12                             # pictures saved into inputs/
 MAX_IMAGE_BYTES = 12_000_000                # one picture larger than this is skipped

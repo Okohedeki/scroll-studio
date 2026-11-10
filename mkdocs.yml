@@ -1,11 +1,11 @@
-# The docs site: https://okohedeki.github.io/scroll-studio/
+# The docs site: https://okohedeki.github.io/designai/
 # Build it with `python -m engine.docsgen docs/reference && mkdocs build --strict` (docs/contributing/building-the-docs.md).
 site_name: DesignAI
 site_description: Open-source engine for scroll-driven websites. One YAML file in, a finished site out, made on your own GPU with no API keys.
-site_url: https://okohedeki.github.io/scroll-studio/
+site_url: https://okohedeki.github.io/designai/
 site_author: Edeki Okoh
-repo_url: https://github.com/Okohedeki/scroll-studio
-repo_name: Okohedeki/scroll-studio
+repo_url: https://github.com/Okohedeki/designai
+repo_name: Okohedeki/designai
 edit_uri: edit/main/docs/
 copyright: DesignAI is free software under the GNU AGPL-3.0 with additional terms. Sites you build are yours.
 
@@ -88,7 +88,7 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/Okohedeki/scroll-studio
+      link: https://github.com/Okohedeki/designai
 
 nav:
   - Home: index.md

@@ -22,7 +22,7 @@ own research brief), docs and tests.
 
 ## How it works
 
-1. **Start a discussion** in [Discussions → Proposals](https://github.com/Okohedeki/scroll-studio/discussions) with
+1. **Start a discussion** in [Discussions → Proposals](https://github.com/Okohedeki/designai/discussions) with
    the idea in a few paragraphs. This is the cheapest place to find out it won't fly.
 2. **Write the RFC**: copy [0000-template.md](0000-template.md) to `docs/rfcs/0000-short-name.md` and open a pull
    request, linked to the issue for the work, labelled `type: rfc`. Keep the number `0000` until it is accepted.

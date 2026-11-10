@@ -28,7 +28,7 @@ needs no change to how things work, only names in [MAINTAINERS.md](MAINTAINERS.m
 - **The ground rules** in [CONTRIBUTING.md](CONTRIBUTING.md#ground-rules) (engine features, local-first with hosted models optional, the spec
   as the source of truth, old sites keep building, nothing from one machine, accessible by default) are what make
   DesignAI what it is. Changing one needs an RFC and the maintainer's approval.
-- **The roadmap** lives in the [milestones](https://github.com/Okohedeki/scroll-studio/milestones) and
+- **The roadmap** lives in the [milestones](https://github.com/Okohedeki/designai/milestones) and
   [docs/directions.md](docs/directions.md). Anyone can propose a change to it in Discussions.
 
 ## Becoming a triager or area maintainer

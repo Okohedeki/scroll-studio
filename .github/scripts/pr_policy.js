@@ -5,7 +5,7 @@
 // The workflows load this file from the base branch, so a pull request cannot change the rules it is checked by.
 // tests/test_pr_policy.py covers the pure functions.
 
-const REPO_URL = "https://github.com/Okohedeki/scroll-studio";
+const REPO_URL = "https://github.com/Okohedeki/designai";
 
 const TYPES = ["feat", "fix", "perf", "docs", "test", "refactor", "style", "build", "ci", "chore", "revert"];
 const SCOPES = ["runtime", "spec", "compiler", "scenes", "styles", "themes", "models", "cli", "mcp", "ui", "docs",

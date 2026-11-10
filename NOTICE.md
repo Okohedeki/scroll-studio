@@ -26,7 +26,7 @@ Every copy of the Program, every modified version, and every work based on the P
 offered to users over a network, must keep this notice file and must preserve the following attribution notice
 **exactly as written, without alteration**:
 
-> Based on DesignAI by Edeki Okoh: https://github.com/Okohedeki/scroll-studio (GNU AGPL-3.0)
+> Based on DesignAI by Edeki Okoh: https://github.com/Okohedeki/designai (GNU AGPL-3.0)
 
 The notice must appear:
 - in the work's licence or notice file and its README (or equivalent top-level documentation);
@@ -36,7 +36,7 @@ The notice must appear:
 Any publication, product, documentation, dataset, course or service that uses or adapts **the Findings** must credit
 them with this notice, exactly as written, where the Findings are used:
 
-> Style research from DesignAI by Edeki Okoh: https://github.com/Okohedeki/scroll-studio
+> Style research from DesignAI by Edeki Okoh: https://github.com/Okohedeki/designai
 
 ### 2. No misrepresentation (section 7(c))
 

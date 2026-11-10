@@ -3,7 +3,7 @@
 ## Reporting a problem
 
 Please do not report security problems in public issues, pull requests or discussions. Use GitHub's private
-reporting instead: **[Report a vulnerability](https://github.com/Okohedeki/scroll-studio/security/advisories/new)**.
+reporting instead: **[Report a vulnerability](https://github.com/Okohedeki/designai/security/advisories/new)**.
 Only the maintainers see the report.
 
 Include what you found, how to reproduce it (a spec, a request, a file), what an attacker could do with it, and the

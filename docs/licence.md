@@ -10,9 +10,9 @@ section 7 ([NOTICE.md](../NOTICE.md)):
   offered over a network, and including code an AI agent produced from this repository) must be released under the
   AGPL with its complete source.
 - **Attribution, word for word.** Derivatives keep the notice
-  `Based on DesignAI by Edeki Okoh: https://github.com/Okohedeki/scroll-studio (GNU AGPL-3.0)` in their README,
+  `Based on DesignAI by Edeki Okoh: https://github.com/Okohedeki/designai (GNU AGPL-3.0)` in their README,
   notice file and About / `--version` / footer, and work that uses the research in `docs/styles` credits it as
-  `Style research from DesignAI by Edeki Okoh: https://github.com/Okohedeki/scroll-studio`.
+  `Style research from DesignAI by Edeki Okoh: https://github.com/Okohedeki/designai`.
 - **No misrepresentation.** Modified versions are marked as modified, may not claim to be the original or be named
   "DesignAI", and nobody may present the code or the research as their own.
 - **Your sites are yours.** Sites you build with DesignAI are covered by the DesignAI Output Exception: license
