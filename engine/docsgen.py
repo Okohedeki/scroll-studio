@@ -470,7 +470,7 @@ def _usage(full: str, cmd: Any) -> str:
     parts = [full, "[OPTIONS]"] if any(not _is_argument(p) and p.name != "help" for p in cmd.params) else [full]
     for p in cmd.params:
         if _is_argument(p):
-            name = p.human_readable_name.upper() + ("..." if p.nargs == -1 else "")
+            name = (getattr(p, "human_readable_name", None) or p.metavar or p.name).upper() + ("..." if p.nargs == -1 else "")
             parts.append(name if p.required else f"[{name}]")
     return " ".join(parts)
 
@@ -492,7 +492,7 @@ def _anchor(full: str) -> str:
 def _param_table(kind: str, params: list[Any]) -> list[str]:
     lines = [f"| {kind} | Type | Default | Description |", "| --- | --- | --- | --- |"]
     for p in params:
-        label = f"`{p.human_readable_name}`" if _is_argument(p) else _option_names(p)
+        label = f"`{getattr(p, 'human_readable_name', None) or p.metavar or p.name}`" if _is_argument(p) else _option_names(p)
         lines.append(f"| {label} | {_type_text(p)} | {_default_text(p)} | {prose(getattr(p, 'help', None) or '')} |")
     return lines + [""]
 
