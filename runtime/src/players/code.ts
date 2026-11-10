@@ -243,7 +243,7 @@ function drawTerminal(g: CanvasRenderingContext2D, W: number, H: number, t: Term
   // title bar: name left, model right
   const small = Math.round(19 * u);
   g.font = `600 ${small}px "${mono}", monospace`;
-  g.fillStyle = "#c9ccd1"; g.fillText(t.logo.replace("|", ""), bx + 28 * u, by + bar / 2);
+  g.fillStyle = "#c9ccd1"; g.fillText(t.logo.split("|").join(""), bx + 28 * u, by + bar / 2);
   const tag = [t.agent, t.model, t.provider].filter(Boolean).join(" · ");
   if (tag) { g.textAlign = "right"; g.font = `400 ${small}px "${mono}", monospace`; g.fillStyle = "#7b8089";
     g.fillText(tag, bx + bw - 28 * u, by + bar / 2); g.textAlign = "left"; }
