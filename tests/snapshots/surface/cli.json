@@ -280,6 +280,81 @@
     }
    }
   },
+  "cloud": {
+   "commands": {
+    "buy": {
+     "help": "Open a checkout page for a credit pack; the credits land on the account when the payment clears.",
+     "params": {
+      "no_open": {
+       "default": false,
+       "kind": "option",
+       "multiple": false,
+       "opts": [
+        "--no-no-open",
+        "--no-open"
+       ],
+       "required": false,
+       "type": "boolean"
+      },
+      "pack": {
+       "default": null,
+       "kind": "argument",
+       "multiple": false,
+       "opts": [
+        "pack"
+       ],
+       "required": false,
+       "type": "str"
+      }
+     }
+    },
+    "login": {
+     "help": "Sign in with a link sent to your email; the account is kept in your user config folder.",
+     "params": {
+      "email": {
+       "default": null,
+       "kind": "option",
+       "multiple": false,
+       "opts": [
+        "--email"
+       ],
+       "required": true,
+       "type": "str"
+      },
+      "open_link": {
+       "default": false,
+       "kind": "option",
+       "multiple": false,
+       "opts": [
+        "--open"
+       ],
+       "required": false,
+       "type": "boolean"
+      },
+      "url": {
+       "default": null,
+       "kind": "option",
+       "multiple": false,
+       "opts": [
+        "--url"
+       ],
+       "required": false,
+       "type": "str"
+      }
+     }
+    },
+    "logout": {
+     "help": "Forget the cloud sign-in on this machine (and revoke it on the service).",
+     "params": {}
+    },
+    "status": {
+     "help": "The signed-in account, its balance, and what each kind of job costs.",
+     "params": {}
+    }
+   },
+   "help": "The optional cloud account: provider jobs on credits, for builders without API keys. Local models and your own keys stay free and come first.",
+   "params": {}
+  },
   "combine": {
    "help": "Join recordings into one video with crossfades (e.g. a reel of several sites).",
    "params": {

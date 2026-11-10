@@ -8,7 +8,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Literal, Optional, Protocol, Union
 
-Kind = Literal["image", "edit", "text", "speech"]
+Kind = Literal["image", "edit", "text", "speech", "video"]
 
 
 @dataclass(frozen=True)
@@ -47,7 +47,19 @@ class SpeechJob:
     kind: Kind = "speech"
 
 
-Job = Union[ImageJob, EditJob, TextJob, SpeechJob]
+@dataclass(frozen=True)
+class VideoJob:
+    image: str                       # path of the still the clip starts on
+    prompt: str                      # what moves, and how
+    seconds: float
+    width: int                       # the size the frames are wanted at (a provider renders at its nearest size)
+    height: int
+    seed: int
+    end_image: Optional[str] = None  # a still the clip should land on, where the backend can
+    kind: Kind = "video"
+
+
+Job = Union[ImageJob, EditJob, TextJob, SpeechJob, VideoJob]
 
 
 @dataclass
@@ -55,7 +67,7 @@ class Result:
     backend: str
     model: str
     seconds: float
-    path: Optional[Path] = None      # image and edit jobs
+    path: Optional[Path] = None      # image, edit and speech jobs; an MP4 for video jobs
     text: Optional[str] = None       # text jobs
     meta: dict = field(default_factory=dict)
 
@@ -174,6 +186,23 @@ def edit_on_provider(images: list, instruction: str, seed: int, steps: int, out:
     if b.local:
         return False
     route(EditJob(tuple(str(i) for i in images), instruction, seed, steps), out, policy, build=build, log=log)
+    return True
+
+
+def video_on_provider(still: Path, prompt: str, seconds: float, seed: int, out: Path, size: tuple[int, int],
+                      end_image: Optional[Path] = None, policy: Any = None, build: Optional[Path] = None,
+                      log=lambda m: None) -> bool:
+    """Animate `still` on a provider backend when the policy picks one, writing the MP4 `out`. False means the local
+    ComfyUI path (LTX-2.3 or Wan 2.2) should run as before, including when no video backend can run."""
+    policy = CURRENT.get() if policy is None else policy
+    try:
+        b = choose("video", policy)
+    except NoBackend:
+        return False
+    if b.local:
+        return False
+    route(VideoJob(str(still), prompt, seconds, size[0], size[1], seed, str(end_image) if end_image else None), out,
+          policy, build=build, log=log)
     return True
 
 

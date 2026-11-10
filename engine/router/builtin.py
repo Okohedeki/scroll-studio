@@ -1,10 +1,11 @@
 """The built-in backends. Local: ComfyUI (Z-Image Turbo stills, Qwen-Image-Edit edits). Providers, each used only when
 its key is set: Anthropic (text), OpenAI (images and edits), ElevenLabs (speech) and any OpenAI-compatible text server (`text_url` in
-studio.toml, for example a model served on this machine). Licences and terms belong to each provider."""
+studio.toml, for example a model served on this machine), plus the frontier backends in providers.py (OpenAI text, Gemini,
+FLUX, Runway). Last comes the Scroll Studio cloud account (engine/cloud.py), which runs provider jobs on credits for
+builders without keys of their own. Licences and terms belong to each provider."""
 from __future__ import annotations
 
 import base64
-import io
 import os
 import shutil
 from pathlib import Path
@@ -15,20 +16,7 @@ from ..config import settings
 from .core import EditJob, ImageJob, Job, Kind, Result, SpeechJob, TextJob, register
 
 
-def _key(*names: str) -> Optional[str]:
-    return next((os.environ[n] for n in names if os.environ.get(n)), None)
-
-
-def _fit(data: bytes, out: Path, width: int, height: int) -> Path:
-    """Write image bytes to `out` at exactly width x height (scaled to cover, centre-cropped)."""
-    from PIL import Image
-    im = Image.open(io.BytesIO(data)).convert("RGB")
-    s = max(width / im.width, height / im.height)
-    im = im.resize((max(width, round(im.width * s)), max(height, round(im.height * s))), Image.LANCZOS)
-    left, top = (im.width - width) // 2, (im.height - height) // 2
-    out.parent.mkdir(parents=True, exist_ok=True)
-    im.crop((left, top, left + width, top + height)).save(out)
-    return out
+from .util import _fit, _key  # noqa: E402,F401  (shared with providers.py)
 
 
 # ---------------------------------------------------------------- local
@@ -230,5 +218,10 @@ class ElevenLabsSpeech:
         return Result(self.name, model, 0.0, path=out, meta={"voice": voice})
 
 
-for _b in (ComfyBackend(), OpenAICompatibleText(), AnthropicBackend(), OpenAIImages(), ElevenLabsSpeech()):
+from .providers import FluxBackend, GeminiBackend, OpenAIText, RunwayBackend  # noqa: E402  (they use the helpers above)
+from ..cloud import CloudBackend  # noqa: E402
+
+# Order is the tie-break: local first, then the builder's own keys (no credits), the cloud account last.
+for _b in (ComfyBackend(), OpenAICompatibleText(), AnthropicBackend(), OpenAIImages(), OpenAIText(), GeminiBackend(),
+           FluxBackend(), RunwayBackend(), ElevenLabsSpeech(), CloudBackend()):
     register(_b)
