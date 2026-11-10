@@ -28,7 +28,7 @@ for ext, typ in ((".js", "text/javascript"), (".mjs", "text/javascript"), (".css
                  (".glb", "model/gltf-binary"), (".json", "application/json"), (".mp4", "video/mp4")):
     mimetypes.add_type(typ, ext)
 
-app = FastAPI(title="Scroll Studio")
+app = FastAPI(title="DesignAI")
 app.add_middleware(LocalOnly, extra_ports=UI_DEV_PORTS)    # Host and Origin checks: see local_only.py
 jobs = JobQueue()
 PROJECTS = Path(settings()["projects"])

@@ -1,10 +1,10 @@
-> Style research from Scroll Studio by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
+> Style research from DesignAI by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
 
-# Scroll Studio style research: styles 22 and 23
+# DesignAI style research: styles 22 and 23
 
 **Pinscreen, Sand animation**
 
-Prepared 2026-10-12 for the Scroll Studio engine. These are the first two of the animation-technique batch (styles 22 to 27). The question for this batch is sharper than for the earlier ones: scroll-driven pages are everywhere now, so each style starts from a classic technique's own *mechanic* and asks what "scrolling" becomes inside it. Wheel and touch scroll stay the main input, but the technique decides what that input does.
+Prepared 2026-10-12 for the DesignAI engine. These are the first two of the animation-technique batch (styles 22 to 27). The question for this batch is sharper than for the earlier ones: scroll-driven pages are everywhere now, so each style starts from a classic technique's own *mechanic* and asks what "scrolling" becomes inside it. Wheel and touch scroll stay the main input, but the technique decides what that input does.
 
 > **How to read the citations.** URLs are inline. Where a claim comes from general knowledge of the films or the craft and not from a source I retrieved, I say "(general knowledge)". Pin counts and release years differ between sources; where they do, I give the range and say so.
 

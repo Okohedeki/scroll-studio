@@ -178,7 +178,7 @@ dl {{ display: grid; grid-template-columns: 64px 1fr; gap: 3px 10px; font-size: 
 </style></head><body>
 <h1>{e(head['title'])}</h1><p class="sum">{e(head['line'])}</p><p class="sum2">{e(head['line2'])}</p><nav>{nav}</nav>
 <main class="grid">{''.join(items)}</main>
-<p class="sum2" style="margin-top:28px">Made with Scroll Studio (`studio storyboard`) · {time.strftime('%Y-%m-%d %H:%M')}</p>
+<p class="sum2" style="margin-top:28px">Made with DesignAI (`studio storyboard`) · {time.strftime('%Y-%m-%d %H:%M')}</p>
 </body></html>"""
     path = out / "storyboard.html"
     path.write_text(page, encoding="utf-8")

@@ -1,10 +1,10 @@
-> Style research from Scroll Studio by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
+> Style research from DesignAI by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
 
-# Scroll Studio style research: styles 24 and 25
+# DesignAI style research: styles 24 and 25
 
 **Zoetrope, Flipbook**
 
-Prepared 2026-10-12 for the Scroll Studio engine, as part of the animation-technique batch (styles 22 to 27). These two styles come from the two oldest ways of making drawings move by hand: a drum you spin and a pad you thumb. Both are pre-cinema toys, and both answer the batch's question in a different way: *what does scrolling become inside this technique?* In the zoetrope, the page is **a prize wheel of cards under a strobe**: you spin it, the figures come alive while it is fast, and it lands on one card you can open. In the flipbook, scrolling is **the thumb**: every notch lets go of one page, and the drawing is wherever your thumb has got to.
+Prepared 2026-10-12 for the DesignAI engine, as part of the animation-technique batch (styles 22 to 27). These two styles come from the two oldest ways of making drawings move by hand: a drum you spin and a pad you thumb. Both are pre-cinema toys, and both answer the batch's question in a different way: *what does scrolling become inside this technique?* In the zoetrope, the page is **a prize wheel of cards under a strobe**: you spin it, the figures come alive while it is fast, and it lands on one card you can open. In the flipbook, scrolling is **the thumb**: every notch lets go of one page, and the drawing is wherever your thumb has got to.
 
 > **How to read the citations.** URLs are inline. Where a claim comes from general animation or design knowledge and not from a source I retrieved, I say "(general knowledge)". Some figures (frame counts, installation sizes) differ between sources; where they do I say so instead of picking one silently.
 

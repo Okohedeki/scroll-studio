@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "scroll-studio": {
+    "designai": {
       "command": "python",
       "args": ["-m", "engine.mcp_server"]
     }

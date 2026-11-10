@@ -1,6 +1,6 @@
-# Installing Scroll Studio
+# Installing DesignAI
 
-Scroll Studio runs entirely on your machine. What you need depends on which scene types you use:
+DesignAI runs entirely on your machine. What you need depends on which scene types you use:
 
 | Scene type | Needs |
 |---|---|
@@ -59,7 +59,7 @@ lists what can run here, and a spec's `models:` picks ([the project file](projec
 film beats and `theme.art` are animated by a provider's video model instead of LTX-2.3 or Wan. Each provider's own terms
 apply to what it makes.
 
-**No keys? The cloud account.** `studio cloud login` signs in to a Scroll Studio cloud account, which runs the same
+**No keys? The cloud account.** `studio cloud login` signs in to a DesignAI cloud account, which runs the same
 provider jobs on credits (`studio cloud status` shows the prices, `studio cloud buy` tops up). It is the router's last
 choice: local models and your own keys always come first and stay free.
 
@@ -79,7 +79,7 @@ Depth Anything V2 downloads into `<model_dir>/hf` on first use (set `model_dir` 
 
 ## 3. Blender (sequence, film)
 
-Install Blender 4.2 LTS or newer. Scroll Studio finds it in the default install location, or set `blender = "…"`
+Install Blender 4.2 LTS or newer. DesignAI finds it in the default install location, or set `blender = "…"`
 in `studio.toml` (copy `studio.example.toml`) or the `BLENDER` environment variable.
 
 ## 4. ComfyUI (film, generated images)
@@ -103,7 +103,7 @@ in `studio.toml` (copy `studio.example.toml`) or the `BLENDER` environment varia
    ```
    On Windows set `PYTHONUTF8=1` first. Close games before rendering; they take VRAM and stall renders.
 
-Scroll Studio talks to ComfyUI at `comfy_url` (default http://127.0.0.1:8188).
+DesignAI talks to ComfyUI at `comfy_url` (default http://127.0.0.1:8188).
 
 **Wan 2.2 (optional second video model, `video_model: wan`).** Download the eight Wan files listed in
 `engine/models.yaml` from https://huggingface.co/Comfy-Org/Wan_2.2_ComfyUI_Repackaged into the same folders (Wan needs
@@ -114,7 +114,7 @@ sits in a subfolder or under another name, set it in `studio.toml` under `[wan]`
 
 **Reveal and faces (optional: `reveal:` and `faces: restore` on a film).** Both run in ComfyUI. `studio setup-comfy`
 clones kijai's [ComfyUI-segment-anything-2](https://github.com/kijai/ComfyUI-segment-anything-2) (Apache-2.0) and
-[ComfyUI-Florence2](https://github.com/kijai/ComfyUI-Florence2) (MIT) into `custom_nodes/`, copies Scroll Studio's own
+[ComfyUI-Florence2](https://github.com/kijai/ComfyUI-Florence2) (MIT) into `custom_nodes/`, copies DesignAI's own
 `scroll_studio_nodes` there (it holds SAM 2.1 tracking with box prompts and the face repair, and bundles GFPGAN's
 network definition under its Apache-2.0 licence) and downloads GFPGAN v1.4 (~350 MB) into `models/facerestore_models/`.
 Set `comfy_dir` in `studio.toml` first if ComfyUI isn't at `<model_dir>/ComfyUI`. Then **restart ComfyUI when its queue is
@@ -125,7 +125,7 @@ build. The stages need ~4 GB of VRAM and, per frame of film, ~6 MB of system RAM
 ## 5. TRELLIS (optional: a product model from one photo)
 
 `take.product.from_photo` turns a product photo into a mesh with TRELLIS before rendering it. Install TRELLIS in
-its own environment, then tell Scroll Studio how to run it (`studio.toml` or environment variables):
+its own environment, then tell DesignAI how to run it (`studio.toml` or environment variables):
 
 ```toml
 trellis_python = "/path/to/trellis/venv/bin/python"      # TRELLIS_PYTHON
@@ -136,7 +136,7 @@ A real model (`model:`) always looks better than a reconstruction; use the photo
 
 ## 6. Claude
 
-- **Claude Code**: open the repo; `.mcp.json` registers the `scroll-studio` MCP server, and the skills in
+- **Claude Code**: open the repo; `.mcp.json` registers the `designai` MCP server, and the skills in
   `.agents/skills/` (mirrored in `.claude/skills/`) teach the workflow. Ask for a site in plain language.
 - **Claude Desktop / other MCP clients**: add a server that runs `python -m engine.mcp_server` with the repo as the
   working directory.

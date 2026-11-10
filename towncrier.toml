@@ -1,7 +1,7 @@
 # Changelog fragments (changes/README.md). At release time `towncrier build --version X.Y.Z` turns the fragments in
 # changes/ into a section of CHANGELOG.md and deletes them (docs/maintainers/releasing.md).
 [tool.towncrier]
-name = "Scroll Studio"
+name = "DesignAI"
 directory = "changes"
 filename = "CHANGELOG.md"
 start_string = "<!-- towncrier release notes start -->\n"

@@ -1,10 +1,10 @@
 # Compatibility and deprecation
 
-What you can rely on between Scroll Studio releases, and how things change when they have to.
+What you can rely on between DesignAI releases, and how things change when they have to.
 
 ## Versions
 
-Scroll Studio follows [semantic versioning](https://semver.org): `MAJOR.MINOR.PATCH`.
+DesignAI follows [semantic versioning](https://semver.org): `MAJOR.MINOR.PATCH`.
 
 - **Patch** (1.4.1): fixes only. A site that built before builds the same page, except where the old page was wrong.
 - **Minor** (1.5.0): new features. Everything that worked keeps working; deprecated things warn.

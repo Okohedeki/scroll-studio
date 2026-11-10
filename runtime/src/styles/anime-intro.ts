@@ -184,8 +184,8 @@ export default function start(): void {
   const hud = { song: $("[data-song]"), credit: $("[data-credit]"), cut: $("[data-cut]"), tc: $("[data-tc]") };
   // staff credits in the corner, one per cut (a pastiche of OP credits, built from the site itself)
   const song = ($(".ai-titlecard")?.textContent || siteName).replace(/\s+/g, " ").trim();
-  const credits: [string, string][] = [["Original concept", siteName], ["Storyboard & direction", "Scroll Studio"], ["Theme song", `“${song}”`],
-    ["Key animation", "Scroll Studio"], ["Colour design", siteName], ["Production", `${siteName} Production Committee`]];
+  const credits: [string, string][] = [["Original concept", siteName], ["Storyboard & direction", "DesignAI"], ["Theme song", `“${song}”`],
+    ["Key animation", "DesignAI"], ["Colour design", siteName], ["Production", `${siteName} Production Committee`]];
 
   function onCut(shot: Shot) {
     live = shot;

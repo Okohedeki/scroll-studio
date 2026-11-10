@@ -1,10 +1,10 @@
 # Threat model
 
-What Scroll Studio trusts, what it does not, and how each risk is handled. Keep this page current: a pull request that
+What DesignAI trusts, what it does not, and how each risk is handled. Keep this page current: a pull request that
 adds a new input, download, server or external tool updates it. Report problems privately
 ([SECURITY.md](https://github.com/Okohedeki/scroll-studio/blob/main/SECURITY.md)).
 
-## What Scroll Studio is
+## What DesignAI is
 
 A local tool. A person runs the engine on their own machine; it reads a project folder (`site.yaml` and inputs),
 drives local models (ComfyUI, Blender, Hugging Face weights), and writes a static site to `dist/`. That site is then

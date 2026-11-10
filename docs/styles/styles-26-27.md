@@ -1,10 +1,10 @@
-> Style research from Scroll Studio by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
+> Style research from DesignAI by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
 
-# Scroll Studio style research: styles 26 and 27
+# DesignAI style research: styles 26 and 27
 
 **Pop-up book, Rotoscope**
 
-Prepared 2026-10-12 for the Scroll Studio engine, as part of the animation-technique batch (styles 22 to 27). These two styles start from a physical or photographic technique and ask the same question the earlier research asked: **what does one notch of the scroll wheel mean here?** A pop-up book is a machine whose only input is the angle the page is opened to. Rotoscoping is a process whose input is live footage and whose output is a drawing. In both, the visitor's scroll is given that input. Fonts and colours come after.
+Prepared 2026-10-12 for the DesignAI engine, as part of the animation-technique batch (styles 22 to 27). These two styles start from a physical or photographic technique and ask the same question the earlier research asked: **what does one notch of the scroll wheel mean here?** A pop-up book is a machine whose only input is the angle the page is opened to. Rotoscoping is a process whose input is live footage and whose output is a drawing. In both, the visitor's scroll is given that input. Fonts and colours come after.
 
 > **How to read the citations.** URLs are inline. Where a claim comes from general knowledge and not from a source I retrieved, I say "(general knowledge)". Where I only saw a search engine's excerpt of a page (the page itself refused to load), I say "(search snippet)". Treat named works as references to check.
 

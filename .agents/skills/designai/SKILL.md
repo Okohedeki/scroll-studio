@@ -1,16 +1,16 @@
 ---
-name: scroll-studio
-description: Start here for any work with Scroll Studio, the engine that builds scroll-driven websites and commerce creative from a spec. Covers what the engine is, the rules every agent follows (design each site new, never copy an example, never hand-write HTML, fix the engine instead of working around it) and which skill to read next. Use when asked to make a scroll site, landing page, product page, scroll animation, interactive page, product stills, ads, or to change the engine itself.
+name: designai
+description: Start here for any work with DesignAI, the engine that builds scroll-driven websites and commerce creative from a spec. Covers what the engine is, the rules every agent follows (design each site new, never copy an example, never hand-write HTML, fix the engine instead of working around it) and which skill to read next. Use when asked to make a scroll site, landing page, product page, scroll animation, interactive page, product stills, ads, or to change the engine itself.
 ---
 
-# Scroll Studio
+# DesignAI
 
-Scroll Studio is an engine. A project file goes in (`project.yaml`, or the older `site.yaml`); the engine renders every
+DesignAI is an engine. A project file goes in (`project.yaml`, or the older `site.yaml`); the engine renders every
 picture, film and 3D scene, and compiles a static site into `dist/`. Each section of a page is either a **scene** the
 visitor scrolls through (a film, a live 3D world, a photo lit by the pointer, a fly-through of code, a place relit from
 dawn to night) or a **block** (features, stats, a quote, a call to action).
 
-You drive it through the `studio` CLI or the `scroll-studio` MCP server (the same operations under both).
+You drive it through the `studio` CLI or the `designai` MCP server (the same operations under both).
 
 ## The rules
 
@@ -48,5 +48,5 @@ You drive it through the `studio` CLI or the `scroll-studio` MCP server (the sam
 
 ## Licence
 
-Scroll Studio is AGPL-3.0 with additional terms. Sites a user builds with it are theirs (the Output Exception in
+DesignAI is AGPL-3.0 with additional terms. Sites a user builds with it are theirs (the Output Exception in
 NOTICE.md). Code, templates or research reused elsewhere stay AGPL and keep the attribution notice: see `AGENTS.md`.

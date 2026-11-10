@@ -43,10 +43,10 @@ import typer
 
 from .config import ROOT, settings
 
-app = typer.Typer(add_completion=False, help="Scroll Studio: build scroll-driven sites from any inputs.\n\nScroll Studio by Edeki Okoh: https://github.com/Okohedeki/scroll-studio (GNU AGPL-3.0, see NOTICE.md). Sites you build are yours under the Scroll Studio Output Exception.")
+app = typer.Typer(add_completion=False, help="DesignAI: product stills, ads, listings, product video and scroll-driven sites, from one photo or a short brief.\n\nDesignAI by Edeki Okoh: https://github.com/Okohedeki/scroll-studio (GNU AGPL-3.0, see NOTICE.md). Sites you build are yours under the DesignAI Output Exception.")
 
 STARTER = """name: My Site
-description: A scroll-driven site built with Scroll Studio.
+description: A scroll-driven site built with DesignAI.
 theme: { preset: night }
 nav: { cta: { label: Get in touch, href: "#contact" } }
 sections:
@@ -70,7 +70,7 @@ sections:
 # (nothing to install), or on a photo parallax when the user brings a picture (`--image`).
 LAPTOP_STARTER = """# A site that builds on any laptop: no GPU, no ComfyUI, no Blender (docs/laptop.md).
 name: @TITLE@
-description: A scroll-driven site built with Scroll Studio.
+description: A scroll-driven site built with DesignAI.
 # Your brand: `theme: { from: https://yoursite.com }` (or a logo, or brand.yaml). A style is an optional experience on top,
 # e.g. `style: bauhaus` (studio looks lists them).
 theme: { preset: night }
@@ -176,7 +176,7 @@ def new(name: str, example: Optional[str] = typer.Option(None, help="Copy an exa
                 with Image.open(image) as im:
                     im.verify()
             except (UnidentifiedImageError, OSError):
-                raise typer.BadParameter(f"{image} is not a picture Scroll Studio can read (jpg, png, webp)") from None
+                raise typer.BadParameter(f"{image} is not a picture DesignAI can read (jpg, png, webp)") from None
         (dst / "inputs").mkdir(parents=True)
         inside = None
         if image:
@@ -472,7 +472,7 @@ def looks(name: str, styles: Optional[str] = typer.Option(None, help="Comma-sepa
     (root / "index.html").write_text(f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{_html.escape(site.name)}: {len(names)} experiences</title>
-<meta name="description" content="One site spec built as {len(names)} different experiences with Scroll Studio.">
+<meta name="description" content="One site spec built as {len(names)} different experiences with DesignAI.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23f2f2f2'/%3E%3Ctext x='16' y='22.5' text-anchor='middle' font-family='system-ui' font-size='18' font-weight='700' fill='%230c0c0e'%3E21%3C/text%3E%3C/svg%3E">
 <style>
   :root {{ color-scheme: dark; --bg: #0c0c0e; --ink: #f2f2f2; --dim: rgba(242, 242, 242, .68); --line: rgba(242, 242, 242, .14); }}
@@ -494,12 +494,12 @@ def looks(name: str, styles: Optional[str] = typer.Option(None, help="Comma-sepa
   a {{ color: inherit; }}
 </style></head><body>
 <header><h1>One spec, {len(names)} experiences.</h1>
-<p>Every page below is the same <code>site.yaml</code> ({_html.escape(site.name)}), built by Scroll Studio with a different
+<p>Every page below is the same <code>site.yaml</code> ({_html.escape(site.name)}), built by DesignAI with a different
 <code>theme: {{ style: ... }}</code>. Each style is its own experience: a different scroll mechanic, layout and set of transitions, not a recolour. Open one, then use the arrows at the bottom (or your arrow keys) to flip through them all.</p></header>
 <main class="grid">
 {cards}
 </main>
-<footer><a href="../">Back to {_html.escape(site.name)}</a> · Made with <a href="https://github.com/Okohedeki/scroll-studio">Scroll Studio</a></footer>
+<footer><a href="../">Back to {_html.escape(site.name)}</a> · Made with <a href="https://github.com/Okohedeki/scroll-studio">DesignAI</a></footer>
 </body></html>
 """, encoding="utf-8")
     typer.echo(f"looks -> {root / 'index.html'}")

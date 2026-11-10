@@ -1,6 +1,6 @@
-> Style research from Scroll Studio by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
+> Style research from DesignAI by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
 
-# Scroll Studio style research: styles 06 to 10
+# DesignAI style research: styles 06 to 10
 
 **Styles:** Glassmorphism, Kinetic typography, Isometric, Clay 3D (claymorphism), ASCII art
 **Purpose:** give each style its own UX (layout, information architecture, scroll grammar, interaction model) and not just its own UI skin. Each brief ends with a "UX signature". A comparison table closes the document.
@@ -281,7 +281,7 @@ Scrolling an isometric site should feel like **flying a fixed-angle drone across
 
 - **What scroll drives: physical, squishy objects with mass and springiness.**
   - **Drop-and-squash arrivals:** cards and objects fall into place, then squash and stretch on landing (scaleY 0.85 / scaleX 1.1, springing to 1). These are the classic animation principles, which no other style uses.
-  - **Scroll-scrubbed clay hero:** a clay object (product or mascot) tumbles, inflates, morphs or gets "sculpted" as you scroll. A Blender image sequence suits Scroll Studio's frame pipeline best, with Spline or three.js for live versions. Spline's own site is a reference for draggable, spinnable playful objects ([One Page Love: Spline](https://onepagelove.com/spline-design)).
+  - **Scroll-scrubbed clay hero:** a clay object (product or mascot) tumbles, inflates, morphs or gets "sculpted" as you scroll. A Blender image sequence suits DesignAI's frame pipeline best, with Spline or three.js for live versions. Spline's own site is a reference for draggable, spinnable playful objects ([One Page Love: Spline](https://onepagelove.com/spline-design)).
   - **Jelly lag:** scroll velocity feeds a spring on each tile's skew and scale, so tiles wobble like jelly when you fling the page and settle when you stop. It differs from kinetic type's velocity skew: here it is *damped wobble of mass*, not *speed lines*.
   - **Inflation:** elements scale from 0.6 to 1 with overshoot (`back.out(2)` or a spring with low damping), as if pumped up.
 - **Hover and press:** **press-in**. Buttons squish (scale 0.96, translateY 3px, outer shadow shrinks, inner shadow deepens). Cards dent toward the cursor (small tilt plus local highlight). 3D icons bob, rotate 15 degrees and blink. A blob cursor softly merges with buttons (goo filter).
@@ -316,7 +316,7 @@ Scrolling an isometric site should feel like **flying a fixed-angle drone across
 
 - **CSS:** shadow stack (outer plus two insets) and large radius ([OpenReplay](https://blog.openreplay.com/implementing-claymorphism-with-css/); [tailwindcss-claymorphism](https://github.com/dulltackle/tailwindcss-claymorphism); [Speckyboy snippets](https://speckyboy.com/css-snippets-claymorphism/)). SVG goo filter (`feGaussianBlur` plus `feColorMatrix` alpha threshold) for merging blobs and the blob cursor.
 - **3D:** three.js `MeshMatcapMaterial` with a clay matcap (cheapest convincing clay), or `MeshPhysicalMaterial` with roughness 0.6 to 0.8, low clearcoat and `sheen`. Use a hemisphere light plus a soft key, and baked AO. Rounded geometry (RoundedBoxGeometry, SDF or marching-cubes blobs for morphs). Or a Spline embed (no-code) ([Webflow Spline sites](https://webflow.com/made-in-webflow/spline)).
-- **Pre-rendered:** Blender Cycles clay renders as scroll-scrubbed image sequences or video (AVIF/WebP frames). Soft GI and subsurface look far better offline than in real time, and this matches Scroll Studio's frame pipeline.
+- **Pre-rendered:** Blender Cycles clay renders as scroll-scrubbed image sequences or video (AVIF/WebP frames). Soft GI and subsurface look far better offline than in real time, and this matches DesignAI's frame pipeline.
 - **Springs:** Motion springs, GSAP `elastic`/`back`, or react-spring. Map velocity to wobble with a damped spring.
 - **Performance:** animating `box-shadow` repaints large blurred areas every frame. Instead animate `transform`, and cross-fade a pseudo-element that holds the "pressed" shadow. Keep 3D to one hero object plus pre-rendered icons (PNG or WebP sprites), not a dozen live meshes.
 - **Accessibility:** pastel text is the trap. Use dark ink (`#2B2140` on `#F4EEFF` comfortably passes AA) and never white on pastel. Shadow depth alone must not signal state (add a label, icon or focus ring: a 3px ink outline offset 3px). Under `prefers-reduced-motion`, remove bounces, squash and wobble, and use 150ms fades. Clay improves on neumorphism for contrast but still needs care for low-contrast-sensitivity users ([OpenReplay](https://blog.openreplay.com/implementing-claymorphism-with-css/)).

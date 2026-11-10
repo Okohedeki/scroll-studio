@@ -1,12 +1,12 @@
 # Governance
 
-How Scroll Studio is run: who decides, how decisions are made, and how contributors take on more of the project.
+How DesignAI is run: who decides, how decisions are made, and how contributors take on more of the project.
 
 ## Roles
 
 | Role | Who | Can |
 |---|---|---|
-| **User** | Anyone building sites with Scroll Studio | Ask questions, report bugs, propose features, share what they built |
+| **User** | Anyone building sites with DesignAI | Ask questions, report bugs, propose features, share what they built |
 | **Contributor** | Anyone with a merged pull request | Everything a user can, plus take issues and review others' pull requests (reviews help, but don't count toward merging) |
 | **Triager** | Invited contributors | Label, deduplicate and close issues; ask for information; mark issues `good first issue` |
 | **Area maintainer** | Invited for one area of the code ([MAINTAINERS.md](MAINTAINERS.md)) | Review and approve pull requests in their area; accept issues in it; their approval counts as a code-owner review |
@@ -27,7 +27,7 @@ needs no change to how things work, only names in [MAINTAINERS.md](MAINTAINERS.m
   decision on the issue. "No" always comes with a reason.
 - **The ground rules** in [CONTRIBUTING.md](CONTRIBUTING.md#ground-rules) (engine features, local-first with hosted models optional, the spec
   as the source of truth, old sites keep building, nothing from one machine, accessible by default) are what make
-  Scroll Studio what it is. Changing one needs an RFC and the maintainer's approval.
+  DesignAI what it is. Changing one needs an RFC and the maintainer's approval.
 - **The roadmap** lives in the [milestones](https://github.com/Okohedeki/scroll-studio/milestones) and
   [docs/directions.md](docs/directions.md). Anyone can propose a change to it in Discussions.
 
@@ -45,7 +45,7 @@ emeritus, with thanks, and can come back by asking.
 
 ## Licence, CLA and the hosted version
 
-Scroll Studio is licensed under the AGPL-3.0 with additional terms ([LICENSE](LICENSE), [NOTICE.md](NOTICE.md)).
+DesignAI is licensed under the AGPL-3.0 with additional terms ([LICENSE](LICENSE), [NOTICE.md](NOTICE.md)).
 Contributors sign the [CLA](CLA.md), which lets the project also be offered in other forms, such as a hosted service run
 by the maintainer. The open-source engine stays complete: features are not held back from it for the hosted version.
 

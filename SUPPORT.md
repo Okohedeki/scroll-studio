@@ -10,5 +10,5 @@
 - **Installing models, ComfyUI and Blender:** [docs/INSTALL.md](docs/INSTALL.md), then `studio doctor`.
 - **Something you made:** share it in [Discussions → Show and tell](https://github.com/Okohedeki/scroll-studio/discussions).
 
-Scroll Studio is maintained by volunteers. Questions are answered when someone has time; the response targets in
+DesignAI is maintained by volunteers. Questions are answered when someone has time; the response targets in
 [docs/maintainers/triage.md](docs/maintainers/triage.md) apply to issues and pull requests.

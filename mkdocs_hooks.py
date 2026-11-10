@@ -1,4 +1,4 @@
-"""MkDocs hooks for the Scroll Studio docs site.
+"""MkDocs hooks for the DesignAI docs site.
 
 The docs are written to be read on GitHub, so their links point at files in the repository: `../README.md`,
 `docs/guide.md`, `CLA.md`, `engine/styles/README.md`. A site build cannot follow those. Rather than copy and edit the

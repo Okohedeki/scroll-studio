@@ -36,8 +36,8 @@ from urllib.parse import urljoin, urlparse
 
 from .project import BuildError, Project, child
 
-AGENT = "ScrollStudio"                      # the token robots.txt rules are matched against
-UA = {"User-Agent": "ScrollStudio-remake (+https://github.com/Okohedeki/scroll-studio)"}
+AGENT = "DesignAI"                      # the token robots.txt rules are matched against
+UA = {"User-Agent": "DesignAI-remake (+https://github.com/Okohedeki/scroll-studio)"}
 MAX_PAGE = 8_000_000                        # bytes of markup read
 MAX_IMAGES = 12                             # pictures saved into inputs/
 MAX_IMAGE_BYTES = 12_000_000                # one picture larger than this is skipped
@@ -1106,7 +1106,7 @@ def story(page: Page, style: Optional[str] = None, gpu: bool = False, brand: Opt
         theme["from"] = brand
     spec = {"name": _clip(page.site_name, 60) or page.host, "description": _clip(page.description, 300),
             "lang": page.lang, "theme": theme, "nav": {"cta": nav_cta} if nav_cta else {}, "sections": sections,
-            "footer": {"left": f"Remade from {page.host} with Scroll Studio. The words and pictures belong to "
+            "footer": {"left": f"Remade from {page.host} with DesignAI. The words and pictures belong to "
                                f"{_clip(page.site_name, 60) or page.host}."}}
     if not spec["description"]:
         del spec["description"]

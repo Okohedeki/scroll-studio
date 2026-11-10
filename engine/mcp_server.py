@@ -22,7 +22,7 @@ from .project import BuildError, Project, child, has_spec, safe_name
 from .server.jobs import JobQueue, logger
 from .spec import SCENE_TYPES, Site, deprecations
 
-INSTRUCTIONS = """Scroll Studio builds scroll-driven sites and commerce creative from a project spec; these tools drive it.
+INSTRUCTIONS = """DesignAI builds scroll-driven sites and commerce creative from a project spec; these tools drive it.
 
 Design every site new from its brief: who it is for, the one promise, an image that belongs to this subject alone, five
 to nine moments, and at least one thing the visitor plays with (the pointer, live 3D, a film scrubbed by the scroll).
@@ -34,9 +34,9 @@ the style, and pictures hold no text.
 
 Then storyboard before any render, build in draft, and judge the snapshots, not the log. If the engine cannot do
 something a site needs, change the engine rather than working around it. The full guide is in the repository's
-.agents/skills/ (start with scroll-studio)."""
+.agents/skills/ (start with designai)."""
 
-mcp = MCPServer("scroll-studio", instructions=INSTRUCTIONS)
+mcp = MCPServer("designai", instructions=INSTRUCTIONS)
 
 
 class _Jobs(JobQueue):

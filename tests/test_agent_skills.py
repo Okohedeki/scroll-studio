@@ -46,6 +46,6 @@ def test_skills_never_send_an_agent_to_copy_an_example():
 
 
 def test_the_skills_named_in_the_entry_skill_exist():
-    entry = (SKILLS / "scroll-studio" / "SKILL.md").read_text(encoding="utf-8")
-    for name in set(re.findall(r"`(scroll-[a-z-]+)`", entry)) - {"scroll-studio"}:
+    entry = (SKILLS / "designai" / "SKILL.md").read_text(encoding="utf-8")
+    for name in set(re.findall(r"`(scroll-[a-z-]+)`", entry)) - {"designai"}:
         assert (SKILLS / name / "SKILL.md").exists(), name

@@ -1,7 +1,7 @@
-# The Scroll Studio showcase: every example site, built by the engine. Tiles link to each example's dist/,
+# The DesignAI showcase: every example site, built by the engine. Tiles link to each example's dist/,
 # so serve the examples/ folder (studio's examples server, or publish it as one static site).
 # Previews are made locally with:  studio previews examples/<name> ... --out examples/showcase/previews
-name: Scroll Studio
+name: DesignAI
 description: An open-source engine for scroll-driven websites. Every site below was built from one YAML file.
 theme:
   preset: night
@@ -18,7 +18,7 @@ sections:
   - id: hello
     type: type
     mode: reveal
-    text: "Give it a <em>brief</em>, a <em>photo</em>, a <em>painting</em>, a <em>3D model</em> or a <em>CSV</em>. Scroll Studio builds the site, and scrolling plays it."
+    text: "Give it a <em>brief</em>, a <em>photo</em>, a <em>painting</em>, a <em>3D model</em> or a <em>CSV</em>. DesignAI builds the site, and scrolling plays it."
     length: 2.4
   - type: gallery
     id: new
@@ -88,5 +88,5 @@ sections:
   - type: cta
     kicker: Open source (AGPL-3.0) · local models only, no API keys
     title: Build one <em>tonight.</em>
-    button: { label: Get Scroll Studio, href: "https://github.com/Okohedeki/scroll-studio" }
-footer: { left: "Scroll Studio · AGPL-3.0", right: "Every example on this page is a concept site." }
+    button: { label: Get DesignAI, href: "https://github.com/Okohedeki/scroll-studio" }
+footer: { left: "DesignAI · AGPL-3.0", right: "Every example on this page is a concept site." }

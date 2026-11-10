@@ -1,6 +1,6 @@
 # Releasing
 
-How a version of Scroll Studio is released. Versions follow [semantic versioning](../compatibility.md); a minor
+How a version of DesignAI is released. Versions follow [semantic versioning](../compatibility.md); a minor
 release usually closes a milestone.
 
 ## Before
@@ -37,7 +37,7 @@ push `v*` tags (the "Release tags" ruleset).
 
 ```bash
 git switch main && git pull
-git tag -a v1.5.0 -m "Scroll Studio 1.5.0"     # -s instead of -a if you sign tags
+git tag -a v1.5.0 -m "DesignAI 1.5.0"     # -s instead of -a if you sign tags
 git push origin v1.5.0
 ```
 

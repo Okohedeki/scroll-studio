@@ -50,7 +50,7 @@ sections:
 
 ## Build with Claude
 
-Open the repository in Claude Code and ask for a site. The `scroll-studio` MCP server (`.mcp.json`) gives Claude every
+Open the repository in Claude Code and ask for a site. The `designai` MCP server (`.mcp.json`) gives Claude every
 engine tool, and the skills in `.agents/skills/` give it the workflow. The tools are listed in the
 [MCP reference](reference/mcp.md).
 

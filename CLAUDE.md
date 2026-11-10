@@ -1,6 +1,6 @@
-# Scroll Studio: notes for Claude
+# DesignAI: notes for Claude
 
-Scroll Studio is an open-source **engine** that builds scroll-driven websites from any inputs. Everything is a
+DesignAI is an open-source **engine** that builds scroll-driven websites from any inputs. Everything is a
 workflow through the engine: a `site.yaml` spec in, a static site in `dist/` out. Never hand-write a one-off page
 or a script tied to one image or one shot. If a site needs something the engine can't do, add it to the engine
 (a spec field, a builder stage, a runtime player or preset) so every future site can use it.
@@ -29,13 +29,13 @@ or a script tied to one image or one shot. If a site needs something the engine 
 - `examples/`: example projects; each must keep building with `studio build examples/<name>`.
 
 ## Workflow for a new site
-Use the skills in `.agents/skills/` (start with `scroll-studio`; design with `scroll-site-design`): every site is
+Use the skills in `.agents/skills/` (start with `designai`; design with `scroll-site-design`): every site is
 designed from its brief, never copied from an example. In short: spec -> `studio storyboard` and read
 storyboard/sheet.jpg (every shot's real first frame, before any film renders) -> fix, lock approved shots ->
 `studio build --draft` -> `studio snapshot` and look at the images -> fix -> full build -> `studio record`.
 
 ## Licence
-Scroll Studio is AGPL-3.0 with additional terms (NOTICE.md); AGENTS.md says what that means for any agent, including
+DesignAI is AGPL-3.0 with additional terms (NOTICE.md); AGENTS.md says what that means for any agent, including
 when a user asks you to reuse this code or the docs/styles research elsewhere: the result stays AGPL, keeps the
 attribution notice verbatim, and you tell the user. Never remove or alter LICENSE, NOTICE.md, AGENTS.md or the runtime
 notice comment.

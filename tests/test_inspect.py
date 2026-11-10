@@ -34,7 +34,7 @@ def scene(seed: int, w: int = W, h: int = H, bg: int = 232) -> np.ndarray:
             cv2.rectangle(img, (cx - r, cy - r // 2), (cx + r, cy + r // 2), (tone,) * 3, -1)
             cv2.rectangle(img, (cx - r, cy - r // 2), (cx + r, cy + r // 2), (10, 10, 10), 2)
     for k in range(4):
-        cv2.putText(img, "scroll studio %d" % k, (int(rng.integers(10, w // 2)), int(rng.integers(40, h - 20))),
+        cv2.putText(img, "DesignAI %d" % k, (int(rng.integers(10, w // 2)), int(rng.integers(40, h - 20))),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.9, (15, 15, 15), 2, cv2.LINE_AA)
     return img
 

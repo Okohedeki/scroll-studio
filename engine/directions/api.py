@@ -127,7 +127,7 @@ def free_port(preferred: Optional[int] = None) -> int:
 
 
 def make_app(project: Project) -> FastAPI:
-    app = FastAPI(title="Scroll Studio: direction boards")
+    app = FastAPI(title="DesignAI: direction boards")
     app.add_middleware(LocalOnly)
 
     def resolve(name: str) -> Project:

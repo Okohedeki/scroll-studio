@@ -198,4 +198,4 @@ sections:
       live: [{ kind: flow, box: [0.15, 0.82, 1.0, 0.98], speed: 0.8, strength: 0.4 }]
 
 footer:
-  left: Millrace is a fictional product. A Scroll Studio example.
+  left: Millrace is a fictional product. A DesignAI example.

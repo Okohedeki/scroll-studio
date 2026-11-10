@@ -1,6 +1,6 @@
 # Try it on a laptop
 
-You do not need a GPU, ComfyUI or Blender to make a Scroll Studio site. Kinetic type, photo parallax, maps, data, code
+You do not need a GPU, ComfyUI or Blender to make a DesignAI site. Kinetic type, photo parallax, maps, data, code
 flights, live 3D, every block and all 32 styles build on the CPU. This page goes from `pip install` to a built site; it
 should take about five minutes, most of it the install. To see what the finished thing looks like first, open the
 [live showcase](https://okohedeki.github.io/scroll-studio-showcase/).

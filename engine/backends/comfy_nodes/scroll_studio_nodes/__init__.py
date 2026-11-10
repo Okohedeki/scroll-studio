@@ -1,4 +1,4 @@
-"""Scroll Studio's ComfyUI nodes (AGPL-3.0, part of Scroll Studio: https://github.com/Okohedeki/scroll-studio).
+"""DesignAI's ComfyUI nodes (AGPL-3.0, part of DesignAI: https://github.com/Okohedeki/scroll-studio).
 
 Installed by `studio setup-comfy` (copies this folder into ComfyUI/custom_nodes/) and used by the engine's `reveal`
 (region masks for scroll-driven colour) and `faces` (face repair) stages. They are thin glue over models that are
@@ -166,5 +166,5 @@ class SSFaceRestore:
 
 
 NODE_CLASS_MAPPINGS = {"SSRevealGround": SSRevealGround, "SSRevealTrack": SSRevealTrack, "SSFaceRestore": SSFaceRestore}
-NODE_DISPLAY_NAME_MAPPINGS = {"SSRevealGround": "Scroll Studio: ground phrase", "SSRevealTrack": "Scroll Studio: track region",
-                              "SSFaceRestore": "Scroll Studio: restore faces"}
+NODE_DISPLAY_NAME_MAPPINGS = {"SSRevealGround": "DesignAI: ground phrase", "SSRevealTrack": "DesignAI: track region",
+                              "SSFaceRestore": "DesignAI: restore faces"}

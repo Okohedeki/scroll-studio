@@ -1,6 +1,6 @@
-# Scroll Studio engine: design
+# DesignAI engine: design
 
-Scroll Studio is an open-source engine for scroll-driven sites. You clone it, give it inputs (a brief, images,
+DesignAI is an open-source engine for scroll-driven sites. You clone it, give it inputs (a brief, images,
 a 3D model, a CSV, a URL), and it builds a finished static site where scrolling plays the visuals. It runs
 locally, with no API keys, and Claude can drive it through the UI's chat, Claude Code, or an MCP server.
 

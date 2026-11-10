@@ -1,8 +1,8 @@
 # Feel: what a landing page can be. A story film told in beats (each a Z-Image still brought to life by LTX-2.3 on a
 # local GPU), every sentence its own shot: joy, ache, love, curiosity, longing. It ends on the showcase.
 #   studio build examples/feel        (needs ComfyUI with Z-Image and LTX-2.3; about 5 minutes a beat on an RTX 4090)
-name: Scroll Studio
-description: A landing page is the door to a world. Scroll Studio makes the ones people feel.
+name: DesignAI
+description: A landing page is the door to a world. DesignAI makes the ones people feel.
 theme:
   preset: night
   colors: { bg: "#070707", accent: "#ff7a3d", accent2: "#ffb27a" }
@@ -190,7 +190,7 @@ sections:
   - title: Show them <em>what's missing.</em>
     state:
       beat: missing
-  - title: That's what <em>Scroll Studio</em> does.
+  - title: That's what <em>DesignAI</em> does.
     state:
       beat: screen
 - type: cta
@@ -202,5 +202,5 @@ sections:
 # Launch trailer: `studio trailer examples/feel` cuts a 16:9 and a 9:16 film from the beats, captioned with the steps.
 trailer: {}
 footer:
-  left: Scroll Studio · AGPL-3.0
-  right: Made with Scroll Studio
+  left: DesignAI · AGPL-3.0
+  right: Made with DesignAI

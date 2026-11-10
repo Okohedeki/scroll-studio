@@ -30,7 +30,7 @@ export default function App() {
   return (
     <div className="app">
       <aside className="side">
-        <a className="brand" href="#"><span className="mark" />Scroll Studio</a>
+        <a className="brand" href="#"><span className="mark" />DesignAI</a>
         <nav>
           <a className={!view ? "on" : ""} href="#">Projects</a>
           <a className={view === "doctor" ? "on" : ""} href="#doctor">Toolchain</a>
@@ -45,7 +45,7 @@ export default function App() {
           {projects.filter((p) => p.kind === "example").map((p) => <a key={p.name} className={arg === p.name ? "on" : ""} href={`#p/${p.name}`}>{p.title}</a>)}
         </div>
         <div className="side-legal muted small">
-          Scroll Studio by Edeki Okoh · <a href="https://github.com/Okohedeki/scroll-studio" target="_blank" rel="noreferrer">source</a> · GNU AGPL-3.0
+          DesignAI by Edeki Okoh · <a href="https://github.com/Okohedeki/scroll-studio" target="_blank" rel="noreferrer">source</a> · GNU AGPL-3.0
         </div>
       </aside>
       <main className="main">

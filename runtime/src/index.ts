@@ -1,5 +1,5 @@
 /**
- * Scroll Studio runtime. Mounts a player into every [data-scene] section and drives it from scroll.
+ * DesignAI runtime. Mounts a player into every [data-scene] section and drives it from scroll.
  * Pages are complete without this script; it adds the motion.
  */
 import Lenis from "lenis";

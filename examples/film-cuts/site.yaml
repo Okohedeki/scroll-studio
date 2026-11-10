@@ -155,4 +155,4 @@ sections:
     button: { label: Order a bag, href: "#" }
 footer:
   left: "Halo Coffee is fictional. The page is a demonstration of edited-like-a-film transitions."
-  right: Built with Scroll Studio
+  right: Built with DesignAI

@@ -33,8 +33,8 @@ throughout and will not take legal action against good-faith research that follo
   read or write files it should not, or attack visitors of a built site.
 - The project's CI and release process (`.github/`).
 
-What Scroll Studio trusts and why is described in the [threat model](docs/security/threat-model.md). Problems in
-ComfyUI, Blender, browsers or model weights themselves should go to their own projects; tell us too if Scroll Studio
+What DesignAI trusts and why is described in the [threat model](docs/security/threat-model.md). Problems in
+ComfyUI, Blender, browsers or model weights themselves should go to their own projects; tell us too if DesignAI
 makes them worse.
 
 ## Supported versions

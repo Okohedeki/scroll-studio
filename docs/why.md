@@ -1,6 +1,6 @@
-# Why Scroll Studio
+# Why DesignAI
 
-[← README](../README.md) · [Why Scroll Studio](why.md) · [What's new](whats-new.md) · [Examples](examples.md) · [Guide: make a site](guide.md) · [Styles](styles.md) · [Scenes](scenes.md) · [Licence](licence.md)
+[← README](../README.md) · [Why DesignAI](why.md) · [What's new](whats-new.md) · [Examples](examples.md) · [Guide: make a site](guide.md) · [Styles](styles.md) · [Scenes](scenes.md) · [Licence](licence.md)
 
 
 - **Local only. Nothing to pay per site.** Every image and video is generated on your own GPU with open models
@@ -22,7 +22,7 @@ writes for it:
 
 | | Tokens the agent writes |
 |---|---:|
-| **With Scroll Studio:** `site.yaml` (content, order, `style: zoetrope`) | **1,241** |
+| **With DesignAI:** `site.yaml` (content, order, `style: zoetrope`) | **1,241** |
 | **By hand,** the same page: | |
 | &nbsp;&nbsp;Page markup and copy | 15,934 |
 | &nbsp;&nbsp;Stylesheets | 16,821 |

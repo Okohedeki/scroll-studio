@@ -1,4 +1,4 @@
-"""Check an installed copy of Scroll Studio: the CI `install` job runs this with the virtualenv's Python, from outside the
+"""Check an installed copy of DesignAI: the CI `install` job runs this with the virtualenv's Python, from outside the
 checkout, after installing the built wheel.
 
     python -I tools/install_check.py --checkout . [--sdist dist/scroll_studio-<version>.tar.gz]

@@ -1,10 +1,10 @@
-> Style research from Scroll Studio by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
+> Style research from DesignAI by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
 
-# Scroll Studio style research: styles 28 and 29
+# DesignAI style research: styles 28 and 29
 
 **Stop-motion, Paper cut-out**
 
-Prepared 2026-10-18 for the Scroll Studio engine, as part of the animation-technique batch (styles 22 to 33). These two techniques are close relatives: cut-out animation is itself a kind of stop-motion, and both are photographed from a fixed camera with the hands of an animator just out of shot. They still ask different questions of a scroll site, and the question this research keeps asking is the earlier one: **what does one notch of the scroll wheel mean here?** In stop-motion the honest answer is *one more exposure*: a world that only changes when somebody takes a photograph. In paper cut-out it is *a pull on the strings*: flat pieces that only turn on a pin or slide in a plane, whatever the camera does. Fonts and colours come after.
+Prepared 2026-10-18 for the DesignAI engine, as part of the animation-technique batch (styles 22 to 33). These two techniques are close relatives: cut-out animation is itself a kind of stop-motion, and both are photographed from a fixed camera with the hands of an animator just out of shot. They still ask different questions of a scroll site, and the question this research keeps asking is the earlier one: **what does one notch of the scroll wheel mean here?** In stop-motion the honest answer is *one more exposure*: a world that only changes when somebody takes a photograph. In paper cut-out it is *a pull on the strings*: flat pieces that only turn on a pin or slide in a plane, whatever the camera does. Fonts and colours come after.
 
 > **How to read the citations.** URLs are inline. Where a claim comes from general knowledge and not from a source I retrieved, I say "(general knowledge)". Where I only saw a search engine's excerpt of a page (the page itself refused to load or I could not read it), I say "(search snippet)". Pages fetched through a summarising tool are marked "fetched" in my notes, but quotations in this document are kept short and should be checked against the live page before they are reused. Treat named works as references to check.
 

@@ -1,7 +1,7 @@
 """The built-in backends. Local: ComfyUI (Z-Image Turbo stills, Qwen-Image-Edit edits). Providers, each used only when
 its key is set: Anthropic (text), OpenAI (images and edits), ElevenLabs (speech) and any OpenAI-compatible text server (`text_url` in
 studio.toml, for example a model served on this machine), plus the frontier backends in providers.py (OpenAI text, Gemini,
-FLUX, Runway). Last comes the Scroll Studio cloud account (engine/cloud.py), which runs provider jobs on credits for
+FLUX, Runway). Last comes the DesignAI cloud account (engine/cloud.py), which runs provider jobs on credits for
 builders without keys of their own. Licences and terms belong to each provider."""
 from __future__ import annotations
 

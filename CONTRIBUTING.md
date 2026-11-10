@@ -1,6 +1,6 @@
-# Contributing to Scroll Studio
+# Contributing to DesignAI
 
-Thank you for helping. Scroll Studio is an open-source **engine**: a `site.yaml` spec goes in and a finished static
+Thank you for helping. DesignAI is an open-source **engine**: a `site.yaml` spec goes in and a finished static
 site comes out, made with open models on the contributor's own GPU. This guide says how to contribute and the rules
 every change keeps, so the engine stays consistent as more people work on it.
 
@@ -39,14 +39,14 @@ everywhere in the project.
 <a id="no-bounties"></a>
 ### No bounties
 
-Scroll Studio does not pay for contributions. There are no bounties, tips or payments for issues, pull requests,
+DesignAI does not pay for contributions. There are no bounties, tips or payments for issues, pull requests,
 reviews, translations or security reports, and nobody is authorised to promise any on the project's behalf. Pull
 requests or issues that ask for payment (including wallet addresses or payment details) are closed. Contributors are
 credited by name in the release notes, and security reporters in the advisory.
 
 ## Ground rules
 
-These are what make Scroll Studio what it is. A change that breaks one is not merged, however good it is otherwise.
+These are what make DesignAI what it is. A change that breaks one is not merged, however good it is otherwise.
 
 1. **Engine features, never one-off pages.** If a site needs something the engine can't do, add it to the engine (a
    spec field, a builder stage, a runtime player or preset) so every site can use it. No hand-written pages, no
@@ -70,7 +70,7 @@ These are what make Scroll Studio what it is. A change that breaks one is not me
 <a id="rules-per-area"></a>
 ## Rules per area: core, standard and trivial
 
-Not every file carries the same risk. The runtime ships inside every site anyone has ever built with Scroll Studio; a
+Not every file carries the same risk. The runtime ships inside every site anyone has ever built with DesignAI; a
 change to it reaches all of their visitors. A typo in a guide reaches nobody. So the rules depend on what a pull request
 touches. The labeler marks pull requests that touch a core path `tier: core`, and the `pr-policy` check holds them to
 the core rules.
@@ -301,7 +301,7 @@ Every pull request runs these without a GPU, and `main` only accepts changes tha
 - **Title it** in the [Conventional Commits](https://www.conventionalcommits.org) form, because the project merges with
   squash and the title becomes the commit on `main`: `type(area): what changed`, in the present tense, lower case
   after the colon.
-  - Types: `feat` (a new capability), `fix` (a bug), `perf`, `docs`, `test`, `refactor`, `style` (a Scroll Studio
+  - Types: `feat` (a new capability), `fix` (a bug), `perf`, `docs`, `test`, `refactor`, `style` (a DesignAI
     style, not code formatting), `build`, `ci`, `chore`, `revert`.
   - Area (optional): `runtime`, `spec`, `compiler`, `scenes`, `styles`, `themes`, `models`, `cli`, `mcp`, `ui`,
     `docs`, `examples`, `tests`, `ci`.
@@ -320,7 +320,7 @@ Every pull request runs these without a GPU, and `main` only accepts changes tha
 
 ## Licence and the CLA
 
-Scroll Studio is licensed under the **GNU AGPL-3.0 with additional terms** ([LICENSE](LICENSE),
+DesignAI is licensed under the **GNU AGPL-3.0 with additional terms** ([LICENSE](LICENSE),
 [NOTICE.md](NOTICE.md)). Never remove or alter `LICENSE`, `NOTICE.md`, `AGENTS.md` or the notice comment at the top of
 the runtime files.
 

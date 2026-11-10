@@ -265,7 +265,7 @@ def apply_brand(project: Project, logo_rel: str, mode: str = "light", dry_run: b
 
 # ---------------------------------------------------------------- a brand from a page, a logo or a brand.yaml (theme.from)
 IMAGE_TYPES = (".png", ".jpg", ".jpeg", ".webp", ".svg")
-UA = {"User-Agent": "Mozilla/5.0 (compatible; ScrollStudio brand reader)"}
+UA = {"User-Agent": "Mozilla/5.0 (compatible; DesignAI brand reader)"}
 MAX_FETCH = 4_000_000            # bytes: a page, a stylesheet or a logo larger than this is not read
 
 

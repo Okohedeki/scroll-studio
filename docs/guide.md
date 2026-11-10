@@ -1,6 +1,6 @@
 # Guide: make a site
 
-[← README](../README.md) · [Why Scroll Studio](why.md) · [What's new](whats-new.md) · [Examples](examples.md) · [Guide: make a site](guide.md) · [Styles](styles.md) · [Scenes](scenes.md) · [Licence](licence.md)
+[← README](../README.md) · [Why DesignAI](why.md) · [What's new](whats-new.md) · [Examples](examples.md) · [Guide: make a site](guide.md) · [Styles](styles.md) · [Scenes](scenes.md) · [Licence](licence.md)
 
 ## Make your own
 
@@ -302,7 +302,7 @@ keeps it a photo parallax, which needs only the CPU. Every section builds with s
 `studio storyboard my-remake --level sketch`.
 
 Only public pages are read. The site's `robots.txt` is asked first, for the page and for every host a picture comes
-from, under the user agent `ScrollStudio-remake`; a page it disallows is refused. Nothing is uploaded anywhere. The
+from, under the user agent `DesignAI-remake`; a page it disallows is refused. Nothing is uploaded anywhere. The
 words, pictures and brand belong to the site's owner: a remake is for your own use, or for use with their permission,
 and the command says so when it finishes. Claude can do the same in conversation with the MCP tool `remake_site`.
 
@@ -629,9 +629,9 @@ text touches.
 
 ## With Claude
 
-Open the repo in Claude Code and ask for a site. The `scroll-studio` MCP server (`.mcp.json`) gives Claude tools
+Open the repo in Claude Code and ask for a site. The `designai` MCP server (`.mcp.json`) gives Claude tools
 to create projects, edit specs, build, take snapshots and look at them, record videos and cut launch trailers; the skills in
-`.agents/skills/` give any coding agent the workflow, starting with `scroll-studio`. Any MCP client can use `python -m engine.mcp_server`.
+`.agents/skills/` give any coding agent the workflow, starting with `designai`. Any MCP client can use `python -m engine.mcp_server`.
 
 ## How it's built
 

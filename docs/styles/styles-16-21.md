@@ -1,10 +1,10 @@
-> Style research from Scroll Studio by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
+> Style research from DesignAI by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
 
-# Scroll Studio style research: styles 16 to 21
+# DesignAI style research: styles 16 to 21
 
 **Bauhaus, Pixel art, Blueprint, Art deco, Neo-brutalism, 2D anime intro (OP)**
 
-Prepared 2026-10-10 for the Scroll Studio engine. The aim: each style has to be a different *interaction model*, not a reskin. So every brief below starts from one question: **what does one notch of the scroll wheel mean in this style?** Fonts and colours come after that.
+Prepared 2026-10-10 for the DesignAI engine. The aim: each style has to be a different *interaction model*, not a reskin. So every brief below starts from one question: **what does one notch of the scroll wheel mean in this style?** Fonts and colours come after that.
 
 > **How to read the citations.** URLs are inline. Where a claim comes from general design or animation knowledge and not from a source I retrieved, I say "(general knowledge)". Treat named live sites as references to check, because sites get redesigned. One example: one source says gumroad.com's live homepage no longer serves its famous hard shadows.
 

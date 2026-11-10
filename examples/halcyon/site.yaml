@@ -3,7 +3,7 @@
 #   studio looks examples/halcyon
 # which writes dist/looks/<style>/ for each style, a switcher bar on every page, and a gallery at dist/looks/.
 name: Halcyon
-description: The calendar that guards your mornings. One page, built in twenty styles by Scroll Studio.
+description: The calendar that guards your mornings. One page, built in twenty styles by DesignAI.
 theme:
   preset: night
   style: neo-brutalism
@@ -88,4 +88,4 @@ sections:
     button: { label: Get Halcyon, href: "#" }
 footer:
   left: "© Halcyon. A concept site; the product is fictional."
-  right: Built with Scroll Studio
+  right: Built with DesignAI

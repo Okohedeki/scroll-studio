@@ -4,7 +4,7 @@ Status: design, phase 0 approved ([#172](https://github.com/Okohedeki/scroll-stu
 
 ## Why
 
-Scroll Studio turns a spec into a page by sending it through fixed scene builders, templates and styles. That keeps
+DesignAI turns a spec into a page by sending it through fixed scene builders, templates and styles. That keeps
 builds reliable, but projects start to look alike, and every output has to be shaped like a page. Product photos, ads,
 short videos and listing copy have nowhere to live in `site.yaml`.
 

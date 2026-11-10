@@ -1,4 +1,4 @@
-"""The Scroll Studio cloud account: provider jobs on credits, for builders without API keys of their own.
+"""The DesignAI cloud account: provider jobs on credits, for builders without API keys of their own.
 
 Everything here is optional. Local models and your own provider keys are free and come first; the account backend is
 the router's last choice, and only when `models:` asks for providers (or pins `cloud`). `studio cloud login` signs in
@@ -8,8 +8,8 @@ with a link sent to your email:
     studio cloud status                              # balance and what each job costs
     studio cloud buy                                 # a checkout page for a credit pack
 
-The sign-in is kept in a credentials file in the user's config folder (Windows %APPDATA%\\scroll-studio, macOS
-~/Library/Application Support/scroll-studio, Linux $XDG_CONFIG_HOME/scroll-studio), or STUDIO_CLOUD_TOKEN and
+The sign-in is kept in a credentials file in the user's config folder (Windows %APPDATA%\\designai, macOS
+~/Library/Application Support/designai, Linux $XDG_CONFIG_HOME/designai), or STUDIO_CLOUD_TOKEN and
 STUDIO_CLOUD_URL for CI. The service's API is small: POST /v1/jobs takes a job and its input images, GET /v1/jobs/<id>
 reports it, GET /v1/jobs/<id>/output returns the file.
 """
@@ -37,10 +37,10 @@ def config_dir() -> Path:
     if os.environ.get("STUDIO_CONFIG_DIR"):
         return Path(os.environ["STUDIO_CONFIG_DIR"])
     if sys.platform == "win32":
-        return Path(os.environ.get("APPDATA") or Path.home() / "AppData" / "Roaming") / "scroll-studio"
+        return Path(os.environ.get("APPDATA") or Path.home() / "AppData" / "Roaming") / "designai"
     if sys.platform == "darwin":
-        return Path.home() / "Library" / "Application Support" / "scroll-studio"
-    return Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "scroll-studio"
+        return Path.home() / "Library" / "Application Support" / "designai"
+    return Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "designai"
 
 
 def _creds_path() -> Path:
@@ -205,7 +205,7 @@ def run_job(job: Job, out: Optional[Path], model: Optional[str] = None, backend:
 
 
 class CloudBackend:
-    """The Scroll Studio cloud account: every provider job kind, on credits. Available once `studio cloud login` has
+    """The DesignAI cloud account: every provider job kind, on credits. Available once `studio cloud login` has
     run (or STUDIO_CLOUD_TOKEN is set). The service picks the provider for each kind unless `models.model.<kind>`
     names one of its models."""
     name = "cloud"

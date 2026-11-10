@@ -1,10 +1,10 @@
-> Style research from Scroll Studio by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
+> Style research from DesignAI by Edeki Okoh: https://github.com/Okohedeki/scroll-studio. Licensed under the GNU AGPL-3.0 with additional terms (NOTICE.md): credit it with this notice, unchanged, wherever it is used, and don't present it as your own work.
 
-# Scroll Studio style research: styles 32 and 33
+# DesignAI style research: styles 32 and 33
 
 **Scratch film, Smears**
 
-Prepared 2026-10-19 for the Scroll Studio engine, as part of the animation-technique batch (styles 22 to 33). Both techniques are about **time**, and both are drawn, not photographed. Direct-on-film animation puts every mark on the strip itself: nothing is shot, so every frame is a new drawing and the film is the picture. The Spider-Verse look is a timing system laid over computer animation: drawings held on twos, a smear where a pose changes, colour offset where a lens would blur. The question this research keeps asking is the earlier one: **what does one notch of the scroll wheel mean here?** In scratch film it is *film pulled through a gate*. In smears it is *a pose change that has to be drawn between*. Fonts and colours come after.
+Prepared 2026-10-19 for the DesignAI engine, as part of the animation-technique batch (styles 22 to 33). Both techniques are about **time**, and both are drawn, not photographed. Direct-on-film animation puts every mark on the strip itself: nothing is shot, so every frame is a new drawing and the film is the picture. The Spider-Verse look is a timing system laid over computer animation: drawings held on twos, a smear where a pose changes, colour offset where a lens would blur. The question this research keeps asking is the earlier one: **what does one notch of the scroll wheel mean here?** In scratch film it is *film pulled through a gate*. In smears it is *a pose change that has to be drawn between*. Fonts and colours come after.
 
 > **How to read the citations.** URLs are inline. Where a claim comes from general knowledge and not from a source I retrieved, I say "(general knowledge)". Where I only saw a search engine's excerpt of a page (the page itself refused to load or I could not read it), I say "(search snippet)". Pages read in full are cited without a tag. Quotations are kept under fifteen words; check them against the live page before reuse. Treat named works as references to check. Where the brief for this batch named a person or tool and I found no source for it, I left it out and say so below.
 
