@@ -74,6 +74,16 @@
   "build": {
    "help": "Build a project into dist/. Prints what will render and about how long it takes here before starting.",
    "params": {
+    "cloud": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--cloud"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
     "draft": {
      "default": false,
      "kind": "option",
@@ -95,6 +105,16 @@
      ],
      "required": false,
      "type": "boolean"
+    },
+    "max_minutes": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--max-minutes"
+     ],
+     "required": false,
+     "type": "int"
     },
     "name": {
      "default": null,
