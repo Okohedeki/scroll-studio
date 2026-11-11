@@ -91,8 +91,15 @@ def test_every_cli_command_is_documented(generated):
     from engine.cli import app
     group = typer.main.get_command(app)
     assert len(group.commands) == len(app.registered_commands) + len(app.registered_groups) and len(group.commands) > 20
+    def leaves(cmd, prefix):
+        if not hasattr(cmd, "commands"):
+            yield prefix
+            return
+        for n, sub in cmd.commands.items():
+            yield from leaves(sub, f"{prefix} {n}")
+
     for name, cmd in group.commands.items():
-        for leaf in ([f"{name} {n}" for n in cmd.commands] if hasattr(cmd, "commands") else [name]):
+        for leaf in leaves(cmd, name):
             assert f"## `studio {leaf}`" in generated["cli.md"], leaf
     assert "studio build [OPTIONS] NAME" in generated["cli.md"] and "`--force`" in generated["cli.md"]
 

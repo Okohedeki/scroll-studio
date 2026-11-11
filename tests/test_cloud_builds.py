@@ -122,3 +122,43 @@ def test_max_minutes_needs_cloud(tmp_path):
                            env={"NO_COLOR": "1", "COLUMNS": "200", "TERM": "dumb"})
     plain = " ".join(re.sub(r"\[[0-9;]*m", "", r.output).replace("│", " ").split())
     assert r.exit_code != 0 and "--cloud" in plain
+
+
+def test_the_workspace_in_use_goes_with_every_request(tmp_path, monkeypatch):
+    monkeypatch.setenv("STUDIO_CONFIG_DIR", str(tmp_path))
+    monkeypatch.delenv("STUDIO_CLOUD_WORKSPACE", raising=False)
+    monkeypatch.delenv("STUDIO_CLOUD_TOKEN", raising=False)
+    with pytest.raises(cloud.CloudError):
+        cloud.use_workspace("team1")                         # not signed in yet
+    cloud.save("http://svc.test", "tok", "me@example.com")
+    with cloud._client() as c:
+        assert "x-workspace" not in c.headers
+    cloud.use_workspace("team1")
+    with cloud._client() as c:
+        assert c.headers["x-workspace"] == "team1" and c.headers["authorization"] == "Bearer tok"
+    monkeypatch.setenv("STUDIO_CLOUD_WORKSPACE", "team2")
+    assert cloud.credentials()["workspace"] == "team2"
+    monkeypatch.delenv("STUDIO_CLOUD_WORKSPACE")
+    cloud.use_workspace(None)
+    assert cloud.credentials()["workspace"] is None and cloud.credentials()["token"] == "tok"
+
+
+def test_buy_takes_a_pack_or_a_plan(tmp_path, monkeypatch):
+    from typer.testing import CliRunner
+
+    from engine.cli import app
+    asked = []
+    monkeypatch.setattr(cloud, "checkout", lambda pack=None, plan=None: asked.append((pack, plan)) or "http://x/co")
+    r = CliRunner().invoke(app, ["cloud", "buy", "--plan", "studio", "--no-open"])
+    assert r.exit_code == 0 and asked == [(None, "studio")]
+    assert CliRunner().invoke(app, ["cloud", "buy", "starter", "--plan", "studio", "--no-open"]).exit_code == 2
+
+
+def test_a_commercial_only_machine_never_loads_a_non_commercial_depth_model(monkeypatch):
+    from engine.backends import depth
+    monkeypatch.delenv("STUDIO_COMMERCIAL_ONLY", raising=False)
+    assert depth._size("large") == "large"
+    monkeypatch.setenv("STUDIO_COMMERCIAL_ONLY", "1")
+    with pytest.warns(UserWarning, match="non-commercial"):
+        assert depth._size("large") == "small"
+    assert depth._size("small") == "small"

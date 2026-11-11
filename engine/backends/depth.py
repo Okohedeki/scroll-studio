@@ -17,8 +17,29 @@ MODELS = {
 }
 
 
-@lru_cache(maxsize=2)
+NON_COMMERCIAL = {"base", "large"}
+
+
+def commercial_only() -> bool:
+    """STUDIO_COMMERCIAL_ONLY=1 (set on the DesignAI cloud's build machine, which is a paid service) keeps every
+    model with a non-commercial licence out of the build: those requests get the commercial-friendly model."""
+    return os.environ.get("STUDIO_COMMERCIAL_ONLY", "").strip().lower() in ("1", "true", "yes")
+
+
+def _size(size: str) -> str:
+    if size in NON_COMMERCIAL and commercial_only():
+        import warnings
+        warnings.warn(f"depth_model: {size} is non-commercial (CC-BY-NC), so this build uses small (Apache-2.0) instead")
+        return "small"
+    return size
+
+
 def _load(size: str):
+    return _load_size(_size(size))
+
+
+@lru_cache(maxsize=2)
+def _load_size(size: str):
     os.environ.setdefault("HF_HOME", str(Path(settings()["model_dir"]) / "hf"))
     try:
         import torch
@@ -62,3 +83,6 @@ def estimate_raw(img: Image.Image, size: str = "small") -> np.ndarray:
         pred = model(**inputs).predicted_depth
     d = torch.nn.functional.interpolate(pred[:, None], size=(img.height, img.width), mode="bicubic", align_corners=False)[0, 0]
     return d.float().cpu().numpy()
+
+
+_load.cache_clear = _load_size.cache_clear     # type: ignore[attr-defined]
