@@ -3798,13 +3798,14 @@ class Directions(Model):
     stills: int = Field(4, ge=1, le=6, description="Storyboard stills per board: the hero, then key sections")
 
 
-RouterKind = Literal["image", "edit", "text", "speech"]
+RouterKind = Literal["image", "edit", "text", "speech", "video"]
 
 
 class Models(Model):
     """Which backend does each job (engine/router). Local models come first unless `prefer: provider`; a provider
-    backend (Anthropic, OpenAI, an OpenAI-style text server) is used only when its key or URL is set. `studio models`
-    lists what is available here."""
+    backend (Anthropic, OpenAI, Gemini, FLUX, Runway, ElevenLabs, an OpenAI-style text server) is used only when its
+    key or URL is set, and the cloud account (`studio cloud login`) only after them. `studio models` lists what is
+    available here."""
     prefer: Literal["local", "provider"] = Field("local", description="local: this machine's models first. provider: "
                                                                       "a provider's API first, where a key is set")
     fallback: Optional[bool] = Field(None, description="Unset: a provider falls back to local models, never the other "

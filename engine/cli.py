@@ -1305,11 +1305,76 @@ def models(name: Optional[str] = typer.Argument(None, help="A project: also show
         kinds = ", ".join(b.kinds)
         typer.echo(f"  {b.name:<18} {'local' if b.local else 'provider':<9} {kinds:<18} "
                    + (f"ready ({b.model(b.kinds[0])})" if ok else f"off: {why}"))
-    for kind in ("image", "edit", "text", "speech"):
+    for kind in ("image", "edit", "text", "speech", "video"):
         try:
             typer.echo(f"{kind}: {router.choose(kind, policy).name}")
         except router.NoBackend as e:
             typer.echo(f"{kind}: none ({e})")
+
+
+cloud_app = typer.Typer(help="The optional cloud account: provider jobs on credits, for builders without API keys. "
+                             "Local models and your own keys stay free and come first.")
+app.add_typer(cloud_app, name="cloud")
+
+
+@cloud_app.command("login")
+def cloud_login(email: str = typer.Option(..., prompt=True, help="The address the sign-in link is sent to"),
+                url: Optional[str] = typer.Option(None, help="The cloud service (kept for next time; default: the "
+                                                                 "one signed in before, or cloud_url in studio.toml)"),
+                open_link: bool = typer.Option(False, "--open", help="Open a development service's link in the browser")):
+    """Sign in with a link sent to your email; the account is kept in your user config folder."""
+    from . import cloud
+    try:
+        got = cloud.login(email, url, typer.echo, open_link=open_link)
+    except cloud.CloudError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(1)
+    typer.echo(f"signed in as {got['email']}: {got.get('balance', '?')} credits. Jobs use the account when a spec's "
+               "`models:` prefers providers (or pins `cloud`).")
+
+
+@cloud_app.command("status")
+def cloud_status():
+    """The signed-in account, its balance, and what each kind of job costs."""
+    from . import cloud
+    c = cloud.credentials()
+    if not c["token"]:
+        typer.echo("not signed in: `studio cloud login`. Local models and your own provider keys need no account.")
+        return
+    try:
+        a = cloud.account()
+    except cloud.CloudError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(1)
+    typer.echo(f"{a['email']} on {c['url']}: {a['balance']} credits")
+    for kind, row in a.get("prices", {}).items():
+        typer.echo(f"  {kind:<7} {row['credits']:>4} credits {row['per']:<12} {row['backend']} ({row['model']})")
+    for pack in a.get("packs", []):
+        typer.echo(f"  pack {pack['id']:<8} {pack['credits']:>6} credits for {pack['price']}")
+
+
+@cloud_app.command("buy")
+def cloud_buy(pack: Optional[str] = typer.Argument(None, help="A pack id from `studio cloud status` (default: the "
+                                                               "smallest)"),
+              no_open: bool = typer.Option(False, help="Print the checkout link instead of opening it")):
+    """Open a checkout page for a credit pack; the credits land on the account when the payment clears."""
+    from . import cloud
+    try:
+        link = cloud.checkout(pack)
+    except cloud.CloudError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(1)
+    typer.echo(f"checkout: {link}")
+    if not no_open:
+        import webbrowser
+        webbrowser.open(link)
+
+
+@cloud_app.command("logout")
+def cloud_logout():
+    """Forget the cloud sign-in on this machine (and revoke it on the service)."""
+    from . import cloud
+    typer.echo("signed out" if cloud.logout() else "was not signed in")
 
 
 @app.command()

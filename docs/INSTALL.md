@@ -42,10 +42,26 @@ weights (`laion/CLIP-ViT-H-14-laion2B-s32B-b79K`, 3.9 GB, MIT) already in the Hu
 (`huggingface-cli download laion/CLIP-ViT-H-14-laion2B-s32B-b79K open_clip_pytorch_model.bin` fetches them once).
 
 **Provider models (optional).** Every build works with local models only. To also let the model router
-(`engine/router`) use a provider, set its key: `ANTHROPIC_API_KEY` for text (`pip install -e .[providers]`),
-`OPENAI_API_KEY` for images and edits, `ELEVENLABS_API_KEY` for voiceovers, or `text_url` in studio.toml for an OpenAI-style text server (one on this machine
-counts as local). `studio models` lists what can run here, and a spec's `models:` picks
-([the project file](project-file.md)). Each provider's own terms apply to what it makes.
+(`engine/router`) use a provider, set its key:
+
+| Key | Backend | Jobs |
+| --- | --- | --- |
+| `ANTHROPIC_API_KEY` | `anthropic` | text (`pip install -e .[providers]`) |
+| `OPENAI_API_KEY` | `openai`, `openai-text` | images, edits, text |
+| `GEMINI_API_KEY` | `gemini` | images and edits (Nano Banana), text, image-to-video (Gemini Omni Flash) |
+| `BFL_API_KEY` | `flux` | images and edits (FLUX.2) |
+| `RUNWAYML_API_SECRET` | `runway` | image-to-video |
+| `ELEVENLABS_API_KEY` | `elevenlabs` | voiceovers |
+
+`text_url` in studio.toml adds an OpenAI-style text server (one on this machine counts as local). Each backend's
+default model is a studio.toml setting (`gemini_image_model`, `flux_model`, `runway_model` and so on). `studio models`
+lists what can run here, and a spec's `models:` picks ([the project file](project-file.md)); with `prefer: provider`,
+film beats and `theme.art` are animated by a provider's video model instead of LTX-2.3 or Wan. Each provider's own terms
+apply to what it makes.
+
+**No keys? The cloud account.** `studio cloud login` signs in to a Scroll Studio cloud account, which runs the same
+provider jobs on credits (`studio cloud status` shows the prices, `studio cloud buy` tops up). It is the router's last
+choice: local models and your own keys always come first and stay free.
 
 `studio inspect --page` (the polish report of a built page) needs Playwright's Chromium, which `playwright` (a core
 dependency) downloads once with `playwright install chromium`; it runs headless, on the CPU, with no network.

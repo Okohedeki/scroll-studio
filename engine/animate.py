@@ -93,6 +93,29 @@ def retime(src_dir: Path, dst_dir: Path, src_fps: float, dst_fps: int, size: Opt
     return sorted(dst_dir.glob("*.png"))
 
 
+def clip_frames(clip: Path, dst_dir: Path, seconds: float, size: tuple[int, int],
+                log: Callable[[str], None] = print) -> list[Path]:
+    """A provider's MP4 -> PNG frames at 24 fps and `size` (scaled to cover, centre-cropped), stretched or squeezed to
+    `seconds`: providers render whole seconds in their own lengths, and the scroll timeline wants the asked one."""
+    import shutil
+    from .project import ffmpeg, probe
+    if dst_dir.exists():
+        shutil.rmtree(dst_dir)
+    dst_dir.mkdir(parents=True)
+    try:
+        made = float(probe(clip).get("duration") or seconds)
+    except (ValueError, TypeError):
+        made = seconds
+    w, h = size
+    vf = (f"setpts={seconds / made:.5f}*PTS,fps={FPS},scale={w}:{h}:force_original_aspect_ratio=increase:flags=lanczos,"
+          f"crop={w}:{h},tpad=stop_mode=clone:stop=1")      # one frame past the end: the last frame lands on `seconds`
+    ffmpeg("-i", clip, "-vf", vf, "-frames:v", str(round(seconds * FPS) + 1), "-start_number", "1",
+           dst_dir / "%04d.png", log=log)
+    frames = sorted(dst_dir.glob("*.png"))
+    log(f"  provider clip: {made:.1f}s -> {len(frames)} frames at {FPS} fps, {w}x{h}")
+    return frames
+
+
 def animate(still: Path, prompt: str, motion: str, seconds: float, seed: int, work: Path,
             log: Callable[[str], None] = print, size: Optional[tuple[int, int]] = None,
             negative: str = NEGATIVE, strength: float = 1.0, end_image: Optional[Path] = None,
@@ -100,6 +123,13 @@ def animate(still: Path, prompt: str, motion: str, seconds: float, seed: int, wo
             end_strength: float = 1.0) -> list[Path]:
     """Frames (PNG paths, in order, 24 fps) of `still` brought to life by `motion`. `end_strength` (ltx): how firmly the last
     frame is held to `end_image` (1 pins it; a cinemagraph loop that must keep moving holds it more loosely)."""
+    from PIL import Image
+    from .router import video_on_provider
+    out_size = size or Image.open(still).size
+    clip = work / "provider.mp4"
+    text = f"{prompt or 'The subject of the image'}. {motion}. Smooth natural motion."
+    if video_on_provider(still, text, seconds, seed, clip, tuple(out_size), end_image, log=log):
+        return clip_frames(clip, work / "frames", seconds, tuple(out_size), log)
     from .backends import comfy
     name = "Wan 2.2" if model == "wan" else "LTX-2.3"
     if not comfy.alive():
