@@ -230,7 +230,7 @@ def _need_nodes(log) -> None:
             missing.append(n)
     if missing:
         raise BuildError("reveal needs ComfyUI custom nodes it can't see: " + ", ".join(missing) + ". Run `studio setup-comfy` "
-                         "(installs ComfyUI-segment-anything-2, ComfyUI-Florence2 and Scroll Studio's own nodes), restart "
+                         "(installs ComfyUI-segment-anything-2, ComfyUI-Florence2 and DesignAI's own nodes), restart "
                          "ComfyUI when its queue is empty, then build again. `studio doctor` lists what is missing.")
 
 

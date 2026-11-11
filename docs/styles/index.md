@@ -22,5 +22,5 @@ The [style gallery](../styles.md) says what every style does in one line, and
 | [Part 10](styles-32-33.md) | Scratch film, smears |
 | [Next batch](todo.md) | The animation techniques that came after, shipped or planned |
 
-The research may be reused with credit: *Style research from Scroll Studio by Edeki Okoh:
-https://github.com/Okohedeki/scroll-studio*. See the [licence](../licence.md).
+The research may be reused with credit: *Style research from DesignAI by Edeki Okoh:
+https://github.com/Okohedeki/designai*. See the [licence](../licence.md).

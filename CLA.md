@@ -14,7 +14,7 @@ contribution you make to the project.
 - **"You"** means the person, or the legal entity on whose behalf that person is authorised to act, who signs this
   agreement.
 - **"Maintainer"** means Edeki Okoh, the owner of the Scroll Studio project at
-  https://github.com/Okohedeki/scroll-studio, and any successor to whom the project is transferred.
+  https://github.com/Okohedeki/designai, and any successor to whom the project is transferred.
 - **"Contribution"** means any work of authorship (code, templates, styles, documentation, research, images, designs
   or other material) that You submit to the Maintainer for inclusion in Scroll Studio, by pull request, patch, issue,
   comment or any other means, unless You mark it in writing as "Not a Contribution".

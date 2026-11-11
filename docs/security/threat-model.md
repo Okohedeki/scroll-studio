@@ -1,10 +1,10 @@
 # Threat model
 
-What Scroll Studio trusts, what it does not, and how each risk is handled. Keep this page current: a pull request that
+What DesignAI trusts, what it does not, and how each risk is handled. Keep this page current: a pull request that
 adds a new input, download, server or external tool updates it. Report problems privately
-([SECURITY.md](https://github.com/Okohedeki/scroll-studio/blob/main/SECURITY.md)).
+([SECURITY.md](https://github.com/Okohedeki/designai/blob/main/SECURITY.md)).
 
-## What Scroll Studio is
+## What DesignAI is
 
 A local tool. A person runs the engine on their own machine; it reads a project folder (`site.yaml` and inputs),
 drives local models (ComfyUI, Blender, Hugging Face weights), and writes a static site to `dist/`. That site is then
@@ -37,7 +37,7 @@ A hostile `site.yaml` names `../../.ssh/id_rsa` as an input, or an output path o
 - **Defence:** project paths resolve through `Project.path()`, which refuses anything outside the project folder after
   resolving `..` and links. Specs are validated by Pydantic before anything runs.
 - **Gap:** every path a spec can name must go through that check; an audit and hostile-spec tests are tracked in
-  [#54](https://github.com/Okohedeki/scroll-studio/issues/54).
+  [#54](https://github.com/Okohedeki/designai/issues/54).
 
 ### A spec runs code
 
@@ -53,7 +53,7 @@ A caption carries `<script>` or a `javascript:` link, and every visitor of the b
 
 - **Defence:** the compiler's Jinja environment autoescapes HTML templates. Markdown fields are rendered by the engine
   and must not allow raw HTML or `javascript:` URLs.
-- **Gap:** hostile-text tests for every block type are part of [#54](https://github.com/Okohedeki/scroll-studio/issues/54).
+- **Gap:** hostile-text tests for every block type are part of [#54](https://github.com/Okohedeki/designai/issues/54).
 
 ### Model weights run code when loaded
 
@@ -63,7 +63,7 @@ serve a hostile file.
 - **Defence:** most models are `.safetensors`, which hold data only. Downloads come from the sources named in
   `engine/models.yaml`.
 - **Gap:** checksums for every file, refusing mismatches, and `weights_only=True` wherever torch files are loaded:
-  [#53](https://github.com/Okohedeki/scroll-studio/issues/53).
+  [#53](https://github.com/Okohedeki/designai/issues/53).
 
 ### ComfyUI custom nodes
 
@@ -84,7 +84,7 @@ local.
 - **Defence:** every server binds to `127.0.0.1` only, never to the network. Files are served only from inside the
   project (`Project.path()`, the `dist/` check in the preview route).
 - **Gap:** checking the `Host` and `Origin` headers on every request, so other sites can neither read nor change
-  projects: [#55](https://github.com/Okohedeki/scroll-studio/issues/55).
+  projects: [#55](https://github.com/Okohedeki/designai/issues/55).
 
 ### The MCP server
 

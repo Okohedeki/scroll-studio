@@ -8,7 +8,7 @@ const BRANCH = "cla-signatures";
 const FILE = "signatures/cla.json";
 const ALLOWLIST = ["Okohedeki"];
 const MARKER = "<!-- scroll-studio-cla -->";
-const CLA_URL = "https://github.com/Okohedeki/scroll-studio/blob/main/CLA.md";
+const CLA_URL = "https://github.com/Okohedeki/designai/blob/main/CLA.md";
 
 const isBot = (login) => /\[bot\]$/.test(login);
 const isSigning = (body) => (body || "").trim().replace(/\s+/g, " ").replace(/\.$/, "") === SENTENCE;
@@ -37,7 +37,7 @@ function message(missing) {
   if (missing.length === 0) return `${MARKER}\nAll contributors have signed the CLA. Thank you.`;
   const named = missing.filter((p) => p.login).map((p) => `@${p.login}`);
   const unlinked = missing.filter((p) => !p.login).map((p) => p.name);
-  let text = `${MARKER}\nThank you for contributing to Scroll Studio. Before this can be merged, please read the ` +
+  let text = `${MARKER}\nThank you for contributing to DesignAI. Before this can be merged, please read the ` +
     `[Contributor Licence Agreement](${CLA_URL}) and sign it by commenting on this pull request with exactly:\n\n` +
     `> ${SENTENCE}\n\nYou only sign once, for all your contributions.`;
   if (named.length) text += `\n\nStill to sign: ${named.join(", ")}.`;

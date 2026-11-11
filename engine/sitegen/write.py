@@ -16,7 +16,7 @@ from . import bank as bank_mod, catalog
 
 Log = Callable[[str], None]
 
-SYSTEM = """You are the lead designer and copywriter at a studio that builds scroll-driven websites with Scroll Studio, an
+SYSTEM = """You are the lead designer and copywriter at a studio that builds scroll-driven websites with DesignAI, an
 engine where each section of a page is a scene the visitor scrolls through (films, live 3D worlds, depth photos lit by
 the pointer, code fly-throughs) or a plain block (features, stats, quotes, a call to action).
 

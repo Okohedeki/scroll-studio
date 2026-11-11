@@ -5,7 +5,7 @@ shimmer when one dissolves into the other. With `edit.region` the edit is confin
 the rest of the result is the source itself, byte for byte. In order:
 
   find     the region's prompt -> boxes on the source (Florence-2, through ComfyUI), or the spec's `box` / `points`;
-           SAM 2.1 (image mode: a one-frame video through Scroll Studio's own SSRevealTrack node, so no new ComfyUI
+           SAM 2.1 (image mode: a one-frame video through DesignAI's own SSRevealTrack node, so no new ComfyUI
            node is needed) cuts the thing out; soft mask at the source's resolution. Cached by the source's content and
            what names the region (`region_<digest>.png`, plus the boxes drawn on the source for review).
   shape    `grow` dilates it (pixels of the source), `feather` softens its edge; `invert` swaps it for everything else.

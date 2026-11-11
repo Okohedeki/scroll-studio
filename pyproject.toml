@@ -1,7 +1,7 @@
 [project]
-name = "scroll-studio"
+name = "designai"
 version = "1.4.0"
-description = "Open-source engine for scroll-driven websites: AI film, artwork drawn on scroll, live 3D, product sequences, photo parallax and kinetic type, built locally from any inputs."
+description = "Open-source generation engine for commerce creative: product stills, ads, listings, product video and scroll-driven sites, local-first with optional frontier models."
 readme = "README.md"
 license = { text = "AGPL-3.0-only" }
 requires-python = ">=3.10"
@@ -55,10 +55,11 @@ splat = ["gsplat>=1.3"]
 dev = ["pytest>=8.0", "pytest-xdist>=3.5", "pytest-cov==7.1.0", "ruff==0.17.1", "build>=1.2", "setuptools>=68"]
 # the docs site (docs/contributing/building-the-docs.md): exact versions, so a docs build is the same everywhere
 docs = ["mkdocs==1.6.1", "mkdocs-material==9.7.7", "pymdown-extensions==12.1"]
-all = ["scroll-studio[ml,vector,mesh,cad,data,audio,providers,dev]"]
+all = ["designai[ml,vector,mesh,cad,data,audio,providers,dev]"]
 
 [project.scripts]
 studio = "engine.cli:app"
+designai = "engine.cli:app"
 
 [build-system]
 requires = ["setuptools>=68"]

@@ -1,6 +1,6 @@
 # Styles
 
-[← README](../README.md) · [Why Scroll Studio](why.md) · [What's new](whats-new.md) · [Examples](examples.md) · [Guide: make a site](guide.md) · [Styles](styles.md) · [Scenes](scenes.md) · [Licence](licence.md)
+[← README](../README.md) · [Why DesignAI](why.md) · [What's new](whats-new.md) · [Examples](examples.md) · [Guide: make a site](guide.md) · [Styles](styles.md) · [Scenes](scenes.md) · [Licence](licence.md)
 
 
 `theme: { style: <name> }` changes how a site is experienced: what scrolling does, how content is laid out and

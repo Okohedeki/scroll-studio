@@ -23,7 +23,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: Scroll Studio version or commit
+      label: DesignAI version or commit
       placeholder: "1.4.0, or git rev-parse --short HEAD"
     validations:
       required: true

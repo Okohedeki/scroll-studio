@@ -245,7 +245,7 @@ def free_port(preferred: Optional[int] = None) -> int:
 
 
 def make_app(project: Project) -> FastAPI:
-    app = FastAPI(title="Scroll Studio: storyboard editor")
+    app = FastAPI(title="DesignAI: storyboard editor")
     app.add_middleware(LocalOnly)
     jobs = JobQueue()
 

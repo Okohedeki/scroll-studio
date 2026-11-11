@@ -20,7 +20,7 @@ the files are gathered into a new section of the changelog and deleted, so pull 
 
 ## Text
 
-A sentence or two, written for someone who builds sites with Scroll Studio: what they can do now, or what works
+A sentence or two, written for someone who builds sites with DesignAI: what they can do now, or what works
 differently, in plain words. Name spec fields and commands in backticks. Markdown is fine; no heading, no bullet.
 
 ```markdown

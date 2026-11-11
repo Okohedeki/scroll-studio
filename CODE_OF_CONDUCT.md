@@ -1,6 +1,6 @@
 # Code of conduct
 
-Scroll Studio is built by people with different backgrounds, skills and opinions. Everyone who takes part (in issues,
+DesignAI is built by people with different backgrounds, skills and opinions. Everyone who takes part (in issues,
 pull requests, discussions, reviews and any other project space) is expected to make that a good experience.
 
 ## What we expect

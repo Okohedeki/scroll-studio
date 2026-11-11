@@ -1,6 +1,6 @@
 # Try it on a laptop
 
-You do not need a GPU, ComfyUI or Blender to make a Scroll Studio site. Kinetic type, photo parallax, maps, data, code
+You do not need a GPU, ComfyUI or Blender to make a DesignAI site. Kinetic type, photo parallax, maps, data, code
 flights, live 3D, every block and all 32 styles build on the CPU. This page goes from `pip install` to a built site; it
 should take about five minutes, most of it the install. To see what the finished thing looks like first, open the
 [live showcase](https://okohedeki.github.io/scroll-studio-showcase/).
@@ -10,7 +10,7 @@ should take about five minutes, most of it the install. To see what the finished
 You need Python 3.10 or newer and git. Node.js, FFmpeg and Blender are not needed for anything on this page.
 
 ```bash
-git clone https://github.com/Okohedeki/scroll-studio && cd scroll-studio
+git clone https://github.com/Okohedeki/designai && cd scroll-studio
 pip install -e .
 studio doctor
 ```
@@ -96,13 +96,13 @@ have permission to use. The result is an ordinary `site.yaml`, so everything in 
 | A flight through code | `code` | nothing |
 | Live 3D, a miniature world, a scan | `scene3d`, `diorama`, `splat` | nothing (a scan is a `.ply` or `.spz`) |
 
-These examples build without a GPU: [FORM/26](https://github.com/Okohedeki/scroll-studio/blob/main/examples/form-conference/site.yaml) (type),
-[Cellwright Bio](https://github.com/Okohedeki/scroll-studio/blob/main/examples/cellwright-bio/site.yaml) (live 3D),
-[Northstar Observatory](https://github.com/Okohedeki/scroll-studio/blob/main/examples/northstar-observatory/site.yaml) (live 3D),
-[Tidewater Lines](https://github.com/Okohedeki/scroll-studio/blob/main/examples/tidewater-lines/site.yaml) (a map),
-[Harbourlight](https://github.com/Okohedeki/scroll-studio/blob/main/examples/little-harbour/site.yaml) (a miniature world),
-[Wunderkammer](https://github.com/Okohedeki/scroll-studio/blob/main/examples/wunderkammer/site.yaml) (vector line art) and
-[Atelier Sfumato](https://github.com/Okohedeki/scroll-studio/blob/main/examples/atelier-sfumato/site.yaml) (artwork). Build one with
+These examples build without a GPU: [FORM/26](https://github.com/Okohedeki/designai/blob/main/examples/form-conference/site.yaml) (type),
+[Cellwright Bio](https://github.com/Okohedeki/designai/blob/main/examples/cellwright-bio/site.yaml) (live 3D),
+[Northstar Observatory](https://github.com/Okohedeki/designai/blob/main/examples/northstar-observatory/site.yaml) (live 3D),
+[Tidewater Lines](https://github.com/Okohedeki/designai/blob/main/examples/tidewater-lines/site.yaml) (a map),
+[Harbourlight](https://github.com/Okohedeki/designai/blob/main/examples/little-harbour/site.yaml) (a miniature world),
+[Wunderkammer](https://github.com/Okohedeki/designai/blob/main/examples/wunderkammer/site.yaml) (vector line art) and
+[Atelier Sfumato](https://github.com/Okohedeki/designai/blob/main/examples/atelier-sfumato/site.yaml) (artwork). Build one with
 `studio build examples/<name>`.
 
 ## What needs the GPU stack

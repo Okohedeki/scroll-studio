@@ -50,7 +50,7 @@ def test_bad_titles(title, needle):
 
 
 def test_linked_numbers():
-    body = "Closes #13, fixes #14 and part of #37.\nRefs Okohedeki/scroll-studio#9. Mentions #99 only."
+    body = "Closes #13, fixes #14 and part of #37.\nRefs Okohedeki/designai#9. Mentions #99 only."
     assert sorted(js(f"p.linkedNumbers({json.dumps(body)})")) == [9, 13, 14, 37]
     assert js("p.linkedNumbers(null)") == []
 

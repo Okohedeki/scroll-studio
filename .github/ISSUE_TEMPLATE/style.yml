@@ -7,8 +7,8 @@ body:
       value: |
         A style is an experience, not a skin: its own scroll mechanic, layout, transitions and pointer behaviour. One that
         shares those with an existing style is a reskin and won't be merged. Read the
-        [style contract](https://github.com/Okohedeki/scroll-studio/blob/main/engine/styles/README.md) and the
-        [consistency rules](https://github.com/Okohedeki/scroll-studio/blob/main/CONTRIBUTING.md#consistency-rules) first.
+        [style contract](https://github.com/Okohedeki/designai/blob/main/engine/styles/README.md) and the
+        [consistency rules](https://github.com/Okohedeki/designai/blob/main/CONTRIBUTING.md#consistency-rules) first.
   - type: input
     id: name
     attributes:

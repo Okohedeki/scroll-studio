@@ -1,6 +1,6 @@
-# Contributing to Scroll Studio
+# Contributing to DesignAI
 
-Thank you for helping. Scroll Studio is an open-source **engine**: a `site.yaml` spec goes in and a finished static
+Thank you for helping. DesignAI is an open-source **engine**: a `site.yaml` spec goes in and a finished static
 site comes out, made with open models on the contributor's own GPU. This guide says how to contribute and the rules
 every change keeps, so the engine stays consistent as more people work on it.
 
@@ -22,9 +22,9 @@ every change keeps, so the engine stays consistent as more people work on it.
 **Every pull request starts with an issue**, for everyone, maintainers included. A check on every pull request fails
 until it links an issue that a maintainer has accepted, so nobody spends time on work that won't be merged:
 
-1. **Find or open the issue.** Search the [issues](https://github.com/Okohedeki/scroll-studio/issues) and the
-   [milestones](https://github.com/Okohedeki/scroll-studio/milestones) first. Questions belong in
-   [Discussions](https://github.com/Okohedeki/scroll-studio/discussions) ([SUPPORT.md](SUPPORT.md)).
+1. **Find or open the issue.** Search the [issues](https://github.com/Okohedeki/designai/issues) and the
+   [milestones](https://github.com/Okohedeki/designai/milestones) first. Questions belong in
+   [Discussions](https://github.com/Okohedeki/designai/discussions) ([SUPPORT.md](SUPPORT.md)).
 2. **Wait for `status: accepted`.** A maintainer triages new issues within a few days
    ([docs/maintainers/triage.md](docs/maintainers/triage.md)). Small fixes (a typo, a broken link, a clear bug) are
    accepted quickly.
@@ -39,14 +39,14 @@ everywhere in the project.
 <a id="no-bounties"></a>
 ### No bounties
 
-Scroll Studio does not pay for contributions. There are no bounties, tips or payments for issues, pull requests,
+DesignAI does not pay for contributions. There are no bounties, tips or payments for issues, pull requests,
 reviews, translations or security reports, and nobody is authorised to promise any on the project's behalf. Pull
 requests or issues that ask for payment (including wallet addresses or payment details) are closed. Contributors are
 credited by name in the release notes, and security reporters in the advisory.
 
 ## Ground rules
 
-These are what make Scroll Studio what it is. A change that breaks one is not merged, however good it is otherwise.
+These are what make DesignAI what it is. A change that breaks one is not merged, however good it is otherwise.
 
 1. **Engine features, never one-off pages.** If a site needs something the engine can't do, add it to the engine (a
    spec field, a builder stage, a runtime player or preset) so every site can use it. No hand-written pages, no
@@ -70,7 +70,7 @@ These are what make Scroll Studio what it is. A change that breaks one is not me
 <a id="rules-per-area"></a>
 ## Rules per area: core, standard and trivial
 
-Not every file carries the same risk. The runtime ships inside every site anyone has ever built with Scroll Studio; a
+Not every file carries the same risk. The runtime ships inside every site anyone has ever built with DesignAI; a
 change to it reaches all of their visitors. A typo in a guide reaches nobody. So the rules depend on what a pull request
 touches. The labeler marks pull requests that touch a core path `tier: core`, and the `pr-policy` check holds them to
 the core rules.
@@ -127,7 +127,7 @@ same day.
 ## Set up
 
 ```bash
-git clone https://github.com/<you>/scroll-studio && cd scroll-studio
+git clone https://github.com/<you>/designai && cd designai
 pip install -e ".[dev]"            # add extras you need: .[ml,mesh,cad,...] (see pyproject.toml)
 npm ci                             # the runtime and the Studio UI
 python -m pytest -q                # the whole suite, no GPU needed (about 10 minutes)
@@ -137,7 +137,7 @@ studio doctor                      # what your machine can build
 GPU stages need ComfyUI, Blender and the models: [docs/INSTALL.md](docs/INSTALL.md). You do not need them to work on
 the spec, the compiler, the runtime, styles or docs.
 
-The docs site (https://okohedeki.github.io/scroll-studio/) builds from `docs/` with
+The docs site (https://okohedeki.github.io/designai/) builds from `docs/` with
 `pip install -e ".[docs]"`, `python -m engine.docsgen docs/reference` and `mkdocs serve`
 ([building the docs](docs/contributing/building-the-docs.md)).
 
@@ -301,7 +301,7 @@ Every pull request runs these without a GPU, and `main` only accepts changes tha
 - **Title it** in the [Conventional Commits](https://www.conventionalcommits.org) form, because the project merges with
   squash and the title becomes the commit on `main`: `type(area): what changed`, in the present tense, lower case
   after the colon.
-  - Types: `feat` (a new capability), `fix` (a bug), `perf`, `docs`, `test`, `refactor`, `style` (a Scroll Studio
+  - Types: `feat` (a new capability), `fix` (a bug), `perf`, `docs`, `test`, `refactor`, `style` (a DesignAI
     style, not code formatting), `build`, `ci`, `chore`, `revert`.
   - Area (optional): `runtime`, `spec`, `compiler`, `scenes`, `styles`, `themes`, `models`, `cli`, `mcp`, `ui`,
     `docs`, `examples`, `tests`, `ci`.
@@ -320,7 +320,7 @@ Every pull request runs these without a GPU, and `main` only accepts changes tha
 
 ## Licence and the CLA
 
-Scroll Studio is licensed under the **GNU AGPL-3.0 with additional terms** ([LICENSE](LICENSE),
+DesignAI is licensed under the **GNU AGPL-3.0 with additional terms** ([LICENSE](LICENSE),
 [NOTICE.md](NOTICE.md)). Never remove or alter `LICENSE`, `NOTICE.md`, `AGENTS.md` or the notice comment at the top of
 the runtime files.
 
@@ -337,5 +337,5 @@ for the contribution and signs the CLA.
 
 ## Reporting bugs and security issues
 
-- **Bugs and ideas:** [open an issue](https://github.com/Okohedeki/scroll-studio/issues/new/choose) with the template.
+- **Bugs and ideas:** [open an issue](https://github.com/Okohedeki/designai/issues/new/choose) with the template.
 - **Security problems:** do not open a public issue; follow [SECURITY.md](SECURITY.md).

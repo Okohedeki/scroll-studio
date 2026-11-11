@@ -282,7 +282,7 @@ PAGES = {"docs/guide.md": "guide.md", "docs/styles/index.md": "styles/index.md",
          "CLA.md": "contributing/cla.md", "CONTRIBUTING.md": "contributing/guide.md"}
 EXISTING = {"README.md": "file", "LICENSE": "file", "examples": "dir", "examples/fenmoor/site.yaml": "file",
             "engine/styles/README.md": "file", "docs/styles": "dir", ".github/workflows/tests.yml": "file"}
-URL = "https://github.com/Okohedeki/scroll-studio"
+URL = "https://github.com/Okohedeki/designai"
 
 
 def link(target: str, origin: str, dest: str) -> str:

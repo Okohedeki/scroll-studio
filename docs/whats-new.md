@@ -1,6 +1,6 @@
 # What's new
 
-[← README](../README.md) · [Why Scroll Studio](why.md) · [What's new](whats-new.md) · [Examples](examples.md) · [Guide: make a site](guide.md) · [Styles](styles.md) · [Scenes](scenes.md) · [Licence](licence.md)
+[← README](../README.md) · [Why DesignAI](why.md) · [What's new](whats-new.md) · [Examples](examples.md) · [Guide: make a site](guide.md) · [Styles](styles.md) · [Scenes](scenes.md) · [Licence](licence.md)
 
 ### New in 1.5
 
@@ -67,7 +67,7 @@
 - **Local servers answer only this machine.** The Studio UI, preview, storyboard editor and direction boards refuse
   requests for other hosts and from other websites.
   ([Threat model](security/threat-model.md#local-servers-are-reached-by-other-web-pages))
-- **A docs site.** The documentation is at [okohedeki.github.io/scroll-studio](https://okohedeki.github.io/scroll-studio/),
+- **A docs site.** The documentation is at [okohedeki.github.io/designai](https://okohedeki.github.io/designai/),
   with search, and its spec, command and MCP references are generated from the code.
 
 ### New in 1.4

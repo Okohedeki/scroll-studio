@@ -2,7 +2,7 @@
 
 The docs are Markdown files in `docs/`, built into a site with [MkDocs](https://www.mkdocs.org/) and the
 [Material](https://squidfunk.github.io/mkdocs-material/) theme. Pull requests build the site, and every push to `main`
-publishes it to GitHub Pages at <https://okohedeki.github.io/scroll-studio/>.
+publishes it to GitHub Pages at <https://okohedeki.github.io/designai/>.
 
 ## Build it locally
 

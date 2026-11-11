@@ -7,7 +7,7 @@ for what each scene type needs). No GPU? [Try it on a laptop](laptop.md) is this
 ## Install and look around
 
 ```bash
-git clone https://github.com/Okohedeki/scroll-studio && cd scroll-studio
+git clone https://github.com/Okohedeki/designai && cd scroll-studio
 pip install -e .
 studio doctor                         # what this machine can build
 ```
@@ -50,7 +50,7 @@ sections:
 
 ## Build with Claude
 
-Open the repository in Claude Code and ask for a site. The `scroll-studio` MCP server (`.mcp.json`) gives Claude every
+Open the repository in Claude Code and ask for a site. The `designai` MCP server (`.mcp.json`) gives Claude every
 engine tool, and the skills in `.agents/skills/` give it the workflow. The tools are listed in the
 [MCP reference](reference/mcp.md).
 

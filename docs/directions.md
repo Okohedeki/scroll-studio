@@ -1,6 +1,6 @@
 # Directions: the next level of landing pages
 
-Scroll Studio is a design studio for landing pages. These are the directions it grows in next, chosen for what the
+DesignAI is a design studio for landing pages. These are the directions it grows in next, chosen for what the
 engine does well (generated worlds and camera moves, depth and masks, type, real products, browser-side mechanics) and
 away from what it does badly (people acting, choreography, consistent characters). Each one is an engine feature: a
 spec field, a cached builder, a runtime player where needed, CLI and MCP, docs and a showcase spec.

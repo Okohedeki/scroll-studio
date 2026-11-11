@@ -22,7 +22,7 @@ def resolve_path(project: Project, ref: str, log=print) -> Path:
             would_render("download", ref)
             out.parent.mkdir(parents=True, exist_ok=True)
             log(f"  downloading {ref}")
-            ua = {"User-Agent": "ScrollStudio/0.1 (+https://github.com/Okohedeki/scroll-studio)"}
+            ua = {"User-Agent": "DesignAI/0.1 (+https://github.com/Okohedeki/designai)"}
             with requests.get(ref, stream=True, timeout=60, headers=ua) as r:
                 r.raise_for_status()
                 tmp = out.with_suffix(out.suffix + ".part")
@@ -53,7 +53,7 @@ def _lfs_check(url: str, out: Path, log=print) -> None:
     media = f"https://media.githubusercontent.com/media/{owner}/{repo}/{rest.split('?')[0]}"
     log(f"  {Path(url.split('?')[0]).name} is stored with Git LFS: downloading it from {media}")
     tmp = out.with_suffix(out.suffix + ".part")
-    with requests.get(media, stream=True, timeout=120, headers={"User-Agent": "ScrollStudio/0.1"}) as r:
+    with requests.get(media, stream=True, timeout=120, headers={"User-Agent": "DesignAI/0.1"}) as r:
         r.raise_for_status()
         with open(tmp, "wb") as f:
             for chunk in r.iter_content(1 << 20):

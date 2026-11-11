@@ -1,6 +1,6 @@
-# Every model Scroll Studio can use. ComfyUI models go in ComfyUI's model folders (see docs/INSTALL.md);
+# Every model DesignAI can use. ComfyUI models go in ComfyUI's model folders (see docs/INSTALL.md);
 # Hugging Face models download automatically into <model_dir>/hf on first use.
-# Licences belong to the model authors and are NOT covered by Scroll Studio's licence (AGPL-3.0). Check before commercial use.
+# Licences belong to the model authors and are NOT covered by DesignAI's licence (AGPL-3.0). Check before commercial use.
 #
 # sha256: the SHA-256 of the file (for Hugging Face files, the LFS hash the Hub lists for it). `null` means not pinned yet:
 # the file is still used, with a warning where the engine downloads it. A file the engine downloads itself (see

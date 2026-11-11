@@ -1,14 +1,14 @@
 # Triage
 
 How issues and pull requests are handled, for maintainers and triagers. Labels are defined in
-[.github/labels.yml](https://github.com/Okohedeki/scroll-studio/blob/main/.github/labels.yml); change them there, never
+[.github/labels.yml](https://github.com/Okohedeki/designai/blob/main/.github/labels.yml); change them there, never
 in the GitHub UI.
 
 ## Response targets
 
 | What | First response | Then |
 |---|---|---|
-| Security report (private advisory) | 2 days | Fix plan within 7 days ([SECURITY.md](https://github.com/Okohedeki/scroll-studio/blob/main/SECURITY.md)) |
+| Security report (private advisory) | 2 days | Fix plan within 7 days ([SECURITY.md](https://github.com/Okohedeki/designai/blob/main/SECURITY.md)) |
 | `priority: p0` issue | Same day | Fix or workaround in a patch release |
 | New issue | 3 days: triaged | |
 | Pull request | 3 days: first comment | Full review within 7 days of the checks passing |
@@ -31,7 +31,7 @@ Every new issue arrives with `status: needs-triage` (the issue forms add it). Fo
    - `p3`: nice to have.
 4. **Decide.** Remove `status: needs-triage` and either:
    - **accept**: `status: accepted`. For a core change (see
-     [CONTRIBUTING.md](https://github.com/Okohedeki/scroll-studio/blob/main/CONTRIBUTING.md#rules-per-area)), only
+     [CONTRIBUTING.md](https://github.com/Okohedeki/designai/blob/main/CONTRIBUTING.md#rules-per-area)), only
      once the design is written down: then `status: design-approved` as well. Put it in a milestone if it's planned.
    - **decline**: `wontfix` with the reason (usually a ground rule: one-off pages, hosted APIs, or not an engine
      feature), and close. Be kind and specific.
@@ -53,7 +53,7 @@ request needs a design-approved one). The labeler adds `area:`, `tier: core` and
 5. **Review** for the ground rules and consistency rules, then the code. Request changes with concrete suggestions;
    maintainers can push small fixes to the contributor's branch.
 6. **Merge** with squash once everything is green. The pull request title becomes the commit message, so make sure it
-   follows the [title format](https://github.com/Okohedeki/scroll-studio/blob/main/CONTRIBUTING.md#pull-requests).
+   follows the [title format](https://github.com/Okohedeki/designai/blob/main/CONTRIBUTING.md#pull-requests).
 
 ## Dependabot pull requests
 

@@ -2,7 +2,7 @@
 
 A post stage over a finished clip: faces above `min_size` pixels are found in every frame, restored with GFPGAN v1.4
 (Apache-2.0; not CodeFormer, whose licence is non-commercial), blended back through a soft face mask, and the change is
-smoothed over time in the face's own aligned space so nothing flickers. It runs in ComfyUI through Scroll Studio's
+smoothed over time in the face's own aligned space so nothing flickers. It runs in ComfyUI through DesignAI's
 `SSFaceRestore` node (engine/backends/comfy_nodes/), in chunks of frames that overlap by a few frames so the smoothing has
 warmed up where each chunk starts. The result is a new clip with the same frame count and rate, cached by the source clip and
 the settings; the film (or the beat's join) then carries on from it.
@@ -30,7 +30,7 @@ def preflight(ctx: BuildContext) -> None:
         try:
             comfy._req(f"/object_info/{n}")
         except Exception:
-            raise BuildError("faces: restore needs Scroll Studio's ComfyUI nodes, which ComfyUI can't see. Run `studio setup-comfy`, "
+            raise BuildError("faces: restore needs DesignAI's ComfyUI nodes, which ComfyUI can't see. Run `studio setup-comfy`, "
                              "restart ComfyUI when its queue is empty, then build again (`studio doctor` checks it).")
 
 

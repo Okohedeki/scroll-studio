@@ -44,7 +44,7 @@ jobs:
         with:
           path: .
           format: spdx-json
-          output-file: scroll-studio.spdx.json
+          output-file: designai.spdx.json
           upload-artifact: false
           upload-release-assets: false
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
@@ -55,7 +55,7 @@ jobs:
           name: release
           path: |
             dist/
-            scroll-studio.spdx.json
+            designai.spdx.json
             release-notes.md
           retention-days: 30
 
@@ -79,7 +79,7 @@ jobs:
         run: |
           flags=()
           if [[ "$TAG" == *rc* ]]; then flags+=(--prerelease); fi
-          gh release create "$TAG" dist/* scroll-studio.spdx.json \
+          gh release create "$TAG" dist/* designai.spdx.json \
             --repo "$GITHUB_REPOSITORY" --verify-tag --title "${TAG#v}" --notes-file release-notes.md "${flags[@]}"
 
   pypi:
@@ -89,7 +89,7 @@ jobs:
     timeout-minutes: 10
     environment:
       name: pypi
-      url: https://pypi.org/p/scroll-studio
+      url: https://pypi.org/p/designai
     permissions:
       id-token: write       # trusted publishing
     steps:

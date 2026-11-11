@@ -131,7 +131,7 @@ def reveal_checks() -> list[dict]:
     for label, nodes, need, fix in (
             ("ComfyUI nodes: SAM 2.1 + Florence-2 (kijai)", ("DownloadAndLoadSAM2Model", "DownloadAndLoadFlorence2Model"), "film reveal",
              "ComfyUI-segment-anything-2 and ComfyUI-Florence2 in custom_nodes"),
-            ("ComfyUI nodes: Scroll Studio (tracking, faces)", ("SSRevealTrack", "SSRevealGround", "SSFaceRestore"), "film reveal, faces: restore",
+            ("ComfyUI nodes: DesignAI (tracking, faces)", ("SSRevealTrack", "SSRevealGround", "SSFaceRestore"), "film reveal, faces: restore",
              "")):
         if not up:
             out.append({"name": label, "ok": False, "detail": "ComfyUI not running, can't check", "needed_by": need})
@@ -280,7 +280,7 @@ def report(verify: bool = False) -> None:
         console.print()
     console.print("No GPU? `studio new my-site --laptop` makes a site that builds on this machine (docs/laptop.md).")
     console.print()
-    t = Table(title="Scroll Studio doctor: the whole toolchain")
+    t = Table(title="DesignAI doctor: the whole toolchain")
     for c in ("", "Check", "Detail", "Needed by"):
         t.add_column(c)
     for c in checks() + (verify_models() if verify else []):

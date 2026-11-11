@@ -2,7 +2,7 @@
 
 `studio stills my-shop` turns one product photo into a reviewed set of stills: pack shots, lifestyle scenes and
 close details. It explores several art directions, makes candidates across seeds and backends, scores them, and
-keeps a varied shortlist for each shot ([design](https://github.com/Okohedeki/scroll-studio/issues/175)).
+keeps a varied shortlist for each shot ([design](https://github.com/Okohedeki/designai/issues/175)).
 
 ```yaml
 # docs: no-validate (a project file)

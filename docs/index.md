@@ -7,9 +7,9 @@ hide:
 
 <div align="center" markdown>
 
-![Scroll Studio](media/logo.svg){ width="88" }
+![DesignAI](media/logo.svg){ width="88" }
 
-# Scroll Studio
+# DesignAI
 
 **An open-source design studio for scroll-driven landing pages. One YAML file in, a finished site out, made on your own GPU with no API keys.**
 

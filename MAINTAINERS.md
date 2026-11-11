@@ -1,6 +1,6 @@
 # Maintainers
 
-Who looks after which part of Scroll Studio. Roles are described in [GOVERNANCE.md](GOVERNANCE.md); review rules per
+Who looks after which part of DesignAI. Roles are described in [GOVERNANCE.md](GOVERNANCE.md); review rules per
 area are in [CONTRIBUTING.md](CONTRIBUTING.md#rules-per-area) and enforced through [CODEOWNERS](.github/CODEOWNERS).
 
 ## Maintainer

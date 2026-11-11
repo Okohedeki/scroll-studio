@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="docs/media/logo.svg" alt="Scroll Studio" width="88" />
-  <h1>Scroll Studio</h1>
-  <p><strong>An open-source design studio for scroll-driven landing pages. One YAML file in, a finished site out, made on your own machine with no API keys.</strong></p>
+  <img src="docs/media/logo.svg" alt="DesignAI" width="88" />
+  <h1>DesignAI</h1>
+  <p><strong>An open-source generation engine for commerce creative: product stills, ads, listings, product video and scroll-driven sites from one photo or a short brief. Local models by default; frontier models when you want them.</strong></p>
   <table>
     <tr>
       <td align="center" width="50%">
@@ -15,24 +15,24 @@
     </tr>
   </table>
   <p>
-    <a href="https://okohedeki.github.io/scroll-studio-showcase/recordings/1.5.mp4"><img src="https://okohedeki.github.io/scroll-studio-showcase/recordings/1.5.jpg" alt="Scroll Studio 1.5 in 30 seconds: six example pages recorded from their built sites" width="720" /></a><br />
+    <a href="https://okohedeki.github.io/scroll-studio-showcase/recordings/1.5.mp4"><img src="https://okohedeki.github.io/scroll-studio-showcase/recordings/1.5.jpg" alt="DesignAI 1.5 in 30 seconds: six example pages recorded from their built sites" width="720" /></a><br />
     <strong>New in 1.5:</strong> your brand from a link, pictures in one medium, the pointer as a light or a lens, and <code>studio remake &lt;url&gt;</code>.
     <a href="docs/whats-new.md">What's new &rarr;</a>
   </p>
   <p>
     <a href="https://okohedeki.github.io/scroll-studio-showcase/">Showcase</a> ·
     <a href="#get-started">Get started</a> ·
-    <a href="https://okohedeki.github.io/scroll-studio/">Docs</a> ·
+    <a href="https://okohedeki.github.io/designai/">Docs</a> ·
     <a href="docs/examples.md">Examples</a> ·
-    <a href="https://github.com/Okohedeki/scroll-studio/releases/latest">Releases</a> ·
+    <a href="https://github.com/Okohedeki/designai/releases/latest">Releases</a> ·
     <a href="CHANGELOG.md">Changelog</a>
   </p>
   <p>
-    <a href="https://github.com/Okohedeki/scroll-studio/releases/latest"><img src="https://img.shields.io/github/v/release/Okohedeki/scroll-studio" alt="Latest release" /></a>
+    <a href="https://github.com/Okohedeki/designai/releases/latest"><img src="https://img.shields.io/github/v/release/Okohedeki/designai" alt="Latest release" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL--3.0-blue" alt="AGPL-3.0" /></a>
-    <a href="https://github.com/Okohedeki/scroll-studio/actions/workflows/tests.yml"><img src="https://github.com/Okohedeki/scroll-studio/actions/workflows/tests.yml/badge.svg" alt="Tests" /></a>
-    <a href="https://scorecard.dev/viewer/?uri=github.com/Okohedeki/scroll-studio"><img src="https://api.scorecard.dev/projects/github.com/Okohedeki/scroll-studio/badge" alt="OpenSSF Scorecard" /></a>
-    <img src="https://img.shields.io/badge/models-local%20only-ff7a3d" alt="Local models only" />
+    <a href="https://github.com/Okohedeki/designai/actions/workflows/tests.yml"><img src="https://github.com/Okohedeki/designai/actions/workflows/tests.yml/badge.svg" alt="Tests" /></a>
+    <a href="https://scorecard.dev/viewer/?uri=github.com/Okohedeki/designai"><img src="https://api.scorecard.dev/projects/github.com/Okohedeki/designai/badge" alt="OpenSSF Scorecard" /></a>
+    <img src="https://img.shields.io/badge/models-local%20first-ff7a3d" alt="Local models first" />
     <img src="https://img.shields.io/badge/MCP-ready-8a5cff" alt="MCP ready" />
   </p>
 </div>
@@ -82,7 +82,7 @@ scene does; they are not templates. Bring your own photos, footage, 3D models, l
 ## Get started
 
 ```bash
-git clone https://github.com/Okohedeki/scroll-studio && cd scroll-studio
+git clone https://github.com/Okohedeki/designai && cd scroll-studio
 pip install -e .
 studio doctor                         # what this machine can build
 studio build examples/cellwright-bio  # live 3D: needs nothing but Python
@@ -103,12 +103,12 @@ Full setup (GPU, Blender, ComfyUI and the models) is in [docs/INSTALL.md](docs/I
 
 ### Build with Claude
 
-Open the repo in Claude Code and ask for a site. The `scroll-studio` MCP server (`.mcp.json`) gives Claude every
+Open the repo in Claude Code and ask for a site. The `designai` MCP server (`.mcp.json`) gives Claude every
 engine tool, and the skills in `.agents/skills/` give any coding agent the workflow. Or paste this into any coding agent:
 
 ```text
-Install Scroll Studio on this machine and build one of its examples, following
-https://github.com/Okohedeki/scroll-studio/blob/main/docs/INSTALL.md
+Install DesignAI on this machine and build one of its examples, following
+https://github.com/Okohedeki/designai/blob/main/docs/INSTALL.md
 ```
 
 <details>
@@ -134,13 +134,13 @@ The whole workflow is in the [guide](docs/guide.md).
 |---|---|
 | Setup | [Install](docs/INSTALL.md) · [What each machine can build](docs/INSTALL.md) |
 | What it can make | [Scenes](docs/scenes.md) · [Styles](docs/styles.md) · [Examples](docs/examples.md) · [Showcase](https://okohedeki.github.io/scroll-studio-showcase/) |
-| Reference | [site.yaml, CLI and MCP reference](https://okohedeki.github.io/scroll-studio/reference/), generated from the engine |
+| Reference | [site.yaml, CLI and MCP reference](https://okohedeki.github.io/designai/reference/), generated from the engine |
 | Making a site | [Guide](docs/guide.md): direction boards, storyboards, client copy decks, trailers, Claude |
 | Why it exists | [Local only, 10 to 30 times fewer tokens](docs/why.md) |
 | How it works | [Engine](docs/ENGINE.md) · [Style research](docs/styles/) · [Roadmap](docs/directions.md) |
 | Contributing | [How to contribute](CONTRIBUTING.md) · [Rules per area](CONTRIBUTING.md#rules-per-area) · [Code of conduct](CODE_OF_CONDUCT.md) · [Getting help](SUPPORT.md) |
 | The project | [Governance](GOVERNANCE.md) · [Maintainers](MAINTAINERS.md) · [Compatibility](docs/compatibility.md) · [Design proposals](docs/rfcs/README.md) · [Security](SECURITY.md) · [Threat model](docs/security/threat-model.md) |
-| Releases | [What's new](docs/whats-new.md) · [Changelog](CHANGELOG.md) · [1.5 milestone](https://github.com/Okohedeki/scroll-studio/milestone/1) |
+| Releases | [What's new](docs/whats-new.md) · [Changelog](CHANGELOG.md) · [1.5 milestone](https://github.com/Okohedeki/designai/milestone/1) |
 
 ## Licence
 
