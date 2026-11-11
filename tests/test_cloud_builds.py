@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import json
+import re
 import tarfile
 from pathlib import Path
 
@@ -117,5 +118,7 @@ def test_max_minutes_needs_cloud(tmp_path):
 
     from engine.cli import app
     p = _project(tmp_path)
-    r = CliRunner().invoke(app, ["build", str(p), "--max-minutes", "5"])
-    assert r.exit_code != 0 and "--cloud" in r.output
+    r = CliRunner().invoke(app, ["build", str(p), "--max-minutes", "5"],
+                           env={"NO_COLOR": "1", "COLUMNS": "200", "TERM": "dumb"})
+    plain = " ".join(re.sub(r"\[[0-9;]*m", "", r.output).replace("│", " ").split())
+    assert r.exit_code != 0 and "--cloud" in plain
