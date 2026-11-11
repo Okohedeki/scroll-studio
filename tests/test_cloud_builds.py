@@ -152,3 +152,13 @@ def test_buy_takes_a_pack_or_a_plan(tmp_path, monkeypatch):
     r = CliRunner().invoke(app, ["cloud", "buy", "--plan", "studio", "--no-open"])
     assert r.exit_code == 0 and asked == [(None, "studio")]
     assert CliRunner().invoke(app, ["cloud", "buy", "starter", "--plan", "studio", "--no-open"]).exit_code == 2
+
+
+def test_a_commercial_only_machine_never_loads_a_non_commercial_depth_model(monkeypatch):
+    from engine.backends import depth
+    monkeypatch.delenv("STUDIO_COMMERCIAL_ONLY", raising=False)
+    assert depth._size("large") == "large"
+    monkeypatch.setenv("STUDIO_COMMERCIAL_ONLY", "1")
+    with pytest.warns(UserWarning, match="non-commercial"):
+        assert depth._size("large") == "small"
+    assert depth._size("small") == "small"
