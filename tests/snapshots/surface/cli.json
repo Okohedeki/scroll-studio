@@ -303,7 +303,7 @@
   "cloud": {
    "commands": {
     "buy": {
-     "help": "Open a checkout page for a credit pack; the credits land on the account when the payment clears.",
+     "help": "Open a checkout page for a credit pack or a monthly plan, for the workspace in use; the credits land when the",
      "params": {
       "no_open": {
        "default": false,
@@ -322,6 +322,16 @@
        "multiple": false,
        "opts": [
         "pack"
+       ],
+       "required": false,
+       "type": "str"
+      },
+      "plan": {
+       "default": null,
+       "kind": "option",
+       "multiple": false,
+       "opts": [
+        "--plan"
        ],
        "required": false,
        "type": "str"
@@ -369,6 +379,132 @@
     },
     "status": {
      "help": "The signed-in account, its balance, and what each kind of job costs.",
+     "params": {}
+    },
+    "workspace": {
+     "commands": {
+      "create": {
+       "help": "Make a team workspace you own.",
+       "params": {
+        "name": {
+         "default": null,
+         "kind": "argument",
+         "multiple": false,
+         "opts": [
+          "name"
+         ],
+         "required": true,
+         "type": "str"
+        },
+        "use": {
+         "default": true,
+         "kind": "option",
+         "multiple": false,
+         "opts": [
+          "--no-use",
+          "--use"
+         ],
+         "required": false,
+         "type": "boolean"
+        }
+       }
+      },
+      "invite": {
+       "help": "Invite someone by email; they join the next time they sign in with that address.",
+       "params": {
+        "email": {
+         "default": null,
+         "kind": "argument",
+         "multiple": false,
+         "opts": [
+          "email"
+         ],
+         "required": true,
+         "type": "str"
+        },
+        "role": {
+         "default": "member",
+         "kind": "option",
+         "multiple": false,
+         "opts": [
+          "--role"
+         ],
+         "required": false,
+         "type": "str"
+        },
+        "workspace": {
+         "default": null,
+         "kind": "option",
+         "multiple": false,
+         "opts": [
+          "--workspace"
+         ],
+         "required": false,
+         "type": "str"
+        }
+       }
+      },
+      "list": {
+       "help": "Your workspaces; * marks the one in use.",
+       "params": {}
+      },
+      "remove": {
+       "help": "Take someone out of a workspace (or withdraw their invite); your own address leaves it.",
+       "params": {
+        "email": {
+         "default": null,
+         "kind": "argument",
+         "multiple": false,
+         "opts": [
+          "email"
+         ],
+         "required": true,
+         "type": "str"
+        },
+        "workspace": {
+         "default": null,
+         "kind": "option",
+         "multiple": false,
+         "opts": [
+          "--workspace"
+         ],
+         "required": false,
+         "type": "str"
+        }
+       }
+      },
+      "show": {
+       "help": "Members, pending invites and seats.",
+       "params": {
+        "wid": {
+         "default": null,
+         "kind": "argument",
+         "multiple": false,
+         "opts": [
+          "wid"
+         ],
+         "required": false,
+         "type": "str"
+        }
+       }
+      },
+      "use": {
+       "help": "Pick the workspace this machine spends from.",
+       "params": {
+        "wid": {
+         "default": null,
+         "kind": "argument",
+         "multiple": false,
+         "opts": [
+          "wid"
+         ],
+         "required": true,
+         "type": "str"
+        }
+       }
+      }
+     },
+     "help": "Team workspaces: one shared balance and plan, seats for members, invites by email.",
      "params": {}
     }
    },

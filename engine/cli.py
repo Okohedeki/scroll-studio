@@ -1439,7 +1439,10 @@ def cloud_status():
     except cloud.CloudError as e:
         typer.echo(f"error: {e}", err=True)
         raise typer.Exit(1)
-    typer.echo(f"{a['email']} on {c['url']}: {a['balance']} credits")
+    ws = a.get("workspace") or {}
+    where = "" if not ws or ws.get("personal") else f" in workspace {ws['name']} ({ws['role']})"
+    typer.echo(f"{a['email']} on {c['url']}{where}: {a['balance']} credits"
+               + (f", plan {ws['plan']}" if ws.get("plan") else ""))
     if a.get("builds"):
         b = a["builds"]
         typer.echo(f"  hosted builds ({b['gpu']}): {b['credits_per_minute']} credits a GPU minute, up to "
@@ -1448,16 +1451,25 @@ def cloud_status():
         typer.echo(f"  {kind:<7} {row['credits']:>4} credits {row['per']:<12} {row['backend']} ({row['model']})")
     for pack in a.get("packs", []):
         typer.echo(f"  pack {pack['id']:<8} {pack['credits']:>6} credits for {pack['price']}")
+    for plan in a.get("plans", []):
+        typer.echo(f"  plan {plan['id']:<8} {plan['credits']:>6} credits a month, {plan.get('seats', 1)} seat(s), "
+                   f"{plan['price']} (studio cloud buy --plan {plan['id']})")
 
 
 @cloud_app.command("buy")
 def cloud_buy(pack: Optional[str] = typer.Argument(None, help="A pack id from `studio cloud status` (default: the "
                                                                "smallest)"),
+              plan: Optional[str] = typer.Option(None, help="A monthly plan id instead: credits every month and "
+                                                            "more seats for the workspace"),
               no_open: bool = typer.Option(False, help="Print the checkout link instead of opening it")):
-    """Open a checkout page for a credit pack; the credits land on the account when the payment clears."""
+    """Open a checkout page for a credit pack or a monthly plan, for the workspace in use; the credits land when the
+    payment clears."""
     from . import cloud
+    if pack and plan:
+        typer.echo("error: buy a pack or a plan, not both", err=True)
+        raise typer.Exit(2)
     try:
-        link = cloud.checkout(pack)
+        link = cloud.checkout(pack, plan)
     except cloud.CloudError as e:
         typer.echo(f"error: {e}", err=True)
         raise typer.Exit(1)
@@ -1465,6 +1477,101 @@ def cloud_buy(pack: Optional[str] = typer.Argument(None, help="A pack id from `s
     if not no_open:
         import webbrowser
         webbrowser.open(link)
+
+
+ws_app = typer.Typer(help="Team workspaces: one shared balance and plan, seats for members, invites by email.")
+cloud_app.add_typer(ws_app, name="workspace")
+
+
+def _cloud_call(fn, *args):
+    from . import cloud
+    try:
+        return fn(*args)
+    except cloud.CloudError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(1)
+
+
+def _current_ws(wid: Optional[str]) -> str:
+    from . import cloud
+    wid = wid or cloud.credentials()["workspace"]
+    if not wid:
+        typer.echo("error: name the workspace (--workspace <id>) or pick one with `studio cloud workspace use <id>`",
+                   err=True)
+        raise typer.Exit(2)
+    return wid
+
+
+@ws_app.command("list")
+def ws_list():
+    """Your workspaces; * marks the one in use."""
+    from . import cloud
+    rows = _cloud_call(cloud.workspaces)
+    using = cloud.credentials()["workspace"]
+    for w in rows:
+        mark = "*" if (w["id"] == using or (not using and w["personal"])) else " "
+        name = "personal" if w["personal"] else w["name"]
+        typer.echo(f"{mark} {w['id']:<16} {name:<24} {w['role']:<7} {w['balance']:>7} credits  "
+                   f"{w['used']}/{w['seats']} seats" + (f"  plan {w['plan']}" if w.get("plan") else ""))
+
+
+@ws_app.command("create")
+def ws_create(name: str = typer.Argument(..., help="What the team calls it"),
+              use: bool = typer.Option(True, help="Spend from it on this machine from now on")):
+    """Make a team workspace you own."""
+    from . import cloud
+    w = _cloud_call(cloud.create_workspace, name)
+    if use:
+        cloud.use_workspace(w["id"])
+    typer.echo(f"created {w['name']} ({w['id']}), {w['seats']} seats" + ("; in use here" if use else ""))
+
+
+@ws_app.command("use")
+def ws_use(wid: str = typer.Argument(..., help="A workspace id from `studio cloud workspace list`, or `personal`")):
+    """Pick the workspace this machine spends from."""
+    from . import cloud
+    wid = wid.strip()
+    if not wid:
+        typer.echo("error: give a workspace id from `studio cloud workspace list`", err=True)
+        raise typer.Exit(2)
+    if wid == "personal":
+        _cloud_call(cloud.use_workspace, None)
+        typer.echo("using your personal workspace")
+        return
+    w = _cloud_call(cloud.workspace, wid)
+    _cloud_call(cloud.use_workspace, wid)
+    typer.echo(f"using {w['name']} ({w['balance']} credits)")
+
+
+@ws_app.command("show")
+def ws_show(wid: Optional[str] = typer.Argument(None, help="Default: the one in use")):
+    """Members, pending invites and seats."""
+    from . import cloud
+    w = _cloud_call(cloud.workspace, _current_ws(wid))
+    typer.echo(f"{w['name']} ({w['id']}): {w['balance']} credits, {w['used']}/{w['seats']} seats"
+               + (f", plan {w['plan']}" if w.get("plan") else ""))
+    for m in w["members"]:
+        typer.echo(f"  {m['email']:<32} {m['role']}")
+    for i in w["invites"]:
+        typer.echo(f"  {i['email']:<32} {i['role']} (invited)")
+
+
+@ws_app.command("invite")
+def ws_invite(email: str = typer.Argument(...),
+              role: str = typer.Option("member", help="member or admin (admins can invite and buy)"),
+              workspace: Optional[str] = typer.Option(None, help="Default: the one in use")):
+    """Invite someone by email; they join the next time they sign in with that address."""
+    from . import cloud
+    got = _cloud_call(cloud.invite, _current_ws(workspace), email, role)
+    typer.echo(f"invited {got['email']} as {got['role']}: they join when they next run `studio cloud login`")
+
+
+@ws_app.command("remove")
+def ws_remove(email: str = typer.Argument(...),
+              workspace: Optional[str] = typer.Option(None, help="Default: the one in use")):
+    """Take someone out of a workspace (or withdraw their invite); your own address leaves it."""
+    from . import cloud
+    typer.echo(f"{email}: {_cloud_call(cloud.remove, _current_ws(workspace), email)}")
 
 
 @cloud_app.command("logout")

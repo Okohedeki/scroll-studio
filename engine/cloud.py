@@ -10,7 +10,11 @@ adds two things, paid in credits:
 
     studio cloud login --email you@example.com      # click the link in the email
     studio cloud status                              # balance, the GPU rate, what each job costs
-    studio cloud buy                                 # a checkout page for a credit pack
+    studio cloud buy                                 # a checkout page for a credit pack (or --plan, monthly)
+    studio cloud workspace create "Shop team"        # a team workspace: one shared balance, seats, invites
+
+Credits belong to a workspace. Everyone has a personal one; `studio cloud workspace use <id>` makes a team's the
+one spent from on this machine (or STUDIO_CLOUD_WORKSPACE).
 
 The sign-in is kept in a credentials file in the user's config folder (Windows %APPDATA%\\designai, macOS
 ~/Library/Application Support/designai, Linux $XDG_CONFIG_HOME/designai), or STUDIO_CLOUD_TOKEN and
@@ -63,7 +67,9 @@ def credentials() -> dict:
         pass
     url = os.environ.get("STUDIO_CLOUD_URL") or saved.get("url") or _setting("cloud_url")
     token = os.environ.get("STUDIO_CLOUD_TOKEN") or saved.get("token")
-    return {"url": (url or "").rstrip("/") or None, "token": token, "email": saved.get("email")}
+    workspace = os.environ.get("STUDIO_CLOUD_WORKSPACE") or saved.get("workspace")
+    return {"url": (url or "").rstrip("/") or None, "token": token, "email": saved.get("email"),
+            "workspace": workspace or None}
 
 
 def _setting(key: str) -> Optional[str]:
@@ -82,6 +88,19 @@ def save(url: str, token: str, email: str) -> Path:
     return path
 
 
+def use_workspace(wid: Optional[str]) -> None:
+    """Spend from this workspace on this machine from now on (None: the personal one)."""
+    path = _creds_path()
+    try:
+        saved = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        raise CloudError("not signed in: `studio cloud login`")
+    saved.pop("workspace", None)
+    if wid:
+        saved["workspace"] = wid
+    path.write_text(json.dumps(saved, indent=2), encoding="utf-8")
+
+
 def forget() -> bool:
     try:
         _creds_path().unlink()
@@ -97,6 +116,8 @@ def _client(url: Optional[str] = None, token: Optional[str] = None):
     if not url:
         raise CloudError("no cloud service set: `studio cloud login --url <service>` (or cloud_url in studio.toml)")
     headers = {"Authorization": f"Bearer {token}"} if token else {}
+    if token and c["workspace"]:
+        headers["X-Workspace"] = c["workspace"]
     return httpx.Client(base_url=url, headers=headers, timeout=120)
 
 
@@ -149,9 +170,51 @@ def account() -> dict:
         return _check(c.get("/v1/account"))
 
 
-def checkout(pack: Optional[str] = None) -> str:
+def checkout(pack: Optional[str] = None, plan: Optional[str] = None) -> str:
+    """A checkout link for a credit pack, or for a monthly plan, for the workspace in use."""
     with _client() as c:
-        return _check(c.post("/v1/checkout", json={"pack": pack}))["url"]
+        return _check(c.post("/v1/checkout", json={"plan": plan} if plan else {"pack": pack}))["url"]
+
+
+# ---------------------------------------------------------------- workspaces
+
+def workspaces() -> list[dict]:
+    with _client() as c:
+        return _check(c.get("/v1/workspaces"))["workspaces"]
+
+
+def create_workspace(name: str) -> dict:
+    with _client() as c:
+        return _check(c.post("/v1/workspaces", json={"name": name}))
+
+
+def workspace(wid: str) -> dict:
+    with _client() as c:
+        return _check(c.get(f"/v1/workspaces/{wid}"))
+
+
+def invite(wid: str, email: str, role: str = "member") -> dict:
+    with _client() as c:
+        r = c.post(f"/v1/workspaces/{wid}/invites", json={"email": email, "role": role})
+        if r.status_code == 402:          # seats, not credits
+            raise CloudError(_detail(r))
+        return _check(r)
+
+
+def remove(wid: str, email: str) -> str:
+    """Take someone out of a workspace, or withdraw their invite; returns which it was."""
+    w = workspace(wid)
+    email = email.strip().lower()
+    with _client() as c:
+        for m in w["members"]:
+            if m["email"].lower() == email:
+                _check(c.delete(f"/v1/workspaces/{wid}/members/{m['id']}"))
+                return "removed"
+        for i in w["invites"]:
+            if i["email"].lower() == email:
+                _check(c.delete(f"/v1/workspaces/{wid}/invites/{i['id']}"))
+                return "invite withdrawn"
+    raise CloudError(f"{email} is not in {w['name']} and has no invite to it")
 
 
 def logout() -> bool:

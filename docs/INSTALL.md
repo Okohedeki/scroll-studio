@@ -69,6 +69,12 @@ apply to what it makes.
 - Single provider jobs: the router's last choice when a project's `models:` asks for providers and you have no keys
   of your own. Local models and your own keys always come first and stay free.
 
+Credits belong to a workspace. Yours is personal; for a team, `studio cloud workspace create "Shop team"` makes one
+with a shared balance and seats, `studio cloud workspace invite someone@example.com` adds people (they join when they
+next sign in), and `studio cloud workspace use <id>` picks which one a machine spends from. Besides one-off packs,
+`studio cloud buy --plan <id>` starts a monthly plan: credits every month (unused plan credits don't carry over; pack
+credits never expire) and more seats.
+
 `studio inspect --page` (the polish report of a built page) needs Playwright's Chromium, which `playwright` (a core
 dependency) downloads once with `playwright install chromium`; it runs headless, on the CPU, with no network.
 
