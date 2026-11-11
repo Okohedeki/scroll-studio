@@ -1410,6 +1410,10 @@ cloud_app = typer.Typer(help="The optional cloud account: provider jobs on credi
 app.add_typer(cloud_app, name="cloud")
 
 
+SELF_HOST_NOTE = ("Have the hardware? DesignAI runs on your own machine for free, with no account: generated film and "
+                  "pictures want a 24 GB GPU, the rest runs on any computer (`studio doctor` checks yours).")
+
+
 @cloud_app.command("login")
 def cloud_login(email: str = typer.Option(..., prompt=True, help="The address the sign-in link is sent to"),
                 url: Optional[str] = typer.Option(None, help="The cloud service (kept for next time; default: the "
@@ -1454,6 +1458,7 @@ def cloud_status():
     for plan in a.get("plans", []):
         typer.echo(f"  plan {plan['id']:<8} {plan['credits']:>6} credits a month, {plan.get('seats', 1)} seat(s), "
                    f"{plan['price']} (studio cloud buy --plan {plan['id']})")
+    typer.echo(SELF_HOST_NOTE)
 
 
 @cloud_app.command("buy")
@@ -1474,6 +1479,7 @@ def cloud_buy(pack: Optional[str] = typer.Argument(None, help="A pack id from `s
         typer.echo(f"error: {e}", err=True)
         raise typer.Exit(1)
     typer.echo(f"checkout: {link}")
+    typer.echo(SELF_HOST_NOTE)
     if not no_open:
         import webbrowser
         webbrowser.open(link)

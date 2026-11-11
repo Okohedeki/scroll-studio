@@ -101,6 +101,10 @@ Blender, and `studio remake <url> --no-gpu` turns a live page into one.
 
 Full setup (GPU, Blender, ComfyUI and the models) is in [docs/INSTALL.md](docs/INSTALL.md).
 
+**Free on your hardware, hosted if you need it.** Everything above runs on your own machine for free, with no account
+and no limits. No 24 GB GPU? The optional DesignAI cloud runs the same build on a hosted GPU for credits
+(`studio build my-site --cloud`); see [the cloud account](docs/INSTALL.md).
+
 ### Build with Claude
 
 Open the repo in Claude Code and ask for a site. The `designai` MCP server (`.mcp.json`) gives Claude every

@@ -59,7 +59,9 @@ lists what can run here, and a spec's `models:` picks ([the project file](projec
 film beats and `theme.art` are animated by a provider's video model instead of LTX-2.3 or Wan. Each provider's own terms
 apply to what it makes.
 
-**No GPU, or no keys? The cloud account.** DesignAI is free to run on your own machine. For when you can't,
+**No GPU, or no keys? The cloud account.** DesignAI is free to run on your own machine, with no account and no
+limits: if you have the hardware (a 24 GB GPU for generated film and pictures; any computer for the rest), you never
+need the cloud. For when you can't,
 `studio cloud login` signs in to a DesignAI cloud account, paid in credits (`studio cloud status` shows the prices,
 `studio cloud buy` tops up):
 
