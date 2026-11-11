@@ -21,6 +21,21 @@ outputs:
 
 A `site.yaml` project gets stills after `studio migrate my-shop --write` ([the project file](project-file.md)).
 
+## From a product page
+
+`studio import https://shop.example/products/mug` starts a project from a product page. It reads the page's
+schema.org product data, its Open Graph tags and its text, saves the product pictures into `inputs/`, and writes a
+product profile to `profile/profile.md`: what the product is, the main benefit, what the buyer wants, how it looks,
+who it is for, proof points and objections. Every output below starts from that profile. The page's robots.txt is
+obeyed. Import your own products, or ones you have permission to use.
+
+```bash
+studio import https://shop.example/products/mug --languages en,es,de
+```
+
+`--languages` sets the project's `languages`. Copy, captions and voice are written in each one for its market, not
+translated word for word. The MCP tool is `import_product`.
+
 ## How a still is made
 
 1. **Directions.** A text backend writes divergent art directions: setting, light, palette and mood. With none
@@ -68,7 +83,36 @@ outputs:
     width: 1080
 ```
 
+`resolution: 1k | 2k | 4k` sets the width to 1080, 2048 or 4096 pixels. A still smaller than that is scaled up, and
+`ads.json` says so (`upscaled_from`); for sharp 4k ads, make the stills at `size: [4096, 4096]`.
+
+With [ad concepts](#ad-concepts), every ad is made once per concept and language, with that concept's headline and
+call to action: `lifestyle-9x16-c2.es.png`. Set `concepts: false` to keep one ad per size.
+
 Files land in `ads/`, listed in `ads/ads.json`. The MCP tool is `make_ads`.
+
+## Ad concepts
+
+`studio concepts my-shop` writes ad concepts from the product profile. Each concept is an angle on the product, with
+a hook for the first two seconds, a headline and call to action, a few on-screen lines and a short spoken script.
+The angles are problem, benefit, proof, comparison, routine, gift, unboxing, story, offer and objection. The first
+language fixes them, and each other language gets the same concepts written for its market. The text backend is told
+never to invent numbers, ratings or specifications. With no text backend, plain drafts come from the profile.
+
+```yaml
+# docs: no-validate (a project file)
+languages: [en, es]
+outputs:
+  concepts:
+    count: 6                  # how many concepts
+    angles: []                # or a list, in order; empty: the engine picks
+    seconds: 20               # length of each spoken script
+    tone: warm, plain, direct
+    claims: profile           # or page: only what the product page itself says
+```
+
+Written to `concepts/concepts.md` and `.json`. Ads and video ads make one variation per concept. The MCP tool is
+`make_concepts`.
 
 ## Listing copy
 
@@ -104,6 +148,45 @@ outputs:
 ```
 
 Written to `video/video-<aspect>.mp4` with `video/video.json`. The MCP tool is `make_video`.
+
+## Video ads
+
+`studio ugc my-shop` makes vertical, creator-style video ads, one for each of the first concepts in each language:
+
+1. A presenter still: an edit job puts a generated presenter with the product still, and the product is kept as it
+   is. The presenter is a made-up person. Never describe a real or famous one.
+2. A presenter clip: a video job brings it to life, through local LTX-2.3 in ComfyUI or a provider, as `models:`
+   allows. With no video backend, the still is shown with a slow push-in.
+3. Product shots from the picked stills, cut to the length of the script.
+4. The concept's hook on screen at the start, its script read as a voiceover, and the script burned in as captions
+   a few words at a time.
+
+The voice is a voiceover; lip sync is not attempted. Captions use DejaVu Sans or Arial, so a language written in
+another script (Japanese, Arabic...) needs a font with those letters installed.
+
+```yaml
+# docs: no-validate (a project file)
+outputs:
+  ugc:
+    concepts: 3                       # the first three concepts each get a video ad
+    presenter: a friendly person in their thirties, casual clothes, at home
+    aspect: 9x16
+    captions: true
+    presenter_seconds: 4
+    music: inputs/bed.mp3             # optional; you need the right to use it
+```
+
+Written to `ugc/<concept>.<language>.mp4` (or `ugc/<concept>.mp4` with one language), with `ugc/ugc.json`. The MCP
+tool is `make_video_ads`.
+
+## Editing a picture
+
+`studio edit my-shop ads/lifestyle-1x1.png "make the backdrop warmer"` changes a finished picture through an edit
+job. The result goes next to it as `lifestyle-1x1.edit1.png`. With `--replace`, it goes over the picture instead,
+and the original is kept once as `.orig`, so the steps that use the picture pick up the edit when they run again.
+Every edit is listed in `edits.json`. Videos are edited through what they are made from: edit the still, or a
+concept's script in `concepts/concepts.json`, then run `studio video` or `studio ugc` again. The MCP tool is
+`edit_picture`.
 
 ## Page layouts
 

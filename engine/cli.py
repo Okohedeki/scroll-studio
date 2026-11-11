@@ -1295,6 +1295,79 @@ def video(name: str):
     typer.echo(f"{r['file']}: {r['seconds']} s, {r['voice']}")
 
 
+@app.command("import")
+def import_product(url: str, name: Optional[str] = typer.Option(None, "--name", help="The new project's name "
+                                                                                  "(default: from the product)"),
+                   languages: str = typer.Option("en", "--languages", help="Languages to write in, comma separated "
+                                                                           "codes (en,es,de,pt-BR)"),
+                   no_browser: bool = typer.Option(False, "--no-browser", help="Read the page without Playwright")):
+    """A new project from a product page: its facts and pictures, and a product profile every output starts from
+    (the page's robots.txt is obeyed). Import your own products, or ones you have permission to use."""
+    from .productpage import import_product as run_import
+    from .project import BuildError
+    langs = [x.strip() for x in languages.split(",") if x.strip()]
+    try:
+        r = run_import(url, name=name, languages=langs, browser=not no_browser, log=typer.echo)
+    except BuildError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(1)
+    for w in r["warnings"]:
+        typer.echo(f"warning: {w}")
+    p = r["profile"]
+    typer.echo(f"created {r['path']}: {p.get('name') or r['name']} ({len(r['pictures'])} pictures, profile by "
+               f"{p.get('source')})")
+    typer.echo(r["notice"])
+    typer.echo("next: " + " && ".join(r["next"]))
+
+
+@app.command()
+def concepts(name: str):
+    """Ad concepts (outputs.concepts in project.yaml): angles with a hook, headline, call to action, on-screen lines
+    and a spoken script, in every language of the project -> <project>/concepts/."""
+    from .concepts import make as make_concepts
+    from .project import BuildError, Project
+    try:
+        r = make_concepts(Project(resolve(name)), log=typer.echo)
+    except BuildError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(1)
+    for c in r["concepts"]:
+        first = c["copy"][r["languages"][0]]
+        typer.echo(f"  {c['id']:<4} {c['angle']:<11} {first['headline']}")
+
+
+@app.command()
+def ugc(name: str):
+    """Vertical creator-style video ads (outputs.ugc in project.yaml): a generated presenter with the product,
+    product shots, the concept's script as voiceover and captions, per concept and language -> <project>/ugc/."""
+    from .project import BuildError, Project
+    from .ugc import make as make_ugc
+    try:
+        r = make_ugc(Project(resolve(name)), log=typer.echo)
+    except BuildError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(1)
+    typer.echo(f"{len(r['videos'])} video ads in {r['folder']}")
+
+
+@app.command()
+def edit(name: str, file: str = typer.Argument(..., help="The picture, inside the project (e.g. ads/lifestyle-1x1.png)"),
+         instruction: str = typer.Argument(..., help="What to change, e.g. \"make the backdrop warmer\""),
+         seed: int = typer.Option(1, help="Seed for the edit"),
+         replace: bool = typer.Option(False, "--replace", help="Write over the picture (the original kept once as "
+                                                               "<name>.orig) so the steps using it pick up the edit")):
+    """Change a finished picture with an instruction, through an edit job; the result is written next to it
+    (or over it with --replace) and listed in <project>/edits.json."""
+    from .editpass import edit as run_edit
+    from .project import BuildError, Project
+    try:
+        r = run_edit(Project(resolve(name)), file, instruction, seed=seed, replace=replace, log=typer.echo)
+    except BuildError as e:
+        typer.echo(f"error: {e}", err=True)
+        raise typer.Exit(1)
+    typer.echo(r["file"])
+
+
 @app.command()
 def layouts(name: str, pick: Optional[str] = typer.Option(None, "--pick", help="Make this layout the site "
                                                                           "(writes its sections into outputs.site)")):

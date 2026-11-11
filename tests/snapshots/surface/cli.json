@@ -410,6 +410,21 @@
     }
    }
   },
+  "concepts": {
+   "help": "Ad concepts (outputs.concepts in project.yaml): angles with a hook, headline, call to action, on-screen lines",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    }
+   }
+  },
   "copy": {
    "commands": {
     "export": {
@@ -762,6 +777,61 @@
     }
    }
   },
+  "edit": {
+   "help": "Change a finished picture with an instruction, through an edit job; the result is written next to it",
+   "params": {
+    "file": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "file"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "instruction": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "instruction"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
+    },
+    "replace": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--replace"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "seed": {
+     "default": 1,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--seed"
+     ],
+     "required": false,
+     "type": "int"
+    }
+   }
+  },
   "freeze": {
    "help": "Render one frozen-moment beat (deep zoom and layers included), or print its tile plan, or measure its clip.",
    "params": {
@@ -889,6 +959,51 @@
      ],
      "required": false,
      "type": "int"
+    }
+   }
+  },
+  "import": {
+   "help": "A new project from a product page: its facts and pictures, and a product profile every output starts from",
+   "params": {
+    "languages": {
+     "default": "en",
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--languages"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "name": {
+     "default": null,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--name"
+     ],
+     "required": false,
+     "type": "str"
+    },
+    "no_browser": {
+     "default": false,
+     "kind": "option",
+     "multiple": false,
+     "opts": [
+      "--no-browser"
+     ],
+     "required": false,
+     "type": "boolean"
+    },
+    "url": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "url"
+     ],
+     "required": true,
+     "type": "str"
     }
    }
   },
@@ -2084,6 +2199,21 @@
      ],
      "required": false,
      "type": "boolean"
+    }
+   }
+  },
+  "ugc": {
+   "help": "Vertical creator-style video ads (outputs.ugc in project.yaml): a generated presenter with the product,",
+   "params": {
+    "name": {
+     "default": null,
+     "kind": "argument",
+     "multiple": false,
+     "opts": [
+      "name"
+     ],
+     "required": true,
+     "type": "str"
     }
    }
   },

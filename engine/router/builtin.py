@@ -13,7 +13,7 @@ from typing import Optional
 from urllib.parse import urlparse
 
 from ..config import settings
-from .core import EditJob, ImageJob, Job, Kind, Result, SpeechJob, TextJob, register
+from .core import EditJob, ImageJob, Job, Kind, Result, SpeechJob, TextJob, VideoJob, register
 
 
 from .util import _fit, _key  # noqa: E402,F401  (shared with providers.py)
@@ -24,19 +24,35 @@ from .util import _fit, _key  # noqa: E402,F401  (shared with providers.py)
 class ComfyBackend:
     name = "local:comfy"
     local = True
-    kinds: tuple[Kind, ...] = ("image", "edit")
+    kinds: tuple[Kind, ...] = ("image", "edit", "video")
 
     def available(self) -> tuple[bool, str]:
         from ..backends import comfy
         return (True, "") if comfy.alive() else (False, f"ComfyUI is not running at {comfy.COMFY}")
 
     def model(self, kind: Kind) -> str:
-        return "z-image-turbo" if kind == "image" else "qwen-image-edit"
+        return {"image": "z-image-turbo", "edit": "qwen-image-edit", "video": "ltx-2.3"}[kind]
 
     def run(self, job: Job, out: Optional[Path], model: Optional[str] = None) -> Result:
         from ..backends import comfy
         assert out is not None
         tag = out.stem[:40]
+        if isinstance(job, VideoJob):          # LTX-2.3 image-to-video, the same path a film beat takes
+            from ..animate import animate
+            from ..project import ffmpeg
+            work = out.parent / f"_{tag}"
+            frames = animate(Path(job.image), job.prompt, "natural handheld motion", job.seconds, job.seed, work,
+                             log=lambda m: None, size=(job.width, job.height),
+                             end_image=Path(job.end_image) if job.end_image else None)
+            seq = work / "seq"
+            seq.mkdir(parents=True, exist_ok=True)
+            for i, f in enumerate(frames):             # numbered from 1 with no gaps, whatever ComfyUI called them
+                shutil.copy(f, seq / f"{i + 1:05d}.png")
+            out.parent.mkdir(parents=True, exist_ok=True)
+            ffmpeg("-framerate", "24", "-i", seq / "%05d.png", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "16",
+                   out, log=lambda m: None)
+            shutil.rmtree(work, ignore_errors=True)
+            return Result(self.name, self.model("video"), 0.0, path=out)
         if isinstance(job, ImageJob):
             graph = comfy.build_txt2img_graph(job.prompt, job.width, job.height, job.seed, prefix=f"studio/{tag}")
         elif isinstance(job, EditJob):

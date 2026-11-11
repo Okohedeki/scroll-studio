@@ -130,7 +130,8 @@ def make(project: Project, log: Callable[[str], None] = print) -> dict:
 
     text = v.voiceover
     if text.strip().lower() == "listing":
-        lst = project.root / "listing" / "listing.json"
+        from .languages import suffix
+        lst = project.root / "listing" / f"listing{suffix(spec.languages[0], spec.languages)}.json"
         text = json.loads(lst.read_text(encoding="utf-8"))["description"].split("\n\n")[0] if lst.exists() else ""
     voice, note = voiceover(project, text, v.voice, spec.models, work, log)
     music = project.path(v.music) if v.music else None

@@ -628,6 +628,53 @@ def make_video(project: str) -> dict:
 
 
 @mcp.tool()
+def import_product(url: str, name: Optional[str] = None, languages: Optional[list[str]] = None) -> dict:
+    """A new project from a product page (the page's robots.txt is obeyed): its facts and pictures saved, a product
+    profile written (profile/profile.json), and outputs for stills, concepts, ads, listing and video ads set up.
+    Import your own products, or ones you have permission to use. Returns the project, profile and next steps."""
+    from .productpage import import_product as run_import
+    try:
+        return {"ok": True, **run_import(url, name=name, languages=languages or ["en"], projects=PROJECTS,
+                                         log=lambda m: None)}
+    except BuildError as e:
+        return {"ok": False, "error": str(e)}
+
+
+@mcp.tool()
+def make_concepts(project: str) -> dict:
+    """Ad concepts (needs outputs.concepts in project.yaml): angles, each with a hook, headline, call to action,
+    on-screen lines and a spoken script, in every language of the project. Returned and written to concepts/."""
+    from .concepts import make
+    try:
+        return {"ok": True, **make(_find(project), log=lambda m: None)}
+    except BuildError as e:
+        return {"ok": False, "error": str(e)}
+
+
+@mcp.tool()
+def make_video_ads(project: str) -> dict:
+    """Vertical creator-style video ads (needs outputs.ugc, and `make_concepts` and `make_stills` run first): a
+    generated presenter with the product, product shots, the concept's script as voiceover and captions, one per
+    concept and language. Returns the files written to <project>/ugc/."""
+    from .ugc import make
+    try:
+        return {"ok": True, **make(_find(project), log=lambda m: None)}
+    except BuildError as e:
+        return {"ok": False, "error": str(e)}
+
+
+@mcp.tool()
+def edit_picture(project: str, file: str, instruction: str, seed: int = 1, replace: bool = False) -> dict:
+    """Change a finished picture in the project (a still, an ad) with an instruction through an edit job. The
+    result goes next to it as <name>.edit<n>.png, or over it with replace (the original kept as <name>.orig)."""
+    from .editpass import edit
+    try:
+        return {"ok": True, **edit(_find(project), file, instruction, seed=seed, replace=replace, log=lambda m: None)}
+    except BuildError as e:
+        return {"ok": False, "error": str(e)}
+
+
+@mcp.tool()
 def make_layouts(project: str, pick: Optional[str] = None) -> dict:
     """Generated page layouts (needs outputs.layouts in project.yaml; best after make_stills and write_listing):
     several pages arranged differently from the project's own material, on <project>/layouts/board.html.

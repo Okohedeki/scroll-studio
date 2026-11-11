@@ -66,14 +66,24 @@ class Stills(Model):
 AdSize = Literal["1x1", "4x5", "9x16", "16x9", "1.91x1"]
 
 
+AdResolution = Literal["1k", "2k", "4k"]
+RESOLUTION_WIDTH = {"1k": 1080, "2k": 2048, "4k": 4096}
+
+
 class Ads(Model):
-    """Placement-sized ads from the picked product stills (engine/ads.py, `studio ads`)."""
+    """Placement-sized ads from the picked product stills (engine/ads.py, `studio ads`). With outputs.concepts, one
+    variation per concept and language: each concept's headline and call to action on every size."""
     sizes: list[AdSize] = Field(default_factory=lambda: ["1x1", "4x5", "9x16"], description="Aspect ratios to make")
     headline: str = Field("", description="The line set on each ad; empty: none")
     cta: str = Field("", description="The call to action set under it, e.g. 'Shop the range'")
     shots: list[StillShot] = Field(default_factory=lambda: ["lifestyle", "packshot"],
                                    description="Which shots' stills to use (each shot's pick, else its best)")
     width: int = Field(1080, ge=320, le=4096, description="Width of every ad, pixels; the height follows the ratio")
+    resolution: Optional[AdResolution] = Field(None, description="1k (1080 px wide), 2k (2048) or 4k (4096): sets "
+                                                                 "the width; a still smaller than that is upscaled, "
+                                                                 "and ads.json says so")
+    concepts: bool = Field(True, description="With outputs.concepts: one variation per concept (its headline and "
+                                             "call to action); headline and cta here are then the fallback")
 
 
 class Listing(Model):
@@ -98,6 +108,39 @@ class Video(Model):
                                                    "(you need the right to use it)")
 
 
+ConceptAngle = Literal["problem", "benefit", "proof", "comparison", "routine", "gift", "unboxing", "story", "offer",
+                       "objection"]
+
+
+class Concepts(Model):
+    """Ad concepts (engine/concepts.py, `studio concepts`): angles on the product, each with a hook, a headline, a
+    call to action, on-screen lines and a short spoken script, written from the product profile in every language
+    the project sells in. Ads and video ads make one variation per concept."""
+    count: int = Field(6, ge=1, le=30, description="How many concepts to write")
+    angles: list[ConceptAngle] = Field(default_factory=list, description="Angles to use, in order; empty: the "
+                                                                         "engine picks the ones the product supports")
+    seconds: float = Field(20, ge=6, le=60, description="Length of each spoken script, for video ads")
+    tone: str = Field("warm, plain, direct", description="How the copy reads, in a few words")
+    claims: Literal["page", "profile"] = Field("profile", description="What a claim may rest on: the product page's "
+                                                                      "own words only, or the profile drawn from it")
+
+
+class Ugc(Model):
+    """Vertical creator-style video ads (engine/ugc.py, `studio ugc`): for each concept and language, a synthetic
+    presenter with the product, product shots, the concept's script as a voiceover and its lines as captions. The
+    presenter is generated, never a real person's likeness; lip sync is not attempted (the voice is a voiceover)."""
+    concepts: int = Field(3, ge=1, le=30, description="How many concepts get a video ad (the first ones)")
+    presenter: str = Field("a friendly person in their thirties, casual clothes, at home", description="Who presents "
+                           "the product, described (a generated person; never name or describe a real one)")
+    aspect: Literal["9x16", "4x5", "1x1"] = Field("9x16", description="Aspect ratio")
+    width: int = Field(1080, ge=240, le=2160, description="Width in pixels; the height follows the ratio")
+    captions: bool = Field(True, description="Burn the script in as captions, a few words at a time")
+    voice: str = Field("", description="The speech backend's voice id; empty: its default")
+    music: Optional[str] = Field(None, description="A music file inside the project, laid under the voice "
+                                                   "(you need the right to use it)")
+    presenter_seconds: float = Field(4, ge=2, le=10, description="Length of each presenter clip")
+
+
 class Layouts(Model):
     """Generated page layouts (engine/layouts.py, `studio layouts`): several pages written from the brief, the stills
     and the listing, each a different arrangement; picking one writes its sections into outputs.site."""
@@ -117,18 +160,36 @@ class Outputs(Model):
                                                      "where a speech backend can run (`studio video`)")
     layouts: Optional[Layouts] = Field(None, description="Generated page layouts to pick from; the pick becomes "
                                                          "outputs.site (`studio layouts`)")
+    concepts: Optional[Concepts] = Field(None, description="Ad concepts: angles, hooks, headlines, scripts, in every "
+                                                           "language (`studio concepts`)")
+    ugc: Optional[Ugc] = Field(None, description="Vertical creator-style video ads, one per concept and language "
+                                                 "(`studio ugc`)")
 
 
 class ProjectSpec(Model):
     name: str
     description: str = ""
     brief: str = Field("", description="What the project is for, in a sentence or two; generation steps read it")
+    source: Optional[str] = Field(None, description="The product page this project was imported from (`studio "
+                                                    "import`); its profile is in profile/profile.json")
+    languages: list[str] = Field(default_factory=lambda: ["en"], description="The languages the copy, captions and "
+                                 "voice are written in, as codes (en, es, de, pt-BR, ja...): each is written for its "
+                                 "market, not translated word for word")
     brand: Optional[Theme] = Field(None, description="Colours, fonts and brand source, shared by every output "
                                                      "(a site's `theme`)")
     product: Optional[Product] = Field(None, description="The product every output shows, declared once")
     imagery: Optional[Imagery] = Field(None, description="How every generated image and film is phrased")
     models: Optional[Models] = Field(None, description="Which backend does each job, for every output")
     outputs: Outputs = Field(default_factory=Outputs)
+
+    @field_validator("languages")
+    @classmethod
+    def _languages(cls, v):
+        import re
+        bad = [x for x in v if not re.fullmatch(r"[a-z]{2,3}(-[A-Za-z0-9]{2,8})?", x)]
+        if bad or not v:
+            raise ValueError(f"languages are codes such as en, es, pt-BR (got {bad or 'none'})")
+        return list(dict.fromkeys(v))
 
 
 class ProjectFileError(ValueError):

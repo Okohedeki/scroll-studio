@@ -557,6 +557,42 @@
    "type": "object"
   }
  },
+ "edit_picture": {
+  "description": "Change a finished picture in the project (a still, an ad) with an instruction through an edit job. The",
+  "input": {
+   "properties": {
+    "file": {
+     "title": "File",
+     "type": "string"
+    },
+    "instruction": {
+     "title": "Instruction",
+     "type": "string"
+    },
+    "project": {
+     "title": "Project",
+     "type": "string"
+    },
+    "replace": {
+     "default": false,
+     "title": "Replace",
+     "type": "boolean"
+    },
+    "seed": {
+     "default": 1,
+     "title": "Seed",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "project",
+    "file",
+    "instruction"
+   ],
+   "title": "edit_pictureArguments",
+   "type": "object"
+  }
+ },
  "get_spec": {
   "description": "Read a project's spec file as written: its project.yaml, or its site.yaml.",
   "input": {
@@ -570,6 +606,49 @@
     "project"
    ],
    "title": "get_specArguments",
+   "type": "object"
+  }
+ },
+ "import_product": {
+  "description": "A new project from a product page (the page's robots.txt is obeyed): its facts and pictures saved, a product",
+  "input": {
+   "properties": {
+    "languages": {
+     "anyOf": [
+      {
+       "items": {
+        "type": "string"
+       },
+       "type": "array"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Languages"
+    },
+    "name": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Name"
+    },
+    "url": {
+     "title": "Url",
+     "type": "string"
+    }
+   },
+   "required": [
+    "url"
+   ],
+   "title": "import_productArguments",
    "type": "object"
   }
  },
@@ -842,6 +921,22 @@
    "type": "object"
   }
  },
+ "make_concepts": {
+  "description": "Ad concepts (needs outputs.concepts in project.yaml): angles, each with a hook, headline, call to action,",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "make_conceptsArguments",
+   "type": "object"
+  }
+ },
  "make_layouts": {
   "description": "Generated page layouts (needs outputs.layouts in project.yaml; best after make_stills and write_listing):",
   "input": {
@@ -928,6 +1023,22 @@
     "project"
    ],
    "title": "make_videoArguments",
+   "type": "object"
+  }
+ },
+ "make_video_ads": {
+  "description": "Vertical creator-style video ads (needs outputs.ugc, and `make_concepts` and `make_stills` run first): a",
+  "input": {
+   "properties": {
+    "project": {
+     "title": "Project",
+     "type": "string"
+    }
+   },
+   "required": [
+    "project"
+   ],
+   "title": "make_video_adsArguments",
    "type": "object"
   }
  },

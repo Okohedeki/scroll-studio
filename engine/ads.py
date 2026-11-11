@@ -14,6 +14,7 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 from .project import BuildError, Project
+from .project_spec import RESOLUTION_WIDTH
 
 RATIOS = {"1x1": 1.0, "4x5": 4 / 5, "9x16": 9 / 16, "16x9": 16 / 9, "1.91x1": 1.91}
 
@@ -168,6 +169,26 @@ def brand_colours(project: Project) -> tuple[str, str]:
     return "#1d1f24", "#f4f1ea"
 
 
+def copies(project: Project, spec) -> list[dict]:
+    """The copy each ad is made with: one per concept and language when outputs.concepts was run (and ads.concepts
+    is on), else the ads' own headline and call to action."""
+    from . import concepts
+    from .languages import suffix
+    ads = spec.outputs.ads
+    got = concepts.pick(project) if ads.concepts and spec.outputs.concepts is not None else []
+    if not got:
+        return [{"tag": "", "headline": ads.headline, "cta": ads.cta, "concept": None, "angle": None, "language": None}]
+    langs = spec.languages
+    out = []
+    for c in got:
+        for lang in langs:
+            cp = c["copy"].get(lang)
+            if cp:
+                out.append({"tag": f"-{c['id']}{suffix(lang, langs)}", "headline": cp["headline"],
+                            "cta": cp["cta"] or ads.cta, "concept": c["id"], "angle": c["angle"], "language": lang})
+    return out
+
+
 def make(project: Project, log: Callable[[str], None] = print) -> dict:
     from .stills import run as stills
     spec = project.load_project() if project.is_project_file else None
@@ -181,6 +202,8 @@ def make(project: Project, log: Callable[[str], None] = print) -> dict:
     colours = brand_colours(project)
     out_dir = project.root / "ads"
     out_dir.mkdir(parents=True, exist_ok=True)
+    width = RESOLUTION_WIDTH[ads.resolution] if ads.resolution else ads.width
+    variants = copies(project, spec)
     made = []
     for shot in ads.shots:
         cid = state.get("picked", {}).get(shot) or next(iter(state.get("shortlist", {}).get(shot) or []), None)
@@ -192,13 +215,19 @@ def make(project: Project, log: Callable[[str], None] = print) -> dict:
         mask = Image.open(stills.folder(project) / c["image"].replace(".png", ".mask.png")).convert("L")
         for size in ads.sizes:
             ratio = RATIOS[size]
-            band = 0.0 if not (ads.headline or ads.cta) else (0.24 if ratio < 1 / 1.3 else 0.3 if ratio <= 1 else 0.34)
-            frame, fmask = reframe(img, mask, ratio, ads.width, keep_bottom=band)
-            final, layout = set_copy(frame, ads.headline, ads.cta, colours)
-            path = out_dir / f"{shot}-{size}.png"
-            final.save(path)
-            made.append({"file": path.name, "shot": shot, "size": size, "from": cid, "width": final.width,
-                         "height": final.height, "product_box": list(mask_box(fmask)), **layout})
-            log(f"  ads: {path.name}")
+            for v in variants:
+                band = 0.0 if not (v["headline"] or v["cta"]) else (0.24 if ratio < 1 / 1.3 else 0.3 if ratio <= 1 else 0.34)
+                frame, fmask = reframe(img, mask, ratio, width, keep_bottom=band)
+                final, layout = set_copy(frame, v["headline"], v["cta"], colours)
+                path = out_dir / f"{shot}-{size}{v['tag']}.png"
+                final.save(path)
+                row = {"file": path.name, "shot": shot, "size": size, "from": cid, "width": final.width,
+                       "height": final.height, "product_box": list(mask_box(fmask)), **layout}
+                if v["concept"]:
+                    row.update(concept=v["concept"], angle=v["angle"], language=v["language"])
+                if final.width > img.width:
+                    row["upscaled_from"] = img.width     # the still was smaller than this ad: scaled up, not redrawn
+                made.append(row)
+                log(f"  ads: {path.name}")
     (out_dir / "ads.json").write_text(json.dumps({"ads": made, "colours": colours}, indent=2), encoding="utf-8")
     return {"ads": made, "folder": str(out_dir)}
