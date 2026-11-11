@@ -141,11 +141,25 @@ def resolve(name: str) -> Path:
 def new(name: str, example: Optional[str] = typer.Option(None, help="Copy an example from examples/"),
         laptop: bool = typer.Option(False, "--laptop", help="A starter that builds on any laptop, with no GPU, ComfyUI or Blender"),
         image: Optional[Path] = typer.Option(None, "--image", help="With --laptop: your photo, opened as a photo parallax "
-                                                                   "(default: the page opens on kinetic type)")):
+                                                                   "(default: the page opens on kinetic type)"),
+        brief: Optional[str] = typer.Option(None, "--brief", help="Write the whole site from this brief with a text model "
+                                                                  "(docs/generate.md): sections, copy, prompts and the look"),
+        interactive: str = typer.Option("pointer,3d", "--interactive", help="With --brief: what the page must let "
+                                                                            "visitors play with: pointer, 3d, code, film"),
+        sections: int = typer.Option(8, "--sections", help="With --brief: about how many sections"),
+        seed: int = typer.Option(1, "--seed", help="With --brief: another seed, another site"),
+        direction: str = typer.Option("best", "--direction", help="With --brief: which art direction to write in "
+                                                               "(best: the one that fits the brief; a letter; 'none' keeps the default look)")):
     """Create a project."""
     dst = Path(settings()["projects"]) / name
     if dst.exists():
         raise typer.BadParameter(f"{dst} already exists")
+    if brief is not None:
+        if example or laptop or image:
+            raise typer.BadParameter("--brief writes the whole site; leave out --example, --laptop and --image")
+        _generate(dst, brief, interactive, sections, seed, direction)
+        typer.echo(f"next: studio storyboard {name} (quick look) or studio build {name}")
+        return
     if (laptop or image) and example:
         raise typer.BadParameter("--laptop and --image make a starter; --example copies an example: use one or the other")
     if image and not laptop:
@@ -177,6 +191,35 @@ def new(name: str, example: Optional[str] = typer.Option(None, help="Copy an exa
         typer.echo("this one builds on any laptop: it needs no GPU, ComfyUI or Blender"
                    + (f"; it opens on {inside.split('/')[-1]} as a photo parallax (the first build downloads a small depth model)" if image else
                       "; to open on your own photo, see docs/laptop.md"))
+
+
+def _generate(dst: Path, brief: str, interactive: str, sections: int, seed: int, direction: str,
+              only: Optional[str] = None) -> None:
+    from .project import BuildError
+    from .sitegen import WriteError, generate
+    want = tuple(k.strip() for k in interactive.split(",") if k.strip())
+    try:
+        generate(dst, brief, want=want, count=sections, seed=seed, only=only,
+                 direction=None if direction == "none" else direction, log=typer.echo)
+    except (BuildError, WriteError, ValueError) as e:
+        typer.secho(f"error: {e}", fg=typer.colors.RED, err=True)
+        raise typer.Exit(1) from None
+
+
+@app.command("generate")
+def generate_cmd(name: str, only: Optional[str] = typer.Option(None, "--only", help="Rewrite just this section (its id)"),
+                 brief: Optional[str] = typer.Option(None, "--brief", help="A new brief (default: the saved one)"),
+                 interactive: Optional[str] = typer.Option(None, "--interactive", help="pointer, 3d, code, film"),
+                 sections: Optional[int] = typer.Option(None, "--sections", help="About how many sections"),
+                 seed: int = typer.Option(2, "--seed", help="Another seed, another site"),
+                 direction: str = typer.Option("best", "--direction", help="Which art direction (best: the one that fits the brief; a letter; 'none' keeps the look)")):
+    """Write a generated project's site again from its brief (generate.json), or one section of it with --only."""
+    dst = resolve(name)
+    record = json.loads((dst / "generate.json").read_text(encoding="utf-8")) if (dst / "generate.json").exists() else {}
+    if not (brief or record.get("brief")):
+        raise typer.BadParameter("no saved brief: pass --brief (or make the project with studio new --brief)")
+    _generate(dst, brief or record["brief"], interactive or ",".join(record.get("want") or ["pointer", "3d"]),
+              sections or record.get("count") or 8, seed, direction, only=only)
 
 
 @app.command()

@@ -25,8 +25,13 @@ def _load(size: str):
         from transformers import AutoImageProcessor, AutoModelForDepthEstimation
     except ImportError as e:
         from ..project import BuildError
-        raise BuildError(f"photo parallax estimates depth with PyTorch and transformers, and {e.name} is not installed: run "
-                         "`pip install torch transformers` (the CPU build is enough; docs/laptop.md)") from None
+        if e.name in ("torch", "transformers"):
+            raise BuildError(f"photo parallax estimates depth with PyTorch and transformers, and {e.name} is not installed: "
+                             "run `pip install torch transformers` (the CPU build is enough; docs/laptop.md)") from None
+        cause = e.__cause__ or e.__context__ or e      # installed, but something it imports is broken
+        raise BuildError("photo parallax estimates depth with transformers, which is installed but failed to import: "
+                         f"{type(cause).__name__}: {cause}. Repair or upgrade the package it names "
+                         "(`pip install -U <package>`)") from None
     name = MODELS[size]
     dev = "cuda" if torch.cuda.is_available() else "cpu"
     # safetensors only: never fall back to a pickled pytorch_model.bin, which can run code when loaded

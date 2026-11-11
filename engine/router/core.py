@@ -34,6 +34,9 @@ class TextJob:
     prompt: str
     system: str = ""
     max_tokens: int = 4000
+    temperature: Optional[float] = None    # the backend's default when unset
+    seed: Optional[int] = None             # for backends that sample reproducibly with one (local servers)
+    json: bool = False                     # ask for a JSON object where the backend supports it
     kind: Kind = "text"
 
 

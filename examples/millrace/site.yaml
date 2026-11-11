@@ -92,7 +92,7 @@ sections:
     nav_label: In your code
     surface: dark                  # an editor is dark: the code world and its captions on the ink, on this light page
     length: 9
-    terminal: { logo: "mill|race", prompt: "make send_invoice a durable job: retry it, keep each customer's invoices in order", agent: Build, model: any coding agent }
+    terminal: { logo: millrace, prompt: "make send_invoice a durable job: retry it, keep each customer's invoices in order", model: any coding agent }
     files:
       - path: app/jobs/invoices.py
         todo: "send_invoice: a durable job"

@@ -58,6 +58,7 @@ class Brief:
     notes: list = field(default_factory=list)          # how the brief was read, for the board
     cfg: Directions = field(default_factory=Directions)
     current: dict = field(default_factory=dict)        # the look the site has today
+    places: bool = False                               # the page has scenes set in a place (films, relit views ...)
 
     def public(self) -> dict:
         return {"name": self.name, "description": self.description, "brief": self.brief,
@@ -89,6 +90,8 @@ def current_look(site: Site) -> dict:
     return {"preset": site.theme.preset, "style": site.theme.style, "mode": t["mode"], "colors": t["colors"],
             "fonts": t["fonts"], "imagery": site.imagery.model_dump(mode="json") if site.imagery else None}
 
+
+PLACE_SCENES = {"film", "light", "parallax", "diorama", "splat", "map"}
 
 PRESET_DOMAIN = {"night": "tech", "brass": "luxury", "paper": "art", "lab": "science", "cosmos": "space", "studio": "retail",
                  "dusk": "hospitality", "ink": "events", "blueprint": "architecture", "clinic": "health"}
@@ -125,4 +128,8 @@ def read(site: Site, raw: dict, cfg: Optional[Directions] = None) -> Brief:
         notes.append("no strong subject in the copy: directions are chosen for range, not fit")
     if moods:
         notes.append("leans " + ", ".join(k for k, _ in sorted(moods.items(), key=lambda x: -x[1])[:4]))
-    return Brief(plain(site.name), plain(site.description), brief_text, domains, moods, notes, cfg, current_look(site))
+    places = any(getattr(sec, "type", None) in PLACE_SCENES for sec in site.sections)
+    if places:
+        notes.append("its pictures are places")
+    return Brief(plain(site.name), plain(site.description), brief_text, domains, moods, notes, cfg, current_look(site),
+                 places)

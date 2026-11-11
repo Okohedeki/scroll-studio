@@ -91,6 +91,8 @@ class AnthropicBackend:
         model = model or self.model("text")
         client = anthropic.Anthropic()
         kwargs = {"system": job.system} if job.system else {}
+        if job.temperature is not None:
+            kwargs["temperature"] = job.temperature
         # a declined request is re-run on a fallback model the API picks ("default" routing)
         response = client.beta.messages.create(
             model=model, max_tokens=job.max_tokens, messages=[{"role": "user", "content": job.prompt}],
@@ -128,12 +130,33 @@ class OpenAICompatibleText:
         messages = [{"role": "system", "content": job.system}] if job.system else []
         messages.append({"role": "user", "content": job.prompt})
         key = _key("STUDIO_TEXT_KEY")
+        body = {"model": model, "messages": messages, "max_tokens": job.max_tokens}
+        if job.temperature is not None:
+            body["temperature"] = job.temperature
+        if job.seed is not None:
+            body["seed"] = job.seed
+        if job.json:
+            body["response_format"] = {"type": "json_object"}
         r = httpx.post(self.url.rstrip("/") + "/v1/chat/completions", timeout=600,
-                       headers={"Authorization": f"Bearer {key}"} if key else {},
-                       json={"model": model, "messages": messages, "max_tokens": job.max_tokens})
+                       headers={"Authorization": f"Bearer {key}"} if key else {}, json=body)
         r.raise_for_status()
         data = r.json()
         return Result(self.name, data.get("model") or model, 0.0, text=data["choices"][0]["message"]["content"])
+
+    def release(self, model: Optional[str] = None) -> bool:
+        """Free the GPU memory the text model holds, so ComfyUI can render next. Servers that hold a model until told
+        otherwise (Ollama) are told; any other server is left as it is. True when a model was unloaded."""
+        import httpx
+        if not (self.url and self.local):
+            return False
+        base = self.url.rstrip("/").removesuffix("/v1")
+        try:
+            if httpx.get(base + "/api/version", timeout=3).status_code != 200:      # not an Ollama server
+                return False
+            r = httpx.post(base + "/api/generate", timeout=30, json={"model": model or self.model("text"), "keep_alive": 0})
+            return r.status_code == 200
+        except httpx.HTTPError:
+            return False
 
 
 class OpenAIImages:

@@ -1155,7 +1155,8 @@ load each 14B expert from a hard disk when they aren't already in RAM.
 ### Flying through code
 
 A `code` scene follows an AI agent through a codebase in live 3D, with real, readable text. It opens on the agent's
-prompt box (`terminal`), the task types itself, and the camera dives through the screen into the project. Files the
+window (`terminal`: the project's name in its title bar, the model on the right), the task types itself after the
+prompt, and the camera dives through the screen into the project. Files the
 agent `read`s line a corridor, each `edit` is a stop where the diff applies itself as you scroll (removed lines light up
 and fold away, new ones type in), and a `run` prints its output line by line. A status bar ticks off each file's `todo`.
 Steps pin themselves to the route with `state: { file: <path> }` (or `terminal` / `outro`), so captions never need
@@ -1165,7 +1166,7 @@ progress numbers:
   - id: session
     type: code
     length: 20
-    terminal: { logo: "open|code", prompt: "add a field that validates signups are 18+", model: Claude Opus 4.5 }
+    terminal: { logo: signup-service, prompt: "add a field that validates signups are 18+", model: any coding agent }
     files:
       - { path: config/fortify.php, file: inputs/fortify.php }            # read
       - path: app/Models/User.php

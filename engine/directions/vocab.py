@@ -69,6 +69,7 @@ class School:
     radius: str = ""
     board: str = "overlay"      # how the board sets a still: overlay | split | poster | plate | grid | terminal
     unit: str = "Plate"         # what a still is called under the plate layout: Plate, Spread, Layer, Sheet
+    objects_only: bool = False  # its pictures are an object on a backdrop: it cannot hold a landscape or a room
 
 
 def P(name, mode, bg, bg2, ink, accent, accent2, accent_ink=""):
@@ -500,6 +501,7 @@ SCHOOLS: tuple[School, ...] = (
 
     School(
         key="quiet-studio", name="Quiet Studio", kind="photo",
+        objects_only=True,
         about="Clean product photography on seamless paper: plenty of space, soft shadow, one muted accent.",
         moods=frozenset({"minimal", "calm", "precise", "luxurious", "quiet", "fresh", "editorial"}),
         domains={"retail": 3, "tech": 3, "wellness": 3, "health": 3, "luxury": 2, "fashion": 2, "food": 1, "architecture": 1},
@@ -668,7 +670,7 @@ STYLE_CLUSTER = {
 # domain -> words that put a site in it (lower case, matched on word starts)
 DOMAIN_WORDS = {
     "hospitality": "hotel resort inn stay rooms suite villa lodge guest booking reserve retreat hostel airbnb getaway cliff coast beach ocean sea island",
-    "tech": "software app platform api developer cloud saas data ai machine code startup product digital dashboard automation analytics tool engineer",
+    "tech": "software app platform api developer cloud saas data ai machine code startup product digital dashboard automation analytics tool engineer backend frontend server queue deploy repo repository database infrastructure devops framework library sdk cli terminal open-source",
     "science": "research lab laboratory biotech bio cell molecule dna genome institute scientific experiment study physics chemistry observatory",
     "art": "art gallery museum painting artist exhibition sculpture drawing studio atelier collection curator design illustration pottery ceramic ceramics clay kiln glaze craft maker workshop print printmaking",
     "luxury": "luxury bespoke handmade crafted jewel watch heritage atelier couture premium fine artisan commission walnut crystal",

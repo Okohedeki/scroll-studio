@@ -225,51 +225,48 @@ function mix(a: string, b: string, t: number) {
 }
 
 // ---------------------------------------------------------------- the opening terminal
+// One window, centred: a slim title bar (the project's name on the left, the model on the right), then a prompt line
+// where the task types itself after a `›` in the page's accent, and an optional quiet line of hints under it.
+
 function drawTerminal(g: CanvasRenderingContext2D, W: number, H: number, t: Term, typed: number, sent: number, mono: string, accent2: string) {
   const u = MOB ? Math.min(W / 640, H / 700) : Math.min(W / 1600, H / 900);
-  g.fillStyle = "#0a0a0b"; g.fillRect(0, 0, W, H);
+  g.fillStyle = "#0b0c0e"; g.fillRect(0, 0, W, H);
   g.textBaseline = "middle";
-  const cx = W / 2, cy = H * (MOB ? 0.66 : 0.4);
-  // wordmark: blocky, dim half | bright half
-  if (t.logo) {
-    const [a, b] = t.logo.includes("|") ? t.logo.split("|") : ["", t.logo];
-    g.font = `800 ${Math.round(118 * u)}px "${mono}", monospace`;
-    const wa = g.measureText(a).width, wb = g.measureText(b).width, x = cx - (wa + wb) / 2, y = cy - 150 * u;
-    g.fillStyle = "#5d5f63"; g.fillText(a, x, y);
-    g.fillStyle = "#f2f2f2"; g.fillText(b, x + wa, y);
-  }
-  // prompt box
-  const bw = Math.min(W * 0.86, 1080 * u), bh = 118 * u, bx = cx - bw / 2, by = cy - 20 * u;
-  g.fillStyle = sent > 0 ? `rgba(30,31,34,${1 - 0.3 * sent})` : "#1e1f22"; g.fillRect(bx, by, bw, bh);
-  g.fillStyle = accent2; g.fillRect(bx, by, 5 * u, bh);
-  const fs = Math.round(25 * u);
+  const cx = W / 2, cy = H * (MOB ? 0.6 : 0.42);
+  const bw = Math.min(W * 0.88, 1040 * u), bar = 54 * u, body = 150 * u, bh = bar + body, bx = cx - bw / 2, by = cy - bh / 2;
+  const r = 16 * u;
+  // the window, with a soft glow of the accent under it
+  g.save(); g.shadowColor = `rgba(${hexRgb(accent2)},0.18)`; g.shadowBlur = 80 * u; g.shadowOffsetY = 24 * u;
+  roundRect(g, bx, by, bw, bh, r); g.fillStyle = "#15171a"; g.fill(); g.restore();
+  roundRect(g, bx, by, bw, bh, r); g.strokeStyle = "rgba(255,255,255,0.08)"; g.lineWidth = Math.max(1, u); g.stroke();
+  g.fillStyle = "rgba(255,255,255,0.05)"; g.fillRect(bx + 1, by + bar, bw - 2, Math.max(1, u));
+  // title bar: name left, model right
+  const small = Math.round(19 * u);
+  g.font = `600 ${small}px "${mono}", monospace`;
+  g.fillStyle = "#c9ccd1"; g.fillText(t.logo.split("|").join(""), bx + 28 * u, by + bar / 2);
+  const tag = [t.agent, t.model, t.provider].filter(Boolean).join(" · ");
+  if (tag) { g.textAlign = "right"; g.font = `400 ${small}px "${mono}", monospace`; g.fillStyle = "#7b8089";
+    g.fillText(tag, bx + bw - 28 * u, by + bar / 2); g.textAlign = "left"; }
+  // the prompt line
+  const fs = Math.round(30 * u), ly = by + bar + body / 2, px = bx + 28 * u;
+  g.font = `600 ${fs}px "${mono}", monospace`; g.fillStyle = accent2; g.fillText("›", px, ly);
+  const tx = px + g.measureText("›  ").width;
   g.font = `400 ${fs}px "${mono}", monospace`;
   const full = t.prompt, n = Math.round(typed * full.length);
   let shown = full.slice(0, n);
-  const maxW = bw - 70 * u;
+  const maxW = bx + bw - 40 * u - tx;
   while (g.measureText(shown).width > maxW && shown.length > 4) shown = "…" + shown.slice(shown.length - Math.floor(shown.length * 0.9));
-  g.fillStyle = n ? "#eceef1" : "#6b7079";
-  g.fillText(n ? shown : "Ask anything…", bx + 34 * u, by + 40 * u);
-  if (typed < 1 && Math.floor(performance.now() / 500) % 2 === 0 || (n && typed < 1)) {
-    const x = bx + 34 * u + (n ? g.measureText(shown).width + 4 * u : 0);
-    g.fillStyle = "#eceef1"; g.fillRect(x, by + 26 * u, 13 * u, 28 * u);
+  g.fillStyle = "#eceef1"; g.fillText(shown, tx, ly);
+  if (typed < 1 && (n > 0 || Math.floor(performance.now() / 500) % 2 === 0)) {
+    g.fillStyle = accent2; g.fillRect(tx + g.measureText(shown).width + 4 * u, ly - 16 * u, 3 * u, 32 * u);
   }
-  g.font = `600 ${Math.round(22 * u)}px "${mono}", monospace`;
-  let x = bx + 34 * u; const ly = by + 84 * u;
-  g.fillStyle = accent2; g.fillText(t.agent, x, ly); x += g.measureText(t.agent + "  ").width;
-  g.fillStyle = "#eceef1"; g.fillText(t.model, x, ly); x += g.measureText(t.model + " ").width;
-  g.font = `400 ${Math.round(22 * u)}px "${mono}", monospace`; g.fillStyle = "#7b8089"; g.fillText(t.provider, x, ly);
-  // hints, right-aligned under the box
-  g.textAlign = "right";
-  let hx = bx + bw;
-  [...t.hints].reverse().forEach((h) => {
-    const [k, ...rest] = h.split(" "), r = rest.join(" ");
-    g.fillStyle = "#7b8089"; g.fillText(r, hx, by + bh + 38 * u); hx -= g.measureText(r + " ").width;
-    g.fillStyle = "#eceef1"; g.fillText(k, hx, by + bh + 38 * u); hx -= g.measureText(k + "    ").width;
-  });
-  g.textAlign = "left";
-  // the task is sent: a pulse down the box
-  if (sent > 0 && sent < 1) { g.fillStyle = `rgba(${hexRgb(accent2)},${0.35 * (1 - sent)})`; g.fillRect(bx, by, bw * sent, bh); }
+  // hints, quiet, under the window (only when the spec gives some)
+  if (t.hints.length) {
+    g.font = `400 ${small}px "${mono}", monospace`; g.fillStyle = "#6b7079"; g.textAlign = "center";
+    g.fillText(t.hints.join("   ·   "), cx, by + bh + 40 * u); g.textAlign = "left";
+  }
+  // the task is sent: a sweep of the accent across the prompt line
+  if (sent > 0 && sent < 1) { g.fillStyle = `rgba(${hexRgb(accent2)},${0.3 * (1 - sent)})`; g.fillRect(bx, by + bar, bw * sent, body); }
 }
 
 // ---------------------------------------------------------------- the player
@@ -407,10 +404,10 @@ const factory: PlayerFactory = async (cfg, ctx) => {
   hudEl.className = "ss-code-todo"; hudEl.setAttribute("aria-hidden", "true");
   hudEl.innerHTML = `<span class="ss-code-todo__h">Todo <b data-n>0/${todos.length}</b></span>` +
     todos.map((t) => `<div class="ss-code-todo__i"><b>[ ]</b><span>${t.f.todo}</span></div>`).join("") +
-    `<span class="ss-code-todo__r">${term ? `<i>${term.agent}</i> ${term.model}` : ""}</span>`;
+    `<span class="ss-code-todo__r">${term ? `${term.agent ? `<i>${term.agent}</i> ` : ""}${term.model}` : ""}</span>`;
   const style = document.createElement("style");
   style.textContent = `
-  /* the agent's status line along the bottom, like the TUI: todo count, the item in progress, agent and model */
+  /* the status line along the bottom: todo count, the item in progress, and the agent and model when set */
   .ss-code-todo { position: absolute; left: 0; right: 0; bottom: 0; height: 38px; display: flex; align-items: center; gap: 18px;
     padding: 0 var(--gutter, 24px); font: 500 12.5px/1 "${mono}", ui-monospace, monospace; color: #8b929b; z-index: 4;
     background: rgba(10,10,11,.86); border-top: 1px solid rgba(255,255,255,.07); opacity: 0; transition: opacity .4s; pointer-events: none; }
