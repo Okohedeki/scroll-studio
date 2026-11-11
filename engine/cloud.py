@@ -148,6 +148,8 @@ def login(email: str, url: Optional[str] = None, log: Callable[[str], None] = pr
         start = _check(c.post("/v1/login", json={"email": email}))
         log(f"Sent a sign-in link to {email}. Open it and confirm; this waits for up to "
             f"{start['expires_in'] // 60} minutes.")
+        if start.get("code"):
+            log(f"  The page will show the code {start['code']}: confirm only if it matches.")
         if start.get("dev_link"):          # a service in development mode shows the link instead of emailing it
             log(f"  (development service) sign-in link: {start['dev_link']}")
             if open_link:

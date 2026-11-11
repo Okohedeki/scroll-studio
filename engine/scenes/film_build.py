@@ -7,6 +7,7 @@ import glob
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 
@@ -43,7 +44,11 @@ def stage_blockout(shot, out):
             "--take", bl["world"], "--pass", "world", "--out", bdir, "--res", f"{w}x{h}"])
         cmd = None
     else:
-        cmd = [BLENDER, "-b", "--factory-startup", "--python-exit-code", "1", "-P", os.path.join(SCRIPTS, "presets", bl.get("preset", "rocket_launch").replace("-", "_") + ".py"), "--"]
+        preset = str(bl.get("preset", "rocket_launch")).replace("-", "_")
+        script = os.path.join(SCRIPTS, "presets", preset + ".py")
+        if not re.fullmatch(r"[a-z0-9_]{1,60}", preset) or not os.path.isfile(script):
+            raise RuntimeError(f"blockout preset {preset!r} is not one of the presets in {os.path.join(SCRIPTS, 'presets')}")
+        cmd = [BLENDER, "-b", "--factory-startup", "--python-exit-code", "1", "-P", script, "--"]
     if cmd:
         sh(cmd + ["--out", bdir, "--fps", shot["fps"], "--duration", shot["duration"], "--res", f"{w}x{h}"])
     frames = sorted(glob.glob(os.path.join(bdir, "frames", "*.png")))
