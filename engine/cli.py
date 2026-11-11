@@ -258,7 +258,13 @@ def build(name: str, only: Optional[str] = typer.Option(None, help="Render only 
           yes: bool = typer.Option(False, "--yes", "-y", help="Don't ask, even over studio.toml's confirm_over"),
           plan: bool = typer.Option(False, "--plan", help="Print what would render and the estimate, then stop"),
           profile: bool = typer.Option(False, "--profile", help="Time every stage and backend; write "
-                                                                ".build/profile.json and print the slowest")):
+                                                                ".build/profile.json and print the slowest"),
+          cloud: bool = typer.Option(False, "--cloud", help="Run the whole build on the DesignAI cloud's GPU instead "
+                                                            "of this machine (needs `studio cloud login`; charged by "
+                                                            "the GPU minute)"),
+          max_minutes: Optional[int] = typer.Option(None, "--max-minutes", help="With --cloud: stop the hosted build "
+                                                                                "after this many GPU minutes (the "
+                                                                                "most it can cost)")):
     """Build a project into dist/. Prints what will render and about how long it takes here before starting."""
     import sys
     from .compile.compiler import build_site
@@ -267,6 +273,20 @@ def build(name: str, only: Optional[str] = typer.Option(None, help="Render only 
     from .spec import deprecations
     project = Project(resolve(name))
     ids = ",".join(x for x in (only, section) if x) or None
+    if max_minutes is not None and not cloud:
+        raise typer.BadParameter("--max-minutes goes with --cloud")
+    if cloud:
+        if plan:
+            raise typer.BadParameter("--plan estimates a build on this machine; leave out --cloud")
+        from . import cloud as account
+        try:
+            account.build(project.root, {"only": ids, "force": force, "draft": draft, "profile": profile},
+                          max_minutes, log=typer.echo)
+        except account.CloudError as e:
+            typer.echo(str(e), err=True)
+            raise typer.Exit(1)
+        typer.echo(f"built {project.root / 'dist' / 'index.html'}")
+        return
     est = announce(project, only=ids.split(",") if ids else None, force=force, options={"draft": draft}, log=typer.echo)
     for d in deprecations(project.load()):
         typer.echo(f"warning: {d}")
@@ -1347,6 +1367,10 @@ def cloud_status():
         typer.echo(f"error: {e}", err=True)
         raise typer.Exit(1)
     typer.echo(f"{a['email']} on {c['url']}: {a['balance']} credits")
+    if a.get("builds"):
+        b = a["builds"]
+        typer.echo(f"  hosted builds ({b['gpu']}): {b['credits_per_minute']} credits a GPU minute, up to "
+                   f"{b['max_minutes']} minutes a build (studio build <project> --cloud)")
     for kind, row in a.get("prices", {}).items():
         typer.echo(f"  {kind:<7} {row['credits']:>4} credits {row['per']:<12} {row['backend']} ({row['model']})")
     for pack in a.get("packs", []):

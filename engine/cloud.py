@@ -1,24 +1,31 @@
-"""The DesignAI cloud account: provider jobs on credits, for builders without API keys of their own.
+"""The DesignAI cloud account, for people who can't run DesignAI on their own machine.
 
-Everything here is optional. Local models and your own provider keys are free and come first; the account backend is
-the router's last choice, and only when `models:` asks for providers (or pins `cloud`). `studio cloud login` signs in
-with a link sent to your email:
+Everything here is optional: DesignAI runs locally for free, with open models or your own provider keys. The account
+adds two things, paid in credits:
 
-    studio cloud login --email you@example.com      # opens nothing; click the link in the email
-    studio cloud status                              # balance and what each job costs
+- hosted builds: `studio build my-site --cloud` sends the project to the service, which runs the same build with the
+  same open models on its GPU and sends dist/ back. Charged by the GPU minute; nothing runs on your machine.
+- provider jobs: the router's last choice for single image, edit, text, speech and video jobs, used only when a
+  project's `models:` asks for providers (or pins `cloud`), for builders with no provider keys.
+
+    studio cloud login --email you@example.com      # click the link in the email
+    studio cloud status                              # balance, the GPU rate, what each job costs
     studio cloud buy                                 # a checkout page for a credit pack
 
 The sign-in is kept in a credentials file in the user's config folder (Windows %APPDATA%\\designai, macOS
 ~/Library/Application Support/designai, Linux $XDG_CONFIG_HOME/designai), or STUDIO_CLOUD_TOKEN and
-STUDIO_CLOUD_URL for CI. The service's API is small: POST /v1/jobs takes a job and its input images, GET /v1/jobs/<id>
-reports it, GET /v1/jobs/<id>/output returns the file.
+STUDIO_CLOUD_URL for CI. STUDIO_CLOUD_DISABLED=1 turns the account off (the service sets it on its own build machine).
 """
 from __future__ import annotations
 
 import base64
+import io
 import json
 import os
+import shutil
 import sys
+import tarfile
+import tempfile
 import time
 from dataclasses import asdict
 from pathlib import Path
@@ -213,6 +220,8 @@ class CloudBackend:
     kinds: tuple[Kind, ...] = ("image", "edit", "text", "speech", "video")
 
     def available(self) -> tuple[bool, str]:
+        if os.environ.get("STUDIO_CLOUD_DISABLED"):
+            return False, "the cloud account is turned off here (STUDIO_CLOUD_DISABLED)"
         c = credentials()
         if not c["token"]:
             return False, "not signed in (studio cloud login)"
@@ -237,3 +246,91 @@ def _size(path: str) -> tuple[int, int]:
     from PIL import Image
     with Image.open(path) as im:
         return im.size
+
+
+# ---------------------------------------------------------------- hosted builds
+
+LEAVE_HOME = {".build", "dist", ".git", "node_modules", "__pycache__", ".venv", ".DS_Store"}
+MAX_UPLOAD = 500 * 2**20
+
+
+def pack_project(folder: Path, archive: Path) -> tuple[int, int]:
+    """The project as .tar.gz, leaving out what the build makes (.build, dist) and tool folders. Links are left out
+    too: the service takes plain files only. Returns (files, bytes before compression)."""
+    files = size = 0
+    with tarfile.open(archive, "w:gz") as tar:
+        for p in sorted(folder.rglob("*")):
+            rel = p.relative_to(folder)
+            if any(part in LEAVE_HOME for part in rel.parts) or p.is_symlink() or not p.is_file():
+                continue
+            tar.add(p, arcname=rel.as_posix(), recursive=False)
+            files, size = files + 1, size + p.stat().st_size
+    return files, size
+
+
+def unpack_dist(data: bytes, dest: Path) -> None:
+    """dist/ from the service, written into `dest` (replacing it); names that would leave `dest` are refused."""
+    tmp = dest.with_name(dest.name + ".cloud-part")
+    shutil.rmtree(tmp, ignore_errors=True)
+    tmp.mkdir(parents=True)
+    root = tmp.resolve()
+    with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as tar:
+        for m in tar.getmembers():
+            target = (tmp / m.name).resolve()
+            if not (m.isfile() or m.isdir()) or (target != root and root not in target.parents):
+                raise CloudError(f"the service sent an unusable file name in dist/: {m.name}")
+            if m.isdir():
+                target.mkdir(parents=True, exist_ok=True)
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(tar.extractfile(m).read())
+    shutil.rmtree(dest, ignore_errors=True)
+    tmp.replace(dest)
+
+
+def build(folder: Path, options: dict, max_minutes: Optional[int] = None, log: Callable[[str], None] = print,
+          poll: float = 2.0) -> dict:
+    """Run `studio build` for the project in `folder` on the service's GPU; dist/ comes back into the project.
+    Credits for up to `max_minutes` are held while it runs; the minutes it used are charged and the rest returned.
+    Ctrl+C cancels the build on the service too."""
+    with tempfile.TemporaryDirectory() as t, _client() as c:
+        archive = Path(t) / "project.tar.gz"
+        files, size = pack_project(folder, archive)
+        packed = archive.stat().st_size
+        if packed > MAX_UPLOAD:
+            raise CloudError(f"the project is {packed / 2**20:.0f} MB packed, over the {MAX_UPLOAD // 2**20} MB "
+                             "upload limit: keep large inputs as links (https://...) in the spec")
+        log(f"uploading {folder.name}: {files} files, {packed / 2**20:.1f} MB")
+        form = {"options": json.dumps(options), "project": folder.name}
+        if max_minutes:
+            form["max_minutes"] = str(max_minutes)
+        with open(archive, "rb") as f:
+            made = _check(c.post("/v1/builds", data=form, files={"bundle": ("project.tar.gz", f, "application/gzip")},
+                                 timeout=1800))
+        bid = made["id"]
+        log(f"hosted build {bid} on {made.get('gpu') or 'the service GPU'}: {made['rate']} credits a minute, holding "
+            f"{made['hold']} for up to {made['max_minutes']} minutes (unused credits come back)")
+        since = 0
+        try:
+            while True:
+                st = _check(c.get(f"/v1/builds/{bid}", params={"since": since}))
+                for line in st["lines"]:
+                    log(line)
+                since = st["next"]
+                if st["status"] not in ("queued", "running"):
+                    break
+                if not st["lines"]:
+                    time.sleep(poll)
+        except KeyboardInterrupt:
+            log("cancelling the hosted build...")
+            c.post(f"/v1/builds/{bid}/cancel")
+            raise
+        if st["status"] != "done":
+            raise CloudError(f"hosted build {st['status']}: {st.get('error') or 'no reason given'} "
+                             f"({st['charged']} credits charged, balance {st['balance']})")
+        r = c.get(f"/v1/builds/{bid}/output", timeout=1800)
+        if r.status_code >= 400:
+            _check(r)
+        unpack_dist(r.content, folder / "dist")
+        log(f"hosted build done: {st['minutes']} GPU minutes, {st['charged']} credits; balance {st['balance']}")
+        return st
